@@ -4,7 +4,7 @@ import path from 'path';
 
 // We import the raw JSON representation or read the story data
 const storiesPath = path.resolve('src/data/stories.ts');
-const rawCode = fs.readFileSync(storiesPath, 'utf8');
+const _rawCode = fs.readFileSync(storiesPath, 'utf8');
 
 // Quick parser to extract quest acts from data
 // Or we can import from a compiled or ts-node/direct script

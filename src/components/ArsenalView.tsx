@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MEMORY_VERSES } from '../data/verses';
+import { STORY_QUESTS } from '../data/stories';
 import type { MemoryVerse } from '../types';
 import { soundEngine } from '../utils/audio';
 import { 
@@ -21,6 +22,16 @@ interface ArsenalViewProps {
   onPracticeVerse: (verseId: string) => void;
 }
 
+const getActTitle = (actId: string): string => {
+  for (const quest of STORY_QUESTS) {
+    const act = quest.acts.find(a => a.id === actId);
+    if (act) {
+      return `${quest.heroName} — Act ${act.actNumber}: ${act.actTitle}`;
+    }
+  }
+  return `Act Reflection (${actId})`;
+};
+
 export const ArsenalView: React.FC<ArsenalViewProps> = ({
   memorizedVerses,
   bookmarkedVerses,
@@ -30,6 +41,12 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeAudioVerseId, setActiveAudioVerseId] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      soundEngine.stopSpeaking();
+    };
+  }, []);
 
   const notes: Record<string, string> = JSON.parse(localStorage.getItem('testament_notes') || '{}');
 
@@ -58,7 +75,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 pb-40 sm:pb-48 text-left">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-8 pb-36 sm:pb-40 md:pb-48 text-left">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-500 mb-1">
@@ -76,13 +93,14 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
       {/* Search Input & Category Filters */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-3 w-4 h-4 text-stone-500" />
+          <Search className="absolute left-3.5 top-3 w-4 h-4 text-stone-500 pointer-events-none" />
           <input 
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Search scriptures by topic, keyword, or reference"
             placeholder="Search by topic, keyword, or reference (e.g. anxiety, courage, Proverbs)..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-stone-900 border border-stone-800 text-sm text-parchment-100 placeholder:text-stone-500 focus:outline-none focus:border-amber-500/70"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-stone-900 border border-stone-800 text-sm text-parchment-100 placeholder:text-stone-500 focus:outline-none focus:border-amber-500/70 focus-visible:ring-2 focus-visible:ring-amber-500"
           />
         </div>
 
@@ -228,7 +246,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Object.entries(notes).map(([actId, noteText]) => (
               <div key={actId} className="p-4 rounded-xl bg-stone-900/60 border border-stone-800 text-xs">
-                <div className="text-amber-400 font-mono font-bold mb-1">Act Reflection ({actId})</div>
+                <div className="text-amber-400 font-serif font-bold text-sm mb-1">{getActTitle(actId)}</div>
                 <p className="text-stone-300 italic">"{noteText}"</p>
               </div>
             ))}

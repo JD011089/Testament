@@ -10,24 +10,24 @@ interface BeforeInstallPromptEvent extends Event {
 export const PWAInstallPrompt: React.FC = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
+  const [isIOS] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+  });
+  const [isStandalone] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return (
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as unknown as { standalone?: boolean }).standalone === true
+    );
+  });
   const [isModalMode, setIsModalMode] = useState(false);
   const [installState, setInstallState] = useState<'ready' | 'prompted' | 'manual_needed'>('ready');
 
   useEffect(() => {
-    // Check if running as standalone PWA
-    const standalone = window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as unknown as { standalone?: boolean }).standalone === true;
-
-    setIsStandalone(standalone);
-    if (standalone) {
+    if (isStandalone) {
       return; // Already installed and running as standalone app
     }
-
-    const userAgent = window.navigator.userAgent.toLowerCase();
-    const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
-    setIsIOS(isIosDevice);
 
     const promptHandler = (e: Event) => {
       e.preventDefault();
@@ -58,7 +58,7 @@ export const PWAInstallPrompt: React.FC = () => {
       window.removeEventListener('beforeinstallprompt', promptHandler);
       window.removeEventListener('open-pwa-install', openHandler);
     };
-  }, []);
+  }, [isStandalone]);
 
   const handleInstallClick = async () => {
     soundEngine.playSnap();

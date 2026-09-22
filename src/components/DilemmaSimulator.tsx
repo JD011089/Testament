@@ -4,6 +4,7 @@ import type { RealLifeDilemma } from '../data/dilemmas';
 import { evaluateUserPlay } from '../utils/heartEvaluation';
 import type { HeartEvaluationResult } from '../utils/heartEvaluation';
 import { soundEngine } from '../utils/audio';
+import { getDailyDilemma } from '../utils/dailyEngine';
 import confetti from 'canvas-confetti';
 import { 
   ShieldAlert, 
@@ -59,6 +60,8 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({ onRewardXP }
 
   // Reset inputs when switching dilemmas
   const handleSelectDilemma = (dilemmaId: string) => {
+    soundEngine.stopSpeaking();
+    setIsSpeakingScripture(false);
     soundEngine.playClick();
     setSelectedDilemmaId(dilemmaId);
     setUserText('');
@@ -66,6 +69,13 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({ onRewardXP }
     setEvaluationResult(null);
     setRevealedPlayId(null);
   };
+
+  // Stop audio on unmount
+  React.useEffect(() => {
+    return () => {
+      soundEngine.stopSpeaking();
+    };
+  }, []);
 
   const handleQuickFeelingSelect = (feeling: string) => {
     soundEngine.playSnap();
@@ -129,7 +139,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({ onRewardXP }
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 pb-44 sm:pb-48 text-left">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-8 pb-36 sm:pb-40 md:pb-48 text-left">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-500 mb-1">
@@ -145,20 +155,22 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({ onRewardXP }
       </div>
 
       {/* Category Filter Pills */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-3 scrollbar-none">
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-3 scrollbar-none" role="tablist" aria-label="Dilemma categories">
         <span className="text-[11px] font-mono text-stone-400 flex items-center gap-1 pl-1">
           <Filter className="w-3 h-3 text-amber-500" /> Category:
         </span>
         {categories.map(cat => (
           <button
             key={cat}
+            role="tab"
+            aria-selected={selectedCategory === cat}
             onClick={() => {
               soundEngine.playClick();
               setSelectedCategory(cat);
               const firstInCat = REAL_LIFE_DILEMMAS.find(d => cat === 'All' || d.category === cat);
-              if (firstInCat) setSelectedDilemmaId(firstInCat.id);
+              if (firstInCat) handleSelectDilemma(firstInCat.id);
             }}
-            className={`text-xs px-3 py-1 rounded-full font-medium whitespace-nowrap transition-all ${
+            className={`text-xs px-3 py-1 rounded-full font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-amber-500 ${
               selectedCategory === cat
                 ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
                 : 'bg-stone-900/80 border border-stone-800 text-stone-400 hover:text-stone-200'
@@ -185,6 +197,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({ onRewardXP }
               }`}
             >
               {isDone && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />}
+              {d.id === getDailyDilemma().id && <span className="text-amber-400 text-xs shrink-0" title="Today's Featured Scenario">★</span>}
               <span>{d.title}</span>
             </button>
           );
@@ -200,6 +213,12 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({ onRewardXP }
             <span className="text-xs font-mono font-bold text-amber-400 uppercase tracking-wider bg-amber-950/60 border border-amber-800/50 px-2.5 py-0.5 rounded-full">
               {dilemma.category}
             </span>
+            {dilemma.id === getDailyDilemma().id && (
+              <span className="flex items-center gap-1 text-[10px] font-mono font-bold text-amber-300 bg-amber-950/80 border border-amber-500/60 px-2.5 py-0.5 rounded-full">
+                <Sparkles className="w-3 h-3 text-amber-400" />
+                <span>Today's Daily Dilemma</span>
+              </span>
+            )}
             <span className="text-xs text-stone-400 font-mono">
               Scenario #{REAL_LIFE_DILEMMAS.findIndex(x => x.id === dilemma.id) + 1} of {REAL_LIFE_DILEMMAS.length}
             </span>
@@ -320,12 +339,16 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({ onRewardXP }
 
             {/* Freeform Textarea */}
             <div className="mb-4">
+              <label htmlFor="gut-reaction-input" className="sr-only">
+                Your authentic gut reaction
+              </label>
               <textarea
+                id="gut-reaction-input"
                 value={userText}
                 onChange={e => setUserText(e.target.value)}
                 placeholder="Type your unvarnished reaction here... (e.g. 'I’d be furious. I’d corner him after the meeting, call him a liar, or pull the VP aside and show the email receipts...')"
                 rows={4}
-                className="w-full p-4 rounded-xl bg-stone-950 border border-stone-800 text-stone-200 placeholder-stone-600 text-sm focus:outline-none focus:border-amber-500 transition-all font-sans leading-relaxed"
+                className="w-full p-4 rounded-xl bg-stone-950 border border-stone-800 text-stone-200 placeholder-stone-600 text-sm focus:outline-none focus:border-amber-500 focus-visible:ring-2 focus-visible:ring-amber-500 transition-all font-sans leading-relaxed"
               />
             </div>
 

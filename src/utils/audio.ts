@@ -10,8 +10,14 @@ class SoundEngine {
   private currentAmbience: 'none' | 'campfire' | 'wind' | 'sanctuary' = 'none';
   private isMuted: boolean = false;
   private isAmbiencePlaying: boolean = false;
-  private currentNarratorProfile: NarratorProfile = 'cinematic';
+  private currentNarratorProfile: NarratorProfile = (
+    typeof window !== 'undefined'
+      ? (localStorage.getItem('testament_narrator_profile') as NarratorProfile) || 'cinematic'
+      : 'cinematic'
+  );
   private currentAudioElement: HTMLAudioElement | null = null;
+  private currentObjectUrl: string | null = null;
+  private currentAbortController: AbortController | null = null;
   private cachedVoices: SpeechSynthesisVoice[] = [];
 
   constructor() {
@@ -47,6 +53,13 @@ class SoundEngine {
 
   public setNarratorProfile(profile: NarratorProfile) {
     this.currentNarratorProfile = profile;
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('testament_narrator_profile', profile);
+      } catch {
+        /* ignore localStorage quota/disabled errors */
+      }
+    }
     this.playSnap();
   }
 
@@ -339,42 +352,78 @@ class SoundEngine {
   }
 
   // --- BROWSER SPEECH SYNTHESIS FALLBACK (NEVER USES FEMALE ZIRA ROBOT) ---
-  private getFallbackMaleVoice(): SpeechSynthesisVoice | null {
+  private getFallbackVoice(profile: NarratorProfile): SpeechSynthesisVoice | null {
     this.refreshVoices();
     const voices = this.cachedVoices.length > 0 ? this.cachedVoices : (typeof window !== 'undefined' ? window.speechSynthesis.getVoices() : []);
     if (voices.length === 0) return null;
 
     // Filter OUT any known female or robot voices
-    const nonFemale = voices.filter(v => 
-      !v.name.toLowerCase().includes('zira') &&
-      !v.name.toLowerCase().includes('female') &&
-      !v.name.toLowerCase().includes('hazel') &&
-      !v.name.toLowerCase().includes('samantha') &&
-      !v.name.toLowerCase().includes('victoria')
-    );
+    const nonFemale = voices.filter(v => {
+      const name = v.name.toLowerCase();
+      return !name.includes('zira') &&
+             !name.includes('female') &&
+             !name.includes('hazel') &&
+             !name.includes('samantha') &&
+             !name.includes('victoria') &&
+             !name.includes('susan') &&
+             !name.includes('catherine');
+    });
 
     const candidates = nonFemale.length > 0 ? nonFemale : voices;
 
-    // 1. Check for Natural Microsoft voices
-    const natural = candidates.find(v => 
-      v.lang.startsWith('en') && 
-      (v.name.includes('Christopher') || v.name.includes('Guy') || v.name.includes('Ryan') || v.name.includes('Eric'))
-    );
-    if (natural) return natural;
+    // Filter to avoid legacy Windows desktop robotic voices if modern/natural ones exist
+    const highQualityCandidates = candidates.filter(v => {
+      const name = v.name.toLowerCase();
+      return !name.includes('desktop') && !name.includes('microsoft david');
+    });
 
-    // 2. Check for Microsoft David Desktop (standard Windows male voice)
-    const david = candidates.find(v => v.name.includes('David'));
-    if (david) return david;
+    const pool = highQualityCandidates.length > 0 ? highQualityCandidates : candidates;
 
-    // 3. Check for Google US English
-    const google = candidates.find(v => v.name.includes('Google US English'));
-    if (google) return google;
+    if (profile === 'scholar') {
+      // Seek British or cultured English voice
+      const british = pool.find(v => {
+        const lang = v.lang.toLowerCase();
+        const name = v.name.toLowerCase();
+        return (lang.includes('gb') || lang.includes('uk')) &&
+               (name.includes('ryan') || name.includes('george') || name.includes('oliver') || name.includes('daniel') || name.includes('male'));
+      }) || pool.find(v => v.lang.toLowerCase().includes('gb') || v.lang.toLowerCase().includes('uk'));
 
-    // 4. Any English male voice
-    const anyMale = candidates.find(v => v.lang.startsWith('en') && (v.name.includes('Male') || v.name.includes('Guy') || v.name.includes('George')));
-    if (anyMale) return anyMale;
+      if (british) return british;
+    }
 
-    return candidates.find(v => v.lang.startsWith('en')) || null;
+    if (profile === 'cinematic') {
+      // Seek deep, commanding US/neutral English voice
+      const cinematicVoice = pool.find(v => {
+        const name = v.name.toLowerCase();
+        return v.lang.toLowerCase().startsWith('en') && 
+               (name.includes('christopher') || name.includes('eric') || name.includes('guy') || name.includes('alex'));
+      });
+      if (cinematicVoice) return cinematicVoice;
+    }
+
+    if (profile === 'brotherhood') {
+      // Seek warm, conversational US English voice
+      const warmVoice = pool.find(v => {
+        const name = v.name.toLowerCase();
+        return v.lang.toLowerCase().startsWith('en') && 
+               (name.includes('guy') || name.includes('brian') || name.includes('google us english') || name.includes('christopher') || name.includes('matthew'));
+      });
+      if (warmVoice) return warmVoice;
+    }
+
+    // Secondary search across pool for any natural or Google voice
+    const naturalVoice = pool.find(v => {
+      const name = v.name.toLowerCase();
+      return v.lang.toLowerCase().startsWith('en') && (name.includes('natural') || name.includes('online') || name.includes('google'));
+    });
+    if (naturalVoice) return naturalVoice;
+
+    // Any English voice
+    const anyEnglish = pool.find(v => v.lang.toLowerCase().startsWith('en'));
+    if (anyEnglish) return anyEnglish;
+
+    // Absolute fallback
+    return candidates.find(v => v.lang.toLowerCase().startsWith('en')) || candidates[0] || null;
   }
 
   // --- STUDIO & NEURAL VOICE NARRATION ---
@@ -389,55 +438,116 @@ class SoundEngine {
       if (onEnd) onEnd();
     };
 
-    // 1. If a pre-rendered studio asset is provided (e.g. for any story act or morning briefing), play it directly!
-    if (audioAssetUrl) {
+    // Stream from real-time Azure Neural endpoint with safe buffering & persona fallback
+    this.streamOrSynthesize(text, handleFinished, audioAssetUrl);
+  }
+
+  private streamOrSynthesize(text: string, onFinished: () => void, audioAssetUrl?: string) {
+    if (this.currentAbortController) {
+      try {
+        this.currentAbortController.abort();
+      } catch {
+        /* ignore */
+      }
+      this.currentAbortController = null;
+    }
+
+    if (this.currentObjectUrl) {
+      try {
+        URL.revokeObjectURL(this.currentObjectUrl);
+      } catch {
+        /* ignore */
+      }
+      this.currentObjectUrl = null;
+    }
+
+    const controller = new AbortController();
+    this.currentAbortController = controller;
+
+    // Real-time Azure Neural endpoint
+    const streamUrl = `/api/tts?text=${encodeURIComponent(text)}&voice=${encodeURIComponent(this.currentNarratorProfile)}`;
+
+    fetch(streamUrl, { signal: controller.signal })
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error(`TTS server HTTP ${res.status}`);
+        }
+        const blob = await res.blob();
+        if (controller.signal.aborted) return;
+
+        if (blob.size < 100) {
+          throw new Error('TTS payload too small');
+        }
+
+        const objectUrl = URL.createObjectURL(blob);
+        this.currentObjectUrl = objectUrl;
+
+        const audio = new Audio(objectUrl);
+        this.currentAudioElement = audio;
+
+        const cleanup = () => {
+          if (this.currentObjectUrl === objectUrl) {
+            try {
+              URL.revokeObjectURL(objectUrl);
+            } catch {
+              /* ignore */
+            }
+            this.currentObjectUrl = null;
+          }
+          if (this.currentAudioElement === audio) {
+            this.currentAudioElement = null;
+          }
+          if (this.currentAbortController === controller) {
+            this.currentAbortController = null;
+          }
+        };
+
+        audio.onended = () => {
+          cleanup();
+          onFinished();
+        };
+
+        audio.onerror = () => {
+          cleanup();
+          this.fallbackWithAssetOrSpeech(text, onFinished, audioAssetUrl);
+        };
+
+        audio.play().catch(() => {
+          cleanup();
+          this.fallbackWithAssetOrSpeech(text, onFinished, audioAssetUrl);
+        });
+      })
+      .catch((_err) => {
+        if (controller.signal.aborted) return;
+        this.fallbackWithAssetOrSpeech(text, onFinished, audioAssetUrl);
+      });
+  }
+
+  private fallbackWithAssetOrSpeech(text: string, onFinished: () => void, audioAssetUrl?: string) {
+    // If an offline studio asset is available and profile is cinematic, try it
+    if (audioAssetUrl && this.currentNarratorProfile === 'cinematic') {
       try {
         const audio = new Audio(audioAssetUrl);
         this.currentAudioElement = audio;
-        audio.onended = handleFinished;
+        audio.onended = () => {
+          this.currentAudioElement = null;
+          onFinished();
+        };
         audio.onerror = () => {
-          // Fall back to neural streaming or speech synthesis
-          this.streamOrSynthesize(text, handleFinished);
+          this.currentAudioElement = null;
+          this.fallbackSpeak(text, onFinished);
         };
         audio.play().catch(() => {
-          this.streamOrSynthesize(text, handleFinished);
+          this.currentAudioElement = null;
+          this.fallbackSpeak(text, onFinished);
         });
         return;
       } catch {
-        /* proceed to fallback */
+        /* proceed to fallbackSpeak */
       }
     }
 
-    // 2. Otherwise stream from Neural TTS endpoint
-    this.streamOrSynthesize(text, handleFinished);
-  }
-
-  private streamOrSynthesize(text: string, onFinished: () => void) {
-    // Try streaming from real-time Azure Neural endpoint
-    const streamUrl = `/api/tts?text=${encodeURIComponent(text)}&voice=${this.currentNarratorProfile}`;
-    const audio = new Audio(streamUrl);
-    this.currentAudioElement = audio;
-
-    let hasStarted = false;
-
-    audio.onplay = () => {
-      hasStarted = true;
-    };
-
-    audio.onended = onFinished;
-
-    audio.onerror = () => {
-      if (!hasStarted) {
-        // Fallback to browser synthesis if API is unavailable
-        this.fallbackSpeak(text, onFinished);
-      } else {
-        onFinished();
-      }
-    };
-
-    audio.play().catch(() => {
-      this.fallbackSpeak(text, onFinished);
-    });
+    this.fallbackSpeak(text, onFinished);
   }
 
   private fallbackSpeak(text: string, onFinished: () => void) {
@@ -448,22 +558,57 @@ class SoundEngine {
 
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.88;
-    utterance.pitch = 0.95;
 
-    const maleVoice = this.getFallbackMaleVoice();
-    if (maleVoice) {
-      utterance.voice = maleVoice;
+    // Apply distinct acoustic profiles for each narrator persona
+    switch (this.currentNarratorProfile) {
+      case 'cinematic':
+        utterance.pitch = 0.82; // Deep, resonance
+        utterance.rate = 0.84;  // Majestic, deliberate pacing
+        break;
+      case 'scholar':
+        utterance.pitch = 1.04; // Clear, intellectual tone
+        utterance.rate = 0.88;  // Articulate, deliberate cadence
+        break;
+      case 'brotherhood':
+      default:
+        utterance.pitch = 1.00; // Natural, relatable pitch
+        utterance.rate = 0.95;  // Warm, conversational tempo
+        break;
     }
 
-    utterance.onend = onFinished;
-    utterance.onerror = onFinished;
+    const matchedVoice = this.getFallbackVoice(this.currentNarratorProfile);
+    if (matchedVoice) {
+      utterance.voice = matchedVoice;
+    }
+
+    utterance.onend = () => onFinished();
+    utterance.onerror = () => onFinished();
 
     window.speechSynthesis.speak(utterance);
   }
 
   public stopSpeaking() {
-    // Stop any HTML5 audio element
+    // 1. Abort any active fetch in progress
+    if (this.currentAbortController) {
+      try {
+        this.currentAbortController.abort();
+      } catch {
+        /* ignore */
+      }
+      this.currentAbortController = null;
+    }
+
+    // 2. Revoke and release blob object URL
+    if (this.currentObjectUrl) {
+      try {
+        URL.revokeObjectURL(this.currentObjectUrl);
+      } catch {
+        /* ignore */
+      }
+      this.currentObjectUrl = null;
+    }
+
+    // 3. Stop HTML5 audio element
     if (this.currentAudioElement) {
       try {
         this.currentAudioElement.pause();
@@ -474,9 +619,13 @@ class SoundEngine {
       }
     }
 
-    // Stop browser synthesis
+    // 4. Cancel browser speech synthesis
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
+      try {
+        window.speechSynthesis.cancel();
+      } catch {
+        /* ignore */
+      }
     }
 
     this.restoreAmbience();

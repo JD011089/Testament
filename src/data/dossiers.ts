@@ -18,7 +18,7 @@ export const CHARACTER_DOSSIERS: CharacterDossier[] = [
     name: 'David ben Jesse',
     codename: 'The Outlaw Shepherd',
     era: 'c. 1020 BC • Kingdom of Israel',
-    occupation: 'Shepherd boy &rarr; Folk hero &rarr; Fugitive outlaw commander &rarr; King of Israel',
+    occupation: 'Shepherd boy → Folk hero → Fugitive outlaw commander → King of Israel',
     image: '/images/valley_battlefield.jpg',
     superpower: 'Zero intimidation factor. Refused to see giants as bigger than God.',
     majorFlaws: [
@@ -35,7 +35,7 @@ export const CHARACTER_DOSSIERS: CharacterDossier[] = [
     name: 'Joseph ben Jacob',
     codename: 'The Unbroken Steward',
     era: 'c. 1800 BC • Canaan & Ancient Egypt',
-    occupation: 'Spoiled younger son &rarr; Slave &rarr; Convict trustee &rarr; Prime Minister of Egypt',
+    occupation: 'Spoiled younger son → Slave → Convict trustee → Prime Minister of Egypt',
     image: '/images/desert_canyon.jpg',
     superpower: 'Incurable excellence. Whatever ditch he was thrown into, he managed it with mastery.',
     majorFlaws: [
@@ -51,7 +51,7 @@ export const CHARACTER_DOSSIERS: CharacterDossier[] = [
     name: 'Moses',
     codename: 'The Reluctant Liberator',
     era: 'c. 1446 BC • Egypt & Mount Sinai',
-    occupation: 'Egyptian prince &rarr; Wanted fugitive &rarr; Backcountry desert shepherd &rarr; Lawgiver',
+    occupation: 'Egyptian prince → Wanted fugitive → Backcountry desert shepherd → Lawgiver',
     image: '/images/red_sea.jpg',
     superpower: 'Unshakable endurance. Stepped into high-stakes leadership at age 80.',
     majorFlaws: [
@@ -85,7 +85,7 @@ export const CHARACTER_DOSSIERS: CharacterDossier[] = [
     name: 'Simon Peter',
     codename: 'The Restored Fisherman',
     era: 'c. 30–67 AD • Galilee & Rome',
-    occupation: 'Commercial sea fisherman &rarr; Disciple &rarr; Apostle & martyr in Rome',
+    occupation: 'Commercial sea fisherman → Disciple → Apostle & martyr in Rome',
     image: '/images/courtyard_fire.jpg',
     superpower: 'Raw, impulsive courage. The only disciple brave enough to step out of the boat onto the storm.',
     majorFlaws: [
@@ -102,7 +102,7 @@ export const CHARACTER_DOSSIERS: CharacterDossier[] = [
     name: 'Paul of Tarsus (Saul)',
     codename: 'The Converted Bounty Hunter',
     era: 'c. 35–64 AD • Roman Mediterranean',
-    occupation: 'Religious intellectual & legal enforcer &rarr; Missionary tentmaker & prisoner of Rome',
+    occupation: 'Religious intellectual & legal enforcer → Missionary tentmaker & prisoner of Rome',
     image: '/images/prison_cell.jpg',
     superpower: 'Unstoppable willpower and intellectual clarity. Beaten, shipwrecked, and stoned, but kept preaching.',
     majorFlaws: [

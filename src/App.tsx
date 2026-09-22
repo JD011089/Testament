@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { StoryQuest } from './types';
 import { STORY_QUESTS } from './data/stories';
 import { Dashboard } from './components/Dashboard';
@@ -13,7 +13,9 @@ import { DossierModal } from './components/DossierModal';
 import { StreetTranslatorModal } from './components/StreetTranslatorModal';
 import { DriveModePlayer } from './components/DriveModePlayer';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
+import { OnboardingModal, type UserCalibrationProfile } from './components/OnboardingModal';
 import { soundEngine } from './utils/audio';
+import { recordVerseMasteryDate } from './utils/dailyEngine';
 
 export function App() {
   const [currentTab, setCurrentTab] = useState<NavTab>('dashboard');
@@ -25,6 +27,18 @@ export function App() {
   const [isDossierOpen, setIsDossierOpen] = useState(false);
   const [isStreetTranslatorOpen, setIsStreetTranslatorOpen] = useState(false);
   const [isDriveModeOpen, setIsDriveModeOpen] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState<boolean>(() => {
+    return !localStorage.getItem('testament_onboarding_completed');
+  });
+
+  const [userProfile, setUserProfile] = useState<UserCalibrationProfile | null>(() => {
+    try {
+      const stored = localStorage.getItem('testament_user_profile');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
 
   // Persistence for user progress
   const [completedActs, setCompletedActs] = useState<string[]>(() => {
@@ -47,31 +61,32 @@ export function App() {
     return Number(localStorage.getItem('testament_xp')) || 0;
   });
 
-  const [streakCount, setStreakCount] = useState<number>(() => {
-    return Number(localStorage.getItem('testament_streak')) || 1;
-  });
+  const [targetWordForgeVerseId, setTargetWordForgeVerseId] = useState<string | null>(null);
 
-  // Calculate streak logic on mount
-  useEffect(() => {
+  const [streakCount] = useState<number>(() => {
+    const storedStreak = Number(localStorage.getItem('testament_streak')) || 1;
     const today = new Date().toDateString();
     const lastActive = localStorage.getItem('testament_last_active');
 
     if (lastActive) {
       const lastDate = new Date(lastActive);
       const diffTime = Math.abs(new Date(today).getTime() - lastDate.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
       if (diffDays === 1) {
-        const newStreak = streakCount + 1;
-        setStreakCount(newStreak);
+        const newStreak = storedStreak + 1;
         localStorage.setItem('testament_streak', String(newStreak));
+        localStorage.setItem('testament_last_active', today);
+        return newStreak;
       } else if (diffDays > 1) {
-        setStreakCount(1);
         localStorage.setItem('testament_streak', '1');
+        localStorage.setItem('testament_last_active', today);
+        return 1;
       }
     }
     localStorage.setItem('testament_last_active', today);
-  }, []);
+    return storedStreak;
+  });
 
   const handleSelectQuest = (quest: StoryQuest) => {
     setActiveQuest(quest);
@@ -111,6 +126,7 @@ export function App() {
   };
 
   const handleVerseMastered = (verseId: string) => {
+    recordVerseMasteryDate(verseId);
     if (!memorizedVerses.includes(verseId)) {
       const updated = [...memorizedVerses, verseId];
       setMemorizedVerses(updated);
@@ -136,7 +152,26 @@ export function App() {
     localStorage.setItem('testament_bookmarked_verses', JSON.stringify(updated));
   };
 
-  const handlePracticeVerseFromArsenal = () => {
+  const handleCompleteOnboarding = (profile: UserCalibrationProfile, startRecommendedQuest?: boolean) => {
+    setUserProfile(profile);
+    setIsOnboardingOpen(false);
+
+    const onboardingXpAwarded = localStorage.getItem('testament_onboarding_xp_awarded');
+    if (!onboardingXpAwarded) {
+      const newXp = xp + 50;
+      setXp(newXp);
+      localStorage.setItem('testament_xp', String(newXp));
+      localStorage.setItem('testament_onboarding_xp_awarded', 'true');
+    }
+
+    if (startRecommendedQuest && profile.recommendedQuestId) {
+      handleSelectQuestById(profile.recommendedQuestId);
+    }
+  };
+
+  const handlePracticeVerseFromArsenal = (verseId: string) => {
+    soundEngine.stopSpeaking();
+    setTargetWordForgeVerseId(verseId);
     setCurrentTab('wordforge');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -178,12 +213,25 @@ export function App() {
             {currentTab === 'dashboard' && (
               <Dashboard 
                 onSelectQuest={handleSelectQuest}
-                onOpenWordForge={() => setCurrentTab('wordforge')}
-                onOpenArsenal={() => setCurrentTab('arsenal')}
+                onOpenWordForge={(verseId?: string) => {
+                  soundEngine.stopSpeaking();
+                  if (verseId) setTargetWordForgeVerseId(verseId);
+                  setCurrentTab('wordforge');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                onOpenArsenal={() => {
+                  soundEngine.stopSpeaking();
+                  setCurrentTab('arsenal');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
                 onOpenTimeline={() => setIsTimelineOpen(true)}
                 onOpenDossiers={() => setIsDossierOpen(true)}
                 onOpenStreetTranslator={() => setIsStreetTranslatorOpen(true)}
-                onOpenDilemmas={() => setCurrentTab('dilemmas')}
+                onOpenDilemmas={() => {
+                  soundEngine.stopSpeaking();
+                  setCurrentTab('dilemmas');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
                 onOpenDriveMode={() => setIsDriveModeOpen(true)}
                 completedActs={completedActs}
                 memorizedVerses={memorizedVerses}
@@ -192,6 +240,9 @@ export function App() {
                 xp={xp}
                 currentAmbience={currentAmbience}
                 onToggleAmbience={handleToggleAmbience}
+                userProfile={userProfile}
+                onOpenOnboarding={() => setIsOnboardingOpen(true)}
+                onRewardXP={handleRewardXP}
               />
             )}
 
@@ -199,6 +250,8 @@ export function App() {
               <WordForge 
                 memorizedVerses={memorizedVerses}
                 onVerseMastered={handleVerseMastered}
+                targetVerseId={targetWordForgeVerseId}
+                onClearTargetVerse={() => setTargetWordForgeVerseId(null)}
               />
             )}
 
@@ -225,6 +278,7 @@ export function App() {
         <Navigation 
           currentTab={currentTab}
           onSelectTab={(tab) => {
+            soundEngine.stopSpeaking();
             setCurrentTab(tab);
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
@@ -257,6 +311,14 @@ export function App() {
         onClose={() => setIsDriveModeOpen(false)}
         currentAmbience={currentAmbience}
         onToggleAmbience={handleToggleAmbience}
+      />
+
+      {/* Onboarding Battle Plan Calibration Modal */}
+      <OnboardingModal
+        isOpen={isOnboardingOpen}
+        onComplete={handleCompleteOnboarding}
+        onClose={() => setIsOnboardingOpen(false)}
+        initialProfile={userProfile}
       />
 
       {/* PWA Home-Screen Install Prompt */}

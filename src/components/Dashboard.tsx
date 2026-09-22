@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { StoryQuest } from '../types';
 import { STORY_QUESTS } from '../data/stories';
-import { soundEngine } from '../utils/audio';
+import { soundEngine, type NarratorProfile } from '../utils/audio';
 import { 
   Flame, 
   Award, 
@@ -22,12 +22,23 @@ import {
   Car,
   Download,
   Play,
-  Pause
+  Pause,
+  SlidersHorizontal,
+  Mic
 } from 'lucide-react';
+import type { UserCalibrationProfile } from './OnboardingModal';
+import { 
+  getTodayFormatted, 
+  getDailyVerse, 
+  getDailyBriefing, 
+  getAdaptiveNextObjective, 
+  isDailyBonusClaimed, 
+  claimDailyBonus 
+} from '../utils/dailyEngine';
 
 interface DashboardProps {
   onSelectQuest: (quest: StoryQuest) => void;
-  onOpenWordForge: () => void;
+  onOpenWordForge: (verseId?: string) => void;
   onOpenArsenal: () => void;
   onOpenTimeline: () => void;
   onOpenDossiers: () => void;
@@ -41,6 +52,9 @@ interface DashboardProps {
   xp: number;
   currentAmbience: 'none' | 'campfire' | 'wind' | 'sanctuary';
   onToggleAmbience: (type: 'campfire' | 'wind' | 'sanctuary') => void;
+  userProfile?: UserCalibrationProfile | null;
+  onOpenOnboarding?: () => void;
+  onRewardXP?: (points: number) => void;
 }
 
 const QUEST_IMAGES: Record<string, string> = {
@@ -76,11 +90,40 @@ export const Dashboard: React.FC<DashboardProps> = ({
   streakCount,
   xp,
   currentAmbience,
-  onToggleAmbience
+  onToggleAmbience,
+  userProfile,
+  onOpenOnboarding,
+  onRewardXP
 }) => {
   const [activeTrack, setActiveTrack] = useState<string>('All');
   const [showMorningBriefing, setShowMorningBriefing] = useState<boolean>(false);
   const [isPlayingBriefing, setIsPlayingBriefing] = useState<boolean>(false);
+  const [narratorProfile, setNarratorProfile] = useState<NarratorProfile>(() => soundEngine.getNarratorProfile());
+
+  const dailyVerse = getDailyVerse();
+  const dailyBriefing = getDailyBriefing();
+  const todayFormatted = getTodayFormatted();
+  const adaptiveObjective = getAdaptiveNextObjective(completedActs, userProfile, memorizedVerses);
+  const isBriefingBonusClaimed = isDailyBonusClaimed('briefing');
+
+  useEffect(() => {
+    if (!showMorningBriefing) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        soundEngine.stopSpeaking();
+        setIsPlayingBriefing(false);
+        setShowMorningBriefing(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showMorningBriefing]);
+
+  useEffect(() => {
+    return () => {
+      soundEngine.stopSpeaking();
+    };
+  }, []);
 
   const getRankTitle = (points: number) => {
     if (points >= 500) return 'Iron Pillar';
@@ -96,7 +139,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
     : STORY_QUESTS.filter(q => q.starterTrack === activeTrack);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 pb-40 sm:pb-48 text-left">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-8 pb-36 sm:pb-40 md:pb-48 text-left">
       {/* Top Banner Status */}
       <div className="flex flex-wrap items-center justify-between gap-4 p-4 md:p-5 rounded-2xl bg-[#11141a] border border-stone-800 shadow-md mb-8">
         <div className="flex items-center gap-3">
@@ -114,7 +157,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 {getRankTitle(xp)}
               </span>
             </div>
-            <p className="text-xs text-stone-400">The Living Word • Authentic Bible Journey</p>
+            <p className="text-xs text-stone-400">
+              <span className="text-amber-400 font-medium">{todayFormatted}</span> • The Living Word
+            </p>
           </div>
         </div>
 
@@ -126,6 +171,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
           >
             <Coffee className="w-3.5 h-3.5 text-amber-400" />
             <span>3-Min Morning Briefing</span>
+            {!isBriefingBonusClaimed && (
+              <span className="text-[9px] bg-amber-500 text-black font-extrabold px-1.5 py-0.2 rounded-full uppercase tracking-wider">
+                +50 XP
+              </span>
+            )}
           </button>
 
           <button
@@ -147,6 +197,20 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <Download className="w-3.5 h-3.5 text-amber-500" />
             <span>Install App</span>
           </button>
+
+          {onOpenOnboarding && (
+            <button
+              onClick={() => {
+                soundEngine.playClick();
+                onOpenOnboarding();
+              }}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-stone-900 border border-stone-800 text-stone-300 text-xs font-semibold hover:border-amber-500/60 hover:text-amber-400 transition-all"
+              title="Calibrate your battle plan and learning style"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5 text-amber-500" />
+              <span>{userProfile ? 'My Battle Plan' : 'Calibrate'}</span>
+            </button>
+          )}
 
           <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-stone-900 border border-stone-800">
             <Flame className="w-4 h-4 text-orange-500 fill-orange-500/20" />
@@ -178,24 +242,34 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
 
             <div className="p-5 md:p-6 relative">
-              <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-400 mb-1.5">
-                <Sparkles className="w-4 h-4 text-amber-500" />
-                <span>Daily Truth For The Trenches</span>
+              <div className="flex items-center justify-between gap-2 mb-1.5">
+                <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-400">
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  <span>Daily Truth For The Trenches</span>
+                </div>
+                <span className="text-[10px] font-mono text-amber-400/90 px-2.5 py-0.5 rounded bg-amber-950/40 border border-amber-800/40">
+                  {todayFormatted}
+                </span>
               </div>
 
               <h3 className="text-xl md:text-3xl font-serif font-black text-parchment-50 mb-2">
-                "Iron sharpens iron, and one man sharpens another."
+                "{dailyVerse.text}"
               </h3>
 
               <p className="text-xs md:text-sm text-parchment-200/90 leading-relaxed mb-4 max-w-2xl">
-                Friction creates edge. When you try to carry all your stress, financial weight, and family worries alone without brothers who tell you the truth, you go dull. Don't fight in isolation.
+                {dailyVerse.plainEnglishSummary}
               </p>
 
               <div className="flex items-center justify-between pt-3 border-t border-stone-800">
-                <span className="text-xs font-mono text-amber-500 font-semibold">Proverbs 27:17</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono text-amber-500 font-semibold">{dailyVerse.reference}</span>
+                  <span className="text-[10px] font-mono text-stone-400 px-2 py-0.5 rounded bg-stone-900 border border-stone-800 hidden sm:inline-block">
+                    {dailyVerse.category}
+                  </span>
+                </div>
                 <button
-                  onClick={onOpenWordForge}
-                  className="text-xs font-semibold text-amber-400 hover:text-amber-300 flex items-center gap-1 transition-colors"
+                  onClick={() => onOpenWordForge(dailyVerse.id)}
+                  className="text-xs font-semibold text-amber-400 hover:text-amber-300 flex items-center gap-1 transition-colors focus-visible:ring-2 focus-visible:ring-amber-500 rounded px-1"
                 >
                   <span>Lock this into memory</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -260,8 +334,82 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
 
+          {/* ADAPTIVE NEXT OBJECTIVE */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-950/40 via-[#131722] to-stone-900 border border-amber-500/40 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start sm:items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-xl shrink-0">
+                {adaptiveObjective.type === 'retention_drill' ? '🧠' : adaptiveObjective.type === 'next_act' ? '⚔️' : '👑'}
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400 px-2 py-0.5 rounded bg-amber-950/60 border border-amber-800/60">
+                    {adaptiveObjective.badge}
+                  </span>
+                  <span className="text-xs text-stone-400">Adaptive Objective</span>
+                </div>
+                <h4 className="text-sm sm:text-base font-serif font-bold text-parchment-50">
+                  {adaptiveObjective.title}
+                </h4>
+                <p className="text-xs text-stone-400 line-clamp-1 max-w-xl">
+                  {adaptiveObjective.subtitle}
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                soundEngine.playSnap();
+                if (adaptiveObjective.type === 'retention_drill' && adaptiveObjective.targetVerseId) {
+                  onOpenWordForge(adaptiveObjective.targetVerseId);
+                } else if (adaptiveObjective.targetQuest) {
+                  onSelectQuest(adaptiveObjective.targetQuest);
+                } else {
+                  onOpenWordForge();
+                }
+              }}
+              className="shrink-0 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-black font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-glow-gold focus-visible:ring-2 focus-visible:ring-amber-500"
+            >
+              <span>{adaptiveObjective.type === 'retention_drill' ? 'Start Retention Drill' : 'Resume Mission'}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
           {/* Curated Starter Tracks (Recommendation Filters) */}
           <div>
+            {userProfile && (
+              <div className="mb-4 p-4 rounded-2xl bg-gradient-to-r from-amber-950/40 via-[#141822] to-stone-900 border border-amber-600/40 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-lg shrink-0">
+                    🎯
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-mono uppercase tracking-widest text-amber-400 font-bold">
+                      Your Calibrated Battle Plan
+                    </div>
+                    <div className="text-xs sm:text-sm font-serif font-bold text-parchment-100">
+                      Targeting: {userProfile.battleTitle}
+                    </div>
+                    <div className="text-[11px] text-stone-400 flex items-center gap-2 mt-0.5">
+                      <span>Mode: <strong className="text-amber-300 uppercase">{userProfile.learningStyle}</strong></span>
+                      <span>•</span>
+                      <span>Cadence: <strong className="text-amber-300">{userProfile.dailyCadence === '3min' ? '3 Min/Day' : userProfile.dailyCadence === '10min' ? '7-10 Min/Day' : 'Deep Study'}</strong></span>
+                    </div>
+                  </div>
+                </div>
+
+                {onOpenOnboarding && (
+                  <button
+                    onClick={() => {
+                      soundEngine.playClick();
+                      onOpenOnboarding();
+                    }}
+                    className="self-start sm:self-auto text-xs font-semibold px-3 py-1.5 rounded-lg bg-stone-850 hover:bg-stone-800 text-stone-300 hover:text-amber-300 border border-stone-700 transition-colors whitespace-nowrap"
+                  >
+                    Re-Calibrate
+                  </button>
+                )}
+              </div>
+            )}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
               <div>
                 <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-500 mb-1">
@@ -304,7 +452,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 return (
                   <div
                     key={quest.id}
-                    className="flex flex-col justify-between rounded-2xl bg-[#12151b] border border-stone-800 hover:border-amber-600/60 transition-all shadow-lg overflow-hidden group"
+                    onClick={() => {
+                      soundEngine.playClick();
+                      onSelectQuest(quest);
+                    }}
+                    className="flex flex-col justify-between rounded-2xl bg-[#12151b] border border-stone-800 hover:border-amber-500/70 transition-all shadow-lg overflow-hidden group cursor-pointer hover:shadow-glow-gold/10"
                   >
                     {/* Visual Illustration Thumbnail */}
                     <div className="relative h-44 w-full shrink-0 overflow-hidden bg-stone-950">
@@ -318,8 +470,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         {quest.heroName}
                       </div>
 
-                      {quest.starterTrack && (
-                        <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded bg-amber-950/80 backdrop-blur-md border border-amber-800/40 text-[9px] font-mono text-amber-300 uppercase">
+                      {userProfile?.recommendedQuestId === quest.id && (
+                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 text-stone-950 text-[10px] font-bold uppercase tracking-wider shadow-glow-gold flex items-center gap-1">
+                          <span>🎯</span>
+                          <span>Your Battle Plan</span>
+                        </div>
+                      )}
+
+                      {!userProfile && quest.id === 'david-journey' && completedCount === 0 && (
+                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-amber-500 text-stone-950 text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                          Recommended First
+                        </div>
+                      )}
+
+                      {quest.starterTrack && !((userProfile?.recommendedQuestId === quest.id) || (!userProfile && quest.id === 'david-journey' && completedCount === 0)) && (
+                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded bg-amber-950/80 backdrop-blur-md border border-amber-800/40 text-[9px] font-mono text-amber-300 uppercase">
                           {quest.starterTrack}
                         </div>
                       )}
@@ -447,8 +612,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
               {memorizedVerses.length} Scriptures Mastered
             </div>
             <button
-              onClick={onOpenWordForge}
-              className="w-full py-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 border border-stone-700 text-xs font-semibold text-parchment-100 flex items-center justify-center gap-1.5 transition-all"
+              onClick={() => onOpenWordForge()}
+              className="w-full py-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 border border-stone-700 text-xs font-semibold text-parchment-100 flex items-center justify-center gap-1.5 transition-all focus-visible:ring-2 focus-visible:ring-amber-500"
             >
               <span>Launch Word Forge</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -526,6 +691,42 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <span>Drone</span>
               </button>
             </div>
+
+            {/* DRAMATIZED NARRATOR PERSONA */}
+            <div className="mt-3 pt-3 border-t border-stone-800/80">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-mono text-stone-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Mic className="w-3 h-3 text-amber-500" />
+                  Voice Persona
+                </span>
+                <span className="text-[10px] text-amber-400 font-mono">
+                  {narratorProfile === 'cinematic' ? 'Christopher' : narratorProfile === 'brotherhood' ? 'Guy' : 'Ryan (UK)'}
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-1.5">
+                {[
+                  { id: 'cinematic', label: '🎬 Cinematic' },
+                  { id: 'brotherhood', label: '🤝 Grounded' },
+                  { id: 'scholar', label: '📜 Scholar' }
+                ].map(p => (
+                  <button
+                    key={p.id}
+                    onClick={() => {
+                      const newProfile = p.id as NarratorProfile;
+                      soundEngine.setNarratorProfile(newProfile);
+                      setNarratorProfile(newProfile);
+                    }}
+                    className={`py-1.5 px-1 rounded-lg text-[11px] font-semibold transition-all text-center border ${
+                      narratorProfile === p.id
+                        ? 'bg-amber-600 border-amber-500 text-stone-950 font-bold shadow-sm'
+                        : 'bg-stone-800/70 border-stone-750 text-stone-400 hover:text-white'
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -534,20 +735,37 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {showMorningBriefing && (
         <div 
           className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md overflow-y-auto flex items-start sm:items-center justify-center p-4"
-          onClick={() => setShowMorningBriefing(false)}
+          onClick={() => {
+            soundEngine.stopSpeaking();
+            setIsPlayingBriefing(false);
+            setShowMorningBriefing(false);
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="morning-briefing-title"
         >
           <div 
             className="max-w-lg w-full p-6 rounded-2xl bg-[#141820] border-2 border-amber-600/50 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto my-auto"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between pb-2 border-b border-stone-800">
-              <div className="flex items-center gap-2 text-amber-400 font-serif font-bold text-lg">
-                <Coffee className="w-5 h-5" />
-                <span>Today's 3-Minute Morning Briefing</span>
+              <div>
+                <div className="flex items-center gap-2 text-amber-400 font-serif font-bold text-lg">
+                  <Coffee className="w-5 h-5" />
+                  <span id="morning-briefing-title">{dailyBriefing.title}</span>
+                </div>
+                <div className="text-xs text-stone-400 mt-0.5">
+                  {dailyBriefing.hero} • <span className="text-amber-500/90">{dailyBriefing.themeTag}</span>
+                </div>
               </div>
               <button 
-                onClick={() => setShowMorningBriefing(false)}
-                className="text-stone-400 hover:text-white"
+                onClick={() => {
+                  soundEngine.stopSpeaking();
+                  setIsPlayingBriefing(false);
+                  setShowMorningBriefing(false);
+                }}
+                aria-label="Close morning briefing"
+                className="p-1 rounded-lg text-stone-400 hover:text-white focus-visible:ring-2 focus-visible:ring-amber-500"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -556,17 +774,55 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="space-y-3 text-xs md:text-sm">
               <div className="p-3 bg-stone-900 rounded-xl border border-stone-800">
                 <strong className="text-amber-400">1. Real Moment: </strong>
-                Moses stood at the edge of the Red Sea with 600 chariots charging behind him. He had no army, just a staff and a command to "be still."
+                {dailyBriefing.moment}
               </div>
 
               <div className="p-3 bg-amber-950/30 rounded-xl border border-amber-900/40">
                 <strong className="text-amber-300">2. Truth for the Pocket: </strong>
-                "The Lord will fight for you; you need only to be still." — Exodus 14:14
+                "{dailyBriefing.scriptureText}" — {dailyBriefing.scriptureReference}
               </div>
 
               <div className="p-3 bg-stone-900 rounded-xl border border-stone-800">
                 <strong className="text-amber-400">3. Your Call Today: </strong>
-                When an unexpected crisis or stressful email arrives today, do not react with panic or impulsive anger. Take 3 deep breaths and stand firm.
+                {dailyBriefing.dailyCall}
+              </div>
+            </div>
+
+            {/* Narrator Persona Picker */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 bg-stone-900/90 rounded-xl border border-stone-800">
+              <div className="flex items-center gap-1.5 text-xs font-mono text-stone-400">
+                <Mic className="w-3.5 h-3.5 text-amber-500" />
+                <span>Narrator Persona:</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                {[
+                  { id: 'cinematic', label: '🎬 Cinematic' },
+                  { id: 'brotherhood', label: '🤝 Grounded' },
+                  { id: 'scholar', label: '📜 Scholar' }
+                ].map(p => (
+                  <button
+                    key={p.id}
+                    onClick={() => {
+                      const newProfile = p.id as NarratorProfile;
+                      soundEngine.setNarratorProfile(newProfile);
+                      setNarratorProfile(newProfile);
+                      if (isPlayingBriefing) {
+                        soundEngine.stopSpeaking();
+                        soundEngine.speakVerse(
+                          dailyBriefing.narrationScript,
+                          () => setIsPlayingBriefing(false)
+                        );
+                      }
+                    }}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                      narratorProfile === p.id
+                        ? 'bg-amber-600 text-stone-950 font-bold shadow-sm'
+                        : 'bg-stone-950 text-stone-400 hover:text-white border border-stone-850'
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -579,9 +835,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   } else {
                     setIsPlayingBriefing(true);
                     soundEngine.speakVerse(
-                      "Today's 3-Minute Morning Briefing. Act 1: Real Moment. Moses stood at the edge of the Red Sea with six hundred iron chariots charging behind him. He had no army, just a shepherd's staff, and a command to be still. Act 2: Truth for the Pocket. The Lord will fight for you; you need only to be still. Exodus 14:14. Act 3: Your Call Today. When an unexpected crisis or stressful message arrives today, do not react with impulsive anger or panic. Take three deep breaths, stand firm, and let the Lord fight the battle.",
-                      () => setIsPlayingBriefing(false),
-                      '/audio/morning_briefing.mp3'
+                      dailyBriefing.narrationScript,
+                      () => setIsPlayingBriefing(false)
                     );
                   }
                 }}
@@ -592,7 +847,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 }`}
               >
                 {isPlayingBriefing ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-amber-500" />}
-                <span>{isPlayingBriefing ? 'Pause Audio' : 'Listen (Studio Voice)'}</span>
+                <span>{isPlayingBriefing ? 'Pause Audio' : 'Listen Narration'}</span>
               </button>
 
               <button
@@ -600,11 +855,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   soundEngine.stopSpeaking();
                   setIsPlayingBriefing(false);
                   soundEngine.playVictory();
+                  if (!isBriefingBonusClaimed && onRewardXP) {
+                    claimDailyBonus('briefing');
+                    onRewardXP(50);
+                  }
                   setShowMorningBriefing(false);
                 }}
                 className="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-black font-bold text-xs shadow-glow-gold"
               >
-                Anchor Set • Let's Go
+                Anchor Set {!isBriefingBonusClaimed ? '(+50 XP)' : ''} • Let's Go
               </button>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { STORY_QUESTS } from '../data/stories';
 import { soundEngine } from '../utils/audio';
 import type { NarratorProfile } from '../utils/audio';
@@ -33,6 +33,24 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
   const [currentActIndex, setCurrentActIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [narratorProfile, setNarratorProfile] = useState<NarratorProfile>(soundEngine.getNarratorProfile());
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        soundEngine.stopSpeaking();
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  useEffect(() => {
+    return () => {
+      soundEngine.stopSpeaking();
+    };
+  }, []);
 
   if (!isOpen) return null;
 
@@ -95,7 +113,13 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
   return (
     <div 
       className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl overflow-y-auto p-4 sm:p-8 flex items-start sm:items-center justify-center"
-      onClick={onClose}
+      onClick={() => {
+        soundEngine.stopSpeaking();
+        onClose();
+      }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="drive-mode-title"
     >
       <div 
         className="max-w-2xl w-full mx-auto my-auto flex flex-col justify-between max-h-[90vh] bg-[#11141b] border-2 border-amber-600/40 rounded-3xl p-5 sm:p-8 shadow-2xl overflow-y-auto space-y-6"
@@ -105,14 +129,15 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
         <div className="flex items-center justify-between pb-4 border-b border-stone-800">
           <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-400">
             <Car className="w-4 h-4" />
-            <span>Hands-Free Drive & Commute Mode</span>
+            <span id="drive-mode-title">Hands-Free Drive & Commute Mode</span>
           </div>
           <button 
             onClick={() => {
               soundEngine.stopSpeaking();
               onClose();
             }}
-            className="p-2 rounded-xl bg-stone-900 text-stone-400 hover:text-white border border-stone-800"
+            aria-label="Close Drive Mode"
+            className="p-2 rounded-xl bg-stone-900 text-stone-400 hover:text-white border border-stone-800 focus-visible:ring-2 focus-visible:ring-amber-500"
           >
             <X className="w-5 h-5" />
           </button>
@@ -152,14 +177,16 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
             <button
               onClick={handlePrev}
               title="Previous Act"
-              className="p-4 rounded-2xl bg-stone-900 hover:bg-stone-800 border border-stone-700 text-stone-300 transition-all active:scale-95"
+              aria-label="Previous Act"
+              className="p-4 rounded-2xl bg-stone-900 hover:bg-stone-800 border border-stone-700 text-stone-300 transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-500"
             >
               <SkipBack className="w-6 h-6" />
             </button>
 
             <button
               onClick={handleTogglePlay}
-              className={`p-6 rounded-3xl transition-all shadow-glow-gold active:scale-95 flex items-center justify-center ${
+              aria-label={isPlaying ? 'Pause narration' : 'Play narration'}
+              className={`p-6 rounded-3xl transition-all shadow-glow-gold active:scale-95 flex items-center justify-center focus-visible:ring-2 focus-visible:ring-amber-500 ${
                 isPlaying 
                   ? 'bg-amber-500 text-black animate-pulse' 
                   : 'bg-gradient-to-r from-amber-600 to-amber-500 text-black'
@@ -171,7 +198,8 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
             <button
               onClick={handleNext}
               title="Next Act"
-              className="p-4 rounded-2xl bg-stone-900 hover:bg-stone-800 border border-stone-700 text-stone-300 transition-all active:scale-95"
+              aria-label="Next Act"
+              className="p-4 rounded-2xl bg-stone-900 hover:bg-stone-800 border border-stone-700 text-stone-300 transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-500"
             >
               <SkipForward className="w-6 h-6" />
             </button>

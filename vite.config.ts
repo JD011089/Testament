@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import { MsEdgeTTS, OUTPUT_FORMAT } from 'msedge-tts'
 
+const ttsCache = new Map<string, Buffer>();
+
 function neuralTtsPlugin(): Plugin {
   return {
     name: 'vite-neural-tts-middleware',
@@ -30,16 +32,37 @@ function neuralTtsPlugin(): Plugin {
             voiceName = 'en-GB-RyanNeural';
           }
 
+          const cacheKey = `${voiceName}:${text}`;
+          if (ttsCache.has(cacheKey)) {
+            const cached = ttsCache.get(cacheKey)!;
+            res.setHeader('Content-Type', 'audio/mpeg');
+            res.setHeader('Content-Length', String(cached.length));
+            res.setHeader('Accept-Ranges', 'bytes');
+            res.setHeader('Cache-Control', 'public, max-age=86400');
+            res.end(cached);
+            return;
+          }
+
           const tts = new MsEdgeTTS();
           await tts.setMetadata(voiceName, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
           const { audioStream } = tts.toStream(text);
 
-          res.setHeader('Content-Type', 'audio/mpeg');
-          res.setHeader('Cache-Control', 'public, max-age=86400');
-          audioStream.pipe(res);
+          const chunks: Buffer[] = [];
+          audioStream.on('data', (chunk: Uint8Array) => {
+            chunks.push(Buffer.from(chunk));
+          });
+
           audioStream.on('end', () => {
+            const fullBuffer = Buffer.concat(chunks);
+            ttsCache.set(cacheKey, fullBuffer);
+            res.setHeader('Content-Type', 'audio/mpeg');
+            res.setHeader('Content-Length', String(fullBuffer.length));
+            res.setHeader('Accept-Ranges', 'bytes');
+            res.setHeader('Cache-Control', 'public, max-age=86400');
+            res.end(fullBuffer);
             try { tts.close(); } catch { /* ignore */ }
           });
+
           audioStream.on('error', (err) => {
             console.error('Audio stream error:', err);
             try { tts.close(); } catch { /* ignore */ }

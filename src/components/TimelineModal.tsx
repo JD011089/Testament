@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TIMELINE_ERAS } from '../data/timeline';
 import type { TimelineEra } from '../data/timeline';
 import { soundEngine } from '../utils/audio';
@@ -17,16 +17,30 @@ export const TimelineModal: React.FC<TimelineModalProps> = ({
 }) => {
   const [selectedEraIndex, setSelectedEraIndex] = useState<number>(0);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const currentEra: TimelineEra = TIMELINE_ERAS[selectedEraIndex];
 
   return (
     <div 
-      className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md overflow-y-auto p-3 sm:p-6 flex items-start sm:items-center justify-center"
+      className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md overflow-y-auto p-3 sm:p-6 flex items-start sm:items-center justify-center animate-fadeIn"
       onClick={onClose}
     >
       <div 
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="timeline-modal-title"
         className="max-w-4xl w-full bg-[#11141b] border-2 border-amber-600/50 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] my-auto"
         onClick={e => e.stopPropagation()}
       >
@@ -37,13 +51,14 @@ export const TimelineModal: React.FC<TimelineModalProps> = ({
               <Clock className="w-4 h-4" />
               <span>The 60-Second Big Picture Mental Map</span>
             </div>
-            <h2 className="text-xl md:text-2xl font-serif font-black text-parchment-50">
+            <h2 id="timeline-modal-title" className="text-xl md:text-2xl font-serif font-black text-parchment-50">
               The Entire Bible in 6 Simple Eras
             </h2>
           </div>
           <button 
             onClick={onClose}
-            className="p-2 rounded-xl bg-stone-900 text-stone-400 hover:text-white border border-stone-800"
+            aria-label="Close timeline modal"
+            className="p-2 rounded-xl bg-stone-900 text-stone-400 hover:text-white border border-stone-800 focus-visible:ring-2 focus-visible:ring-amber-500 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>

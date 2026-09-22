@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { STREET_TRANSLATIONS } from '../data/streetTranslator';
 import type { StreetTranslation } from '../data/streetTranslator';
 import { soundEngine } from '../utils/audio';
@@ -15,6 +15,17 @@ export const StreetTranslatorModal: React.FC<StreetTranslatorModalProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -33,6 +44,9 @@ export const StreetTranslatorModal: React.FC<StreetTranslatorModalProps> = ({
     <div 
       className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md overflow-y-auto p-3 sm:p-6 flex items-start sm:items-center justify-center"
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="street-translator-title"
     >
       <div 
         className="max-w-4xl w-full bg-[#11141b] border-2 border-amber-600/50 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] my-auto"
@@ -45,13 +59,14 @@ export const StreetTranslatorModal: React.FC<StreetTranslatorModalProps> = ({
               <BookA className="w-4 h-4" />
               <span>Street Translator • No Religious Jargon</span>
             </div>
-            <h2 className="text-xl md:text-2xl font-serif font-black text-parchment-50">
-              Ancient Customs &rarr; Modern Everyday Reality
+            <h2 id="street-translator-title" className="text-xl md:text-2xl font-serif font-black text-parchment-50">
+              Ancient Customs → Modern Everyday Reality
             </h2>
           </div>
           <button 
             onClick={onClose}
-            className="p-2 rounded-xl bg-stone-900 text-stone-400 hover:text-white border border-stone-800"
+            aria-label="Close street translator modal"
+            className="p-2 rounded-xl bg-stone-900 text-stone-400 hover:text-white border border-stone-800 focus-visible:ring-2 focus-visible:ring-amber-500"
           >
             <X className="w-5 h-5" />
           </button>
@@ -66,7 +81,8 @@ export const StreetTranslatorModal: React.FC<StreetTranslatorModalProps> = ({
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search ancient terms (e.g. loins, sackcloth, coals, Sanhedrin)..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-stone-900 border border-stone-800 text-sm text-parchment-100 placeholder:text-stone-500 focus:outline-none focus:border-amber-500"
+              aria-label="Search ancient terms"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-stone-900 border border-stone-800 text-sm text-parchment-100 placeholder:text-stone-500 focus:outline-none focus:border-amber-500 focus-visible:ring-1 focus-visible:ring-amber-500"
             />
           </div>
 
