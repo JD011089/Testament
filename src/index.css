@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    overflow-x: hidden;
+    overflow-y: scroll;
+    scroll-behavior: smooth;
+    height: auto;
+    min-height: 100%;
+  }
+
+  body {
+    @apply bg-iron-950 text-parchment-100 font-sans antialiased;
+    overflow-x: hidden;
+    overflow-y: visible;
+    min-height: 100vh;
+    height: auto;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(35, 29, 23, 0.35) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(20, 16, 12, 0.4) 0px, transparent 50%);
+  }
+
+  #root {
+    min-height: 100vh;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+  }
+
+  /* Custom subtle scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #090b0e;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2a221b;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #45372b;
+  }
+}
+
+@layer utilities {
+  .text-glow {
+    text-shadow: 0 0 15px rgba(249, 115, 22, 0.4);
+  }
+  .text-gold-glow {
+    text-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+  }
+  .border-glow-gold {
+    box-shadow: 0 0 20px -3px rgba(217, 119, 6, 0.25);
+  }
+  .border-glow-ember {
+    box-shadow: 0 0 20px -3px rgba(234, 88, 12, 0.3);
+  }
+}
