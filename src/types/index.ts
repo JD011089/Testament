@@ -82,6 +82,26 @@ export interface MemoryVerse {
   category: 'Pressure & Anxiety' | 'Courage & Facing Giants' | 'Anger & Self-Control' | 'Restoration After Failure' | 'Endurance & Brotherhood';
   difficulty: 'Core' | 'Deep';
   keyTakeaway: string;
+  // Story connection metadata (if unlocked from or tied to a story quest)
+  storyQuestId?: string;
+  storyTitle?: string;
+  heroName?: string;
+  actId?: string;
+  actTitle?: string;
+}
+
+export type RecallPromptStyle = 'cue' | 'cloze' | 'stealth';
+
+export interface NotificationSettings {
+  enabled: boolean;
+  activeVerseId: string;
+  frequencyPerDay: number; // e.g. 2, 3, 4, 5
+  startHour: number; // 0-23, default 8 (8 AM)
+  endHour: number; // 0-23, default 21 (9 PM)
+  recallStyle: RecallPromptStyle;
+  lastNotifiedDate: string; // YYYY-MM-DD
+  notificationsSentToday: number;
+  scheduledSlots: string[]; // e.g. ["09:00", "14:30", "20:00"]
 }
 
 export interface UserProgress {
@@ -95,3 +115,4 @@ export interface UserProgress {
   notes: Record<string, string>; // verseId or questId -> note text
   xp: number;
 }
+

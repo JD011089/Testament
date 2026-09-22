@@ -22,21 +22,26 @@ import {
   Play,
   Pause,
   ListOrdered,
-  Mic
+  Mic,
+  Bell
 } from 'lucide-react';
+import { MemoryPulseModal } from './MemoryPulseModal';
+import { getStoryVerseForAct } from '../utils/verseRegistry';
 
 interface StoryViewerProps {
   quest: StoryQuest;
   onBack: () => void;
   onCompleteAct: (actId: string, questId: string, relicId?: string) => void;
   completedActs: string[];
+  onOpenWordForge?: (verseId: string) => void;
 }
 
 export const StoryViewer: React.FC<StoryViewerProps> = ({ 
   quest, 
   onBack, 
   onCompleteAct, 
-  completedActs 
+  completedActs,
+  onOpenWordForge
 }) => {
   const [currentActIndex, setCurrentActIndex] = useState(0);
   const [selectedChoiceId, setSelectedChoiceId] = useState<string | null>(null);
@@ -47,6 +52,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
   const [journalNote, setJournalNote] = useState('');
   const [isNoteSaved, setIsNoteSaved] = useState(false);
   const [showNoteInput, setShowNoteInput] = useState(false);
+  const [isMemoryPulseOpen, setIsMemoryPulseOpen] = useState(false);
 
   // Wisdom Quiz state
   const [selectedQuizOption, setSelectedQuizOption] = useState<number | null>(null);
@@ -559,6 +565,27 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
               <strong className="text-amber-400">Context: </strong>
               {act.unlockedScripture.deepDive}
             </p>
+
+            {/* Memory Pulse Reminders Call to Action */}
+            <div className="mt-4 pt-3 border-t border-amber-900/30 flex flex-wrap items-center justify-between gap-2.5">
+              <div className="flex items-center gap-1.5 text-xs text-stone-400">
+                <Bell className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+                <span>Want to lock this story verse into memory?</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    soundEngine.playClick();
+                    setIsMemoryPulseOpen(true);
+                  }}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs shadow-glow-amber transition-all"
+                >
+                  <Bell className="w-3.5 h-3.5" />
+                  <span>Train This Verse (Reminders)</span>
+                </button>
+              </div>
+            </div>
           </section>
 
           {/* STEP 4: REAL TALK FOR TODAY (TAKEAWAY FOR ADULTS) */}
@@ -729,6 +756,19 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
 
         </div>
       </div>
+
+      {/* Memory Verse Pulse & Notification Modal */}
+      <MemoryPulseModal
+        isOpen={isMemoryPulseOpen}
+        onClose={() => setIsMemoryPulseOpen(false)}
+        targetVerse={getStoryVerseForAct(quest.id, act.id)}
+        onOpenWordForge={(verseId) => {
+          if (onOpenWordForge) {
+            onBack();
+            onOpenWordForge(verseId);
+          }
+        }}
+      />
     </div>
   );
 };

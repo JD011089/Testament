@@ -127,7 +127,8 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,mp3}']
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,mp3}'],
+        importScripts: ['/sw-notifications.js']
       }
     })
   ],

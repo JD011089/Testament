@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { StoryQuest } from './types';
 import { STORY_QUESTS } from './data/stories';
 import { Dashboard } from './components/Dashboard';
@@ -16,9 +16,16 @@ import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { OnboardingModal, type UserCalibrationProfile } from './components/OnboardingModal';
 import { soundEngine } from './utils/audio';
 import { recordVerseMasteryDate } from './utils/dailyEngine';
+import { initNotificationScheduler } from './utils/notificationEngine';
 
 export function App() {
-  const [currentTab, setCurrentTab] = useState<NavTab>('dashboard');
+  const [currentTab, setCurrentTab] = useState<NavTab>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('action') === 'wordforge') return 'wordforge';
+    }
+    return 'dashboard';
+  });
   const [activeQuest, setActiveQuest] = useState<StoryQuest | null>(null);
   const [currentAmbience, setCurrentAmbience] = useState<'none' | 'campfire' | 'wind' | 'sanctuary'>('none');
 
@@ -61,7 +68,15 @@ export function App() {
     return Number(localStorage.getItem('testament_xp')) || 0;
   });
 
-  const [targetWordForgeVerseId, setTargetWordForgeVerseId] = useState<string | null>(null);
+  const [targetWordForgeVerseId, setTargetWordForgeVerseId] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('action') === 'wordforge' && params.get('verseId')) {
+        return params.get('verseId');
+      }
+    }
+    return null;
+  });
 
   const [streakCount] = useState<number>(() => {
     const storedStreak = Number(localStorage.getItem('testament_streak')) || 1;
@@ -87,6 +102,35 @@ export function App() {
     localStorage.setItem('testament_last_active', today);
     return storedStreak;
   });
+
+  // Initialize client-side notification scheduler
+  useEffect(() => {
+    const cleanup = initNotificationScheduler();
+    return () => cleanup();
+  }, []);
+
+  // Handle URL deep links cleanup and listen for Service Worker messages
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('action') === 'wordforge') {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+
+    const handleSwMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'TESTAMENT_NAVIGATE_VERSE' && event.data.verseId) {
+        setTargetWordForgeVerseId(event.data.verseId);
+        setCurrentTab('wordforge');
+        setActiveQuest(null);
+      }
+    };
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', handleSwMessage);
+      return () => {
+        navigator.serviceWorker.removeEventListener('message', handleSwMessage);
+      };
+    }
+  }, []);
 
   const handleSelectQuest = (quest: StoryQuest) => {
     setActiveQuest(quest);
@@ -207,6 +251,7 @@ export function App() {
             onBack={handleBackFromQuest}
             onCompleteAct={handleCompleteAct}
             completedActs={completedActs}
+            onOpenWordForge={handlePracticeVerseFromArsenal}
           />
         ) : (
           <>

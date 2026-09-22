@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { MemoryVerse } from '../types';
-import { MEMORY_VERSES } from '../data/verses';
+import { getAllVerses } from '../utils/verseRegistry';
 import { soundEngine } from '../utils/audio';
 import { getDailyVerse } from '../utils/dailyEngine';
+import { MemoryPulseModal } from './MemoryPulseModal';
 import confetti from 'canvas-confetti';
 import { 
   RotateCcw, 
@@ -14,7 +15,8 @@ import {
   ShieldCheck, 
   Flame, 
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Bell
 } from 'lucide-react';
 
 interface WordItem {
@@ -316,10 +318,22 @@ export const WordForge: React.FC<WordForgeProps> = ({
   targetVerseId,
   onClearTargetVerse
 }) => {
+  const allVerses = getAllVerses();
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [isMemoryPulseOpen, setIsMemoryPulseOpen] = useState<boolean>(false);
+
+  const findVerseIndex = (targetId: string | null | undefined, list: MemoryVerse[]): number => {
+    if (!targetId) return -1;
+    return list.findIndex(v => 
+      v.id === targetId || 
+      v.actId === targetId || 
+      v.id === `story-${targetId}`
+    );
+  };
+
   const [activeVerseIndex, setActiveVerseIndex] = useState<number>(() => {
     if (targetVerseId) {
-      const idx = MEMORY_VERSES.findIndex(v => v.id === targetVerseId);
+      const idx = findVerseIndex(targetVerseId, allVerses);
       if (idx !== -1) return idx;
     }
     return 0;
@@ -335,21 +349,27 @@ export const WordForge: React.FC<WordForgeProps> = ({
   ];
 
   const filteredVerses = selectedCategory === 'All' 
-    ? MEMORY_VERSES 
-    : MEMORY_VERSES.filter(v => v.category === selectedCategory);
+    ? allVerses 
+    : allVerses.filter(v => v.category === selectedCategory);
 
   const safeIndex = activeVerseIndex >= filteredVerses.length ? 0 : activeVerseIndex;
-  const currentVerse: MemoryVerse = filteredVerses[safeIndex] || MEMORY_VERSES[0];
+  const currentVerse: MemoryVerse = filteredVerses[safeIndex] || allVerses[0];
 
   const [prevTargetId, setPrevTargetId] = useState<string | null | undefined>(targetVerseId);
 
   if (targetVerseId && targetVerseId !== prevTargetId) {
     setPrevTargetId(targetVerseId);
-    const verseIdx = MEMORY_VERSES.findIndex(v => v.id === targetVerseId);
+    const verseIdx = findVerseIndex(targetVerseId, filteredVerses);
     if (verseIdx !== -1) {
-      setSelectedCategory('All');
       setActiveVerseIndex(verseIdx);
       if (onClearTargetVerse) onClearTargetVerse();
+    } else {
+      const allIdx = findVerseIndex(targetVerseId, allVerses);
+      if (allIdx !== -1) {
+        setSelectedCategory('All');
+        setActiveVerseIndex(allIdx);
+        if (onClearTargetVerse) onClearTargetVerse();
+      }
     }
   }
 
@@ -368,17 +388,31 @@ export const WordForge: React.FC<WordForgeProps> = ({
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-8 pb-36 sm:pb-40 md:pb-48 text-left">
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-500 mb-1">
-          <Flame className="w-4 h-4" />
-          <span>The Word Forge • Scripture Retention</span>
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-500 mb-1">
+            <Flame className="w-4 h-4" />
+            <span>The Word Forge • Scripture Retention</span>
+          </div>
+          <h1 className="text-2xl md:text-4xl font-serif font-black text-parchment-50">
+            Lock Truth Into Memory
+          </h1>
+          <p className="text-xs md:text-sm text-stone-400 mt-1">
+            Tactile word assembly designed for adult retention. Assemble the verse by tapping words in sequence.
+          </p>
         </div>
-        <h1 className="text-2xl md:text-4xl font-serif font-black text-parchment-50">
-          Lock Truth Into Memory
-        </h1>
-        <p className="text-xs md:text-sm text-stone-400 mt-1">
-          Tactile word assembly designed for adult retention. Assemble the verse by tapping words in sequence.
-        </p>
+
+        <button
+          onClick={() => {
+            soundEngine.playClick();
+            setIsMemoryPulseOpen(true);
+          }}
+          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-stone-900 border border-amber-500/40 text-amber-300 text-xs font-semibold hover:bg-amber-600 hover:text-black transition-all shadow-glow-amber"
+          title="Set this verse as your daily memory challenge"
+        >
+          <Bell className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+          <span>Train This Verse (Reminders)</span>
+        </button>
       </div>
 
       {/* Category Pills */}
@@ -433,6 +467,13 @@ export const WordForge: React.FC<WordForgeProps> = ({
           Next Verse
         </button>
       </div>
+
+      {/* Memory Pulse Modal */}
+      <MemoryPulseModal
+        isOpen={isMemoryPulseOpen}
+        onClose={() => setIsMemoryPulseOpen(false)}
+        targetVerse={currentVerse}
+      />
     </div>
   );
 };

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { MEMORY_VERSES } from '../data/verses';
+import { getAllVerses } from '../utils/verseRegistry';
 import { STORY_QUESTS } from '../data/stories';
 import type { MemoryVerse } from '../types';
 import { soundEngine } from '../utils/audio';
+import { MemoryPulseModal } from './MemoryPulseModal';
 import { 
   Shield, 
   Bookmark, 
@@ -12,7 +13,8 @@ import {
   Sparkles, 
   Search, 
   Brain,
-  FileText
+  FileText,
+  Bell
 } from 'lucide-react';
 
 interface ArsenalViewProps {
@@ -41,6 +43,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeAudioVerseId, setActiveAudioVerseId] = useState<string | null>(null);
+  const [pulseModalVerse, setPulseModalVerse] = useState<MemoryVerse | null>(null);
 
   useEffect(() => {
     return () => {
@@ -49,14 +52,16 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
   }, []);
 
   const notes: Record<string, string> = JSON.parse(localStorage.getItem('testament_notes') || '{}');
+  const allVerses = getAllVerses();
 
   const categories = ['All', 'Courage & Facing Giants', 'Pressure & Anxiety', 'Anger & Self-Control', 'Restoration After Failure', 'Endurance & Brotherhood'];
 
-  const filteredVerses = MEMORY_VERSES.filter((verse: MemoryVerse) => {
+  const filteredVerses = allVerses.filter((verse: MemoryVerse) => {
     const matchesCategory = selectedCategory === 'All' || verse.category === selectedCategory;
     const matchesSearch = 
       verse.reference.toLowerCase().includes(searchQuery.toLowerCase()) ||
       verse.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (verse.heroName && verse.heroName.toLowerCase().includes(searchQuery.toLowerCase())) ||
       verse.plainEnglishSummary.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
@@ -208,21 +213,35 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
               </div>
 
               {/* Footer Actions */}
-              <div className="pt-3 border-t border-stone-800/80 flex items-center justify-between">
+              <div className="pt-3 border-t border-stone-800/80 flex flex-wrap items-center justify-between gap-2">
                 <span className="text-[11px] text-stone-500 font-mono">
-                  {verse.category}
+                  {verse.heroName ? `Story: ${verse.heroName}` : verse.category}
                 </span>
 
-                <button
-                  onClick={() => {
-                    soundEngine.playClick();
-                    onPracticeVerse(verse.id);
-                  }}
-                  className="flex items-center gap-1.5 text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors py-1.5 px-3 rounded-lg hover:bg-amber-600/10"
-                >
-                  <Brain className="w-3.5 h-3.5" />
-                  <span>Practice in Word Forge &rarr;</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      soundEngine.playClick();
+                      setPulseModalVerse(verse);
+                    }}
+                    className="flex items-center gap-1 text-xs font-semibold text-stone-300 hover:text-amber-300 py-1.5 px-2.5 rounded-lg bg-stone-900 border border-stone-800 hover:border-amber-500/50 transition-colors"
+                    title="Train with daily spaced notifications"
+                  >
+                    <Bell className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Train Daily</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      soundEngine.playClick();
+                      onPracticeVerse(verse.id);
+                    }}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors py-1.5 px-3 rounded-lg hover:bg-amber-600/10"
+                  >
+                    <Brain className="w-3.5 h-3.5" />
+                    <span>Practice &rarr;</span>
+                  </button>
+                </div>
               </div>
             </div>
           );
@@ -253,6 +272,17 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
           </div>
         </div>
       )}
+
+      {/* Spaced Memory Pulse Modal */}
+      <MemoryPulseModal
+        isOpen={pulseModalVerse !== null}
+        onClose={() => setPulseModalVerse(null)}
+        targetVerse={pulseModalVerse}
+        onOpenWordForge={(verseId) => {
+          setPulseModalVerse(null);
+          onPracticeVerse(verseId);
+        }}
+      />
     </div>
   );
 };

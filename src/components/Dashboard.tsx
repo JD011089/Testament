@@ -24,9 +24,19 @@ import {
   Play,
   Pause,
   SlidersHorizontal,
-  Mic
+  Mic,
+  Bell,
+  Send
 } from 'lucide-react';
 import type { UserCalibrationProfile } from './OnboardingModal';
+import { MemoryPulseModal } from './MemoryPulseModal';
+import { 
+  getNotificationSettings, 
+  sendTestMemoryNotification, 
+  requestNotificationPermission, 
+  getNotificationPermission 
+} from '../utils/notificationEngine';
+import { getVerseById, getAllVerses } from '../utils/verseRegistry';
 import { 
   getTodayFormatted, 
   getDailyVerse, 
@@ -99,12 +109,36 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [showMorningBriefing, setShowMorningBriefing] = useState<boolean>(false);
   const [isPlayingBriefing, setIsPlayingBriefing] = useState<boolean>(false);
   const [narratorProfile, setNarratorProfile] = useState<NarratorProfile>(() => soundEngine.getNarratorProfile());
+  const [isMemoryPulseModalOpen, setIsMemoryPulseModalOpen] = useState<boolean>(false);
+  const [notificationSettings, setNotificationSettings] = useState(() => getNotificationSettings());
+  const [testNoticeStatus, setTestNoticeStatus] = useState<string | null>(null);
 
   const dailyVerse = getDailyVerse();
   const dailyBriefing = getDailyBriefing();
   const todayFormatted = getTodayFormatted();
   const adaptiveObjective = getAdaptiveNextObjective(completedActs, userProfile, memorizedVerses);
   const isBriefingBonusClaimed = isDailyBonusClaimed('briefing');
+  const activeMemoryVerse = getVerseById(notificationSettings.activeVerseId) || getAllVerses()[0];
+
+  const handleQuickTestNotification = async () => {
+    soundEngine.playClick();
+    if (getNotificationPermission() !== 'granted') {
+      const granted = await requestNotificationPermission();
+      if (!granted) {
+        setTestNoticeStatus('Please enable notifications');
+        setIsMemoryPulseModalOpen(true);
+        return;
+      }
+    }
+    setTestNoticeStatus('Dispatched to device!');
+    const ok = await sendTestMemoryNotification(0);
+    if (ok) {
+      soundEngine.playVictory();
+    } else {
+      setTestNoticeStatus('Check permissions');
+    }
+    setTimeout(() => setTestNoticeStatus(null), 3500);
+  };
 
   useEffect(() => {
     if (!showMorningBriefing) return;
@@ -184,6 +218,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
           >
             <Car className="w-3.5 h-3.5 text-amber-500" />
             <span>Drive Audio</span>
+          </button>
+
+          <button
+            onClick={() => {
+              soundEngine.playClick();
+              setIsMemoryPulseModalOpen(true);
+            }}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-stone-900 border border-amber-500/40 text-amber-300 text-xs font-semibold hover:border-amber-500 hover:text-amber-200 transition-all shadow-glow-amber"
+            title="Configure multi-daily memory verse notifications"
+          >
+            <Bell className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+            <span>Memory Pulse ({notificationSettings.frequencyPerDay}x)</span>
           </button>
 
           <button
@@ -273,6 +319,101 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 >
                   <span>Lock this into memory</span>
                   <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* SPACED MEMORY PULSE CARD */}
+          <div className="p-5 md:p-6 rounded-2xl bg-gradient-to-r from-[#151922] via-[#10131a] to-[#141822] border-2 border-amber-500/40 shadow-glow-gold relative overflow-hidden text-left">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <div className="flex items-center gap-2.5">
+                <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                  <Bell className="w-4 h-4 animate-pulse" />
+                </span>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-400">
+                      Spaced Memory Pulse
+                    </span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-950/60 border border-amber-800/60 text-amber-300 font-bold">
+                      {notificationSettings.frequencyPerDay}x / Day Spaced
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {testNoticeStatus && (
+                  <span className="text-[11px] font-mono text-amber-400 animate-pulse">
+                    {testNoticeStatus}
+                  </span>
+                )}
+                <button
+                  onClick={handleQuickTestNotification}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-stone-850 hover:bg-stone-800 text-stone-300 hover:text-amber-300 border border-stone-700 text-xs font-medium transition-colors"
+                  title="Sends an instant recall prompt to this device"
+                >
+                  <Send className="w-3 h-3 text-amber-400" />
+                  <span>Test Prompt</span>
+                </button>
+                <button
+                  onClick={() => {
+                    soundEngine.playClick();
+                    setIsMemoryPulseModalOpen(true);
+                  }}
+                  className="text-xs font-semibold text-amber-400 hover:text-amber-300 underline underline-offset-2 ml-1"
+                >
+                  Configure
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-black/35 p-3.5 rounded-xl border border-stone-800/90 mb-3">
+              <div className="flex items-center justify-between gap-2 mb-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-serif font-bold text-amber-300">
+                    {activeMemoryVerse.reference}
+                  </span>
+                  {activeMemoryVerse.heroName && (
+                    <span className="text-[10px] font-mono text-stone-400">
+                      • Story: {activeMemoryVerse.heroName}
+                    </span>
+                  )}
+                </div>
+                <span className="text-[10px] font-mono text-stone-400">
+                  {notificationSettings.notificationsSentToday} of {notificationSettings.frequencyPerDay} prompts today
+                </span>
+              </div>
+              <p className="text-xs md:text-sm text-parchment-100 italic line-clamp-2 leading-relaxed">
+                "{activeMemoryVerse.text}"
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[10px] font-mono text-stone-400">Scheduled:</span>
+                {notificationSettings.scheduledSlots.map((slot, idx) => (
+                  <span
+                    key={idx}
+                    className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
+                      idx < notificationSettings.notificationsSentToday
+                        ? 'bg-emerald-950/60 border-emerald-800/60 text-emerald-300 font-bold'
+                        : 'bg-stone-900 border-stone-800 text-amber-300'
+                    }`}
+                  >
+                    {idx < notificationSettings.notificationsSentToday ? '✓ ' : ''}{slot}
+                  </span>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => onOpenWordForge(activeMemoryVerse.id)}
+                  className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs flex items-center gap-1.5 shadow-glow-amber transition-all"
+                >
+                  <Brain className="w-3.5 h-3.5" />
+                  <span>Practice in Word Forge</span>
                 </button>
               </div>
             </div>
@@ -869,6 +1010,20 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
       )}
+
+      {/* Spaced Memory Pulse & Notification Modal */}
+      <MemoryPulseModal
+        isOpen={isMemoryPulseModalOpen}
+        onClose={() => {
+          setIsMemoryPulseModalOpen(false);
+          setNotificationSettings(getNotificationSettings());
+        }}
+        targetVerse={activeMemoryVerse}
+        onOpenWordForge={(verseId) => {
+          setIsMemoryPulseModalOpen(false);
+          onOpenWordForge(verseId);
+        }}
+      />
     </div>
   );
 };
