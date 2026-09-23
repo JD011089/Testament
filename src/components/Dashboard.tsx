@@ -330,10 +330,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     onOpenWhatsNew();
                   }}
                   className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 hover:bg-amber-500 hover:text-black text-amber-300 border border-amber-500/40 font-bold transition-all flex items-center gap-1 shadow-sm ml-1"
-                  title="View what's new in v1.7.0"
+                  title="View what's new in v1.8.0"
                 >
                   <Sparkles className="w-2.5 h-2.5" />
-                  <span>v1.7.0 Live ✨</span>
+                  <span>v1.8.0 Live ✨</span>
                 </button>
               )}
             </div>

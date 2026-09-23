@@ -39,10 +39,28 @@ interface ReleaseMilestone {
 
 const RELEASES: ReleaseMilestone[] = [
   {
-    version: 'v1.7.0',
-    tagline: 'Desktop Layout Overhaul & Socratic Tactical AI',
+    version: 'v1.8.0',
+    tagline: 'Background Notifications & IDB-Persisted Alarms',
     dateBadge: 'Current Release',
     isLatest: true,
+    highlights: [
+      {
+        icon: <Bell className="w-4 h-4 text-amber-400" />,
+        title: 'True Background Scripture Reminders',
+        description: 'Memory verse reminders now appear in your system notification bar even when the app tab is closed. Alarms are stored in IndexedDB so they survive Service Worker restarts.'
+      },
+      {
+        icon: <Sparkles className="w-4 h-4 text-amber-400" />,
+        title: 'No More Burst Notifications on App Open',
+        description: 'Fixed the bug where opening the app triggered 3 missed reminders at once. The SW and app now share alarm state via IDB, so each slot fires exactly once.'
+      }
+    ]
+  },
+  {
+    version: 'v1.7.0',
+    tagline: 'Desktop Layout Overhaul & Socratic Tactical AI',
+    dateBadge: 'Previous Release',
+    isLatest: false,
     highlights: [
       {
         icon: <Compass className="w-4 h-4 text-amber-400" />,
@@ -236,12 +254,12 @@ const RELEASES: ReleaseMilestone[] = [
 ];
 
 export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose }) => {
-  const [activeTab, setActiveTab] = useState<string>('v1.7.0');
+  const [activeTab, setActiveTab] = useState<string>('v1.8.0');
 
   const handleDismiss = () => {
     soundEngine.playClick();
     try {
-      localStorage.setItem('testament_last_seen_version', '1.7.0');
+      localStorage.setItem('testament_last_seen_version', '1.8.0');
     } catch {
       // ignore
     }
@@ -276,7 +294,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
                   Field Update Dispatches
                 </h2>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold">
-                  v1.6.0 Live
+                  v1.8.0 Live
                 </span>
               </div>
               <p className="text-xs text-stone-400">

@@ -5,6 +5,14 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2026-09-23
+
+### Fixed
+- **Background Notifications (Scripture Memory Pulse)**:
+  - Replaced `setTimeout`-based Service Worker alarms with **IndexedDB-persisted alarm timestamps** (`pendingAlarm` record). Alarms now survive SW termination by the browser and fire on the next SW wakeup event (`activate`, `fetch`, `periodicsync`, `push`, `notificationclick`).
+  - Fixed burst-on-open bug where opening the app triggered 3 missed reminders simultaneously. `checkAndDispatchDueReminders` now reads both `lastFired` and `pendingAlarm` from IDB before dispatching, suppressing any slot the SW already handled or is about to handle.
+  - `syncNextAlarmToServiceWorker` now writes the `pendingAlarm` record directly to IDB as the primary persistence path, with the SW `postMessage` as a secondary path.
+
 ## [1.7.0] - 2026-09-23
 
 ### Added
