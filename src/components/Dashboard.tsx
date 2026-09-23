@@ -27,13 +27,16 @@ import {
   Mic,
   Bell,
   Send,
-  HeartHandshake
+  HeartHandshake,
+  Target
 } from 'lucide-react';
 import type { UserCalibrationProfile } from './OnboardingModal';
 import { MemoryPulseModal } from './MemoryPulseModal';
 import { ProverbsCodexModal } from './ProverbsCodexModal';
 import { PsalmsFieldMedicModal } from './PsalmsFieldMedicModal';
 import { CanonCodexModal } from './CanonCodexModal';
+import { DailyCampaignCard } from './DailyCampaignCard';
+import type { DailyCampaignStep } from '../data/dailyCampaigns';
 import { 
   getNotificationSettings, 
   sendTestMemoryNotification, 
@@ -74,6 +77,8 @@ interface DashboardProps {
   userProfile?: UserCalibrationProfile | null;
   onOpenOnboarding?: () => void;
   onRewardXP?: (points: number) => void;
+  onOpenWhatsNew?: () => void;
+  onLaunchCampaignStep?: (step: DailyCampaignStep) => void;
 }
 
 const QUEST_IMAGES: Record<string, string> = {
@@ -129,8 +134,28 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onToggleAmbience,
   userProfile,
   onOpenOnboarding,
-  onRewardXP
+  onRewardXP,
+  onOpenWhatsNew,
+  onLaunchCampaignStep
 }) => {
+  const [dashboardMode, setDashboardMode] = useState<'guided' | 'freeroam'>(() => {
+    try {
+      return (localStorage.getItem('testament_dashboard_mode') as 'guided' | 'freeroam') || 'guided';
+    } catch {
+      return 'guided';
+    }
+  });
+
+  const handleToggleDashboardMode = (mode: 'guided' | 'freeroam') => {
+    soundEngine.playSnap();
+    setDashboardMode(mode);
+    try {
+      localStorage.setItem('testament_dashboard_mode', mode);
+    } catch {
+      // ignore
+    }
+  };
+
   const [activeTrack, setActiveTrack] = useState<string>('All');
   const [showMorningBriefing, setShowMorningBriefing] = useState<boolean>(false);
   const [isPlayingBriefing, setIsPlayingBriefing] = useState<boolean>(false);
@@ -265,6 +290,19 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-amber-950/80 border border-amber-800/60 text-amber-300 font-mono font-bold">
                 {getRankTitle(xp)}
               </span>
+              {onOpenWhatsNew && (
+                <button
+                  onClick={() => {
+                    soundEngine.playClick();
+                    onOpenWhatsNew();
+                  }}
+                  className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 hover:bg-amber-500 hover:text-black text-amber-300 border border-amber-500/40 font-bold transition-all flex items-center gap-1 shadow-sm ml-1"
+                  title="View what's new in v1.6.0"
+                >
+                  <Sparkles className="w-2.5 h-2.5" />
+                  <span>v1.6.0 Live ✨</span>
+                </button>
+              )}
             </div>
             <p className="text-xs text-stone-400">
               <span className="text-amber-400 font-medium">{todayFormatted}</span> • The Living Word
@@ -345,12 +383,55 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
+      {/* GUIDED CAMPAIGN vs FREE ROAM MODE SELECTOR */}
+      <div className="flex flex-wrap items-center justify-between gap-3 p-2 sm:p-2.5 rounded-2xl bg-[#11141c] border border-amber-500/30 shadow-md mb-8">
+        <div className="flex items-center p-1 rounded-xl bg-stone-950 border border-stone-800">
+          <button
+            onClick={() => handleToggleDashboardMode('guided')}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              dashboardMode === 'guided'
+                ? 'bg-amber-500 text-black shadow-glow-gold'
+                : 'text-stone-400 hover:text-stone-200'
+            }`}
+          >
+            <Target className="w-3.5 h-3.5" />
+            <span>🎯 Daily Guided Mission</span>
+          </button>
+
+          <button
+            onClick={() => handleToggleDashboardMode('freeroam')}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              dashboardMode === 'freeroam'
+                ? 'bg-amber-500 text-black shadow-glow-gold'
+                : 'text-stone-400 hover:text-stone-200'
+            }`}
+          >
+            <Compass className="w-3.5 h-3.5" />
+            <span>🗺️ Free Roam (Sandbox)</span>
+          </button>
+        </div>
+
+        <div className="text-xs text-stone-400 italic hidden md:block">
+          {dashboardMode === 'guided'
+            ? 'Structured daily path: Story Quest → Dilemma Sim → Word Forge → Library Codex'
+            : 'Unrestricted open exploration across all 14 quests, 66 books, and drills'}
+        </div>
+      </div>
+
       {/* WIDESCREEN DESKTOP GRID: MAIN STAGE (col 8) + SIDEBAR (col 4) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* MAIN STAGE (65-70% on Desktop) */}
         <div className="lg:col-span-8 space-y-8">
           
+          {/* DAILY GUIDED MISSION CARD (When in Guided Mode) */}
+          {dashboardMode === 'guided' && (
+            <DailyCampaignCard 
+              onLaunchStep={onLaunchCampaignStep || (() => {})} 
+              onRewardXP={onRewardXP || (() => {})} 
+            />
+          )}
+
           {/* Cinematic Hero Study Table Banner */}
           <div className="rounded-2xl overflow-hidden border-2 border-amber-700/40 shadow-2xl relative bg-[#0e1117]">
             <div className="relative h-48 sm:h-64 w-full overflow-hidden bg-stone-950">

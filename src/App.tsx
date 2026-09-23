@@ -15,9 +15,12 @@ import { DriveModePlayer } from './components/DriveModePlayer';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { OnboardingModal, type UserCalibrationProfile } from './components/OnboardingModal';
 import { CanonLibraryPage } from './components/CanonLibraryPage';
+import { WhatsNewModal } from './components/WhatsNewModal';
 import { soundEngine } from './utils/audio';
 import { recordVerseMasteryDate } from './utils/dailyEngine';
 import { initNotificationScheduler } from './utils/notificationEngine';
+import { getTodayDailyCampaign, markCampaignStepCompleted } from './data/dailyCampaigns';
+import type { DailyCampaignStep } from './data/dailyCampaigns';
 
 export function App() {
   const [currentTab, setCurrentTab] = useState<NavTab>(() => {
@@ -100,6 +103,16 @@ export function App() {
     return null;
   });
 
+  const [targetDilemmaId, setTargetDilemmaId] = useState<string | null>(null);
+  const [isWhatsNewOpen, setIsWhatsNewOpen] = useState<boolean>(() => {
+    try {
+      const lastSeen = localStorage.getItem('testament_last_seen_version');
+      return lastSeen !== '1.6.0';
+    } catch {
+      return false;
+    }
+  });
+
   const [streakCount] = useState<number>(() => {
     const storedStreak = Number(localStorage.getItem('testament_streak')) || 1;
     const today = new Date().toDateString();
@@ -160,6 +173,11 @@ export function App() {
       setActiveQuest(null);
       setCurrentTab('library');
       window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Mark Step 4 of Daily Campaign if opened
+      const todayCampaign = getTodayDailyCampaign();
+      markCampaignStepCompleted(todayCampaign.id, 4);
+      window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
     };
 
     window.addEventListener('open-canon-library', handleOpenLibrary);
@@ -169,6 +187,52 @@ export function App() {
       window.removeEventListener('open-canon-codex', handleOpenLibrary);
     };
   }, []);
+
+  // Listen for dilemma completions from DilemmaSimulator to advance Daily Campaign
+  useEffect(() => {
+    const handleDilemmaCompleted = (e: Event) => {
+      const customEvent = e as CustomEvent<{ dilemmaId: string }>;
+      const todayCampaign = getTodayDailyCampaign();
+      if (todayCampaign.steps[1].targetId === customEvent.detail?.dilemmaId) {
+        markCampaignStepCompleted(todayCampaign.id, 2);
+        window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
+      }
+    };
+
+    window.addEventListener('testament-dilemma-completed', handleDilemmaCompleted);
+    return () => window.removeEventListener('testament-dilemma-completed', handleDilemmaCompleted);
+  }, []);
+
+  const handleLaunchCampaignStep = (step: DailyCampaignStep) => {
+    soundEngine.playClick();
+    if (step.type === 'quest') {
+      const targetQuest = STORY_QUESTS.find(q => q.id === step.targetId);
+      if (targetQuest) {
+        setActiveQuest(targetQuest);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } else if (step.type === 'dilemma') {
+      soundEngine.stopSpeaking();
+      setActiveQuest(null);
+      setTargetDilemmaId(step.targetId);
+      setCurrentTab('dilemmas');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (step.type === 'wordforge') {
+      soundEngine.stopSpeaking();
+      setActiveQuest(null);
+      setTargetWordForgeVerseId(step.targetId);
+      setCurrentTab('wordforge');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (step.type === 'canon') {
+      soundEngine.stopSpeaking();
+      setActiveQuest(null);
+      setCurrentTab('library');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const todayCampaign = getTodayDailyCampaign();
+      markCampaignStepCompleted(todayCampaign.id, 4);
+      window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
+    }
+  };
 
   const handleSelectQuest = (quest: StoryQuest) => {
     setActiveQuest(quest);
@@ -204,6 +268,13 @@ export function App() {
       const newXp = xp + bonusXp;
       setXp(newXp);
       localStorage.setItem('testament_xp', String(newXp));
+
+      // Check if this fulfills Step 1 of today's Daily Campaign
+      const todayCampaign = getTodayDailyCampaign();
+      if (todayCampaign.steps[0].targetId === _questId || todayCampaign.steps[0].targetSecondaryId === actId) {
+        markCampaignStepCompleted(todayCampaign.id, 1);
+        window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
+      }
     }
   };
 
@@ -217,6 +288,13 @@ export function App() {
       const newXp = xp + 40;
       setXp(newXp);
       localStorage.setItem('testament_xp', String(newXp));
+
+      // Check if this fulfills Step 3 of today's Daily Campaign
+      const todayCampaign = getTodayDailyCampaign();
+      if (todayCampaign.steps[2].targetId === verseId) {
+        markCampaignStepCompleted(todayCampaign.id, 3);
+        window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
+      }
     }
   };
 
@@ -331,6 +409,8 @@ export function App() {
                 userProfile={userProfile}
                 onOpenOnboarding={() => setIsOnboardingOpen(true)}
                 onRewardXP={handleRewardXP}
+                onOpenWhatsNew={() => setIsWhatsNewOpen(true)}
+                onLaunchCampaignStep={handleLaunchCampaignStep}
               />
             )}
 
@@ -368,6 +448,8 @@ export function App() {
             {currentTab === 'dilemmas' && (
               <DilemmaSimulator 
                 onRewardXP={handleRewardXP}
+                targetDilemmaId={targetDilemmaId}
+                onClearTargetDilemma={() => setTargetDilemmaId(null)}
               />
             )}
 
@@ -429,6 +511,12 @@ export function App() {
         onComplete={handleCompleteOnboarding}
         onClose={() => setIsOnboardingOpen(false)}
         initialProfile={userProfile}
+      />
+
+      {/* In-App Release Notes Dispatcher */}
+      <WhatsNewModal
+        isOpen={isWhatsNewOpen}
+        onClose={() => setIsWhatsNewOpen(false)}
       />
 
       {/* PWA Home-Screen Install Prompt */}

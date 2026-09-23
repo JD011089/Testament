@@ -23,10 +23,18 @@ import {
 
 interface DilemmaSimulatorProps {
   onRewardXP: (amount: number) => void;
+  targetDilemmaId?: string | null;
+  onClearTargetDilemma?: () => void;
 }
 
-export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({ onRewardXP }) => {
-  const [selectedDilemmaId, setSelectedDilemmaId] = useState<string>(REAL_LIFE_DILEMMAS[0].id);
+export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({ 
+  onRewardXP,
+  targetDilemmaId,
+  onClearTargetDilemma
+}) => {
+  const [selectedDilemmaId, setSelectedDilemmaId] = useState<string>(() => {
+    return targetDilemmaId || REAL_LIFE_DILEMMAS[0].id;
+  });
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [activeMode, setActiveMode] = useState<'heart_check' | 'playbook'>('heart_check');
   
@@ -48,6 +56,18 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({ onRewardXP }
 
   // Playbook mode state
   const [revealedPlayId, setRevealedPlayId] = useState<string | null>(null);
+  const [prevTargetDilemmaId, setPrevTargetDilemmaId] = useState<string | null | undefined>(targetDilemmaId);
+
+  if (targetDilemmaId && targetDilemmaId !== prevTargetDilemmaId) {
+    setPrevTargetDilemmaId(targetDilemmaId);
+    setSelectedDilemmaId(targetDilemmaId);
+    setSelectedCategory('All');
+    setRevealedPlayId(null);
+    setEvaluationResult(null);
+    if (onClearTargetDilemma) {
+      onClearTargetDilemma();
+    }
+  }
 
   const categories = [
     'All',
@@ -140,6 +160,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({ onRewardXP }
       setCompletedDilemmas(updated);
       localStorage.setItem('testament_completed_dilemmas', JSON.stringify(updated));
       onRewardXP(40);
+      window.dispatchEvent(new CustomEvent('testament-dilemma-completed', { detail: { dilemmaId: dilemma.id } }));
     }
   };
 

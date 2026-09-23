@@ -5,6 +5,28 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-09-22
+
+### Added
+- **Daily Guided Mission System ("Today's Tactical Campaign")**:
+  - Replaces aimless wandering with a curated, high-tempo 4-step daily path:
+    1. **Narrative Forge (Story Quest Act)**: Step into the boots of a biblical hero facing high-stakes conflict (e.g. David facing Goliath).
+    2. **"What's the Play?" Tactical Simulation**: Solve a connected real-life modern crisis directly paralleling that hero's battle (e.g. Family Undermining Ambition / Workplace Hecklers).
+    3. **Word Forge Memory Lock**: Lock the anchor scripture into your mental armor with interactive block builders and cloze puzzles.
+    4. **Scriptorium Codex Briefing**: Open the matching volume in the 3D Library to extract the Monday Morning Reality Check.
+  - **14 Curated Hero Tracks**: Freedom to follow today's rotating campaign or choose from all 14 Hero Tracks (David, Joseph, Moses, Daniel, Elijah, Esther, Nehemiah, Peter, Gideon, Paul, Jonah, Ruth, Joshua, John the Baptist).
+  - **Real-Time Step Progression & Celebration**: 4 connected step nodes with visual checkmarks, progress percentages, and celebration confetti awarding a +150 XP completion victory bonus.
+- **Dual Dashboard Mode Switcher (Guided Campaign vs. Free Roam)**:
+  - 1-tap mode toggle on the Dashboard allowing users to switch between structured mentorship lessons (`🎯 Daily Guided Mission`) and open sandbox exploration (`🗺️ Free Roam`), with persistent state in `localStorage`.
+- **In-App "What's New" Release Notes Dispatcher (`WhatsNewModal`)**:
+  - High-craftsmanship modal automatically notifying users of new capabilities upon app updates (with `localStorage` tracking).
+  - Permanent access from the Dashboard top header pill (`v1.6.0 Live ✨`).
+  - Interactive archive detailing all major version milestones from v1.0.0 through v1.6.0.
+- **Seamless Cross-Tab Deep Linking**:
+  - Direct 1-tap buttons on each campaign step launch directly into the matching Quest, Dilemma, Word Forge verse, or Library Codex pre-loaded and ready for immediate action.
+
+---
+
 ## [1.5.0] - 2026-09-22
 
 ### Added
