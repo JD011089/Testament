@@ -38,7 +38,12 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({ onRewardXP }
 
   // Persistence
   const [completedDilemmas, setCompletedDilemmas] = useState<string[]>(() => {
-    return JSON.parse(localStorage.getItem('testament_completed_dilemmas') || '[]');
+    try {
+      const stored = localStorage.getItem('testament_completed_dilemmas');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
   });
 
   // Playbook mode state

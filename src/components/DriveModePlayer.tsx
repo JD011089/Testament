@@ -57,18 +57,39 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
   const quest = STORY_QUESTS[currentQuestIndex];
   const act = quest.acts[currentActIndex];
 
-  const playCurrentActAudio = () => {
+  const getThemeImage = (theme: string) => {
+    switch (theme) {
+      case 'palace_hall': return '/images/palace_hall.jpg';
+      case 'sea_storm': return '/images/sea_storm.jpg';
+      case 'red_sea': return '/images/red_sea.jpg';
+      case 'mount_carmel': return '/images/mount_carmel.jpg';
+      case 'valley_battlefield': return '/images/valley_battlefield.jpg';
+      case 'cave_refuge': return '/images/cave_refuge.jpg';
+      case 'desert_canyon': return '/images/desert_canyon.jpg';
+      case 'courtyard_fire': return '/images/courtyard_fire.jpg';
+      case 'prison_cell': default: return '/images/prison_cell.jpg';
+    }
+  };
+
+  const playAct = (qIdx: number, aIdx: number) => {
+    const targetQuest = STORY_QUESTS[qIdx];
+    if (!targetQuest) return;
+    const targetAct = targetQuest.acts[aIdx];
+    if (!targetAct) return;
+
     soundEngine.stopSpeaking();
     setIsPlaying(true);
-    const narrationText = `${quest.title}. Act ${act.actNumber}: ${act.actTitle}. ${act.historicalContext}. ${act.narrativeParagraphs.join(' ')}. Scripture: ${act.unlockedScripture.reference}: ${act.unlockedScripture.text}. Life application: ${act.realTalkTakeaway.practicalLesson}`;
-    const studioAssetUrl = `/audio/stories/${quest.id}_${act.id}.mp3`;
+    setCurrentQuestIndex(qIdx);
+    setCurrentActIndex(aIdx);
+
+    const narrationText = `${targetQuest.title}. Act ${targetAct.actNumber}: ${targetAct.actTitle}. ${targetAct.historicalContext}. ${targetAct.narrativeParagraphs.join(' ')}. Scripture: ${targetAct.unlockedScripture.reference}: ${targetAct.unlockedScripture.text}. Life application: ${targetAct.realTalkTakeaway.practicalLesson}`;
+    const studioAssetUrl = `/audio/stories/${targetQuest.id}_${targetAct.id}.mp3`;
     soundEngine.speakVerse(narrationText, () => {
-      // Auto-advance to next act or next quest!
-      if (currentActIndex < quest.acts.length - 1) {
-        setCurrentActIndex(prev => prev + 1);
-      } else if (currentQuestIndex < STORY_QUESTS.length - 1) {
-        setCurrentQuestIndex(prev => prev + 1);
-        setCurrentActIndex(0);
+      // Auto-advance to next act or next quest seamlessly
+      if (aIdx < targetQuest.acts.length - 1) {
+        playAct(qIdx, aIdx + 1);
+      } else if (qIdx < STORY_QUESTS.length - 1) {
+        playAct(qIdx + 1, 0);
       } else {
         setIsPlaying(false);
       }
@@ -80,33 +101,37 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
       soundEngine.stopSpeaking();
       setIsPlaying(false);
     } else {
-      playCurrentActAudio();
+      playAct(currentQuestIndex, currentActIndex);
     }
   };
 
   const handleNext = () => {
     soundEngine.playSnap();
-    if (currentActIndex < quest.acts.length - 1) {
-      setCurrentActIndex(prev => prev + 1);
-    } else {
-      setCurrentQuestIndex(prev => (prev + 1) % STORY_QUESTS.length);
-      setCurrentActIndex(0);
+    let nextQIdx = currentQuestIndex;
+    let nextAIdx = currentActIndex + 1;
+    if (nextAIdx >= quest.acts.length) {
+      nextQIdx = (currentQuestIndex + 1) % STORY_QUESTS.length;
+      nextAIdx = 0;
     }
+    setCurrentQuestIndex(nextQIdx);
+    setCurrentActIndex(nextAIdx);
     if (isPlaying) {
-      setTimeout(playCurrentActAudio, 200);
+      playAct(nextQIdx, nextAIdx);
     }
   };
 
   const handlePrev = () => {
     soundEngine.playSnap();
-    if (currentActIndex > 0) {
-      setCurrentActIndex(prev => prev - 1);
-    } else {
-      setCurrentQuestIndex(prev => (prev - 1 + STORY_QUESTS.length) % STORY_QUESTS.length);
-      setCurrentActIndex(0);
+    let prevQIdx = currentQuestIndex;
+    let prevAIdx = currentActIndex - 1;
+    if (prevAIdx < 0) {
+      prevQIdx = (currentQuestIndex - 1 + STORY_QUESTS.length) % STORY_QUESTS.length;
+      prevAIdx = STORY_QUESTS[prevQIdx].acts.length - 1;
     }
+    setCurrentQuestIndex(prevQIdx);
+    setCurrentActIndex(prevAIdx);
     if (isPlaying) {
-      setTimeout(playCurrentActAudio, 200);
+      playAct(prevQIdx, prevAIdx);
     }
   };
 
@@ -147,7 +172,7 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
         <div className="my-auto space-y-5 text-center">
           <div className="w-36 h-36 sm:w-48 sm:h-48 mx-auto rounded-3xl overflow-hidden border-2 border-amber-500/40 shadow-glow-gold bg-stone-950">
             <img 
-              src={`/images/${act.visualTheme === 'red_sea' ? 'red_sea.jpg' : act.visualTheme === 'mount_carmel' ? 'mount_carmel.jpg' : act.visualTheme === 'valley_battlefield' ? 'valley_battlefield.jpg' : act.visualTheme === 'cave_refuge' ? 'cave_refuge.jpg' : act.visualTheme === 'desert_canyon' ? 'desert_canyon.jpg' : act.visualTheme === 'courtyard_fire' ? 'courtyard_fire.jpg' : 'prison_cell.jpg'}`}
+              src={getThemeImage(act.visualTheme)}
               alt={quest.title}
               className="w-full h-full object-cover"
             />
@@ -224,7 +249,7 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
                     soundEngine.setNarratorProfile(p.id as NarratorProfile);
                     setNarratorProfile(p.id as NarratorProfile);
                     if (isPlaying) {
-                      playCurrentActAudio();
+                      playAct(currentQuestIndex, currentActIndex);
                     }
                   }}
                   className={`px-2.5 py-1 rounded-xl text-xs font-semibold transition-all ${

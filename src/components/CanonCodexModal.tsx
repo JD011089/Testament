@@ -53,6 +53,19 @@ export const CanonCodexModal: React.FC<CanonCodexModalProps> = ({
     };
   }, []);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const showToast = (msg: string) => {
@@ -130,8 +143,12 @@ export const CanonCodexModal: React.FC<CanonCodexModalProps> = ({
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md animate-fadeIn"
       role="dialog"
       aria-modal="true"
+      onClick={onClose}
     >
-      <div className="relative w-full max-w-5xl max-h-[92vh] flex flex-col rounded-3xl bg-[#0f1219] border border-amber-500/40 shadow-2xl overflow-hidden">
+      <div 
+        className="relative w-full max-w-5xl max-h-[92vh] flex flex-col rounded-3xl bg-[#0f1219] border border-amber-500/40 shadow-2xl overflow-hidden"
+        onClick={e => e.stopPropagation()}
+      >
         
         {/* TOAST FEEDBACK */}
         {toastMessage && (

@@ -63,6 +63,7 @@ interface DashboardProps {
   onOpenStreetTranslator: () => void;
   onOpenDilemmas: () => void;
   onOpenDriveMode: () => void;
+  onOpenLibrary?: () => void;
   completedActs: string[];
   memorizedVerses: string[];
   unlockedRelics?: string[];
@@ -83,10 +84,10 @@ const QUEST_IMAGES: Record<string, string> = {
   'moses-journey': '/images/red_sea.jpg',
   'elijah-journey': '/images/mount_carmel.jpg',
   'daniel-journey': '/images/palace_hall.jpg',
-  'esther-journey': '/images/courtyard_fire.jpg',
+  'esther-journey': '/images/palace_hall.jpg',
   'nehemiah-journey': '/images/valley_battlefield.jpg',
   'gideon-journey': '/images/desert_canyon.jpg',
-  'jonah-journey': '/images/cave_refuge.jpg',
+  'jonah-journey': '/images/sea_storm.jpg',
   'ruth-journey': '/images/desert_canyon.jpg',
   'joshua-journey': '/images/valley_battlefield.jpg',
   'john-baptist-journey': '/images/desert_canyon.jpg',
@@ -118,6 +119,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenStreetTranslator = () => {},
   onOpenDilemmas = () => {},
   onOpenDriveMode = () => {},
+  onOpenLibrary = () => {},
   completedActs,
   memorizedVerses,
   unlockedRelics = [],
@@ -296,7 +298,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <button
             onClick={() => {
               soundEngine.playClick();
-              setIsCanonModalOpen(true);
+              if (onOpenLibrary) onOpenLibrary();
+              else setIsCanonModalOpen(true);
             }}
             className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-stone-900 border border-amber-500/40 text-amber-300 text-xs font-semibold hover:border-amber-500 hover:text-amber-200 transition-all shadow-glow-amber"
             title="Browse all 66 books in the Scripture Field Library"
@@ -555,7 +558,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <button
               onClick={() => {
                 soundEngine.playSnap();
-                setIsCanonModalOpen(true);
+                if (onOpenLibrary) onOpenLibrary();
+                else setIsCanonModalOpen(true);
               }}
               className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs flex items-center justify-center gap-2 shadow-glow-amber transition-all shrink-0"
             >

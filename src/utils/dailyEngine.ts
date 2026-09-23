@@ -1,4 +1,4 @@
-import { MEMORY_VERSES } from '../data/verses';
+import { getAllVerses, getVerseById } from './verseRegistry';
 import type { MemoryVerse } from '../types';
 import { MORNING_BRIEFINGS } from '../data/morningBriefings';
 import type { MorningBriefing } from '../data/morningBriefings';
@@ -30,12 +30,11 @@ export const getTodayDateKey = (): string => {
 };
 
 /**
- * Returns formatted date string, e.g. "Tuesday, Sep 22"
+ * Formatted human-readable date
  */
 export const getTodayFormatted = (): string => {
-  const now = new Date();
-  return now.toLocaleDateString(undefined, {
-    weekday: 'long',
+  return new Date().toLocaleDateString('en-US', {
+    weekday: 'short',
     month: 'short',
     day: 'numeric'
   });
@@ -52,11 +51,12 @@ export const getDayIndex = (offsetDays = 0): number => {
 };
 
 /**
- * Deterministically rotates today's verse
+ * Deterministically rotates today's verse across the entire 121-verse library
  */
 export const getDailyVerse = (offsetDays = 0): MemoryVerse => {
-  const index = (getDayIndex(offsetDays)) % MEMORY_VERSES.length;
-  return MEMORY_VERSES[index];
+  const all = getAllVerses();
+  const index = (getDayIndex(offsetDays)) % all.length;
+  return all[index];
 };
 
 /**
@@ -79,6 +79,7 @@ export const getDailyDilemma = (offsetDays = 0): RealLifeDilemma => {
  * Records when a verse was mastered/reviewed for Spaced Repetition
  */
 export const recordVerseMasteryDate = (verseId: string): void => {
+  if (typeof window === 'undefined' || !window.localStorage) return;
   try {
     const dates: Record<string, string> = JSON.parse(
       localStorage.getItem('testament_verse_mastery_dates') || '{}'
@@ -95,6 +96,7 @@ export const recordVerseMasteryDate = (verseId: string): void => {
  */
 export const getSpacedRepetitionDueVerse = (memorizedVerses: string[]): MemoryVerse | null => {
   if (memorizedVerses.length === 0) return null;
+  if (typeof window === 'undefined' || !window.localStorage) return null;
 
   try {
     const dates: Record<string, string> = JSON.parse(
@@ -110,7 +112,7 @@ export const getSpacedRepetitionDueVerse = (memorizedVerses: string[]): MemoryVe
       const timestamp = dates[verseId] ? new Date(dates[verseId]).getTime() : 0;
       if (timestamp < threeDaysAgo) {
         // Due for review!
-        const verse = MEMORY_VERSES.find(v => v.id === verseId);
+        const verse = getVerseById(verseId);
         if (verse) return verse;
       }
       if (timestamp < oldestTimestamp) {
@@ -121,7 +123,7 @@ export const getSpacedRepetitionDueVerse = (memorizedVerses: string[]): MemoryVe
 
     // If all are recent but user has 2+ mastered verses, pick the oldest
     if (oldestVerseId) {
-      return MEMORY_VERSES.find(v => v.id === oldestVerseId) || null;
+      return getVerseById(oldestVerseId);
     }
   } catch (err) {
     console.error('Error computing spaced repetition', err);

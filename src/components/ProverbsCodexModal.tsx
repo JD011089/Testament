@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, 
@@ -94,16 +94,33 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
     }));
   };
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/90 backdrop-blur-md overflow-y-auto">
+      <div 
+        className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/90 backdrop-blur-md overflow-y-auto"
+        onClick={onClose}
+      >
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
           className="relative w-full max-w-4xl bg-[#0b0e14] border border-amber-500/40 rounded-2xl sm:rounded-3xl shadow-glow-gold overflow-hidden my-auto max-h-[94vh] flex flex-col text-left"
+          onClick={e => e.stopPropagation()}
         >
           {/* Header */}
           <div className="p-4 sm:p-5 border-b border-stone-800 bg-gradient-to-r from-stone-900 via-[#121620] to-stone-900 flex flex-wrap items-center justify-between gap-3 shrink-0">

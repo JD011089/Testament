@@ -47,6 +47,16 @@ const SCENE_DATA: Record<string, SceneMeta> = {
     src: '/images/mount_carmel.jpg',
     location: 'Mount Carmel • The Consuming Fire',
     description: 'Supernatural fire strikes the water-soaked altar in front of 450 stunned false prophets.'
+  },
+  palace_hall: {
+    src: '/images/palace_hall.jpg',
+    location: 'Imperial Citadel • Susa & Babylon',
+    description: 'The towering columns and golden throne rooms where decrees are signed and kings are confronted.'
+  },
+  sea_storm: {
+    src: '/images/sea_storm.jpg',
+    location: 'Mediterranean Sea • The Tempest',
+    description: 'Towering dark waves battering the ship as lightning cracks across the midnight sky.'
   }
 };
 

@@ -188,9 +188,19 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
 
   const handleSaveNote = () => {
     if (!journalNote.trim()) return;
-    const existing = JSON.parse(localStorage.getItem('testament_notes') || '{}');
+    let existing: Record<string, string> = {};
+    try {
+      const stored = localStorage.getItem('testament_notes');
+      if (stored) existing = JSON.parse(stored);
+    } catch {
+      existing = {};
+    }
     existing[act.id] = journalNote;
-    localStorage.setItem('testament_notes', JSON.stringify(existing));
+    try {
+      localStorage.setItem('testament_notes', JSON.stringify(existing));
+    } catch (err) {
+      console.warn('Failed to save note to localStorage:', err);
+    }
     setIsNoteSaved(true);
     soundEngine.playSnap();
     setTimeout(() => setShowNoteInput(false), 1200);

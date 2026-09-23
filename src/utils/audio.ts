@@ -329,6 +329,68 @@ class SoundEngine {
     });
   }
 
+  public playBookSlide() {
+    if (this.isMuted) return;
+    this.initCtx();
+    if (!this.ctx) return;
+
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const filter = this.ctx.createBiquadFilter();
+
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(450, this.ctx.currentTime);
+      filter.frequency.exponentialRampToValueAtTime(180, this.ctx.currentTime + 0.12);
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(160, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(80, this.ctx.currentTime + 0.12);
+
+      gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.12);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.12);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  public playPageTurn() {
+    if (this.isMuted) return;
+    this.initCtx();
+    if (!this.ctx) return;
+
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const filter = this.ctx.createBiquadFilter();
+
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(1200, this.ctx.currentTime);
+      filter.Q.value = 1.2;
+
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(220, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(110, this.ctx.currentTime + 0.15);
+
+      gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.15);
+    } catch {
+      /* ignore */
+    }
+  }
+
   // --- DUCKING AMBIENCE ---
   private duckAmbience() {
     if (this.ambientGain && this.ctx && this.isAmbiencePlaying) {
@@ -523,9 +585,30 @@ class SoundEngine {
       });
   }
 
+  private static readonly AVAILABLE_STUDIO_AUDIO = new Set([
+    '/audio/stories/david-journey_david-act-1.mp3',
+    '/audio/stories/david-journey_david-act-2.mp3',
+    '/audio/stories/david-journey_david-act-3.mp3',
+    '/audio/stories/joseph-journey_joseph-act-1.mp3',
+    '/audio/stories/joseph-journey_joseph-act-2.mp3',
+    '/audio/stories/joseph-journey_joseph-act-3.mp3',
+    '/audio/stories/peter-journey_peter-act-1.mp3',
+    '/audio/stories/peter-journey_peter-act-2.mp3',
+    '/audio/stories/peter-journey_peter-act-3.mp3',
+    '/audio/stories/paul-journey_paul-act-1.mp3',
+    '/audio/stories/paul-journey_paul-act-2.mp3',
+    '/audio/stories/paul-journey_paul-act-3.mp3',
+    '/audio/stories/moses-journey_moses-act-1.mp3',
+    '/audio/stories/moses-journey_moses-act-2.mp3',
+    '/audio/stories/moses-journey_moses-act-3.mp3',
+    '/audio/stories/elijah-journey_elijah-act-1.mp3',
+    '/audio/stories/elijah-journey_elijah-act-2.mp3',
+    '/audio/stories/elijah-journey_elijah-act-3.mp3',
+  ]);
+
   private fallbackWithAssetOrSpeech(text: string, onFinished: () => void, audioAssetUrl?: string) {
     // If an offline studio asset is available and profile is cinematic, try it
-    if (audioAssetUrl && this.currentNarratorProfile === 'cinematic') {
+    if (audioAssetUrl && SoundEngine.AVAILABLE_STUDIO_AUDIO.has(audioAssetUrl) && this.currentNarratorProfile === 'cinematic') {
       try {
         const audio = new Audio(audioAssetUrl);
         this.currentAudioElement = audio;

@@ -5,6 +5,32 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-09-22
+
+### Added
+- **The Scripture Scriptorium: Dedicated 66-Book Library Page & 3D Interactive Bookshelf**:
+  - Transformed the 66-Book Field Library from a popup modal into a full-page dedicated experience accessible via the persistent bottom navigation bar ("Library") and Dashboard action buttons.
+  - **Authentic 3D Physical Bookshelves**:
+    - Rich dark oak/walnut wood bookshelves with beveled plank shadows, metallic mount studs, and ambient candlelight aesthetic.
+    - 7 Division Shelves with carved brass header plaques (*I. Torah & Origins*, *II. War & Chronicles*, *III. Wisdom & Soul Triage*, *IV. Prophet Intelligence*, *V. The King's Manifesto*, *VI. Field Dispatches*, *VII. The Cosmic Endgame*).
+  - **Dynamic Physical Book Spines (`BookSpine`)**:
+    - Textured leather spine color palettes tailored to each of the 7 canonical divisions (royal navy, oxblood, burnished gold, forest emerald, imperial purple, saddle tan, obsidian).
+    - Proportional physical spine thicknesses and height variations (heavy tomes like Psalms and Genesis vs. slender volumes like Jude and Philemon).
+    - Gold-embossed lettering, Roman numeral order badges, raised spine ribs, and testament indicators.
+    - Smooth 3D hover/pull animation with illuminated edge highlights, drop shadows, and floating tactical tooltips.
+  - **The 3D Open Codex Reader (`OpenBookModal`)**:
+    - Pulling a book smoothly unfolds a two-page ancient leather codex / tactical manual.
+    - Left Page: Book title, division badge, tactical codename, 30-second crisis sitrep, and Monday morning reality check.
+    - Right Page: Anchor scripture with 1-tap dual-lens switcher (Street Plain English vs. Canonical Word-for-Word), dramatic voice audio narration, and deep-link action buttons (`⚔️ Launch Journey`, `🧠 Train Word Forge`, `🔔 Set Memory Pulse`).
+    - Volume Pager controls (`← Previous Book` / `Next Book →`) and keyboard arrow key listeners (`←` / `→`) allowing users to read through all 66 books continuously with smooth page turns.
+  - **Dual View Modes (Bookshelf vs. Tactical Grid)**:
+    - 1-tap toggle between **📚 Bookshelf View** (3D wooden library shelves) and **📋 Tactical Grid View** (searchable cards with life situation filters).
+  - **Procedural Sound Effects (`soundEngine`)**:
+    - Added `playBookSlide()`: tactile low-friction wood/leather slide when hovering or pulling books.
+    - Added `playPageTurn()`: gentle parchment paper rustle when opening and flipping volumes.
+
+---
+
 ## [1.4.0] - 2026-09-22
 
 ### Added

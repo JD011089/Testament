@@ -51,7 +51,14 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
     };
   }, []);
 
-  const notes: Record<string, string> = JSON.parse(localStorage.getItem('testament_notes') || '{}');
+  const notes: Record<string, string> = (() => {
+    try {
+      const stored = localStorage.getItem('testament_notes');
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  })();
   const allVerses = getAllVerses();
 
   const categories = ['All', 'Courage & Facing Giants', 'Pressure & Anxiety', 'Anger & Self-Control', 'Restoration After Failure', 'Endurance & Brotherhood'];

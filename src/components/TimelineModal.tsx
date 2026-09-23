@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { TIMELINE_ERAS } from '../data/timeline';
 import type { TimelineEra } from '../data/timeline';
+import { STORY_QUESTS } from '../data/stories';
 import { soundEngine } from '../utils/audio';
 import { X, Clock, ArrowRight } from 'lucide-react';
 
@@ -132,21 +133,46 @@ export const TimelineModal: React.FC<TimelineModalProps> = ({
             </div>
           </div>
 
-          {/* Connected Quests in this App */}
+          {/* Connected Quests in this Era */}
           {currentEra.questIds.length > 0 && (
-            <div className="pt-4 border-t border-stone-800 flex items-center justify-between">
-              <span className="text-xs text-stone-400">Ready to step into this era?</span>
-              <button
-                onClick={() => {
-                  soundEngine.playClick();
-                  onSelectEraQuest(currentEra.questIds[0]);
-                  onClose();
-                }}
-                className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-black font-bold text-xs flex items-center gap-1.5 transition-all shadow-glow-gold"
-              >
-                <span>Jump to Story Quest</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+            <div className="pt-4 border-t border-stone-800 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono uppercase tracking-wider text-stone-400">
+                  Interactive Quests in this Era ({currentEra.questIds.length}):
+                </span>
+                <span className="text-[11px] text-stone-500 hidden sm:inline">Select a hero to enter story</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {currentEra.questIds.map((questId) => {
+                  const quest = STORY_QUESTS.find(q => q.id === questId);
+                  const heroName = quest?.heroName || quest?.title.split(':')[0] || 'Quest';
+                  const characterTitle = quest?.characterTitle || 'Story Journey';
+
+                  return (
+                    <button
+                      key={questId}
+                      onClick={() => {
+                        soundEngine.playClick();
+                        onSelectEraQuest(questId);
+                        onClose();
+                      }}
+                      className="p-3 rounded-xl bg-stone-900/90 hover:bg-stone-800 border border-stone-800 hover:border-amber-500/60 text-left flex items-center justify-between group transition-all"
+                    >
+                      <div className="min-w-0 pr-2">
+                        <div className="text-xs font-bold text-parchment-100 group-hover:text-amber-400 transition-colors truncate">
+                          {heroName}
+                        </div>
+                        <div className="text-[11px] text-stone-400 truncate">
+                          {characterTitle}
+                        </div>
+                      </div>
+                      <div className="w-7 h-7 rounded-lg bg-amber-500/10 group-hover:bg-amber-500 group-hover:text-stone-950 text-amber-400 border border-amber-500/30 flex items-center justify-center shrink-0 transition-all">
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>

@@ -89,15 +89,28 @@ export const PWAInstallPrompt: React.FC = () => {
     sessionStorage.setItem('testament_pwa_dismissed_session', 'true');
   };
 
+  useEffect(() => {
+    if (!isVisible) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleDismiss();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isVisible]);
+
   if (!isVisible || isStandalone) return null;
 
   // Render content
   const cardContent = (
-    <div className="w-full bg-[#141820] border-2 border-amber-500/70 rounded-3xl shadow-2xl backdrop-blur-xl p-5 md:p-6 text-left flex flex-col gap-4">
+    <div className={`w-full bg-[#141820] border-2 border-amber-500/70 rounded-2xl sm:rounded-3xl shadow-2xl backdrop-blur-xl ${isModalMode ? 'p-5 md:p-6 gap-4' : 'p-3.5 sm:p-5 gap-3'} text-left flex flex-col`}>
       {/* Header with App Icon */}
       <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3.5">
-          <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl overflow-hidden border-2 border-amber-500/70 shadow-glow-gold bg-stone-950 shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl overflow-hidden border-2 border-amber-500/70 shadow-glow-gold bg-stone-950 shrink-0">
             <img 
               src="/icons/icon-192.png" 
               alt="Testament App Icon" 
@@ -106,14 +119,14 @@ export const PWAInstallPrompt: React.FC = () => {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-base sm:text-lg font-serif font-bold text-parchment-50">
+              <h3 className="text-sm sm:text-lg font-serif font-bold text-parchment-50 leading-tight">
                 Install Testament
               </h3>
-              <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-mono font-bold border border-amber-500/30">
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-wider px-1.5 sm:px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-mono font-bold border border-amber-500/30">
                 PWA
               </span>
             </div>
-            <p className="text-xs text-stone-400 mt-0.5">
+            <p className="text-[11px] sm:text-xs text-stone-400 mt-0.5 line-clamp-1 sm:line-clamp-none">
               100% offline access, audio narration & home screen launch
             </p>
           </div>
@@ -121,15 +134,15 @@ export const PWAInstallPrompt: React.FC = () => {
 
         <button 
           onClick={handleDismiss}
-          className="text-stone-400 hover:text-parchment-100 p-1.5 rounded-lg hover:bg-stone-800/60 transition-colors"
+          className="text-stone-400 hover:text-parchment-100 p-1 sm:p-1.5 rounded-lg hover:bg-stone-800/60 transition-colors"
           title="Close"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
       </div>
 
-      {/* Feature Bullets */}
-      <div className="grid grid-cols-2 gap-2 py-1 text-[11px] text-stone-300">
+      {/* Feature Bullets - compact when floating banner on mobile */}
+      <div className={`${isModalMode ? 'grid' : 'hidden sm:grid'} grid-cols-2 gap-2 py-1 text-[11px] text-stone-300`}>
         <div className="flex items-center gap-1.5">
           <CheckCircle2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />
           <span>Full Offline Mode</span>
@@ -213,8 +226,11 @@ export const PWAInstallPrompt: React.FC = () => {
   // If opened via header button, show as focused modal with backdrop
   if (isModalMode) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-        <div className="max-w-md w-full animate-scaleUp">
+      <div 
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn"
+        onClick={handleDismiss}
+      >
+        <div className="max-w-md w-full animate-scaleUp" onClick={e => e.stopPropagation()}>
           {cardContent}
         </div>
       </div>

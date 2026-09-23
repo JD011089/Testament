@@ -14,6 +14,7 @@ import { StreetTranslatorModal } from './components/StreetTranslatorModal';
 import { DriveModePlayer } from './components/DriveModePlayer';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { OnboardingModal, type UserCalibrationProfile } from './components/OnboardingModal';
+import { CanonLibraryPage } from './components/CanonLibraryPage';
 import { soundEngine } from './utils/audio';
 import { recordVerseMasteryDate } from './utils/dailyEngine';
 import { initNotificationScheduler } from './utils/notificationEngine';
@@ -23,6 +24,7 @@ export function App() {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       if (params.get('action') === 'wordforge') return 'wordforge';
+      if (params.get('action') === 'library' || params.get('tab') === 'library') return 'library';
     }
     return 'dashboard';
   });
@@ -49,19 +51,39 @@ export function App() {
 
   // Persistence for user progress
   const [completedActs, setCompletedActs] = useState<string[]>(() => {
-    return JSON.parse(localStorage.getItem('testament_completed_acts') || '[]');
+    try {
+      const stored = localStorage.getItem('testament_completed_acts');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
   });
 
   const [memorizedVerses, setMemorizedVerses] = useState<string[]>(() => {
-    return JSON.parse(localStorage.getItem('testament_memorized_verses') || '[]');
+    try {
+      const stored = localStorage.getItem('testament_memorized_verses');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
   });
 
   const [unlockedRelics, setUnlockedRelics] = useState<string[]>(() => {
-    return JSON.parse(localStorage.getItem('testament_unlocked_relics') || '[]');
+    try {
+      const stored = localStorage.getItem('testament_unlocked_relics');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
   });
 
   const [bookmarkedVerses, setBookmarkedVerses] = useState<string[]>(() => {
-    return JSON.parse(localStorage.getItem('testament_bookmarked_verses') || '[]');
+    try {
+      const stored = localStorage.getItem('testament_bookmarked_verses');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
   });
 
   const [xp, setXp] = useState<number>(() => {
@@ -130,6 +152,22 @@ export function App() {
         navigator.serviceWorker.removeEventListener('message', handleSwMessage);
       };
     }
+  }, []);
+
+  useEffect(() => {
+    const handleOpenLibrary = () => {
+      soundEngine.stopSpeaking();
+      setActiveQuest(null);
+      setCurrentTab('library');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.addEventListener('open-canon-library', handleOpenLibrary);
+    window.addEventListener('open-canon-codex', handleOpenLibrary);
+    return () => {
+      window.removeEventListener('open-canon-library', handleOpenLibrary);
+      window.removeEventListener('open-canon-codex', handleOpenLibrary);
+    };
   }, []);
 
   const handleSelectQuest = (quest: StoryQuest) => {
@@ -278,6 +316,11 @@ export function App() {
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 onOpenDriveMode={() => setIsDriveModeOpen(true)}
+                onOpenLibrary={() => {
+                  soundEngine.stopSpeaking();
+                  setCurrentTab('library');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
                 completedActs={completedActs}
                 memorizedVerses={memorizedVerses}
                 unlockedRelics={unlockedRelics}
@@ -288,6 +331,28 @@ export function App() {
                 userProfile={userProfile}
                 onOpenOnboarding={() => setIsOnboardingOpen(true)}
                 onRewardXP={handleRewardXP}
+              />
+            )}
+
+            {currentTab === 'library' && (
+              <CanonLibraryPage 
+                onBackToDashboard={() => {
+                  soundEngine.playClick();
+                  setCurrentTab('dashboard');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                onOpenWordForge={(verseId) => {
+                  soundEngine.stopSpeaking();
+                  setTargetWordForgeVerseId(verseId);
+                  setCurrentTab('wordforge');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                onSetMemoryVerse={(verseId) => {
+                  handleVerseMastered(verseId);
+                }}
+                onSelectStoryQuest={(questId) => {
+                  handleSelectQuestById(questId);
+                }}
               />
             )}
 

@@ -1,8 +1,8 @@
 import React from 'react';
-import { Compass, Brain, Shield, ShieldAlert, Car, Volume2, VolumeX } from 'lucide-react';
+import { Compass, BookOpen, Brain, Shield, ShieldAlert, Car, Volume2, VolumeX } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
 
-export type NavTab = 'dashboard' | 'wordforge' | 'dilemmas' | 'arsenal';
+export type NavTab = 'dashboard' | 'library' | 'wordforge' | 'dilemmas' | 'arsenal';
 
 interface NavigationProps {
   currentTab: NavTab;
@@ -33,7 +33,7 @@ export const Navigation: React.FC<NavigationProps> = ({
           }}
           aria-current={currentTab === 'dashboard' ? 'page' : undefined}
           aria-label="Quests Dashboard"
-          className={`flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-1 py-1 px-2.5 rounded-xl transition-all focus-visible:ring-2 focus-visible:ring-amber-500 ${
+          className={`flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-1 py-1 px-2 rounded-xl transition-all focus-visible:ring-2 focus-visible:ring-amber-500 ${
             currentTab === 'dashboard'
               ? 'text-amber-400 font-bold'
               : 'text-stone-400 hover:text-stone-200'
@@ -46,11 +46,28 @@ export const Navigation: React.FC<NavigationProps> = ({
         <button
           onClick={() => {
             soundEngine.playClick();
+            onSelectTab('library');
+          }}
+          aria-current={currentTab === 'library' ? 'page' : undefined}
+          aria-label="66-Book Field Library"
+          className={`flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-1 py-1 px-2 rounded-xl transition-all focus-visible:ring-2 focus-visible:ring-amber-500 ${
+            currentTab === 'library'
+              ? 'text-amber-400 font-bold'
+              : 'text-stone-400 hover:text-stone-200'
+          }`}
+        >
+          <BookOpen className="w-5 h-5" />
+          <span className="text-[10px] md:text-[11px]">Library</span>
+        </button>
+
+        <button
+          onClick={() => {
+            soundEngine.playClick();
             onSelectTab('wordforge');
           }}
           aria-current={currentTab === 'wordforge' ? 'page' : undefined}
           aria-label="Word Forge Scripture Memory"
-          className={`flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-1 py-1 px-2.5 rounded-xl transition-all focus-visible:ring-2 focus-visible:ring-amber-500 ${
+          className={`flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-1 py-1 px-2 rounded-xl transition-all focus-visible:ring-2 focus-visible:ring-amber-500 ${
             currentTab === 'wordforge'
               ? 'text-amber-400 font-bold'
               : 'text-stone-400 hover:text-stone-200'

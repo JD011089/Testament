@@ -48,6 +48,7 @@ export default {
       boxShadow: {
         'glow-ember': '0 0 25px -5px rgba(234, 88, 12, 0.3)',
         'glow-gold': '0 0 25px -5px rgba(217, 119, 6, 0.25)',
+        'glow-amber': '0 0 25px -5px rgba(245, 158, 11, 0.35)',
       }
     },
   },
