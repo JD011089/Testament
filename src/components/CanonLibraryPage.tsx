@@ -325,7 +325,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                 className="relative rounded-3xl bg-gradient-to-b from-[#16120e] via-[#100d0a] to-[#0a0806] border border-amber-950/40 p-4 sm:p-6 shadow-2xl shadow-black/80"
               >
                 {/* SHELF BRASS HEADER PLAQUE */}
-                <div className="flex flex-wrap items-center justify-between gap-3 mb-6 pb-3 border-b border-amber-900/30">
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-amber-900/30">
                   <div className="flex items-center gap-3">
                     <div className="w-7 h-7 rounded-lg bg-amber-950/80 border border-amber-600/50 flex items-center justify-center text-amber-300 font-serif font-black text-xs shadow-inner">
                       {shelfIndex + 1}
@@ -349,17 +349,28 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                 </div>
 
                 {/* THE SHELF RACK CONTAINER */}
-                <div className="relative pt-6 pb-2">
-                  {/* Books Row */}
-                  <div className="flex items-end justify-start sm:justify-center gap-1.5 sm:gap-2.5 overflow-x-auto pb-1 px-2 scrollbar-none min-h-[250px]">
-                    {shelfGroup.books.map((book) => (
-                      <BookSpine
-                        key={book.id}
-                        book={book}
-                        isSelected={activeBookForModal?.id === book.id}
-                        onSelect={() => setActiveBookForModal(book)}
-                      />
-                    ))}
+                <div className="relative pb-2">
+                  {/* Books Row with generous top headroom for pull-out physics and floating preview card */}
+                  <div className="flex items-end justify-start sm:justify-center gap-1.5 sm:gap-2.5 overflow-x-auto pt-32 sm:pt-36 pb-2 px-6 sm:px-10 scrollbar-none min-h-[350px]">
+                    {shelfGroup.books.map((book, bookIdx) => {
+                      const total = shelfGroup.books.length;
+                      const tooltipAlign = total <= 1 
+                        ? 'center' 
+                        : bookIdx === 0 
+                          ? 'left' 
+                          : bookIdx === total - 1 
+                            ? 'right' 
+                            : 'center';
+                      return (
+                        <BookSpine
+                          key={book.id}
+                          book={book}
+                          tooltipAlign={tooltipAlign}
+                          isSelected={activeBookForModal?.id === book.id}
+                          onSelect={() => setActiveBookForModal(book)}
+                        />
+                      );
+                    })}
                   </div>
 
                   {/* THE SOLID WOOD SHELF PLANK (Base) */}

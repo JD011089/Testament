@@ -7,6 +7,7 @@ interface BookSpineProps {
   book: CanonBook;
   isSelected?: boolean;
   onSelect: () => void;
+  tooltipAlign?: 'left' | 'center' | 'right';
 }
 
 // Map canonical divisions to authentic leather spine color themes
@@ -90,7 +91,8 @@ const getSpineHeight = (order: number): number => {
 export const BookSpine: React.FC<BookSpineProps> = ({
   book,
   isSelected = false,
-  onSelect
+  onSelect,
+  tooltipAlign = 'center'
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const style = DIVISION_SPINE_STYLES[book.division] || DIVISION_SPINE_STYLES['Torah & Origins'];
@@ -106,33 +108,48 @@ export const BookSpine: React.FC<BookSpineProps> = ({
     setIsHovered(false);
   };
 
+  let alignContainerClass = 'left-1/2 -translate-x-1/2';
+  let caretClass = 'left-1/2 -translate-x-1/2';
+  if (tooltipAlign === 'left') {
+    alignContainerClass = 'left-0';
+    caretClass = 'left-6';
+  } else if (tooltipAlign === 'right') {
+    alignContainerClass = 'right-0';
+    caretClass = 'right-6';
+  }
+
   return (
-    <div className="relative flex flex-col items-center select-none group">
+    <div className={`relative flex flex-col items-center select-none group ${isHovered || isSelected ? 'z-40' : 'z-10'}`}>
       {/* Floating Tactical Preview Tooltip */}
       {isHovered && (
-        <motion.div 
-          initial={{ opacity: 0, y: 10, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 5 }}
-          transition={{ duration: 0.15 }}
-          className="absolute -top-24 z-50 pointer-events-none w-56 p-2.5 rounded-xl bg-stone-900/95 border border-amber-500/50 backdrop-blur-md shadow-2xl text-left"
-        >
-          <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-widest text-amber-400 font-bold mb-0.5">
-            <span>Vol #{String(book.order).padStart(2, '0')}</span>
-            <span className="px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-[9px]">
-              {book.testament}
-            </span>
-          </div>
-          <h4 className="text-sm font-serif font-black text-parchment-100 leading-tight">
-            {book.name}
-          </h4>
-          <p className="text-[11px] text-stone-300 line-clamp-1 italic mt-0.5">
-            "{book.codename}"
-          </p>
-          <div className="text-[10px] text-amber-300/80 font-mono mt-1 flex items-center gap-1">
-            <span>⚡ Click to pull & open codex</span>
-          </div>
-        </motion.div>
+        <div className={`absolute bottom-[calc(100%+20px)] z-50 pointer-events-none ${alignContainerClass}`}>
+          <motion.div 
+            initial={{ opacity: 0, y: 8, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 4 }}
+            transition={{ duration: 0.15 }}
+            className="w-56 p-2.5 rounded-xl bg-stone-900/95 border border-amber-500/50 backdrop-blur-md shadow-2xl text-left relative"
+          >
+            <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-widest text-amber-400 font-bold mb-0.5">
+              <span>Vol #{String(book.order).padStart(2, '0')}</span>
+              <span className="px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-[9px]">
+                {book.testament}
+              </span>
+            </div>
+            <h4 className="text-sm font-serif font-black text-parchment-100 leading-tight">
+              {book.name}
+            </h4>
+            <p className="text-[11px] text-stone-300 line-clamp-1 italic mt-0.5">
+              "{book.codename}"
+            </p>
+            <div className="text-[10px] text-amber-300/80 font-mono mt-1 flex items-center gap-1">
+              <span>⚡ Click to pull & open codex</span>
+            </div>
+
+            {/* Downward pointing arrow caret */}
+            <div className={`absolute -bottom-1.5 w-3 h-3 bg-stone-900 border-r border-b border-amber-500/50 rotate-45 ${caretClass}`} />
+          </motion.div>
+        </div>
       )}
 
       {/* The Physical 3D Book Spine */}
