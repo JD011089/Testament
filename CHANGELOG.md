@@ -5,6 +5,43 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-09-22
+
+### Added
+- **8 New Full Interactive Story Quests (Expanded from 6 to 14 Journeys)**:
+  - **Daniel: Undercover in Babylon** (*Book of Daniel*): Exiled teenager navigating imperial indoctrination, dietary boundary warfare, and the lions' den conspiracy without compromise.
+  - **Esther: The Shadow Empress** (*Book of Esther*): Covert orphan queen crossing the forbidden inner throne room uninvited to halt genocide: *"If I perish, I perish."*
+  - **Nehemiah: The Blueprint Builder** (*Book of Nehemiah*): Wall construction in 52 days holding a trowel in one hand and a spear in the other; mastering extreme focus and saying no to the Plains of Ono.
+  - **Gideon: The Reluctant Guerilla** (*Book of Judges*): Imposter-syndrome farmer threshing wheat in secret, guided to defeat a 135,000-man horde with 300 men, clay jars, and torches.
+  - **Jonah: The Reluctant Maverick** (*Book of Jonah*): A deep-sea flight from destiny, surviving the ocean abyss, and confronting the difficult truth that divine mercy extends to enemies.
+  - **Ruth: The Loyal Immigrant** (*Book of Ruth*): Covenant loyalty (*Hesed*) in the wake of catastrophic loss; an impoverished foreign gleaner becoming the great-grandmother of King David.
+  - **Joshua: The Beachhead Commander** (*Book of Joshua*): Stepping out from Moses' shadow, commanding the crossing of the Jordan at flood stage, and tearing down the walls of Jericho.
+  - **John the Baptist: Voice in the Wild** (*The Gospels*): Uncompromising desert herald confronting imperial corruption, mastering radical humility (*"He must increase, but I must decrease"*), and enduring dark nights of the soul in Herod's dungeon.
+- **8 New Historical Character Dossiers in Dossier Vault**:
+  - Added rich profiles for Daniel, Esther, Nehemiah, Gideon, Jonah, Ruth, Joshua, and John the Baptist detailing superpowers, tragic flaws, defining crisis moments, and modern Monday-morning lessons.
+- **8 New Collectible Relic Artifacts**:
+  - `daniel-signet` (💍 Babylonian Signet Ring)
+  - `esther-scepter` (🪄 Golden Scepter)
+  - `nehemiah-trowel` (🔨 Mason's Chisel & Trowel)
+  - `gideon-torch` (🏺 Broken Clay Jar & Blazing Torch)
+  - `jonah-anchor` (⚓ Sea Anchor)
+  - `ruth-sheaf` (🌾 Golden Barley Sheaf)
+  - `joshua-trumpet` (📯 Jericho Shofar)
+  - `john-belt` (🥋 Leather Belt & Locust Honey)
+- **Zero-Overwhelm 4 Life-Season Tracks**:
+  - Harmonized all 14 quests across 4 intuitive, relatable real-world tracks:
+    - *Underdog & Courage* (David, Moses, Gideon, Joshua)
+    - *Career & High Stakes* (Joseph, Daniel, Esther, Nehemiah)
+    - *Burnout & Pressure* (Elijah, Jonah, John the Baptist)
+    - *Restoration & Brotherhood* (Peter, Paul, Ruth)
+- **66-Book Canon & Timeline Cross-Linking**:
+  - Added 1-tap `⚔️ Launch Story Quest` deep-links directly from the Scripture Field Library for Joshua, Judges, Ruth, Nehemiah, Esther, Daniel, Jonah, and Mark.
+  - Mapped all 8 new journeys into the interactive Biblical Timeline eras.
+- **Word Forge & Spaced Memory Pulse Registry**:
+  - Registered all 24 new act scripture anchors into `ALL_AVAILABLE_VERSES`, allowing immediate stealth puzzle memorization and multi-daily lock screen notifications.
+
+---
+
 ## [1.3.0] - 2026-09-22
 
 ### Added

@@ -25,7 +25,7 @@ export interface WisdomQuiz {
 export interface RelicReward {
   id: string;
   name: string;
-  iconName: 'stones' | 'signet' | 'staff' | 'mantle' | 'brazier' | 'stocks';
+  iconName: 'stones' | 'signet' | 'staff' | 'mantle' | 'brazier' | 'stocks' | string;
   description: string;
   lesson: string;
 }
@@ -68,7 +68,15 @@ export interface StoryQuest {
   themeColor: string;
   badgeName: string;
   summary: string;
-  starterTrack?: 'Underdog & Purpose' | 'Grace After Failure' | 'High-Pressure Crisis';
+  starterTrack?:
+    | 'Underdog & Courage'
+    | 'Career & High Stakes'
+    | 'Burnout & Pressure'
+    | 'Restoration & Brotherhood'
+    | 'Underdog & Purpose'
+    | 'Grace After Failure'
+    | 'High-Pressure Crisis'
+    | string;
   relicReward?: RelicReward;
   acts: StoryAct[];
 }

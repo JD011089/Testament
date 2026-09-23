@@ -177,7 +177,9 @@ export const CANON_BOOKS: CanonBook[] = [
       canonicalText: 'Have I not commanded you? Be strong and courageous. Do not be frightened, and do not be dismayed, for the Lord your God is with you wherever you go.',
       streetTranslation: 'Straighten your back. No flinching, no second-guessing. You aren’t walking into that room alone.',
       takeaway: 'Step into today’s hardest confrontation with your head held high.'
-    }
+    },
+    deepLinkType: 'story',
+    deepLinkId: 'joshua-journey'
   },
   {
     id: 'canon-judges',
@@ -196,7 +198,9 @@ export const CANON_BOOKS: CanonBook[] = [
       canonicalText: 'And the Lord turned to him and said, "Go in this might of yours and save Israel from the hand of Midian; do not I send you?"',
       streetTranslation: 'Stop whining about your background and your small family. Go with the raw strength you’ve got right now—I am the one backing you.',
       takeaway: 'Stop waiting until you feel 100% qualified. Move on God’s assignment with what you have.'
-    }
+    },
+    deepLinkType: 'story',
+    deepLinkId: 'gideon-journey'
   },
   {
     id: 'canon-ruth',
@@ -215,7 +219,9 @@ export const CANON_BOOKS: CanonBook[] = [
       canonicalText: 'Where you go I will go, and where you lodge I will lodge. Your people shall be my people, and your God my God.',
       streetTranslation: 'Stop trying to shake me off. Where you bleed, I bleed. I’m locked in with you till the dirt covers us.',
       takeaway: 'Prove your loyalty to someone walking through a dark season when everyone else has bailed.'
-    }
+    },
+    deepLinkType: 'story',
+    deepLinkId: 'ruth-journey'
   },
   {
     id: 'canon-1samuel',
@@ -371,7 +377,9 @@ export const CANON_BOOKS: CanonBook[] = [
       canonicalText: 'I am doing a great work and I cannot come down. Why should the work stop while I leave it and come down to you?',
       streetTranslation: 'I am in the middle of mission-critical execution. I will not pause this build to attend your distraction meeting.',
       takeaway: 'Politely decline time-wasting drama: "I am doing important work and cannot come down."'
-    }
+    },
+    deepLinkType: 'story',
+    deepLinkId: 'nehemiah-journey'
   },
   {
     id: 'canon-esther',
@@ -390,7 +398,9 @@ export const CANON_BOOKS: CanonBook[] = [
       canonicalText: 'And who knows whether you have not come to the kingdom for such a time as this?',
       streetTranslation: 'Do you really think you made it into this position by accident? You are here precisely for this moment of courage.',
       takeaway: 'Leverage your influence to protect someone vulnerable this week.'
-    }
+    },
+    deepLinkType: 'story',
+    deepLinkId: 'esther-journey'
   },
 
   // ==========================================
@@ -590,7 +600,9 @@ export const CANON_BOOKS: CanonBook[] = [
       canonicalText: 'Our God whom we serve is able to deliver us... But if not, be it known to you, O king, that we will not serve your gods.',
       streetTranslation: 'Our God can snatch us out of your furnace. But even if He doesn’t, we will never bow to your golden statue.',
       takeaway: 'Draw your line in the sand before the pressure hits. Decide what you will never compromise.'
-    }
+    },
+    deepLinkType: 'story',
+    deepLinkId: 'daniel-journey'
   },
   {
     id: 'canon-hosea',
@@ -685,7 +697,9 @@ export const CANON_BOOKS: CanonBook[] = [
       canonicalText: 'I knew that you are a gracious God and merciful, slow to anger and abounding in steadfast love, and relenting from disaster.',
       streetTranslation: 'I knew it! I ran away because I knew you’re too gracious, too patient, and you’d actually forgive the people I hate.',
       takeaway: 'Pray an honest blessing over the person or group you find most repulsive.'
-    }
+    },
+    deepLinkType: 'story',
+    deepLinkId: 'jonah-journey'
   },
   {
     id: 'canon-micah',
@@ -860,7 +874,9 @@ export const CANON_BOOKS: CanonBook[] = [
       canonicalText: 'For even the Son of Man came not to be served but to serve, and to give his life as a ransom for many.',
       streetTranslation: 'The King of the cosmos didn’t show up demanding an entourage. He arrived with a towel to wash feet and lay down His life.',
       takeaway: 'Find the lowest, most thankless task in your office or home today and do it with joy.'
-    }
+    },
+    deepLinkType: 'story',
+    deepLinkId: 'john-baptist-journey'
   },
   {
     id: 'canon-luke',

@@ -113,5 +113,141 @@ export const CHARACTER_DOSSIERS: CharacterDossier[] = [
     definingMoment: 'Singing hymns at midnight with Silas while locked in wooden stocks in the Roman dungeon of Philippi.',
     realTalkLesson: 'Nobody is too far gone. If God could take a hate-filled religious terrorist and turn him into the greatest teacher of love and grace in history, nobody in your life is beyond redemption.',
     relatedQuestId: 'paul-journey'
+  },
+  {
+    id: 'daniel',
+    name: 'Daniel (Belteshazzar)',
+    codename: 'The Iron Diplomat',
+    era: 'c. 605–536 BC • Babylonian & Persian Empires',
+    occupation: 'Exiled teenage prince → Chief of Royal Wisemen → Imperial Prime Minister',
+    image: '/images/palace_hall.jpg',
+    superpower: 'Zero moral compromise under supreme cultural pressure. Outlived three hostile world empires.',
+    majorFlaws: [
+      'Isolated in the highest corridors of imperial power, far from home and family.',
+      'Carried immense personal and emotional toll from apocalyptic visions and political conspiracies.',
+      'Constantly the prime target of jealous bureaucratic rivals seeking his execution.'
+    ],
+    definingMoment: 'Opening his windows toward Jerusalem and praying on his knees three times a day, knowing a royal death warrant was signed.',
+    realTalkLesson: 'You do not have to sell out your soul to thrive in a secular, competitive industry. Technical excellence paired with radical integrity makes you irreplaceable.',
+    relatedQuestId: 'daniel-journey'
+  },
+  {
+    id: 'esther',
+    name: 'Esther (Hadassah)',
+    codename: 'The Shadow Empress',
+    era: 'c. 483–473 BC • Susa, Persian Empire',
+    occupation: 'Orphaned Jewish refugee → Queen Consort of Persia',
+    image: '/images/courtyard_fire.jpg',
+    superpower: 'Tactical patience and supreme moral bravery. Knew exactly when to hold silence and when to strike.',
+    majorFlaws: [
+      'Initially hid her Jewish lineage and stayed silent to survive royal court scrutiny.',
+      'Paralyzed by natural fear when asked to risk her neck for her people.',
+      'Forced into a hyper-vulnerable, gilded cage where a single royal displeasure meant instant execution.'
+    ],
+    definingMoment: 'Crossing the forbidden inner court uninvited in full royal robes and declaring: "If I perish, I perish."',
+    realTalkLesson: 'Your current position, platform, or privilege is not for your personal comfort—it is a strategic staging ground for a moment of destiny.',
+    relatedQuestId: 'esther-journey'
+  },
+  {
+    id: 'nehemiah',
+    name: 'Nehemiah ben Hacaliah',
+    codename: 'The Blueprint Builder',
+    era: 'c. 445 BC • Susa & Jerusalem',
+    occupation: 'Imperial cupbearer to King Artaxerxes → Governor of Judah & Master Builder',
+    image: '/images/valley_battlefield.jpg',
+    superpower: 'Dual-handed mastery: building with a trowel in one hand while gripping a spear in the other.',
+    majorFlaws: [
+      'Hot temper: pulled out corrupt officials\' hair and cursed them when they exploited the poor.',
+      'Relentless, workaholic intensity that demanded 24/7 hyper-vigilance from his workforce.',
+      'Extreme skepticism toward rival regional leaders, refusing all attempts at compromise.'
+    ],
+    definingMoment: 'Refusing four consecutive invitations to debate his enemies in the plains of Ono, declaring: "I am doing a great work and I cannot come down."',
+    realTalkLesson: 'Focus is saying NO to a hundred good distractions to protect your core mission. Build with high competence and keep your guards posted.',
+    relatedQuestId: 'nehemiah-journey'
+  },
+  {
+    id: 'gideon',
+    name: 'Gideon ben Joash (Jerubbaal)',
+    codename: 'The Reluctant Guerilla',
+    era: 'c. 1160 BC • Valley of Jezreel, Ancient Israel',
+    occupation: 'Impoverished farmer threshing grain in a winepress → Judge & Liberator',
+    image: '/images/desert_canyon.jpg',
+    superpower: 'Willingness to obey unconventional, counter-intuitive orders when all human odds were against him.',
+    majorFlaws: [
+      'Chronic imposter syndrome and persistent self-doubt (demanded multiple fleece signs from God).',
+      'Later made a golden ephod from enemy spoils that became a spiritual snare for his family.',
+      'Struggled with lingering family fear and operated under cover of darkness.'
+    ],
+    definingMoment: 'Attacking a 135,000-man horde with only 300 soldiers carrying clay jars, blazing torches, and ram’s horns.',
+    realTalkLesson: 'God does not call you based on your current résumé; He calls you according to the identity He has forged in you. God trims your resources so you rely on His power.',
+    relatedQuestId: 'gideon-journey'
+  },
+  {
+    id: 'jonah',
+    name: 'Jonah ben Amittai',
+    codename: 'The Reluctant Maverick',
+    era: 'c. 760 BC • Mediterranean Sea & Nineveh',
+    occupation: 'Prophet of Israel → Deep-sea fugitive → Reluctant revivalist',
+    image: '/images/cave_refuge.jpg',
+    superpower: 'Brutal, raw honesty. Even in the depths of the sea or scorching sun, he did not fake his emotions with God.',
+    majorFlaws: [
+      'Deep patriotic prejudice: hated the Assyrians so much he preferred to see them destroyed rather than redeemed.',
+      'Petulant, sulking attitude when God demonstrated mercy to enemies.',
+      'Attempted to physically sail across the known world to escape his calling.'
+    ],
+    definingMoment: 'Praying from inside the belly of the great fish in total darkness, surrendering his runaway rebellion to the God of second chances.',
+    realTalkLesson: 'God’s mercy is not bounded by your political, national, or personal grievances. Running from your purpose always costs more than you planned to pay.',
+    relatedQuestId: 'jonah-journey'
+  },
+  {
+    id: 'ruth',
+    name: 'Ruth the Moabitess',
+    codename: 'The Loyal Immigrant',
+    era: 'c. 1100 BC • Moab & Bethlehem',
+    occupation: 'Widowed refugee immigrant → Field gleaner → Matriarch in the royal Davidic line',
+    image: '/images/desert_canyon.jpg',
+    superpower: 'Covenant loyalty (Hesed). Radical, selfless commitment without safety nets.',
+    majorFlaws: [
+      'Zero social standing, legal rights, or wealth as a foreigner in post-war Bethlehem.',
+      'Depended entirely on the kindness of strangers for basic daily grain survival.',
+      'Bore the heavy cultural stigma of being from Moab, Israel\'s ancient enemy.'
+    ],
+    definingMoment: 'Standing on the border highway refusing to return home, telling Naomi: "Where you go, I will go; your people shall be my people, and your God my God."',
+    realTalkLesson: 'Loyalty in obscurity catches the attention of heaven. What looks like a dead-end tragedy can become the precise field where redemption begins.',
+    relatedQuestId: 'ruth-journey'
+  },
+  {
+    id: 'joshua',
+    name: 'Joshua ben Nun',
+    codename: 'The Vanguard Commander',
+    era: 'c. 1406 BC • Jordan River & Jericho',
+    occupation: 'Moses’ field aide & spy → Supreme Military Commander of Israel',
+    image: '/images/valley_battlefield.jpg',
+    superpower: 'Fearless tactical execution under direct divine command. Held ground when everyone else panicked.',
+    majorFlaws: [
+      'Failed to consult God before the Battle of Ai, leading to an initial military rout.',
+      'Deceived by the Gibeonite peace delegation because he evaluated them with his eyes instead of prayer.',
+      'Struggled with the heavy burden of stepping into the shoes of the legendary Moses.'
+    ],
+    definingMoment: 'Falling face-down before the Commander of the Lord’s Army outside Jericho with his shoes removed before the walls collapsed.',
+    realTalkLesson: 'True courage is not the absence of trembling fear—it is obedience in the presence of it. As for me and my house, we will serve the Lord.',
+    relatedQuestId: 'joshua-journey'
+  },
+  {
+    id: 'john-baptist',
+    name: 'John the Baptist (Yohanan)',
+    codename: 'The Wilderness Rebel',
+    era: 'c. 28–32 AD • Judean Desert & Jordan River',
+    occupation: 'Desert ascetic & street preacher → Herald of the Messiah → Martyr of Machaerus',
+    image: '/images/desert_canyon.jpg',
+    superpower: 'Zero appetite for human approval or luxury. Spoke unflinching truth to emperors and kings.',
+    majorFlaws: [
+      'Struggled with intense doubt and disorientation when sitting in Herod’s dungeon waiting for execution.',
+      'Harsh, unyielding demeanor that made him zero friends in elite religious circles.',
+      'Lived an extreme, solitary lifestyle that alienated traditional societal circles.'
+    ],
+    definingMoment: 'Submitting his entire public following and ego to Jesus with the immortal line: "He must increase, but I must decrease."',
+    realTalkLesson: 'Greatness in God\'s kingdom is measured by your willingness to point the spotlight away from yourself and onto Christ. Even lions of faith experience dark nights of the soul.',
+    relatedQuestId: 'john-baptist-journey'
   }
 ];

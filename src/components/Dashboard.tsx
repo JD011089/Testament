@@ -82,6 +82,14 @@ const QUEST_IMAGES: Record<string, string> = {
   'paul-journey': '/images/prison_cell.jpg',
   'moses-journey': '/images/red_sea.jpg',
   'elijah-journey': '/images/mount_carmel.jpg',
+  'daniel-journey': '/images/palace_hall.jpg',
+  'esther-journey': '/images/courtyard_fire.jpg',
+  'nehemiah-journey': '/images/valley_battlefield.jpg',
+  'gideon-journey': '/images/desert_canyon.jpg',
+  'jonah-journey': '/images/cave_refuge.jpg',
+  'ruth-journey': '/images/desert_canyon.jpg',
+  'joshua-journey': '/images/valley_battlefield.jpg',
+  'john-baptist-journey': '/images/desert_canyon.jpg',
 };
 
 const ALL_RELICS = [
@@ -91,6 +99,14 @@ const ALL_RELICS = [
   { id: 'elijah-mantle', name: 'Weathered Mantle', character: 'Elijah', icon: '🧥', desc: 'Hearing the gentle whisper in burnout.' },
   { id: 'peter-brazier', name: 'Charcoal Brazier', character: 'Peter', icon: '🔥', desc: 'Grace transforms failure into mission.' },
   { id: 'paul-stocks', name: 'Broken Stocks', character: 'Paul', icon: '⛓️', desc: 'An unshakable soul in chains.' },
+  { id: 'daniel-signet', name: 'Babylonian Signet Ring', character: 'Daniel', icon: '💍', desc: 'Zero moral compromise in the imperial den.' },
+  { id: 'esther-scepter', name: 'The Golden Scepter', character: 'Esther', icon: '🪄', desc: 'Courage to step into danger for others.' },
+  { id: 'nehemiah-trowel', name: 'Mason’s Chisel & Trowel', character: 'Nehemiah', icon: '🔨', desc: 'Building with one hand, weapon in the other.' },
+  { id: 'gideon-torch', name: 'Clay Jar & Torch', character: 'Gideon', icon: '🏺', desc: 'Breaking self-reliance so light can shine.' },
+  { id: 'jonah-anchor', name: 'The Sea Anchor', character: 'Jonah', icon: '⚓', desc: 'Surrendering your flight to God’s mercy.' },
+  { id: 'ruth-sheaf', name: 'Golden Barley Sheaf', character: 'Ruth', icon: '🌾', desc: 'Radical loyalty in seasons of grief.' },
+  { id: 'joshua-trumpet', name: 'The Jericho Shofar', character: 'Joshua', icon: '📯', desc: 'Bold obedience bringing down high walls.' },
+  { id: 'john-belt', name: 'Leather Belt & Locust Honey', character: 'John the Baptist', icon: '🥋', desc: 'Radical humility pointing all eyes to Christ.' },
 ];
 
 export const Dashboard: React.FC<DashboardProps> = ({
@@ -223,7 +239,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
     return 'Seeker';
   };
 
-  const tracks = ['All', 'Underdog & Purpose', 'Grace After Failure', 'High-Pressure Crisis'];
+  const tracks = ['All', 'Underdog & Courage', 'Career & High Stakes', 'Burnout & Pressure', 'Restoration & Brotherhood'];
 
   const filteredQuests = activeTrack === 'All'
     ? STORY_QUESTS

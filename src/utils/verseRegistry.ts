@@ -12,12 +12,14 @@ export const STORY_MEMORY_VERSES: MemoryVerse[] = STORY_QUESTS.flatMap((quest) =
   return quest.acts.map((act) => {
     // Determine the most fitting category
     let category: MemoryVerse['category'] = 'Courage & Facing Giants';
-    if (quest.id === 'peter-journey' || quest.id === 'joseph-journey') {
+    if (quest.id === 'peter-journey' || quest.id === 'joseph-journey' || quest.id === 'ruth-journey') {
       category = 'Restoration After Failure';
-    } else if (quest.id === 'paul-journey') {
+    } else if (quest.id === 'paul-journey' || quest.id === 'nehemiah-journey' || quest.id === 'joshua-journey') {
       category = 'Endurance & Brotherhood';
-    } else if (quest.id === 'moses-journey' || quest.id === 'elijah-journey') {
+    } else if (quest.id === 'moses-journey' || quest.id === 'elijah-journey' || quest.id === 'jonah-journey' || quest.id === 'john-baptist-journey') {
       category = 'Pressure & Anxiety';
+    } else if (quest.id === 'daniel-journey' || quest.id === 'esther-journey') {
+      category = 'Anger & Self-Control';
     }
 
     return {

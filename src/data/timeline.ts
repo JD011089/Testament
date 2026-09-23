@@ -31,7 +31,7 @@ export const TIMELINE_ERAS: TimelineEra[] = [
     summary: 'After 400 years of brutal Egyptian slave labor, Moses leads an impossible escape through the Red Sea and receives the Ten Commandments in the Sinai desert.',
     keyFigures: ['Moses', 'Aaron', 'Miriam', 'Joshua'],
     definingMoment: 'Standing trapped at the Red Sea with chariots charging behind them: "The Lord will fight for you; you need only to be still."',
-    questIds: ['moses-journey']
+    questIds: ['moses-journey', 'joshua-journey']
   },
   {
     id: 'era-3',
@@ -40,9 +40,9 @@ export const TIMELINE_ERAS: TimelineEra[] = [
     subtitle: 'From underdog tribes to golden empire',
     timeframe: 'c. 1050 – 930 BC',
     summary: 'Israel transitions from chaotic tribal warlords to a united nation. David slays Goliath, survives Saul’s manhunt, and forges the golden age of Jerusalem.',
-    keyFigures: ['David', 'Jonathan', 'King Saul', 'Solomon'],
+    keyFigures: ['David', 'Jonathan', 'King Saul', 'Solomon', 'Gideon', 'Ruth'],
     definingMoment: 'David stepping out with 5 smooth stones and a sling against a 9-foot bronze giant.',
-    questIds: ['david-journey']
+    questIds: ['david-journey', 'gideon-journey', 'ruth-journey']
   },
   {
     id: 'era-4',
@@ -51,9 +51,9 @@ export const TIMELINE_ERAS: TimelineEra[] = [
     subtitle: 'Corrupt rulers, fiery prophets & foreign captivity',
     timeframe: 'c. 930 – 538 BC',
     summary: 'Civil war splits the kingdom. Corrupt kings lead people into destruction. Tough prophets like Elijah call down fire on Mount Carmel, while Babylon sacks Jerusalem.',
-    keyFigures: ['Elijah', 'Elisha', 'Isaiah', 'Jeremiah', 'Daniel'],
+    keyFigures: ['Elijah', 'Elisha', 'Daniel', 'Esther', 'Nehemiah', 'Jonah'],
     definingMoment: 'Supernatural fire falling on Elijah’s water-soaked altar on Mount Carmel.',
-    questIds: ['elijah-journey']
+    questIds: ['elijah-journey', 'daniel-journey', 'esther-journey', 'nehemiah-journey', 'jonah-journey']
   },
   {
     id: 'era-5',
@@ -62,9 +62,9 @@ export const TIMELINE_ERAS: TimelineEra[] = [
     subtitle: '400 years of silence broken by the carpenter',
     timeframe: 'c. 4 BC – 33 AD',
     summary: 'Jesus of Nazareth turns human power upside down: healing outcasts, challenging religious hypocrites, dying on a Roman cross for humanity’s debt, and rising from the grave.',
-    keyFigures: ['Jesus', 'Simon Peter', 'John', 'Mary Magdalene'],
+    keyFigures: ['Jesus', 'Simon Peter', 'John the Baptist', 'Mary Magdalene'],
     definingMoment: 'Jesus restoring the broken Peter over a beach charcoal fire: "Do you love me? Feed my sheep."',
-    questIds: ['peter-journey']
+    questIds: ['peter-journey', 'john-baptist-journey']
   },
   {
     id: 'era-6',
