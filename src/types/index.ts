@@ -102,6 +102,8 @@ export interface NotificationSettings {
   lastNotifiedDate: string; // YYYY-MM-DD
   notificationsSentToday: number;
   scheduledSlots: string[]; // e.g. ["09:00", "14:30", "20:00"]
+  firedSlotsToday: string[]; // e.g. ["09:00"]
+  lastNotifiedTimestamp?: number; // epoch ms
 }
 
 export interface UserProgress {

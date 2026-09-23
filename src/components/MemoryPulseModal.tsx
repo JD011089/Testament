@@ -18,7 +18,10 @@ import {
   getNotificationPermission, 
   sendTestMemoryNotification, 
   calculateDailySlots,
-  setActiveMemoryVerse
+  setActiveMemoryVerse,
+  getNextScheduledReminder,
+  formatSlot12h,
+  syncNextAlarmToServiceWorker
 } from '../utils/notificationEngine';
 import { getAllVerses, getVerseById } from '../utils/verseRegistry';
 import { soundEngine } from '../utils/audio';
@@ -69,6 +72,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
     settings.startHour,
     settings.endHour
   );
+  const nextReminder = getNextScheduledReminder();
 
   const handleRequestPermission = async () => {
     soundEngine.playClick();
@@ -129,8 +133,16 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
     }
   };
 
-  const handleSaveAndActivate = () => {
+  const handleSaveAndActivate = async () => {
     soundEngine.playVictory();
+    if (permission !== 'granted') {
+      const granted = await requestNotificationPermission();
+      setPermission(getNotificationPermission());
+      if (!granted) {
+        setTestSentMessage('Please allow notifications in browser first.');
+        return;
+      }
+    }
     const updated = setActiveMemoryVerse(selectedVerseId, {
       frequencyPerDay: settings.frequencyPerDay,
       startHour: settings.startHour,
@@ -141,6 +153,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
       ...updated,
       enabled: true
     });
+    await syncNextAlarmToServiceWorker();
     onClose();
   };
 
@@ -348,11 +361,18 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
               <div className="pt-1 flex items-center gap-1.5 flex-wrap">
                 <span className="text-[10px] font-mono text-stone-400">Scheduled:</span>
                 {currentSlots.map((slot, idx) => (
-                  <span key={idx} className="text-[10px] font-mono px-2 py-0.5 rounded bg-stone-800 text-amber-300 border border-stone-700">
-                    {slot}
+                  <span key={idx} className="text-[10px] font-mono px-2 py-0.5 rounded bg-stone-850 text-amber-300 border border-stone-700">
+                    {formatSlot12h(slot)}
                   </span>
                 ))}
               </div>
+
+              {nextReminder && (
+                <div className="flex items-center gap-1.5 text-[11px] font-mono text-amber-300/90 bg-amber-950/40 border border-amber-800/40 rounded-lg px-2.5 py-1.5 mt-2">
+                  <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span>Next scheduled pulse: <strong className="text-amber-200">{nextReminder.label}</strong> ({nextReminder.remainingFormatted})</span>
+                </div>
+              )}
             </div>
 
             {/* Recall Prompt Style */}

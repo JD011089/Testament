@@ -5,6 +5,30 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-09-22
+
+### Fixed
+- **Notification Schedule Deadlock**:
+  - Fixed a critical timing bug where missing the 30-minute window of slot 0 (`09:00`) locked `sentToday` to `0`, preventing afternoon (`14:00`) and evening (`19:30`) slots from ever being evaluated or fired.
+  - Replaced linear index tracking with discrete slot tracking (`firedSlotsToday: string[]`).
+  - Added smart mid-day calibration: slots within the current window are handled smoothly while older slots are marked resolved to prevent backlog spam.
+- **Mobile Sleep & Background Wakeup Support**:
+  - Implemented `SCHEDULE_ALARM` and `CANCEL_ALARM` Service Worker message handlers in `public/sw.js` and `public/sw-notifications.js` to run active alarms directly in the Service Worker.
+  - Added IndexedDB (`testament-notifications-db`) persistence shared between Service Worker and Window to track background-fired notifications without duplication.
+  - Added instant catch-up triggers on device unlock and app resume (`visibilitychange`, `focus`, `pageshow`).
+  - Added bidirectional Service Worker messaging (`TESTAMENT_ALARM_FIRED`, `TESTAMENT_TRIGGER_CHECK`).
+  - Added Periodic Background Sync registration (`testament-memory-pulse`) for Android Chrome PWAs.
+
+### Changed
+- **Enhanced Schedule Status & Live Countdown**:
+  - Added live "Next Reminder" countdown preview (e.g. `Next: 2:00 PM (in 15m)` or `9:00 AM Tomorrow`) on both the Dashboard Spaced Memory Pulse card and `MemoryPulseModal`.
+  - Added 12-hour formatted slot status badges (`✓ 9:00 AM Sent`, `⏳ 2:00 PM Next`, `7:30 PM Upcoming`).
+  - Added a "Sync Schedule" button on the Dashboard for immediate schedule verification.
+  - Automatically requests notification permissions upon clicking "Activate Reminders" if not yet granted.
+  - Added `testament-notifications-updated` custom event to keep UI components synchronized immediately upon settings update.
+
+---
+
 ## [1.1.0] - 2026-09-22
 
 ### Added

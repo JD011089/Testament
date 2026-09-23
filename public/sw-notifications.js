@@ -1,4 +1,6 @@
 // PWA Notification & Deep-Linking Worker Script
+let activeAlarmTimer = null;
+
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const verseId = event.notification.data?.verseId;
@@ -21,6 +23,79 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
+self.addEventListener('notificationclose', () => {
+  // Notification dismissed by user
+});
+
+function recordAlarmFiredInIDB(slot, todayKey, timestamp) {
+  try {
+    const request = indexedDB.open('testament-notifications-db', 1);
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('state')) {
+        db.createObjectStore('state', { keyPath: 'id' });
+      }
+    };
+    request.onsuccess = (e) => {
+      const db = e.target.result;
+      try {
+        const tx = db.transaction('state', 'readwrite');
+        const store = tx.objectStore('state');
+        store.put({ id: 'lastFired', slot, todayKey, timestamp });
+        tx.oncomplete = () => db.close();
+      } catch {
+        db.close();
+      }
+    };
+  } catch {
+    // Ignore IndexedDB failures in restricted environments
+  }
+}
+
+// Service Worker Alarm scheduler for background timer execution
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SCHEDULE_ALARM') {
+    if (activeAlarmTimer) {
+      clearTimeout(activeAlarmTimer);
+      activeAlarmTimer = null;
+    }
+    const { delayMs, title, options, slot, todayKey } = event.data;
+    if (typeof delayMs === 'number' && delayMs > 0 && delayMs < 24 * 60 * 60 * 1000) {
+      activeAlarmTimer = setTimeout(() => {
+        self.registration.showNotification(title, options);
+        if (slot) {
+          recordAlarmFiredInIDB(slot, todayKey || '', Date.now());
+        }
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+          for (const client of clients) {
+            client.postMessage({ type: 'TESTAMENT_ALARM_FIRED', slot, todayKey });
+          }
+        });
+        activeAlarmTimer = null;
+      }, delayMs);
+    }
+  } else if (event.data?.type === 'CANCEL_ALARM') {
+    if (activeAlarmTimer) {
+      clearTimeout(activeAlarmTimer);
+      activeAlarmTimer = null;
+    }
+  }
+});
+
+// Periodic background sync listener (supported in Android Chrome PWAs)
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === 'testament-memory-pulse') {
+    event.waitUntil(
+      self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+        for (const client of clients) {
+          client.postMessage({ type: 'TESTAMENT_TRIGGER_CHECK' });
+        }
+      })
+    );
+  }
+});
+
+// Web Push payload handler (for server push compatibility)
 self.addEventListener('push', (event) => {
   let data = {
     title: '⚔️ Testament Memory Pulse',

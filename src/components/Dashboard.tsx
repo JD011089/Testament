@@ -34,7 +34,10 @@ import {
   getNotificationSettings, 
   sendTestMemoryNotification, 
   requestNotificationPermission, 
-  getNotificationPermission 
+  getNotificationPermission,
+  getNextScheduledReminder,
+  checkAndDispatchDueReminders,
+  formatSlot12h
 } from '../utils/notificationEngine';
 import { getVerseById, getAllVerses } from '../utils/verseRegistry';
 import { 
@@ -112,6 +115,26 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [isMemoryPulseModalOpen, setIsMemoryPulseModalOpen] = useState<boolean>(false);
   const [notificationSettings, setNotificationSettings] = useState(() => getNotificationSettings());
   const [testNoticeStatus, setTestNoticeStatus] = useState<string | null>(null);
+  const [, setPulseRefreshTrigger] = useState(0);
+
+  useEffect(() => {
+    const handleSettingsUpdated = () => {
+      setNotificationSettings(getNotificationSettings());
+      setPulseRefreshTrigger(t => t + 1);
+    };
+
+    window.addEventListener('testament-notifications-updated', handleSettingsUpdated);
+    const timer = setInterval(() => {
+      setPulseRefreshTrigger(t => t + 1);
+    }, 60000);
+
+    return () => {
+      window.removeEventListener('testament-notifications-updated', handleSettingsUpdated);
+      clearInterval(timer);
+    };
+  }, []);
+
+  const nextReminder = getNextScheduledReminder();
 
   const dailyVerse = getDailyVerse();
   const dailyBriefing = getDailyBriefing();
@@ -119,6 +142,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const adaptiveObjective = getAdaptiveNextObjective(completedActs, userProfile, memorizedVerses);
   const isBriefingBonusClaimed = isDailyBonusClaimed('briefing');
   const activeMemoryVerse = getVerseById(notificationSettings.activeVerseId) || getAllVerses()[0];
+
+  const handleCheckAndSyncReminders = async () => {
+    soundEngine.playClick();
+    setTestNoticeStatus('Checking schedule...');
+    const fired = await checkAndDispatchDueReminders();
+    setNotificationSettings(getNotificationSettings());
+    setPulseRefreshTrigger(t => t + 1);
+    if (fired) {
+      soundEngine.playVictory();
+      setTestNoticeStatus('Reminder sent to device!');
+    } else {
+      setTestNoticeStatus('Schedule synchronized!');
+    }
+    setTimeout(() => setTestNoticeStatus(null), 3000);
+  };
 
   const handleQuickTestNotification = async () => {
     soundEngine.playClick();
@@ -332,13 +370,23 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <Bell className="w-4 h-4 animate-pulse" />
                 </span>
                 <div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-400">
                       Spaced Memory Pulse
                     </span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-950/60 border border-amber-800/60 text-amber-300 font-bold">
-                      {notificationSettings.frequencyPerDay}x / Day Spaced
+                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border font-bold ${
+                      notificationSettings.enabled 
+                        ? 'bg-amber-950/60 border-amber-800/60 text-amber-300' 
+                        : 'bg-stone-900 border-stone-800 text-stone-400'
+                    }`}>
+                      {notificationSettings.enabled ? `${notificationSettings.frequencyPerDay}x / Day` : 'Paused'}
                     </span>
+                    {nextReminder && notificationSettings.enabled && (
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-stone-900/90 border border-amber-500/30 text-amber-300 inline-flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-amber-400" />
+                        <span>Next: {nextReminder.label} ({nextReminder.remainingFormatted})</span>
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -349,6 +397,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     {testNoticeStatus}
                   </span>
                 )}
+                <button
+                  onClick={handleCheckAndSyncReminders}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-stone-850 hover:bg-stone-800 text-stone-300 hover:text-amber-300 border border-stone-700 text-xs font-medium transition-colors"
+                  title="Check current schedule and trigger any due reminder"
+                >
+                  <Clock className="w-3 h-3 text-amber-400" />
+                  <span>Sync Schedule</span>
+                </button>
                 <button
                   onClick={handleQuickTestNotification}
                   className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-stone-850 hover:bg-stone-800 text-stone-300 hover:text-amber-300 border border-stone-700 text-xs font-medium transition-colors"
@@ -393,18 +449,26 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
               <div className="flex items-center gap-1.5 flex-wrap">
                 <span className="text-[10px] font-mono text-stone-400">Scheduled:</span>
-                {notificationSettings.scheduledSlots.map((slot, idx) => (
-                  <span
-                    key={idx}
-                    className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
-                      idx < notificationSettings.notificationsSentToday
-                        ? 'bg-emerald-950/60 border-emerald-800/60 text-emerald-300 font-bold'
-                        : 'bg-stone-900 border-stone-800 text-amber-300'
-                    }`}
-                  >
-                    {idx < notificationSettings.notificationsSentToday ? '✓ ' : ''}{slot}
-                  </span>
-                ))}
+                {notificationSettings.scheduledSlots.map((slot, idx) => {
+                  const isFired = notificationSettings.firedSlotsToday?.includes(slot);
+                  const isNext = nextReminder && nextReminder.slot === slot && !nextReminder.isTomorrow;
+                  return (
+                    <span
+                      key={idx}
+                      className={`text-[10px] font-mono px-2.5 py-0.5 rounded-full border transition-all ${
+                        isFired
+                          ? 'bg-emerald-950/70 border-emerald-700/80 text-emerald-300 font-bold'
+                          : isNext
+                          ? 'bg-amber-500/20 border-amber-500 text-amber-200 font-bold shadow-glow-amber'
+                          : 'bg-stone-900 border-stone-800 text-stone-400'
+                      }`}
+                      title={isFired ? 'Already delivered today' : isNext ? `Next upcoming reminder (${nextReminder?.remainingFormatted})` : 'Upcoming slot'}
+                    >
+                      {isFired ? '✓ ' : isNext ? '⏳ ' : ''}{formatSlot12h(slot)}
+                      {isNext ? ` (Next)` : isFired ? ` Sent` : ''}
+                    </span>
+                  );
+                })}
               </div>
 
               <div className="flex items-center gap-2">
