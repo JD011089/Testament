@@ -312,38 +312,56 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         {/* Action Controls & Stats */}
         <div className="flex flex-wrap items-center gap-3">
-          <button
-            onClick={() => setShowMorningBriefing(true)}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-600/30 to-amber-500/20 border border-amber-500/50 text-amber-300 text-xs font-semibold hover:bg-amber-600 hover:text-black transition-all shadow-glow-ember"
-          >
-            <Coffee className="w-3.5 h-3.5 text-amber-400" />
-            <span>3-Min Morning Briefing</span>
-            {!isBriefingBonusClaimed && (
-              <span className="text-[9px] bg-amber-500 text-black font-extrabold px-1.5 py-0.2 rounded-full uppercase tracking-wider">
-                +50 XP
-              </span>
-            )}
-          </button>
+          {dashboardMode === 'freeroam' && (
+            <>
+              <button
+                onClick={() => setShowMorningBriefing(true)}
+                className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-600/30 to-amber-500/20 border border-amber-500/50 text-amber-300 text-xs font-semibold hover:bg-amber-600 hover:text-black transition-all shadow-glow-ember"
+              >
+                <Coffee className="w-3.5 h-3.5 text-amber-400" />
+                <span>3-Min Morning Briefing</span>
+                {!isBriefingBonusClaimed && (
+                  <span className="text-[9px] bg-amber-500 text-black font-extrabold px-1.5 py-0.2 rounded-full uppercase tracking-wider">
+                    +50 XP
+                  </span>
+                )}
+              </button>
 
-          <button
-            onClick={onOpenDriveMode}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-stone-900 border border-stone-800 text-stone-300 text-xs font-semibold hover:border-amber-500/60 hover:text-amber-400 transition-all"
-          >
-            <Car className="w-3.5 h-3.5 text-amber-500" />
-            <span>Drive Audio</span>
-          </button>
+              <button
+                onClick={onOpenDriveMode}
+                className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-stone-900 border border-stone-800 text-stone-300 text-xs font-semibold hover:border-amber-500/60 hover:text-amber-400 transition-all"
+              >
+                <Car className="w-3.5 h-3.5 text-amber-500" />
+                <span>Drive Audio</span>
+              </button>
 
-          <button
-            onClick={() => {
-              soundEngine.playClick();
-              setIsMemoryPulseModalOpen(true);
-            }}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-stone-900 border border-amber-500/40 text-amber-300 text-xs font-semibold hover:border-amber-500 hover:text-amber-200 transition-all shadow-glow-amber"
-            title="Configure multi-daily memory verse notifications"
-          >
-            <Bell className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-            <span>Memory Pulse ({notificationSettings.frequencyPerDay}x)</span>
-          </button>
+              <button
+                onClick={() => {
+                  soundEngine.playClick();
+                  setIsMemoryPulseModalOpen(true);
+                }}
+                className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-stone-900 border border-amber-500/40 text-amber-300 text-xs font-semibold hover:border-amber-500 hover:text-amber-200 transition-all shadow-glow-amber"
+                title="Configure multi-daily memory verse notifications"
+              >
+                <Bell className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                <span>Memory Pulse ({notificationSettings.frequencyPerDay}x)</span>
+              </button>
+
+              {onOpenOnboarding && (
+                <button
+                  onClick={() => {
+                    soundEngine.playClick();
+                    onOpenOnboarding();
+                  }}
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-stone-900 border border-stone-800 text-stone-300 text-xs font-semibold hover:border-amber-500/60 hover:text-amber-400 transition-all"
+                  title="Calibrate your battle plan and learning style"
+                >
+                  <SlidersHorizontal className="w-3.5 h-3.5 text-amber-500" />
+                  <span>{userProfile ? 'My Battle Plan' : 'Calibrate'}</span>
+                </button>
+              )}
+            </>
+          )}
 
           <button
             onClick={() => {
@@ -356,20 +374,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <Download className="w-3.5 h-3.5 text-amber-500" />
             <span>Install App</span>
           </button>
-
-          {onOpenOnboarding && (
-            <button
-              onClick={() => {
-                soundEngine.playClick();
-                onOpenOnboarding();
-              }}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-stone-900 border border-stone-800 text-stone-300 text-xs font-semibold hover:border-amber-500/60 hover:text-amber-400 transition-all"
-              title="Calibrate your battle plan and learning style"
-            >
-              <SlidersHorizontal className="w-3.5 h-3.5 text-amber-500" />
-              <span>{userProfile ? 'My Battle Plan' : 'Calibrate'}</span>
-            </button>
-          )}
 
           <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-stone-900 border border-stone-800">
             <Flame className="w-4 h-4 text-orange-500 fill-orange-500/20" />
@@ -418,21 +422,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
-      {/* WIDESCREEN DESKTOP GRID: MAIN STAGE (col 8) + SIDEBAR (col 4) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
-        {/* MAIN STAGE (65-70% on Desktop) */}
-        <div className="lg:col-span-8 space-y-8">
+      {dashboardMode === 'guided' ? (
+        /* GUIDED MODE: Clean, dedicated focus view with ONLY the Daily Campaign Card */
+        <div className="max-w-4xl mx-auto space-y-6">
+          <DailyCampaignCard 
+            onLaunchStep={onLaunchCampaignStep || (() => {})} 
+            onRewardXP={onRewardXP || (() => {})} 
+          />
+        </div>
+      ) : (
+        /* WIDESCREEN DESKTOP GRID: MAIN STAGE (col 8) + SIDEBAR (col 4) (FREE ROAM / SANDBOX MODE) */
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* DAILY GUIDED MISSION CARD (When in Guided Mode) */}
-          {dashboardMode === 'guided' && (
-            <DailyCampaignCard 
-              onLaunchStep={onLaunchCampaignStep || (() => {})} 
-              onRewardXP={onRewardXP || (() => {})} 
-            />
-          )}
-
-          {/* Cinematic Hero Study Table Banner */}
+          {/* MAIN STAGE (65-70% on Desktop) */}
+          <div className="lg:col-span-8 space-y-8">
+            {/* Cinematic Hero Study Table Banner */}
           <div className="rounded-2xl overflow-hidden border-2 border-amber-700/40 shadow-2xl relative bg-[#0e1117]">
             <div className="relative h-48 sm:h-64 w-full overflow-hidden bg-stone-950">
               <img 
@@ -1112,6 +1116,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
       </div>
+    )}
 
       {/* 3-MINUTE MORNING BRIEFING MODAL */}
       {showMorningBriefing && (
