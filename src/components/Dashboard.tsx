@@ -298,19 +298,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <button
             onClick={() => {
               soundEngine.playClick();
-              if (onOpenLibrary) onOpenLibrary();
-              else setIsCanonModalOpen(true);
-            }}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-stone-900 border border-amber-500/40 text-amber-300 text-xs font-semibold hover:border-amber-500 hover:text-amber-200 transition-all shadow-glow-amber"
-            title="Browse all 66 books in the Scripture Field Library"
-          >
-            <BookOpen className="w-3.5 h-3.5 text-amber-400" />
-            <span>66-Book Library</span>
-          </button>
-
-          <button
-            onClick={() => {
-              soundEngine.playClick();
               setIsMemoryPulseModalOpen(true);
             }}
             className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-stone-900 border border-amber-500/40 text-amber-300 text-xs font-semibold hover:border-amber-500 hover:text-amber-200 transition-all shadow-glow-amber"
