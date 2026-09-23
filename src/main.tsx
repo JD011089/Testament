@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
+import { initPwaUpdateEngine } from './utils/pwaUpdateEngine'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -9,12 +10,9 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>,
 )
 
-// Register service worker for offline capability and PWA installation
-if ('serviceWorker' in navigator) {
+// Initialize PWA Update & Push Notification Engine
+if (typeof window !== 'undefined') {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch((err) => {
-      console.warn('Service worker registration failed:', err);
-    });
+    initPwaUpdateEngine();
   });
 }
-

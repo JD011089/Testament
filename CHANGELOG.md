@@ -5,6 +5,19 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.1] - 2026-09-22
+
+### Added
+- **PWA Background & Open Update Push Notifications**:
+  - Automatically checks for new app updates whenever the app is opened, when switching back from other apps or tabs (`visibilitychange`), and periodically in the background (every 15 minutes and via Periodic Background Sync).
+  - When an update is ready and the user has notifications enabled, dispatches an OS-level system push notification:
+    - **Title**: `🚀 Testament Update Available`
+    - **Body**: `A new version of Testament is ready! Tap to update and open the latest features.`
+    - **Actions**: `[ 🔄 Update & Open ]` and `[ Later ]`.
+  - Tapping the notification triggers `skipWaiting()` and cleanly updates and reloads the application to the latest version.
+  - **In-App Floating Update Banner (`UpdateNotificationBanner`)**: Floating non-intrusive prompt that appears when an update is ready while the app is active in foreground.
+  - **Device Verification Button**: Added "Test Update Push" button in the Memory Pulse modal to easily simulate and verify update notifications on mobile and desktop lock screens.
+
 ## [1.6.0] - 2026-09-22
 
 ### Added

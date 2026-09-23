@@ -94,7 +94,7 @@ export default defineConfig({
     react(),
     neuralTtsPlugin(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       devOptions: {
         enabled: true
       },

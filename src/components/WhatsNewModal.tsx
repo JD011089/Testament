@@ -37,10 +37,32 @@ interface ReleaseMilestone {
 
 const RELEASES: ReleaseMilestone[] = [
   {
-    version: 'v1.6.0',
-    tagline: 'Daily Guided Missions & Connected Battle Paths',
+    version: 'v1.6.1',
+    tagline: 'PWA Background Updates & Push Notifications',
     dateBadge: 'Current Release',
     isLatest: true,
+    highlights: [
+      {
+        icon: <Bell className="w-4 h-4 text-amber-400" />,
+        title: 'Background & Open Update Push Notifications',
+        description: 'When a new version is released, receive an OS-level system push notification ("🚀 Update Available: Tap to update and open") on mobile lock screens and desktop.'
+      },
+      {
+        icon: <Sparkles className="w-4 h-4 text-amber-400" />,
+        title: 'In-App Update Banner & 1-Tap Refresh',
+        description: 'A floating alert banner appears when updates are waiting. Tapping "Update & Open" activates the new version instantly.'
+      },
+      {
+        icon: <Layers className="w-4 h-4 text-amber-400" />,
+        title: 'Proactive Periodic Sync',
+        description: 'Checks for updates whenever you open the app, switch back from another tab or app, and on an automatic 15-minute background cadence.'
+      }
+    ]
+  },
+  {
+    version: 'v1.6.0',
+    tagline: 'Daily Guided Missions & Connected Battle Paths',
+    dateBadge: 'Previous Release',
     highlights: [
       {
         icon: <Target className="w-4 h-4 text-amber-400" />,
@@ -184,12 +206,12 @@ const RELEASES: ReleaseMilestone[] = [
 ];
 
 export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose }) => {
-  const [activeTab, setActiveTab] = useState<string>('v1.6.0');
+  const [activeTab, setActiveTab] = useState<string>('v1.6.1');
 
   const handleDismiss = () => {
     soundEngine.playClick();
     try {
-      localStorage.setItem('testament_last_seen_version', '1.6.0');
+      localStorage.setItem('testament_last_seen_version', '1.6.1');
     } catch {
       // ignore
     }

@@ -16,6 +16,7 @@ import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { OnboardingModal, type UserCalibrationProfile } from './components/OnboardingModal';
 import { CanonLibraryPage } from './components/CanonLibraryPage';
 import { WhatsNewModal } from './components/WhatsNewModal';
+import { UpdateNotificationBanner } from './components/UpdateNotificationBanner';
 import { soundEngine } from './utils/audio';
 import { recordVerseMasteryDate } from './utils/dailyEngine';
 import { initNotificationScheduler } from './utils/notificationEngine';
@@ -521,6 +522,9 @@ export function App() {
 
       {/* PWA Home-Screen Install Prompt */}
       <PWAInstallPrompt />
+
+      {/* PWA Update & Restart Floating Notification Banner */}
+      <UpdateNotificationBanner />
     </div>
   );
 }

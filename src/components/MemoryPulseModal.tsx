@@ -8,7 +8,8 @@ import {
   Send, 
   Clock, 
   Brain, 
-  Smartphone
+  Smartphone,
+  Sparkles
 } from 'lucide-react';
 import type { MemoryVerse, RecallPromptStyle, NotificationSettings } from '../types';
 import { 
@@ -23,6 +24,7 @@ import {
   formatSlot12h,
   syncNextAlarmToServiceWorker
 } from '../utils/notificationEngine';
+import { sendTestUpdateNotification } from '../utils/pwaUpdateEngine';
 import { getAllVerses, getVerseById } from '../utils/verseRegistry';
 import { soundEngine } from '../utils/audio';
 
@@ -130,6 +132,31 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
       setTestSentMessage(withDelay ? 'Dispatched! Check lock screen.' : 'Notification sent to your device!');
     } else {
       setTestSentMessage('Unable to display. Check browser notification permissions.');
+    }
+  };
+
+  const handleTestUpdatePush = async () => {
+    soundEngine.playClick();
+    setIsSendingTest(true);
+    setTestSentMessage('Dispatching update notification...');
+
+    if (permission !== 'granted') {
+      const granted = await requestNotificationPermission();
+      setPermission(getNotificationPermission());
+      if (!granted) {
+        setIsSendingTest(false);
+        setTestSentMessage('Please allow notifications in browser first.');
+        return;
+      }
+    }
+
+    const success = await sendTestUpdateNotification();
+    setIsSendingTest(false);
+    if (success) {
+      soundEngine.playVictory();
+      setTestSentMessage('✓ Update notification dispatched! Tap to test reload.');
+    } else {
+      setTestSentMessage('Unable to display. Check system notification settings.');
     }
   };
 
@@ -446,14 +473,14 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-2 pt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
                 <button
                   onClick={() => handleSendTest(false)}
                   disabled={isSendingTest}
                   className="p-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5"
                 >
                   <Send className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Send Test Now</span>
+                  <span>Test Verse Now</span>
                 </button>
 
                 <button
@@ -463,7 +490,17 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
                   className="p-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5"
                 >
                   <Clock className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Test in 4s (Lock Screen)</span>
+                  <span>Lock Screen (4s)</span>
+                </button>
+
+                <button
+                  onClick={handleTestUpdatePush}
+                  disabled={isSendingTest}
+                  title="Simulate the system push notification for new app updates"
+                  className="p-2 rounded-xl bg-amber-950/40 hover:bg-amber-900/50 border border-amber-600/50 text-amber-300 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 shadow-sm"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Test Update Push</span>
                 </button>
               </div>
 
