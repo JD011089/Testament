@@ -302,90 +302,115 @@ export const getNextScheduledReminder = (): NextReminderInfo | null => {
   };
 };
 
+const IDB_NAME = 'testament-notifications-db';
+const IDB_VERSION = 1;
+const IDB_STORE = 'state';
+
 /**
- * Synchronizes the exact next upcoming alarm timer with the Service Worker
+ * Opens the shared IndexedDB database used by both the app and the Service Worker
+ */
+const openNotificationsDB = (): Promise<IDBDatabase> =>
+  new Promise((resolve, reject) => {
+    if (typeof window === 'undefined' || !('indexedDB' in window)) {
+      return reject(new Error('IndexedDB not available'));
+    }
+    const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+    req.onupgradeneeded = (e: IDBVersionChangeEvent) => {
+      const db = (e.target as IDBOpenDBRequest).result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        db.createObjectStore(IDB_STORE, { keyPath: 'id' });
+      }
+    };
+    req.onsuccess = (e: Event) => resolve((e.target as IDBOpenDBRequest).result);
+    req.onerror = () => reject(req.error);
+  });
+
 /**
  * Records an alarm event into IndexedDB (accessible by both Window and ServiceWorker)
  */
-export const recordAlarmFiredInIDB = (slot: string, todayKey: string, timestamp: number): Promise<boolean> => {
-  return new Promise((resolve) => {
-    try {
-      if (typeof window === 'undefined' || !('indexedDB' in window)) return resolve(false);
-      const request = indexedDB.open('testament-notifications-db', 1);
-      request.onupgradeneeded = (e: IDBVersionChangeEvent) => {
-        const db = (e.target as IDBOpenDBRequest).result;
-        if (!db.objectStoreNames.contains('state')) {
-          db.createObjectStore('state', { keyPath: 'id' });
-        }
-      };
-      request.onsuccess = (e: Event) => {
-        const db = (e.target as IDBOpenDBRequest).result;
-        try {
-          const tx = db.transaction('state', 'readwrite');
-          const store = tx.objectStore('state');
-          store.put({ id: 'lastFired', slot, todayKey, timestamp });
-          tx.oncomplete = () => {
-            db.close();
-            resolve(true);
-          };
-          tx.onerror = () => {
-            db.close();
-            resolve(false);
-          };
-        } catch {
-          db.close();
-          resolve(false);
-        }
-      };
-      request.onerror = () => resolve(false);
-    } catch {
-      resolve(false);
-    }
-  });
-};
+export const recordAlarmFiredInIDB = (slot: string, todayKey: string, timestamp: number): Promise<boolean> =>
+  openNotificationsDB()
+    .then(
+      (db) =>
+        new Promise<boolean>((resolve) => {
+          try {
+            const tx = db.transaction(IDB_STORE, 'readwrite');
+            tx.objectStore(IDB_STORE).put({ id: 'lastFired', slot, todayKey, timestamp });
+            tx.oncomplete = () => { db.close(); resolve(true); };
+            tx.onerror = () => { db.close(); resolve(false); };
+          } catch { db.close(); resolve(false); }
+        })
+    )
+    .catch(() => false);
+
+/**
+ * Writes a pending alarm record to IDB so the Service Worker can fire it even
+ * if the SW was terminated and restarted between now and the target time.
+ */
+export const writePendingAlarmToIDB = (
+  targetTimestamp: number,
+  title: string,
+  options: object,
+  slot: string | null,
+  todayKey: string
+): Promise<boolean> =>
+  openNotificationsDB()
+    .then(
+      (db) =>
+        new Promise<boolean>((resolve) => {
+          try {
+            const tx = db.transaction(IDB_STORE, 'readwrite');
+            tx.objectStore(IDB_STORE).put({ id: 'pendingAlarm', targetTimestamp, title, options, slot, todayKey });
+            tx.oncomplete = () => { db.close(); resolve(true); };
+            tx.onerror = () => { db.close(); resolve(false); };
+          } catch { db.close(); resolve(false); }
+        })
+    )
+    .catch(() => false);
+
+/**
+ * Retrieves the pending alarm record from IDB (written by the app or the SW)
+ */
+export const getIDBPendingAlarm = (): Promise<{
+  targetTimestamp: number;
+  slot: string | null;
+  todayKey: string;
+} | null> =>
+  openNotificationsDB()
+    .then(
+      (db) =>
+        new Promise<{ targetTimestamp: number; slot: string | null; todayKey: string } | null>((resolve) => {
+          try {
+            const tx = db.transaction(IDB_STORE, 'readonly');
+            const req = tx.objectStore(IDB_STORE).get('pendingAlarm');
+            req.onsuccess = () => { db.close(); resolve(req.result || null); };
+            req.onerror = () => { db.close(); resolve(null); };
+          } catch { db.close(); resolve(null); }
+        })
+    )
+    .catch(() => null);
 
 /**
  * Retrieves the last background alarm event from IndexedDB
  */
-export const getIDBLastFired = (): Promise<{ slot: string; todayKey: string; timestamp: number } | null> => {
-  return new Promise((resolve) => {
-    try {
-      if (typeof window === 'undefined' || !('indexedDB' in window)) return resolve(null);
-      const request = indexedDB.open('testament-notifications-db', 1);
-      request.onupgradeneeded = (e: IDBVersionChangeEvent) => {
-        const db = (e.target as IDBOpenDBRequest).result;
-        if (!db.objectStoreNames.contains('state')) {
-          db.createObjectStore('state', { keyPath: 'id' });
-        }
-      };
-      request.onsuccess = (e: Event) => {
-        const db = (e.target as IDBOpenDBRequest).result;
-        try {
-          const tx = db.transaction('state', 'readonly');
-          const store = tx.objectStore('state');
-          const getReq = store.get('lastFired');
-          getReq.onsuccess = () => {
-            db.close();
-            resolve(getReq.result || null);
-          };
-          getReq.onerror = () => {
-            db.close();
-            resolve(null);
-          };
-        } catch {
-          db.close();
-          resolve(null);
-        }
-      };
-      request.onerror = () => resolve(null);
-    } catch {
-      resolve(null);
-    }
-  });
-};
+export const getIDBLastFired = (): Promise<{ slot: string; todayKey: string; timestamp: number } | null> =>
+  openNotificationsDB()
+    .then(
+      (db) =>
+        new Promise<{ slot: string; todayKey: string; timestamp: number } | null>((resolve) => {
+          try {
+            const tx = db.transaction(IDB_STORE, 'readonly');
+            const req = tx.objectStore(IDB_STORE).get('lastFired');
+            req.onsuccess = () => { db.close(); resolve(req.result || null); };
+            req.onerror = () => { db.close(); resolve(null); };
+          } catch { db.close(); resolve(null); }
+        })
+    )
+    .catch(() => null);
 
 /**
- * Synchronizes the exact next upcoming alarm timer with the Service Worker
+ * Synchronizes the exact next upcoming alarm timer with the Service Worker.
+ * Writes the alarm to IDB directly as well so it survives SW restarts.
  */
 export const syncNextAlarmToServiceWorker = async (): Promise<void> => {
   if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
@@ -405,7 +430,7 @@ export const syncNextAlarmToServiceWorker = async (): Promise<void> => {
     body,
     icon: '/icons/icon-192.png',
     badge: '/icons/badge-96.png',
-    tag: `testament-verse-${verse.id}-${Date.now()}`,
+    tag: `testament-verse-${verse.id}`,
     renotify: true,
     vibrate: [120, 60, 120],
     data: {
@@ -419,6 +444,14 @@ export const syncNextAlarmToServiceWorker = async (): Promise<void> => {
     ]
   };
 
+  const targetTimestamp = Date.now() + nextReminder.delayMs;
+  const todayKey = getTodayDateKey();
+
+  // 1. Write directly to IDB — this is the primary persistence path.
+  //    The SW will read this on its next wakeup and fire the notification.
+  await writePendingAlarmToIDB(targetTimestamp, title, options, nextReminder.slot, todayKey);
+
+  // 2. Also send a message to the SW as a secondary path (works while SW is alive).
   try {
     const reg = await navigator.serviceWorker.ready;
     if (reg.active) {
@@ -428,7 +461,7 @@ export const syncNextAlarmToServiceWorker = async (): Promise<void> => {
         title,
         options,
         slot: nextReminder.slot,
-        todayKey: getTodayDateKey()
+        todayKey
       });
     }
   } catch (err) {
@@ -437,7 +470,9 @@ export const syncNextAlarmToServiceWorker = async (): Promise<void> => {
 };
 
 /**
- * Checks all scheduled slots resiliently, catches up on any passed slot, and prevents spam
+ * Checks all scheduled slots resiliently, catches up on any passed slot, and prevents spam.
+ * Reads both `lastFired` and `pendingAlarm` from IDB so app-open catch-up never
+ * duplicates a notification the Service Worker already fired or is about to fire.
  */
 export const checkAndDispatchDueReminders = async (): Promise<boolean> => {
   const settings = getNotificationSettings();
@@ -455,8 +490,12 @@ export const checkAndDispatchDueReminders = async (): Promise<boolean> => {
     saveNotificationSettings(settings);
   }
 
-  // Check if Service Worker background alarm already fired today
-  const lastBackgroundFired = await getIDBLastFired();
+  // ── IDB sync: absorb any slots the SW fired in the background ────────────
+  const [lastBackgroundFired, pendingAlarm] = await Promise.all([
+    getIDBLastFired(),
+    getIDBPendingAlarm()
+  ]);
+
   if (lastBackgroundFired && lastBackgroundFired.todayKey === todayKey && lastBackgroundFired.slot) {
     if (!firedSlots.includes(lastBackgroundFired.slot)) {
       firedSlots.push(lastBackgroundFired.slot);
@@ -466,6 +505,21 @@ export const checkAndDispatchDueReminders = async (): Promise<boolean> => {
       saveNotificationSettings(settings);
     }
   }
+
+  // ── IDB sync: if there is a pendingAlarm for today that is already past,
+  //    the SW will fire it on its next wakeup. Mark its slot as handled so we
+  //    don't accidentally send a second notification from the app side.
+  if (pendingAlarm && pendingAlarm.todayKey === todayKey && pendingAlarm.slot) {
+    const alarmPast = Date.now() >= pendingAlarm.targetTimestamp;
+    if (alarmPast && !firedSlots.includes(pendingAlarm.slot)) {
+      // SW will fire this; treat as handled on the app side
+      firedSlots.push(pendingAlarm.slot);
+      settings.firedSlotsToday = firedSlots;
+      settings.notificationsSentToday = Math.max(settings.notificationsSentToday, firedSlots.length);
+      saveNotificationSettings(settings);
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────────
 
   if (settings.notificationsSentToday >= settings.frequencyPerDay) {
     syncNextAlarmToServiceWorker();
@@ -494,7 +548,7 @@ export const checkAndDispatchDueReminders = async (): Promise<boolean> => {
     return false;
   }
 
-  // Deliver a reminder for the most recent due slot
+  // Deliver a reminder for the most recent due slot only
   const dueSlot = pendingDueSlots[pendingDueSlots.length - 1];
   const verse = getVerseById(settings.activeVerseId) || getAllVerses()[0];
   const nextPromptIndex = settings.notificationsSentToday + 1;
