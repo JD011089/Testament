@@ -5,6 +5,37 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-09-22
+
+### Added
+- **The Testament Canon Codex (Complete 66-Book Field Library)**:
+  - Catalogs all 66 books of the biblical canon (Genesis to Revelation) through Testament's signature gritty, story-driven, anti-textbook lens.
+  - Organized into 7 canonical divisions with dedicated badge counts:
+    - *Torah & Origins* (5 books): Foundations of humanity, covenant, and the wilderness survival code.
+    - *War & Chronicles* (12 books): Military campaigns, palace coups, espionage, and exile resistance.
+    - *Wisdom & Soul Triage* (5 books): High-stakes dilemma tactics, emergency triage, and burnout antidotes.
+    - *Prophet Intelligence* (17 books): Geopolitical whistleblowers, imperial infiltrators, and moral warnings.
+    - *The King's Manifesto* (5 books): The counter-cultural revolution of Jesus and the explosive early church.
+    - *Field Dispatches* (21 books): Tactical letters to underground cells on freedom, integrity, and action.
+    - *The Cosmic Endgame* (1 book): Cosmic warfare, the fall of empire, and unshakeable hope in victory.
+  - **Tactical Intel Per Book**:
+    - Modern tactical codename & subtitle (e.g. *Ecclesiastes: "The Burnout Antidote"*, *Daniel: "Undercover in Babylon"*, *Nehemiah: "Project Management Under Fire"*, *James: "Faith with Teeth"*, *Revelation: "The Dragon's Defeat"*).
+    - 30-Second Crisis SitRep detailing author context and historical peril.
+    - "Why This Matters on Monday Morning" modern practical application.
+    - Anchor scripture with 1-tap dual-lens switcher between canonical text and street translation.
+  - **Full Platform Integration**:
+    - Every book's anchor scripture registered in `ALL_AVAILABLE_VERSES` for immediate active recall in **Word Forge**.
+    - 1-tap lock-screen **Memory Pulse** notification scheduling from any book.
+    - Built-in audio narration with cinematic voice playback (`speakVerse`).
+    - Direct deep-links to interactive modules (Proverbs Codex, Psalms Medic, Story Quests).
+  - **Library UI & Navigation**:
+    - Division switcher pills with live counts.
+    - Life situation filter chips (*"Burnout & Meaning"*, *"Workplace Warfare"*, *"Anxiety & Fear"*, *"Unfair Pain"*, *"Action Over Cheap Talk"*, *"Integrity"*).
+    - Instant real-time keyword search across book names, codenames, themes, and references.
+    - Added "The Scripture Field Library" featured banner and top-level quick action button on the Dashboard.
+
+---
+
 ## [1.2.0] - 2026-09-22
 
 ### Added

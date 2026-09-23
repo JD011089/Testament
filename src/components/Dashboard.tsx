@@ -33,6 +33,7 @@ import type { UserCalibrationProfile } from './OnboardingModal';
 import { MemoryPulseModal } from './MemoryPulseModal';
 import { ProverbsCodexModal } from './ProverbsCodexModal';
 import { PsalmsFieldMedicModal } from './PsalmsFieldMedicModal';
+import { CanonCodexModal } from './CanonCodexModal';
 import { 
   getNotificationSettings, 
   sendTestMemoryNotification, 
@@ -119,6 +120,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [isMemoryPulseModalOpen, setIsMemoryPulseModalOpen] = useState<boolean>(false);
   const [isProverbsModalOpen, setIsProverbsModalOpen] = useState<boolean>(false);
   const [isPsalmsMedicModalOpen, setIsPsalmsMedicModalOpen] = useState<boolean>(false);
+  const [isCanonModalOpen, setIsCanonModalOpen] = useState<boolean>(false);
   const [notificationSettings, setNotificationSettings] = useState(() => getNotificationSettings());
   const [testNoticeStatus, setTestNoticeStatus] = useState<string | null>(null);
   const [, setPulseRefreshTrigger] = useState(0);
@@ -131,10 +133,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
     const handleOpenProverbs = () => setIsProverbsModalOpen(true);
     const handleOpenPsalms = () => setIsPsalmsMedicModalOpen(true);
+    const handleOpenCanon = () => setIsCanonModalOpen(true);
 
     window.addEventListener('testament-notifications-updated', handleSettingsUpdated);
     window.addEventListener('open-proverbs-codex', handleOpenProverbs);
     window.addEventListener('open-psalms-medic', handleOpenPsalms);
+    window.addEventListener('open-canon-codex', handleOpenCanon);
 
     const timer = setInterval(() => {
       setPulseRefreshTrigger(t => t + 1);
@@ -144,6 +148,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       window.removeEventListener('testament-notifications-updated', handleSettingsUpdated);
       window.removeEventListener('open-proverbs-codex', handleOpenProverbs);
       window.removeEventListener('open-psalms-medic', handleOpenPsalms);
+      window.removeEventListener('open-canon-codex', handleOpenCanon);
       clearInterval(timer);
     };
   }, []);
@@ -270,6 +275,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
           >
             <Car className="w-3.5 h-3.5 text-amber-500" />
             <span>Drive Audio</span>
+          </button>
+
+          <button
+            onClick={() => {
+              soundEngine.playClick();
+              setIsCanonModalOpen(true);
+            }}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-stone-900 border border-amber-500/40 text-amber-300 text-xs font-semibold hover:border-amber-500 hover:text-amber-200 transition-all shadow-glow-amber"
+            title="Browse all 66 books in the Scripture Field Library"
+          >
+            <BookOpen className="w-3.5 h-3.5 text-amber-400" />
+            <span>66-Book Library</span>
           </button>
 
           <button
@@ -495,6 +512,40 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </button>
               </div>
             </div>
+          </div>
+
+          {/* THE CANON CODEX BANNER (66-BOOK FIELD LIBRARY) */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-950/40 via-[#151926] to-stone-900 border border-amber-500/40 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start sm:items-center gap-3.5">
+              <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-2xl shrink-0">
+                📜
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400 px-2 py-0.5 rounded bg-amber-950/60 border border-amber-800/60">
+                    The Complete Canon • 66 Books
+                  </span>
+                  <span className="text-xs text-stone-400">All Scriptures Unlocked</span>
+                </div>
+                <h4 className="text-sm sm:text-base font-serif font-bold text-parchment-50">
+                  The Scripture Field Library
+                </h4>
+                <p className="text-xs text-stone-400 mt-0.5">
+                  Every book from Genesis to Revelation translated into real-world Monday morning tactical intelligence.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                soundEngine.playSnap();
+                setIsCanonModalOpen(true);
+              }}
+              className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs flex items-center justify-center gap-2 shadow-glow-amber transition-all shrink-0"
+            >
+              <BookOpen className="w-4 h-4" />
+              <span>Explore 66 Books</span>
+            </button>
           </div>
 
           {/* LEARNER'S TOOLKIT (Visual & Non-Academic Learning Accelerators) */}
@@ -1157,6 +1208,27 @@ export const Dashboard: React.FC<DashboardProps> = ({
         currentAmbience={currentAmbience}
         onToggleAmbience={onToggleAmbience}
         onRewardXP={onRewardXP}
+      />
+
+      {/* Canon Codex (66-Book Field Library) Modal */}
+      <CanonCodexModal
+        isOpen={isCanonModalOpen}
+        onClose={() => setIsCanonModalOpen(false)}
+        onOpenWordForge={(verseId) => {
+          setIsCanonModalOpen(false);
+          onOpenWordForge(verseId);
+        }}
+        onSetMemoryVerse={(verseId) => {
+          setActiveMemoryVerse(verseId);
+          setPulseRefreshTrigger(t => t + 1);
+        }}
+        onSelectStoryQuest={(questId) => {
+          setIsCanonModalOpen(false);
+          const quest = STORY_QUESTS.find(q => q.id === questId);
+          if (quest) {
+            onSelectQuest(quest);
+          }
+        }}
       />
     </div>
   );

@@ -2,6 +2,7 @@ import { MEMORY_VERSES } from '../data/verses';
 import { STORY_QUESTS } from '../data/stories';
 import { PROVERB_SCENARIOS } from '../data/proverbs';
 import { PSALM_PRESCRIPTIONS } from '../data/psalms';
+import { CANON_BOOKS } from '../data/canon';
 import type { MemoryVerse } from '../types';
 
 /**
@@ -88,13 +89,43 @@ export const PSALM_MEMORY_VERSES: MemoryVerse[] = PSALM_PRESCRIPTIONS.map((ps) =
 });
 
 /**
- * All available verses (Core arsenal + all story unlocked scriptures + Proverbs Codex + Psalms Field Medic)
+ * Maps all 66 Canon Codex books' anchor scriptures into MemoryVerse format
+ */
+export const CANON_MEMORY_VERSES: MemoryVerse[] = CANON_BOOKS.map((b) => {
+  let category: MemoryVerse['category'] = 'Endurance & Brotherhood';
+  if (b.lifeTheme === 'Anxiety & Fear' || b.lifeTheme === 'Burnout & Meaning') {
+    category = 'Pressure & Anxiety';
+  } else if (b.lifeTheme === 'Courage Under Fire') {
+    category = 'Courage & Facing Giants';
+  } else if (b.lifeTheme === 'Workplace & Career Pressure') {
+    category = 'Anger & Self-Control';
+  } else if (b.lifeTheme === 'Unfair Pain & Betrayal' || b.lifeTheme === 'Family & Conflict Resolution') {
+    category = 'Restoration After Failure';
+  }
+
+  return {
+    id: b.id,
+    reference: b.anchorScripture.reference,
+    translation: 'BSB',
+    text: b.anchorScripture.canonicalText,
+    plainEnglishSummary: b.anchorScripture.streetTranslation,
+    category,
+    difficulty: 'Core',
+    keyTakeaway: b.anchorScripture.takeaway,
+    heroName: `${b.name} (Canon Codex)`,
+    storyTitle: b.codename
+  };
+});
+
+/**
+ * All available verses (Core arsenal + all story unlocked scriptures + Proverbs Codex + Psalms Field Medic + 66 Canon Books)
  */
 export const ALL_AVAILABLE_VERSES: MemoryVerse[] = [
   ...MEMORY_VERSES,
   ...STORY_MEMORY_VERSES,
   ...PROVERB_MEMORY_VERSES,
-  ...PSALM_MEMORY_VERSES
+  ...PSALM_MEMORY_VERSES,
+  ...CANON_MEMORY_VERSES
 ];
 
 /**
