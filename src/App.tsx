@@ -17,6 +17,7 @@ import { OnboardingModal, type UserCalibrationProfile } from './components/Onboa
 import { CanonLibraryPage } from './components/CanonLibraryPage';
 import { WhatsNewModal } from './components/WhatsNewModal';
 import { UpdateNotificationBanner } from './components/UpdateNotificationBanner';
+import { CampaignNextTaskPrompt } from './components/CampaignNextTaskPrompt';
 import { soundEngine } from './utils/audio';
 import { recordVerseMasteryDate } from './utils/dailyEngine';
 import { initNotificationScheduler } from './utils/notificationEngine';
@@ -105,6 +106,7 @@ export function App() {
   });
 
   const [targetDilemmaId, setTargetDilemmaId] = useState<string | null>(null);
+  const [campaignPrompt, setCampaignPrompt] = useState<{ completedStep: number; nextStep: DailyCampaignStep } | null>(null);
   const [isWhatsNewOpen, setIsWhatsNewOpen] = useState<boolean>(() => {
     try {
       const lastSeen = localStorage.getItem('testament_last_seen_version');
@@ -197,6 +199,7 @@ export function App() {
       if (todayCampaign.steps[1].targetId === customEvent.detail?.dilemmaId) {
         markCampaignStepCompleted(todayCampaign.id, 2);
         window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
+        setCampaignPrompt({ completedStep: 2, nextStep: todayCampaign.steps[2] });
       }
     };
 
@@ -233,6 +236,11 @@ export function App() {
       markCampaignStepCompleted(todayCampaign.id, 4);
       window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
     }
+  };
+
+  const handleProceedCampaignPrompt = (nextStep: DailyCampaignStep) => {
+    setCampaignPrompt(null);
+    handleLaunchCampaignStep(nextStep);
   };
 
   const handleSelectQuest = (quest: StoryQuest) => {
@@ -275,6 +283,7 @@ export function App() {
       if (todayCampaign.steps[0].targetId === _questId || todayCampaign.steps[0].targetSecondaryId === actId) {
         markCampaignStepCompleted(todayCampaign.id, 1);
         window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
+        setCampaignPrompt({ completedStep: 1, nextStep: todayCampaign.steps[1] });
       }
     }
   };
@@ -292,9 +301,10 @@ export function App() {
 
       // Check if this fulfills Step 3 of today's Daily Campaign
       const todayCampaign = getTodayDailyCampaign();
-      if (todayCampaign.steps[2].targetId === verseId) {
+      if (todayCampaign.steps[2].targetId === verseId || verseId.includes(todayCampaign.steps[2].targetId.replace('story-', ''))) {
         markCampaignStepCompleted(todayCampaign.id, 3);
         window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
+        setCampaignPrompt({ completedStep: 3, nextStep: todayCampaign.steps[3] });
       }
     }
   };
@@ -361,7 +371,7 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-iron-950 text-parchment-100 w-full relative">
-      <main className="w-full">
+      <main className="w-full pb-28 sm:pb-32 md:pb-12 md:pt-16">
         {activeQuest ? (
           <StoryViewer 
             quest={activeQuest}
@@ -466,7 +476,7 @@ export function App() {
         )}
       </main>
 
-      {/* Persistent Bottom Nav */}
+      {/* Persistent Responsive Nav (Desktop Top Nav & Mobile Bottom Nav) */}
       {!activeQuest && (
         <Navigation 
           currentTab={currentTab}
@@ -478,6 +488,8 @@ export function App() {
           currentAmbience={currentAmbience}
           onToggleAmbience={handleCycleAmbience}
           onOpenDriveMode={() => setIsDriveModeOpen(true)}
+          streakCount={streakCount}
+          xp={xp}
         />
       )}
 
@@ -525,6 +537,14 @@ export function App() {
 
       {/* PWA Update & Restart Floating Notification Banner */}
       <UpdateNotificationBanner />
+
+      {/* Campaign Next Task Prompt Modal / Banner (Requirement 5) */}
+      <CampaignNextTaskPrompt
+        completedStepNumber={campaignPrompt?.completedStep || 1}
+        nextStep={campaignPrompt?.nextStep || null}
+        onProceed={handleProceedCampaignPrompt}
+        onDismiss={() => setCampaignPrompt(null)}
+      />
     </div>
   );
 }

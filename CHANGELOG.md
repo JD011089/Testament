@@ -5,6 +5,45 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-09-23
+
+### Added
+- **Desktop UI & Visual Hierarchy Overhaul (Decluttering)**:
+  - **Responsive Dual Navigation Bar (`Navigation.tsx`)**:
+    - **Desktop (`md:` and above)**: Fixed, frosted-glass top navigation bar (`bg-[#0a0d13]/90 backdrop-blur-md`) with Testament Emblem, primary tabs (`Quests`, `Library`, `Word Forge`, `The Play?`, `Arsenal`), and dedicated utilities (`Drive Audio`, `Ambient Sound`, `Streak`, `XP`).
+    - **Mobile (`< md`)**: Retains the streamlined bottom navigation dock tailored for single-thumb interaction.
+  - **Ergonomic 2-Column Command Center (Free Roam)**:
+    - **Main Stage (`lg:col-span-8`)**: Displays the Cinematic Hero Study Table Banner and brings **all 14 Illustrated Story Quests directly above the fold** with category filter pills.
+    - **Tactical Sidebar (`lg:col-span-4`)**: Reorganized into a clean HUD featuring the **Adaptive Next Objective**, **Learner's Tactical Toolkit** (6 visual accelerators in a 2-column grid), **Spaced Memory Pulse** card, **Scripture Field Library & Arsenal** launcher, **The Armory (Relics)**, and **Ambient Audio & Voice Persona**.
+  - **Streamlined Morning Command Header**: Replaced the 12-button header wrap with a focused single-row command center for declaring today's trial, listening to the 45s audio briefing, checking due reviews, and calibrating battle plans.
+- **Multi-Turn Socratic AI for Dilemmas & Virtue Profiling (`heartEvaluation.ts`)**:
+  - Turn 2 Socratic challenge probe analyzing user submissions for theological blind spots (e.g. conflict avoidance, premature confrontation without Matt 18:15 private 1-on-1, or emotional escalation).
+  - Biblical Tactical Temperament Profile computing 4 virtue metrics (Grace, Truth, Prudence, Courage) and assigning 1 of 6 biblical archetypes (*The Nathan*, *The Nehemiah*, *The Abigail*, *The Barnabas*, *The Solomon*, *The Caleb*).
+- **Cross-Quest Consequence Tracking & Narrative Momentum (`narrativeMomentum.ts`)**:
+  - Act decisions ripple into subsequent acts with dynamic narrative indicators (`+Patience`, `+Diplomacy`, `+Discernment`, `+Boldness`).
+  - Tactical After-Action Reports (AAR) summarizing user virtue paths upon quest review.
+- **FSRS Spaced Repetition & Multi-Tier Word Forge Scaffolding (`fsrsEngine.ts`)**:
+  - Cognitive science spaced repetition intervals calculating memory stability, difficulty, and retrievability.
+  - 3 progressive scaffolding tiers: **1. Builder (Novice)**, **2. Ghost Letters (Adept)**, and **3. Blind Recall (Master)**.
+- **5-Second Battlefield Check-In & Adaptive Daily Campaign (`BattlefieldCheckInModal.tsx`)**:
+  - One-tap declaration across 5 battlefields (Workplace Politics, Anxiety & Burnout, Betrayal & Friction, High-Stakes Decision, Spiritual Dryness) dynamically adapting today's quest and dilemma.
+- **The Living Canon Tactical Nexus (`nexusGraph.ts`, `TacticalNexusCard.tsx`)**:
+  - Interactive knowledge graph connecting story situations to historical crisis Psalms, adversary psychological profiles, proverbs, and modern workplace dilemmas.
+- **45-Second Morning Audio Tactical Briefing**:
+  - Hands-free audio broadcast synthesizing today's battlefield focus, memory verse, and tactical directives.
+- **Campaign Next Task Auto-Prompts (`CampaignNextTaskPrompt.tsx`)**:
+  - Intelligent floating prompt guiding users seamlessly through each task of the daily campaign.
+- **Smooth Auto-Scroll to Top**:
+  - Ensures completing an Act or Quest automatically scrolls the viewport smoothly to the top for the next phase.
+
+### Fixed
+- **PWA Service Worker Infinite Reload Loop**:
+  - Fixed aggressive auto-reloading loop by adopting stable `autoUpdate` registerType and guarded broadcast channels.
+- **Single Memory Verse Per Quest Consistency**:
+  - Quests now consistently reinforce one unified anchor memory verse across all acts rather than overwhelming users with multiple verses.
+- **Completed Quest State Persistence**:
+  - Completed quests maintain their full completed state and answer review history upon re-visiting.
+
 ## [1.6.1] - 2026-09-22
 
 ### Added

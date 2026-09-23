@@ -136,11 +136,28 @@ export function initPwaUpdateEngine(): () => void {
     return () => {};
   }
 
+  // Prevent dev boot loops: unregister any rogue service workers on localhost (dev mode)
+  const isDev = import.meta.env.DEV || (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'));
+  if (isDev) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (const reg of registrations) {
+        reg.unregister().catch(() => {});
+      }
+    });
+    return () => {};
+  }
+
   // Prevent infinite reload loops on controller change
   let refreshing = false;
   const handleControllerChange = () => {
     if (refreshing) return;
+    const lastReload = sessionStorage.getItem('testament_sw_reloaded');
+    if (lastReload && Date.now() - Number(lastReload) < 15000) {
+      console.warn('PWA: Preventing reload loop.');
+      return;
+    }
     refreshing = true;
+    sessionStorage.setItem('testament_sw_reloaded', String(Date.now()));
     window.location.reload();
   };
   navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);

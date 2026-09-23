@@ -6,6 +6,7 @@ import { soundEngine } from '../utils/audio';
 import { getDailyVerse } from '../utils/dailyEngine';
 import { MemoryPulseModal } from './MemoryPulseModal';
 import confetti from 'canvas-confetti';
+import { recordFSRSReview, getFSRSCard } from '../utils/fsrsEngine';
 import { 
   RotateCcw, 
   Eye, 
@@ -14,9 +15,12 @@ import {
   CheckCircle, 
   ShieldCheck, 
   Flame, 
-  ArrowRight,
-  Sparkles,
-  Bell
+  ArrowRight, 
+  Sparkles, 
+  Bell,
+  Layers,
+  Brain,
+  Clock
 } from 'lucide-react';
 
 interface WordItem {
@@ -57,9 +61,26 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
   const targetWords = verse.text.split(/\s+/);
   const [assembledWords, setAssembledWords] = useState<WordItem[]>([]);
   const [availableWords, setAvailableWords] = useState<WordItem[]>(() => shuffleWords(verse));
+  // Scaffolding mode: 'builder' | 'ghost' | 'blind'
+  const [scaffoldMode, setScaffoldMode] = useState<'builder' | 'ghost' | 'blind'>('builder');
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
   const [showHint, setShowHint] = useState<boolean>(false);
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
+  const [fsrsRated, setFsrsRated] = useState<boolean>(false);
+  const [scheduledNextDays, setScheduledNextDays] = useState<number | null>(null);
+
+  // Helper to get ghost representation of a word
+  const getGhostDisplay = (w: string) => {
+    if (w.length <= 1) return w;
+    return w[0] + '•'.repeat(Math.min(3, w.length - 1));
+  };
+
+  const handleRateFSRS = (rating: 1 | 2 | 3 | 4) => {
+    soundEngine.playSnap();
+    const updated = recordFSRSReview(verse.id, rating);
+    setScheduledNextDays(updated.stability);
+    setFsrsRated(true);
+  };
 
   useEffect(() => {
     return () => {
@@ -67,12 +88,27 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
     };
   }, []);
 
+  const currentFsrs = getFSRSCard(verse.id);
+
+  useEffect(() => {
+    resetPuzzle();
+  }, [verse.id]);
+
   const resetPuzzle = () => {
     soundEngine.playSnap();
     setAvailableWords(shuffleWords(verse));
     setAssembledWords([]);
     setIsCompleted(false);
     setShowHint(false);
+    setFsrsRated(false);
+    setScheduledNextDays(null);
+  };
+
+  const getTileLabel = (word: string, isAvailable = false) => {
+    if (scaffoldMode === 'builder') return word;
+    if (scaffoldMode === 'ghost') return isAvailable ? word : getGhostDisplay(word);
+    if (scaffoldMode === 'blind') return isAvailable ? word : '???';
+    return word;
   };
 
   const handleSelectWord = (item: WordItem) => {
@@ -190,9 +226,21 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
             "{verse.plainEnglishSummary}"
           </div>
 
-          <div className="text-xs text-stone-400">
+          <div className="text-xs text-stone-400 mb-3">
             <strong className="text-amber-400">Takeaway for Today: </strong>
             {verse.keyTakeaway}
+          </div>
+
+          {/* FSRS Retention Stats Widget */}
+          <div className="p-3 bg-stone-950/60 rounded-xl border border-stone-800/80 flex items-center justify-between text-[11px] text-stone-400">
+            <div className="flex items-center gap-1.5">
+              <Brain className="w-3.5 h-3.5 text-amber-400" />
+              <span>Cognitive Stability: <strong className="text-stone-200">{currentFsrs.stability} days</strong></span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Next Review: <strong className="text-stone-200">{currentFsrs.nextReviewDate}</strong></span>
+            </div>
           </div>
 
           <AnimatePresence>
@@ -212,6 +260,46 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
 
       {/* RIGHT COLUMN: WORKBENCH & WORD BANK */}
       <div className="lg:col-span-7 space-y-6">
+        {/* Scaffolding Mode Selector */}
+        <div className="flex items-center justify-between bg-stone-900/80 p-1.5 rounded-xl border border-stone-800">
+          <div className="flex items-center gap-1.5 text-xs font-mono font-medium text-stone-400 px-2">
+            <Layers className="w-3.5 h-3.5 text-amber-400" />
+            <span>Mode:</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setScaffoldMode('builder')}
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                scaffoldMode === 'builder'
+                  ? 'bg-amber-600 text-black font-bold shadow-sm'
+                  : 'text-stone-400 hover:text-stone-200 hover:bg-stone-800'
+              }`}
+            >
+              1. Builder
+            </button>
+            <button
+              onClick={() => setScaffoldMode('ghost')}
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                scaffoldMode === 'ghost'
+                  ? 'bg-amber-600 text-black font-bold shadow-sm'
+                  : 'text-stone-400 hover:text-stone-200 hover:bg-stone-800'
+              }`}
+            >
+              2. Ghost Letters
+            </button>
+            <button
+              onClick={() => setScaffoldMode('blind')}
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                scaffoldMode === 'blind'
+                  ? 'bg-amber-600 text-black font-bold shadow-sm'
+                  : 'text-stone-400 hover:text-stone-200 hover:bg-stone-800'
+              }`}
+            >
+              3. Blind Recall
+            </button>
+          </div>
+        </div>
+
         {/* Assembly Work Area */}
         <div>
           <div className="text-xs uppercase font-mono tracking-wider text-stone-400 mb-2 flex items-center justify-between">
@@ -224,7 +312,9 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
           <div className="min-h-[140px] md:min-h-[160px] p-4 md:p-5 rounded-2xl bg-[#0b0e12] border-2 border-dashed border-stone-800 flex flex-wrap items-center content-start gap-2.5 shadow-inner">
             {assembledWords.length === 0 ? (
               <div className="w-full text-center text-stone-500 text-sm py-10 font-reading italic">
-                Tap the word tiles below to forge the scripture...
+                {scaffoldMode === 'builder' && 'Tap the word tiles below to forge the scripture...'}
+                {scaffoldMode === 'ghost' && 'Assemble the verse using first-letter anchors...'}
+                {scaffoldMode === 'blind' && 'Blind reconstruction active: test pure recall...'}
               </div>
             ) : (
               assembledWords.map((item, idx) => {
@@ -254,7 +344,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
         {/* Available Words Bank */}
         <div>
           <div className="text-xs uppercase font-mono tracking-wider text-stone-400 mb-2">
-            Available Words
+            Available Words ({scaffoldMode})
           </div>
           <div className="p-4 md:p-5 rounded-2xl bg-stone-900/60 border border-stone-800 flex flex-wrap gap-2.5 min-h-[120px]">
             {availableWords.map((item) => (
@@ -265,7 +355,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                 onClick={() => handleSelectWord(item)}
                 className="px-4 py-2.5 rounded-xl text-sm md:text-base font-reading font-medium bg-[#1a1f29] border border-stone-700 text-parchment-200 hover:border-amber-500 hover:bg-stone-800 shadow-sm active:bg-amber-700 focus-visible:ring-2 focus-visible:ring-amber-500"
               >
-                {item.word}
+                {getTileLabel(item.word, true)}
               </motion.button>
             ))}
             {availableWords.length === 0 && !isCompleted && (
@@ -276,7 +366,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
           </div>
         </div>
 
-        {/* Success Card */}
+        {/* Success Card with FSRS Evaluation */}
         <AnimatePresence>
           {isCompleted && (
             <motion.div
@@ -291,8 +381,48 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
               <p className="text-base md:text-lg font-reading text-emerald-100 italic mb-3">
                 "{verse.text}"
               </p>
-              <div className="text-xs text-emerald-300 font-medium">
+              <div className="text-xs text-emerald-300 font-medium mb-4">
                 <strong>Takeaway for Today: </strong> {verse.keyTakeaway}
+              </div>
+
+              {/* FSRS Self-Assessment */}
+              <div className="p-3.5 rounded-xl bg-black/40 border border-emerald-800/40 mb-3">
+                <div className="text-xs font-mono font-medium text-emerald-300 mb-2 flex items-center justify-between">
+                  <span>How easily did you recall this verse? {fsrsRated && <strong className="text-emerald-400">✓ Retention Logged</strong>}</span>
+                  {scheduledNextDays && (
+                    <span className="text-amber-400 font-bold">Scheduled in {scheduledNextDays} days</span>
+                  )}
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  <button
+                    onClick={() => handleRateFSRS(1)}
+                    className="p-2 rounded-lg bg-stone-900 border border-red-800/60 hover:border-red-500 text-[11px] font-medium text-red-300 text-center transition-all"
+                  >
+                    <div className="font-bold">Again</div>
+                    <div className="text-[10px] text-stone-400">1 day</div>
+                  </button>
+                  <button
+                    onClick={() => handleRateFSRS(2)}
+                    className="p-2 rounded-lg bg-stone-900 border border-amber-800/60 hover:border-amber-500 text-[11px] font-medium text-amber-300 text-center transition-all"
+                  >
+                    <div className="font-bold">Hard</div>
+                    <div className="text-[10px] text-stone-400">2-3 days</div>
+                  </button>
+                  <button
+                    onClick={() => handleRateFSRS(3)}
+                    className="p-2 rounded-lg bg-stone-900 border border-emerald-800/60 hover:border-emerald-500 text-[11px] font-medium text-emerald-300 text-center transition-all"
+                  >
+                    <div className="font-bold">Good</div>
+                    <div className="text-[10px] text-stone-400">4-7 days</div>
+                  </button>
+                  <button
+                    onClick={() => handleRateFSRS(4)}
+                    className="p-2 rounded-lg bg-stone-900 border border-cyan-800/60 hover:border-cyan-500 text-[11px] font-medium text-cyan-300 text-center transition-all"
+                  >
+                    <div className="font-bold">Easy</div>
+                    <div className="text-[10px] text-stone-400">14+ days</div>
+                  </button>
+                </div>
               </div>
 
               <div className="mt-4 pt-3 border-t border-emerald-900/40 flex justify-end">

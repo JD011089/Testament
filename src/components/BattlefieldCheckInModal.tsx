@@ -1,0 +1,230 @@
+import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  X, 
+  Swords, 
+  Briefcase, 
+  HeartCrack, 
+  Flame, 
+  Compass, 
+  Sparkles, 
+  CheckCircle2, 
+  RotateCcw 
+} from 'lucide-react';
+import { soundEngine } from '../utils/audio';
+
+export interface BattlefieldOption {
+  id: string;
+  title: string;
+  subtitle: string;
+  icon: 'briefcase' | 'heart' | 'flame' | 'compass' | 'swords';
+  suggestedQuestId: string;
+  suggestedDilemmaId: string;
+  psalmReference: string;
+  colorBorder: string;
+  colorBg: string;
+}
+
+export const BATTLEFIELD_OPTIONS: BattlefieldOption[] = [
+  {
+    id: 'workplace-politics',
+    title: 'Workplace Politics & Authority Tension',
+    subtitle: 'Dealing with credit theft, difficult superiors, or toxic office dynamics.',
+    icon: 'briefcase',
+    suggestedQuestId: 'david-journey',
+    suggestedDilemmaId: 'dilemma-credit-thief',
+    psalmReference: 'Psalm 59 (When Saul sent men to watch David)',
+    colorBorder: 'border-amber-500/60',
+    colorBg: 'from-amber-950/40'
+  },
+  {
+    id: 'anxiety-overwhelm',
+    title: 'Anxiety, Burnout & Heavy Overwhelm',
+    subtitle: 'Depleted energy, high-stress pressure, feeling like quitting.',
+    icon: 'flame',
+    suggestedQuestId: 'elijah-journey',
+    suggestedDilemmaId: 'dilemma-burnout',
+    psalmReference: 'Psalm 46 (God is our refuge and strength)',
+    colorBorder: 'border-blue-500/60',
+    colorBg: 'from-blue-950/40'
+  },
+  {
+    id: 'betrayal-relational',
+    title: 'Betrayal, Slander & Relational Friction',
+    subtitle: 'Stung by friends, family conflict, or someone talking behind your back.',
+    icon: 'heart',
+    suggestedQuestId: 'joseph-journey',
+    suggestedDilemmaId: 'dilemma-credit-thief',
+    psalmReference: 'Psalm 55 (When a companion betrays trust)',
+    colorBorder: 'border-red-500/60',
+    colorBg: 'from-red-950/40'
+  },
+  {
+    id: 'high-stakes-decision',
+    title: 'High-Stakes Decision & Moral Courage',
+    subtitle: 'Standing at a critical crossroad; pressure to compromise integrity.',
+    icon: 'compass',
+    suggestedQuestId: 'peter-journey',
+    suggestedDilemmaId: 'dilemma-credit-thief',
+    psalmReference: 'Proverbs 3:5-6 & Psalm 27 (Whom shall I fear?)',
+    colorBorder: 'border-purple-500/60',
+    colorBg: 'from-purple-950/40'
+  },
+  {
+    id: 'spiritual-dryness',
+    title: 'Spiritual Dryness & Lethargy',
+    subtitle: 'Feeling distant from God, going through the motions, needing fresh fire.',
+    icon: 'swords',
+    suggestedQuestId: 'david-journey',
+    suggestedDilemmaId: 'dilemma-burnout',
+    psalmReference: 'Psalm 63 (My soul thirsts for You in a parched land)',
+    colorBorder: 'border-emerald-500/60',
+    colorBg: 'from-emerald-950/40'
+  }
+];
+
+interface BattlefieldCheckInModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  activeBattlefieldId: string | null;
+  onSelectBattlefield: (battlefieldId: string | null) => void;
+}
+
+export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = ({
+  isOpen,
+  onClose,
+  activeBattlefieldId,
+  onSelectBattlefield
+}) => {
+  if (!isOpen) return null;
+
+  const handleSelect = (id: string) => {
+    soundEngine.playSnap();
+    onSelectBattlefield(id);
+    onClose();
+  };
+
+  const handleReset = () => {
+    soundEngine.playClick();
+    onSelectBattlefield(null);
+    onClose();
+  };
+
+  const renderIcon = (type: BattlefieldOption['icon']) => {
+    switch (type) {
+      case 'briefcase':
+        return <Briefcase className="w-5 h-5 text-amber-400" />;
+      case 'flame':
+        return <Flame className="w-5 h-5 text-blue-400" />;
+      case 'heart':
+        return <HeartCrack className="w-5 h-5 text-red-400" />;
+      case 'compass':
+        return <Compass className="w-5 h-5 text-purple-400" />;
+      case 'swords':
+        return <Swords className="w-5 h-5 text-emerald-400" />;
+    }
+  };
+
+  return (
+    <AnimatePresence>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          className="w-full max-w-xl bg-[#11141c] border-2 border-amber-500/50 rounded-3xl p-6 md:p-8 shadow-2xl relative text-left overflow-y-auto max-h-[90vh]"
+        >
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute top-5 right-5 p-2 rounded-xl bg-stone-900 border border-stone-800 text-stone-400 hover:text-white transition-all"
+            aria-label="Close modal"
+          >
+            <X className="w-4 h-4" />
+          </button>
+
+          {/* Header */}
+          <div className="mb-6">
+            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-400 mb-1.5">
+              <Swords className="w-4 h-4" />
+              <span>5-Second Battlefield Check-In</span>
+            </div>
+            <h3 className="text-xl md:text-2xl font-serif font-bold text-parchment-50">
+              What Trial Are You Facing Today?
+            </h3>
+            <p className="text-xs md:text-sm text-stone-400 mt-1">
+              Select your immediate battlefield. We’ll tailor today's scripture campaign, dilemma, and field prayers to arm you right where you stand.
+            </p>
+          </div>
+
+          {/* Battlefield Options List */}
+          <div className="space-y-3 mb-6">
+            {BATTLEFIELD_OPTIONS.map((opt) => {
+              const isSelected = activeBattlefieldId === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  onClick={() => handleSelect(opt.id)}
+                  className={`w-full p-4 rounded-2xl border text-left transition-all flex items-start gap-3.5 ${
+                    isSelected
+                      ? `${opt.colorBorder} bg-gradient-to-r ${opt.colorBg} to-stone-900 shadow-md ring-2 ring-amber-400/50`
+                      : 'border-stone-800/90 bg-stone-900/60 hover:bg-stone-900 hover:border-stone-700'
+                  }`}
+                >
+                  <div className="p-2.5 rounded-xl bg-black/40 border border-stone-800 shrink-0 mt-0.5">
+                    {renderIcon(opt.icon)}
+                  </div>
+
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="font-serif font-bold text-sm md:text-base text-stone-100">
+                        {opt.title}
+                      </h4>
+                      {isSelected && (
+                        <span className="flex items-center gap-1 text-[11px] font-mono text-emerald-400 font-bold bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-800/50">
+                          <CheckCircle2 className="w-3 h-3" />
+                          <span>Active</span>
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-stone-400 mt-1 leading-relaxed">
+                      {opt.subtitle}
+                    </p>
+                    <div className="text-[10px] font-mono text-amber-300/80 mt-1.5 flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-amber-400" />
+                      <span>Field Armor: {opt.psalmReference}</span>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Footer Reset & Close */}
+          <div className="flex items-center justify-between pt-4 border-t border-stone-800 text-xs">
+            {activeBattlefieldId ? (
+              <button
+                onClick={handleReset}
+                className="flex items-center gap-1.5 text-stone-400 hover:text-amber-400 transition-colors"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset to Standard Daily Rotation</span>
+              </button>
+            ) : (
+              <span className="text-stone-500 font-mono text-[11px]">
+                Currently following general rotation
+              </span>
+            )}
+
+            <button
+              onClick={onClose}
+              className="px-4 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold transition-all"
+            >
+              Done
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    </AnimatePresence>
+  );
+};

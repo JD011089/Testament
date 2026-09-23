@@ -26,7 +26,9 @@ import {
   Bell
 } from 'lucide-react';
 import { MemoryPulseModal } from './MemoryPulseModal';
-import { getStoryVerseForAct } from '../utils/verseRegistry';
+import { getStoryVerseForAct, getStoryVerseForQuest } from '../utils/verseRegistry';
+import { deriveConsequenceRipple, generateAfterActionReport } from '../utils/narrativeMomentum';
+import { TacticalNexusCard } from './TacticalNexusCard';
 
 interface StoryViewerProps {
   quest: StoryQuest;
@@ -60,11 +62,85 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
 
   const act: StoryAct = quest.acts[currentActIndex];
   const isActFinished = completedActs.includes(act.id);
+  const isQuestFullyCompleted = quest.acts.every(a => completedActs.includes(a.id));
+  const questAnchorVerse = getStoryVerseForQuest(quest.id) || getStoryVerseForAct(quest.id, act.id);
+
+  // Load saved choices, quizzes, and reflection notes for the current act (Requirement 3)
+  useEffect(() => {
+    try {
+      const storedChoices = localStorage.getItem('testament_act_choices');
+      if (storedChoices) {
+        const choices = JSON.parse(storedChoices);
+        if (choices[act.id]) {
+          setSelectedChoiceId(choices[act.id]);
+        } else {
+          setSelectedChoiceId(null);
+        }
+      } else {
+        setSelectedChoiceId(null);
+      }
+    } catch {
+      setSelectedChoiceId(null);
+    }
+
+    try {
+      const storedQuizzes = localStorage.getItem('testament_act_quizzes');
+      if (storedQuizzes) {
+        const quizzes = JSON.parse(storedQuizzes);
+        if (quizzes[act.id] !== undefined) {
+          setSelectedQuizOption(quizzes[act.id].optionIndex);
+          setHasSubmittedQuiz(true);
+        } else {
+          setSelectedQuizOption(null);
+          setHasSubmittedQuiz(false);
+        }
+      } else {
+        setSelectedQuizOption(null);
+        setHasSubmittedQuiz(false);
+      }
+    } catch {
+      setSelectedQuizOption(null);
+      setHasSubmittedQuiz(false);
+    }
+
+    try {
+      const storedNotes = localStorage.getItem('testament_notes');
+      if (storedNotes) {
+        const notes = JSON.parse(storedNotes);
+        if (notes[act.id]) {
+          setJournalNote(notes[act.id]);
+          setIsNoteSaved(true);
+          setShowNoteInput(true);
+        } else {
+          setJournalNote('');
+          setIsNoteSaved(false);
+          setShowNoteInput(false);
+        }
+      } else {
+        setJournalNote('');
+        setIsNoteSaved(false);
+        setShowNoteInput(false);
+      }
+    } catch {
+      setJournalNote('');
+      setIsNoteSaved(false);
+      setShowNoteInput(false);
+    }
+  }, [act.id]);
+
   const selectedChoice = act.choices.find(c => c.id === selectedChoiceId);
 
   const handleSelectChoice = (choiceId: string) => {
     soundEngine.playSnap();
     setSelectedChoiceId(choiceId);
+    try {
+      const stored = localStorage.getItem('testament_act_choices');
+      const choices = stored ? JSON.parse(stored) : {};
+      choices[act.id] = choiceId;
+      localStorage.setItem('testament_act_choices', JSON.stringify(choices));
+    } catch (err) {
+      console.warn('Failed to save choice to localStorage:', err);
+    }
   };
 
   const handleToggleSpeakScripture = () => {
@@ -122,8 +198,17 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     if (act.wisdomQuiz?.options[optionIndex].isCorrect) {
       soundEngine.playVictory();
     }
+    try {
+      const stored = localStorage.getItem('testament_act_quizzes');
+      const quizzes = stored ? JSON.parse(stored) : {};
+      quizzes[act.id] = { optionIndex, isCorrect: !!act.wisdomQuiz?.options[optionIndex]?.isCorrect };
+      localStorage.setItem('testament_act_quizzes', JSON.stringify(quizzes));
+    } catch (err) {
+      console.warn('Failed to save quiz answer to localStorage:', err);
+    }
   };
 
+  // Requirement 2: Auto-scroll all the way to top on Act and Quest completion
   const handleFinishAct = () => {
     soundEngine.playVictory();
     confetti({
@@ -136,6 +221,25 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     const isLastAct = currentActIndex === quest.acts.length - 1;
     const relicId = isLastAct ? quest.relicReward?.id : undefined;
     onCompleteAct(act.id, quest.id, relicId);
+
+    if (!isLastAct) {
+      // Advance to start the next act and go all the way to the top!
+      setCurrentActIndex(prev => prev + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    } else {
+      // Completed the entire quest! Scroll to top and finish
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      setTimeout(() => {
+        onBack();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }, 700);
+    }
   };
 
   // Stop audio on unmount
@@ -149,6 +253,9 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     soundEngine.stopSpeaking();
     setIsSpeakingScripture(false);
     setIsNarratingFullStory(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
     onBack();
   };
 
@@ -159,13 +266,9 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     if (currentActIndex < quest.acts.length - 1) {
       soundEngine.playClick();
       setCurrentActIndex(prev => prev + 1);
-      setSelectedChoiceId(null);
-      setActiveTermIndex(null);
-      setShowNoteInput(false);
-      setIsNoteSaved(false);
-      setSelectedQuizOption(null);
-      setHasSubmittedQuiz(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
     }
   };
 
@@ -176,13 +279,9 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     if (currentActIndex > 0) {
       soundEngine.playClick();
       setCurrentActIndex(prev => prev - 1);
-      setSelectedChoiceId(null);
-      setActiveTermIndex(null);
-      setShowNoteInput(false);
-      setIsNoteSaved(false);
-      setSelectedQuizOption(null);
-      setHasSubmittedQuiz(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
     }
   };
 
@@ -283,6 +382,64 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Consequence Ripple Banner (Narrative Momentum from Prior Acts) */}
+      {(() => {
+        const ripple = deriveConsequenceRipple(quest.id, currentActIndex);
+        if (!ripple) return null;
+        return (
+          <div className="mb-4 p-3.5 rounded-2xl bg-gradient-to-r from-amber-950/40 via-stone-900 to-stone-950 border border-amber-500/40 flex items-start gap-3 text-xs shadow-md">
+            <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+            <div>
+              <span className="font-mono font-bold text-amber-300 uppercase tracking-wider block text-[10px]">
+                Consequence Ripple • {ripple.rippleTitle}
+              </span>
+              <span className="text-stone-300 leading-relaxed">{ripple.rippleDescription}</span>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Review Mode Banner & After-Action Report (Requirement 3: Never starts over when reviewed) */}
+      {isQuestFullyCompleted && (
+        <div className="mb-6 p-4 md:p-5 rounded-2xl bg-gradient-to-r from-emerald-950/60 via-[#10141d] to-stone-900 border border-emerald-500/50 shadow-md space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2.5 text-emerald-300">
+              <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+              <div>
+                <span className="font-bold text-sm text-emerald-200 block">
+                  Quest Completed • Review Mode
+                </span>
+                <span className="text-stone-300 text-xs">
+                  All your chosen answers, quiz drills, and reflections are preserved exactly as you answered them.
+                </span>
+              </div>
+            </div>
+            <span className="font-mono text-[11px] text-emerald-300 font-bold bg-emerald-900/60 border border-emerald-700/50 px-2.5 py-1 rounded-full shrink-0">
+              ✓ 100% Completed
+            </span>
+          </div>
+
+          {/* After-Action Report (AAR) Card */}
+          {(() => {
+            const aar = generateAfterActionReport(quest.title, quest.heroName, quest.acts.length);
+            return (
+              <div className="p-3.5 rounded-xl bg-black/50 border border-emerald-800/40 text-xs space-y-1.5">
+                <div className="flex items-center justify-between text-[10px] font-mono text-amber-400 uppercase tracking-wider">
+                  <span>After-Action Report (AAR)</span>
+                  <span className="text-emerald-300 font-bold">{aar.battlefieldHonor}</span>
+                </div>
+                <div className="text-sm font-serif font-bold text-stone-200">
+                  Tactical Path: <span className="text-amber-300">{aar.tacticalPath}</span>
+                </div>
+                <p className="text-stone-300 text-[11px] leading-relaxed">
+                  {aar.afterActionSummary}
+                </p>
+              </div>
+            );
+          })()}
+        </div>
+      )}
 
       {/* GUIDED DESKTOP SPREAD: STICKY STAGE (Col 4) + CHRONOLOGICAL READING STREAM (Col 8) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -532,7 +689,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             </AnimatePresence>
           </section>
 
-          {/* STEP 3: UNLOCKED SCRIPTURE CARD */}
+          {/* STEP 3: UNLOCKED SCRIPTURE CARD (Requirement 1: 1 memory verse applies to the quest) */}
           <section id="section-scripture" className="p-5 md:p-6 rounded-2xl bg-[#151922] border-2 border-amber-500/50 shadow-glow-gold relative overflow-hidden scroll-mt-6">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -541,7 +698,11 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                 </span>
                 <div className="flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-amber-400 font-bold">
                   <BookOpen className="w-4 h-4 text-amber-400" />
-                  <span>Scripture Unlocked • {act.unlockedScripture.translation}</span>
+                  <span>
+                    {act.actNumber === 1 
+                      ? `Quest Anchor Scripture • 1 Memory Verse For This Quest`
+                      : `Scene Scripture • Reinforces Quest Anchor: ${questAnchorVerse?.reference || quest.acts[0].unlockedScripture.reference}`}
+                  </span>
                 </div>
               </div>
 
@@ -580,7 +741,11 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             <div className="mt-4 pt-3 border-t border-amber-900/30 flex flex-wrap items-center justify-between gap-2.5">
               <div className="flex items-center gap-1.5 text-xs text-stone-400">
                 <Bell className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
-                <span>Want to lock this story verse into memory?</span>
+                <span>
+                  {act.actNumber === 1
+                    ? "Lock this quest's definitive memory verse into your daily recall:"
+                    : `Reinforce the quest's memory verse (${questAnchorVerse?.reference}):`}
+                </span>
               </div>
 
               <div className="flex items-center gap-2">
@@ -592,7 +757,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs shadow-glow-amber transition-all"
                 >
                   <Bell className="w-3.5 h-3.5" />
-                  <span>Train This Verse (Reminders)</span>
+                  <span>Train Quest Verse: {questAnchorVerse?.reference || act.unlockedScripture.reference}</span>
                 </button>
               </div>
             </div>
@@ -721,6 +886,9 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             </div>
           )}
 
+          {/* LIVING CANON: TACTICAL NEXUS KNOWLEDGE GRAPH */}
+          <TacticalNexusCard entityId={quest.id} />
+
           {/* Bottom Action Controls */}
           <div className="flex flex-col sm:flex-row gap-3 items-center justify-between pt-6 border-t border-stone-800">
             <button
@@ -758,7 +926,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   className="w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all flex items-center justify-center gap-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-400"
                 >
                   <CheckCircle2 className="w-4 h-4" />
-                  <span>Quest Finished • Return to Quests</span>
+                  <span>{isQuestFullyCompleted ? '✓ Completed • Return to Quests' : 'Quest Finished • Return to Quests'}</span>
                 </button>
               )}
             </div>
@@ -767,11 +935,11 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
         </div>
       </div>
 
-      {/* Memory Verse Pulse & Notification Modal */}
+      {/* Memory Verse Pulse & Notification Modal (Passes quest's single anchor memory verse) */}
       <MemoryPulseModal
         isOpen={isMemoryPulseOpen}
         onClose={() => setIsMemoryPulseOpen(false)}
-        targetVerse={getStoryVerseForAct(quest.id, act.id)}
+        targetVerse={questAnchorVerse || getStoryVerseForAct(quest.id, act.id)}
         onOpenWordForge={(verseId) => {
           if (onOpenWordForge) {
             onBack();

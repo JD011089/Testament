@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { REAL_LIFE_DILEMMAS } from '../data/dilemmas';
 import type { RealLifeDilemma } from '../data/dilemmas';
-import { evaluateUserPlay } from '../utils/heartEvaluation';
-import type { HeartEvaluationResult } from '../utils/heartEvaluation';
+import { evaluateUserPlay, evaluateSocraticTurn2 } from '../utils/heartEvaluation';
+import type { HeartEvaluationResult, TemperamentProfile } from '../utils/heartEvaluation';
 import { soundEngine } from '../utils/audio';
 import { getDailyDilemma } from '../utils/dailyEngine';
 import confetti from 'canvas-confetti';
+import { TacticalNexusCard } from './TacticalNexusCard';
 import { 
   ShieldAlert, 
   ArrowRight, 
@@ -32,11 +33,13 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
   targetDilemmaId,
   onClearTargetDilemma
 }) => {
+  const dailyDilemma = getDailyDilemma();
   const [selectedDilemmaId, setSelectedDilemmaId] = useState<string>(() => {
-    return targetDilemmaId || REAL_LIFE_DILEMMAS[0].id;
+    return targetDilemmaId || dailyDilemma.id;
   });
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [activeMode, setActiveMode] = useState<'heart_check' | 'playbook'>('heart_check');
+  const [isCampaignFocus, setIsCampaignFocus] = useState<boolean>(() => !!targetDilemmaId);
   
   // Heart Check interactive state
   const [userText, setUserText] = useState<string>('');
@@ -58,12 +61,44 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
   const [revealedPlayId, setRevealedPlayId] = useState<string | null>(null);
   const [prevTargetDilemmaId, setPrevTargetDilemmaId] = useState<string | null | undefined>(targetDilemmaId);
 
+  // Multi-Turn Socratic AI state
+  const [turn2Text, setTurn2Text] = useState<string>('');
+  const [turn2Feedback, setTurn2Feedback] = useState<string | null>(null);
+  const [temperamentProfile, setTemperamentProfile] = useState<TemperamentProfile | null>(null);
+
+  // Load saved answers for the current dilemma on mount or when switching
+  React.useEffect(() => {
+    try {
+      const stored = localStorage.getItem('testament_dilemma_answers');
+      if (stored) {
+        const answers = JSON.parse(stored);
+        if (answers[selectedDilemmaId]) {
+          setUserText(answers[selectedDilemmaId].userText || '');
+          setSelectedFeeling(answers[selectedDilemmaId].selectedFeeling || null);
+          setEvaluationResult(answers[selectedDilemmaId].evaluationResult || null);
+          setTurn2Text(answers[selectedDilemmaId].turn2Text || '');
+          setTurn2Feedback(answers[selectedDilemmaId].turn2Feedback || null);
+          setTemperamentProfile(answers[selectedDilemmaId].temperamentProfile || null);
+          return;
+        }
+      }
+    } catch {
+      // ignore
+    }
+    setUserText('');
+    setSelectedFeeling(null);
+    setEvaluationResult(null);
+    setTurn2Text('');
+    setTurn2Feedback(null);
+    setTemperamentProfile(null);
+  }, [selectedDilemmaId]);
+
   if (targetDilemmaId && targetDilemmaId !== prevTargetDilemmaId) {
     setPrevTargetDilemmaId(targetDilemmaId);
     setSelectedDilemmaId(targetDilemmaId);
+    setIsCampaignFocus(true);
     setSelectedCategory('All');
     setRevealedPlayId(null);
-    setEvaluationResult(null);
     if (onClearTargetDilemma) {
       onClearTargetDilemma();
     }
@@ -81,7 +116,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
     selectedCategory === 'All' || d.category === selectedCategory
   );
 
-  const dilemma: RealLifeDilemma = REAL_LIFE_DILEMMAS.find(d => d.id === selectedDilemmaId) || REAL_LIFE_DILEMMAS[0];
+  const dilemma: RealLifeDilemma = REAL_LIFE_DILEMMAS.find(d => d.id === selectedDilemmaId) || dailyDilemma;
 
   // Reset inputs when switching dilemmas
   const handleSelectDilemma = (dilemmaId: string) => {
@@ -89,9 +124,6 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
     setIsSpeakingScripture(false);
     soundEngine.playClick();
     setSelectedDilemmaId(dilemmaId);
-    setUserText('');
-    setSelectedFeeling(null);
-    setEvaluationResult(null);
     setRevealedPlayId(null);
   };
 
@@ -115,6 +147,16 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
     const result = evaluateUserPlay(userText, selectedFeeling, dilemma);
     setEvaluationResult(result);
 
+    // Save user's answer and evaluation so it's preserved on review (Requirement 3 & 4)
+    try {
+      const stored = localStorage.getItem('testament_dilemma_answers');
+      const answers = stored ? JSON.parse(stored) : {};
+      answers[dilemma.id] = { userText, selectedFeeling, evaluationResult: result };
+      localStorage.setItem('testament_dilemma_answers', JSON.stringify(answers));
+    } catch (err) {
+      console.warn('Failed to save dilemma answer', err);
+    }
+
     if (!completedDilemmas.includes(dilemma.id)) {
       soundEngine.playVictory();
       confetti({
@@ -128,6 +170,45 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
       localStorage.setItem('testament_completed_dilemmas', JSON.stringify(updated));
       onRewardXP(50);
     }
+
+    // Dispatch event to advance Daily Campaign and trigger Next Task prompt (Requirement 5)
+    window.dispatchEvent(new CustomEvent('testament-dilemma-completed', { detail: { dilemmaId: dilemma.id } }));
+  };
+
+  const handleSubmitSocraticTurn2 = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!turn2Text.trim()) return;
+
+    soundEngine.playSnap();
+    const { followUpFeedback, temperament } = evaluateSocraticTurn2(userText, turn2Text, dilemma);
+    setTurn2Feedback(followUpFeedback);
+    setTemperamentProfile(temperament);
+
+    try {
+      const stored = localStorage.getItem('testament_dilemma_answers');
+      const answers = stored ? JSON.parse(stored) : {};
+      answers[dilemma.id] = {
+        ...(answers[dilemma.id] || {}),
+        userText,
+        selectedFeeling,
+        evaluationResult,
+        turn2Text,
+        turn2Feedback: followUpFeedback,
+        temperamentProfile: temperament
+      };
+      localStorage.setItem('testament_dilemma_answers', JSON.stringify(answers));
+    } catch (err) {
+      console.warn('Failed to save turn 2 answer', err);
+    }
+
+    soundEngine.playVictory();
+    confetti({
+      particleCount: 50,
+      spread: 60,
+      origin: { y: 0.6 },
+      colors: ['#38bdf8', '#fbbf24', '#34d399']
+    });
+    onRewardXP(40);
   };
 
   const handleSpeakScripture = () => {
@@ -180,55 +261,91 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
         </p>
       </div>
 
-      {/* Category Filter Pills */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-3 scrollbar-none" role="tablist" aria-label="Dilemma categories">
-        <span className="text-[11px] font-mono text-stone-400 flex items-center gap-1 pl-1">
-          <Filter className="w-3 h-3 text-amber-500" /> Category:
-        </span>
-        {categories.map(cat => (
+      {/* Category Filter Pills & Single Campaign Dilemma Focus (Requirement 6) */}
+      {isCampaignFocus ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl bg-gradient-to-r from-amber-950/60 to-stone-900 border border-amber-500/50 mb-6 shadow-md">
+          <div className="flex items-center gap-2.5">
+            <span className="text-xl">🎯</span>
+            <div>
+              <span className="text-xs font-mono font-bold text-amber-300 uppercase tracking-wider block">
+                Today's Daily Campaign Dilemma • 1 of 1 Daily Scenario
+              </span>
+              <span className="text-xs text-stone-400">
+                Sharpening your real-world wisdom for today's assignment.
+              </span>
+            </div>
+          </div>
           <button
-            key={cat}
-            role="tab"
-            aria-selected={selectedCategory === cat}
-            onClick={() => {
-              soundEngine.playClick();
-              setSelectedCategory(cat);
-              const firstInCat = REAL_LIFE_DILEMMAS.find(d => cat === 'All' || d.category === cat);
-              if (firstInCat) handleSelectDilemma(firstInCat.id);
-            }}
-            className={`text-xs px-3 py-1 rounded-full font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-amber-500 ${
-              selectedCategory === cat
-                ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
-                : 'bg-stone-900/80 border border-stone-800 text-stone-400 hover:text-stone-200'
-            }`}
+            onClick={() => setIsCampaignFocus(false)}
+            className="text-xs text-amber-400 hover:text-amber-300 underline underline-offset-2 transition-colors font-semibold"
           >
-            {cat} {cat === 'All' ? `(${REAL_LIFE_DILEMMAS.length})` : ''}
+            Browse All Scenarios (Free Roam)
           </button>
-        ))}
-      </div>
+        </div>
+      ) : (
+        <>
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none" role="tablist" aria-label="Dilemma categories">
+              <span className="text-[11px] font-mono text-stone-400 flex items-center gap-1 pl-1">
+                <Filter className="w-3 h-3 text-amber-500" /> Category:
+              </span>
+              {categories.map(cat => (
+                <button
+                  key={cat}
+                  role="tab"
+                  aria-selected={selectedCategory === cat}
+                  onClick={() => {
+                    soundEngine.playClick();
+                    setSelectedCategory(cat);
+                    const firstInCat = REAL_LIFE_DILEMMAS.find(d => cat === 'All' || d.category === cat);
+                    if (firstInCat) handleSelectDilemma(firstInCat.id);
+                  }}
+                  className={`text-xs px-3 py-1 rounded-full font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-amber-500 ${
+                    selectedCategory === cat
+                      ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                      : 'bg-stone-900/80 border border-stone-800 text-stone-400 hover:text-stone-200'
+                  }`}
+                >
+                  {cat} {cat === 'All' ? `(${REAL_LIFE_DILEMMAS.length})` : ''}
+                </button>
+              ))}
+            </div>
 
-      {/* Scenario Horizontal Selector */}
-      <div className="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-none">
-        {filteredDilemmas.map(d => {
-          const isSelected = dilemma.id === d.id;
-          const isDone = completedDilemmas.includes(d.id);
-          return (
             <button
-              key={d.id}
-              onClick={() => handleSelectDilemma(d.id)}
-              className={`text-xs px-3.5 py-2 rounded-xl font-medium whitespace-nowrap transition-all flex items-center gap-1.5 border ${
-                isSelected
-                  ? 'bg-stone-800 text-amber-400 border-amber-500/60 font-bold shadow-md'
-                  : 'bg-[#12151c] border-stone-800/80 text-stone-400 hover:text-stone-200 hover:border-stone-700'
-              }`}
+              onClick={() => {
+                handleSelectDilemma(dailyDilemma.id);
+                setIsCampaignFocus(true);
+              }}
+              className="text-xs font-mono text-amber-400 hover:text-amber-300 font-bold shrink-0 ml-auto pb-2"
             >
-              {isDone && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />}
-              {d.id === getDailyDilemma().id && <span className="text-amber-400 text-xs shrink-0" title="Today's Featured Scenario">★</span>}
-              <span>{d.title}</span>
+              Focus on Daily Campaign (1 Dilemma)
             </button>
-          );
-        })}
-      </div>
+          </div>
+
+          {/* Scenario Horizontal Selector */}
+          <div className="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-none">
+            {filteredDilemmas.map(d => {
+              const isSelected = dilemma.id === d.id;
+              const isDone = completedDilemmas.includes(d.id);
+              return (
+                <button
+                  key={d.id}
+                  onClick={() => handleSelectDilemma(d.id)}
+                  className={`text-xs px-3.5 py-2 rounded-xl font-medium whitespace-nowrap transition-all flex items-center gap-1.5 border ${
+                    isSelected
+                      ? 'bg-stone-800 text-amber-400 border-amber-500/60 font-bold shadow-md'
+                      : 'bg-[#12151c] border-stone-800/80 text-stone-400 hover:text-stone-200 hover:border-stone-700'
+                  }`}
+                >
+                  {isDone && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />}
+                  {d.id === dailyDilemma.id && <span className="text-amber-400 text-xs shrink-0" title="Today's Featured Scenario">★</span>}
+                  <span>{d.title}</span>
+                </button>
+              );
+            })}
+          </div>
+        </>
+      )}
 
       {/* Main Dilemma Briefing Card */}
       <div className="p-6 rounded-2xl bg-[#12151c] border-2 border-stone-800 mb-6 shadow-xl relative overflow-hidden">
@@ -421,6 +538,185 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                 </p>
               </div>
 
+              {/* Dynamic Analysis of User's Typed Words (Requirement 4) */}
+              {evaluationResult.userWordsAnalysis && (
+                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-amber-950/40 via-stone-900 to-black/60 border border-amber-500/50 shadow-inner">
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2.5 border-b border-stone-800">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-amber-400" />
+                      <h4 className="text-xs sm:text-sm font-serif font-bold text-amber-300 uppercase tracking-wider">
+                        Analysis of Your Proposed Play
+                      </h4>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold">
+                        Tactic: {evaluationResult.userWordsAnalysis.primaryTactic}
+                      </span>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-stone-900 text-stone-400 border border-stone-800">
+                        {evaluationResult.userWordsAnalysis.detectedTone}
+                      </span>
+                    </div>
+                  </div>
+
+                  {evaluationResult.userWordsAnalysis.userQuoteSummary && (
+                    <div className="mb-3 px-3 py-2 rounded-xl bg-black/40 border border-stone-800 text-xs text-stone-300">
+                      <span className="text-stone-400 text-[10px] font-mono uppercase tracking-wider block mb-0.5">Your Words:</span>
+                      <span className="text-amber-200 italic font-reading">{evaluationResult.userWordsAnalysis.userQuoteSummary}</span>
+                    </div>
+                  )}
+
+                  <p className="text-xs sm:text-sm text-stone-200 leading-relaxed font-sans mb-3">
+                    {evaluationResult.directAnswerToUser}
+                  </p>
+
+                  {/* Tactical Pros & Cons */}
+                  {evaluationResult.tacticalProsCons && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-stone-800/80 text-xs">
+                      <div className="p-3 rounded-xl bg-emerald-950/30 border border-emerald-800/40">
+                        <strong className="text-emerald-400 block mb-1 font-mono uppercase text-[10px] tracking-wider">
+                          ✓ Tactical Strength
+                        </strong>
+                        <span className="text-stone-300 leading-relaxed">{evaluationResult.tacticalProsCons.strength}</span>
+                      </div>
+                      <div className="p-3 rounded-xl bg-red-950/20 border border-red-900/40">
+                        <strong className="text-red-400 block mb-1 font-mono uppercase text-[10px] tracking-wider">
+                          ⚠️ Critical Vulnerability
+                        </strong>
+                        <span className="text-stone-300 leading-relaxed">{evaluationResult.tacticalProsCons.vulnerability}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* MULTI-TURN SOCRATIC AI: THE MENTOR'S COUNTER-CHALLENGE */}
+              {evaluationResult.socraticChallenge && (
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-950/50 via-[#10141f] to-stone-900 border-2 border-indigo-500/40 shadow-xl space-y-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-indigo-900/40">
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-4 h-4 text-indigo-400" />
+                      <h4 className="text-xs sm:text-sm font-mono font-bold text-indigo-300 uppercase tracking-wider">
+                        The Mentor's Socratic Counter-Challenge (Turn 2)
+                      </h4>
+                    </div>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-900/60 text-indigo-200 border border-indigo-700/50">
+                      Discipleship Drill
+                    </span>
+                  </div>
+
+                  {/* Socratic Probe */}
+                  <div className="p-3.5 rounded-xl bg-black/40 border border-indigo-900/40 text-xs sm:text-sm text-indigo-100 font-reading leading-relaxed italic">
+                    "{evaluationResult.socraticChallenge}"
+                  </div>
+
+                  {/* Turn 2 Interactive Form */}
+                  <form onSubmit={handleSubmitSocraticTurn2} className="space-y-3">
+                    <label htmlFor="turn2-input" className="text-[11px] font-mono text-stone-400 uppercase tracking-wider block">
+                      Your Response To This Counter-Challenge:
+                    </label>
+                    <textarea
+                      id="turn2-input"
+                      value={turn2Text}
+                      onChange={e => setTurn2Text(e.target.value)}
+                      placeholder="Address the challenge directly... (e.g., 'I will meet him privately at 8:30 AM before the team call. I will say: I noticed you presented the slides without mentioning our joint work...')"
+                      rows={3}
+                      className="w-full p-3 rounded-xl bg-stone-950 border border-stone-800 text-stone-200 placeholder-stone-600 text-xs sm:text-sm focus:outline-none focus:border-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 transition-all font-sans leading-relaxed"
+                    />
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-stone-500 font-mono">
+                        {turn2Text.length > 0 ? `${turn2Text.length} chars` : 'Test your tactical maturity'}
+                      </span>
+                      <button
+                        type="submit"
+                        disabled={!turn2Text.trim()}
+                        className={`py-2 px-4 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                          turn2Text.trim()
+                            ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md cursor-pointer font-bold'
+                            : 'bg-stone-800 text-stone-500 cursor-not-allowed'
+                        }`}
+                      >
+                        <span>Lock In Play & Evaluate Temperament (+40 XP)</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </form>
+
+                  {/* Temperament Profile Results */}
+                  {temperamentProfile && (
+                    <div className="p-4 rounded-xl bg-black/50 border border-indigo-500/50 mt-3 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="text-[10px] font-mono text-amber-400 uppercase tracking-wider block">
+                            Biblical Tactical Temperament:
+                          </span>
+                          <span className="text-sm font-serif font-bold text-parchment-50">
+                            {temperamentProfile.archetypeTitle}
+                          </span>
+                        </div>
+                        <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold font-mono">
+                          {temperamentProfile.archetype}
+                        </span>
+                      </div>
+
+                      <p className="text-xs text-stone-300 leading-relaxed">
+                        {temperamentProfile.archetypeDescription}
+                      </p>
+
+                      {turn2Feedback && (
+                        <div className="p-2.5 rounded-lg bg-indigo-950/40 border border-indigo-800/40 text-xs text-indigo-200 italic">
+                          {turn2Feedback}
+                        </div>
+                      )}
+
+                      {/* 4 Virtue Spectrum Bars */}
+                      <div className="grid grid-cols-2 gap-2.5 pt-2 text-[11px] font-mono">
+                        <div>
+                          <div className="flex justify-between text-stone-400 mb-1">
+                            <span>Grace / Mercy:</span>
+                            <span className="text-emerald-400 font-bold">{temperamentProfile.graceScore}%</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-stone-900 rounded-full overflow-hidden">
+                            <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${temperamentProfile.graceScore}%` }} />
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="flex justify-between text-stone-400 mb-1">
+                            <span>Truth / Steel:</span>
+                            <span className="text-red-400 font-bold">{temperamentProfile.truthScore}%</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-stone-900 rounded-full overflow-hidden">
+                            <div className="h-full bg-red-500 rounded-full" style={{ width: `${temperamentProfile.truthScore}%` }} />
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="flex justify-between text-stone-400 mb-1">
+                            <span>Prudence / Strategy:</span>
+                            <span className="text-amber-400 font-bold">{temperamentProfile.prudenceScore}%</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-stone-900 rounded-full overflow-hidden">
+                            <div className="h-full bg-amber-500 rounded-full" style={{ width: `${temperamentProfile.prudenceScore}%` }} />
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="flex justify-between text-stone-400 mb-1">
+                            <span>Courage / Action:</span>
+                            <span className="text-cyan-400 font-bold">{temperamentProfile.courageScore}%</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-stone-900 rounded-full overflow-hidden">
+                            <div className="h-full bg-cyan-500 rounded-full" style={{ width: `${temperamentProfile.courageScore}%` }} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Grid: Human Validation vs The Flesh Trap */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Human Validation */}
@@ -482,6 +778,9 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                   </p>
                 </div>
               </div>
+
+              {/* LIVING CANON: TACTICAL NEXUS KNOWLEDGE GRAPH */}
+              <TacticalNexusCard entityId={dilemma.id} />
 
               {/* 3 Tactical Moves For Tomorrow */}
               <div>

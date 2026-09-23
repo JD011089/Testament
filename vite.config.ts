@@ -96,7 +96,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'prompt',
       devOptions: {
-        enabled: true
+        enabled: false
       },
       includeAssets: ['favicon.ico', 'favicon.png', 'apple-touch-icon.png', 'icons/*.png', 'audio/**/*.mp3'],
       manifest: {

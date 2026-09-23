@@ -5,6 +5,7 @@ import type { MorningBriefing } from '../data/morningBriefings';
 import { REAL_LIFE_DILEMMAS } from '../data/dilemmas';
 import type { RealLifeDilemma } from '../data/dilemmas';
 import { STORY_QUESTS } from '../data/stories';
+import { getTodayDailyCampaign } from '../data/dailyCampaigns';
 import type { StoryQuest, StoryAct } from '../types';
 import type { UserCalibrationProfile } from '../components/OnboardingModal';
 
@@ -67,10 +68,49 @@ export const getDailyBriefing = (): MorningBriefing => {
   return MORNING_BRIEFINGS[dayOfWeek] || MORNING_BRIEFINGS[0];
 };
 
+export const getTodayBattlefieldId = (): string | null => {
+  try {
+    return localStorage.getItem('testament_todays_battlefield');
+  } catch {
+    return null;
+  }
+};
+
+export const setTodayBattlefieldId = (id: string | null): void => {
+  try {
+    if (id) {
+      localStorage.setItem('testament_todays_battlefield', id);
+    } else {
+      localStorage.removeItem('testament_todays_battlefield');
+    }
+    window.dispatchEvent(new CustomEvent('testament-battlefield-changed', { detail: { battlefieldId: id } }));
+  } catch {
+    // ignore
+  }
+};
+
 /**
- * Deterministically rotates today's featured tactical dilemma
+ * Deterministically aligns today's featured tactical dilemma with the 1 dilemma of today's Daily Campaign
+ * (Requirement 6: There should only be 1 dilemma per daily campaign, or customized by today's Battlefield Check-in)
  */
 export const getDailyDilemma = (offsetDays = 0): RealLifeDilemma => {
+  const bfId = getTodayBattlefieldId();
+  if (bfId) {
+    if (bfId === 'anxiety-overwhelm') {
+      const match = REAL_LIFE_DILEMMAS.find(d => d.id === 'dilemma-burnout');
+      if (match) return match;
+    } else {
+      const match = REAL_LIFE_DILEMMAS.find(d => d.id === 'dilemma-credit-thief');
+      if (match) return match;
+    }
+  }
+
+  const campaign = getTodayDailyCampaign(offsetDays);
+  const dilemmaStep = campaign.steps.find(s => s.type === 'dilemma');
+  if (dilemmaStep) {
+    const matched = REAL_LIFE_DILEMMAS.find(d => d.id === dilemmaStep.targetId);
+    if (matched) return matched;
+  }
   const index = (getDayIndex(offsetDays)) % REAL_LIFE_DILEMMAS.length;
   return REAL_LIFE_DILEMMAS[index];
 };
@@ -151,8 +191,14 @@ export const getAdaptiveNextObjective = (
     };
   }
 
-  // 2. Identify target quest: prioritized by user profile recommendation or default to David
-  const preferredQuestId = userProfile?.recommendedQuestId || 'david-journey';
+  // 2. Identify target quest: prioritized by today's battlefield check-in, then user profile recommendation
+  const bfId = getTodayBattlefieldId();
+  let preferredQuestId = userProfile?.recommendedQuestId || 'david-journey';
+  if (bfId === 'anxiety-overwhelm') preferredQuestId = 'elijah-journey';
+  else if (bfId === 'betrayal-relational') preferredQuestId = 'joseph-journey';
+  else if (bfId === 'high-stakes-decision') preferredQuestId = 'peter-journey';
+  else if (bfId === 'workplace-politics') preferredQuestId = 'david-journey';
+
   const orderedQuests = [
     ...STORY_QUESTS.filter(q => q.id === preferredQuestId),
     ...STORY_QUESTS.filter(q => q.id !== preferredQuestId)

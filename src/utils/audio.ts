@@ -713,6 +713,19 @@ class SoundEngine {
 
     this.restoreAmbience();
   }
+
+  /**
+   * 45-Second Morning Audio Tactical Briefing
+   * Synthesizes and reads a high-impact audio mission briefing.
+   */
+  public playMorningTacticalBriefing(
+    briefing: { title: string; battlefieldFocus: string; memoryVerse: string; proverb: string },
+    onFinished?: () => void
+  ) {
+    this.playSnap();
+    const script = `Command Center Morning Tactical Briefing for today. Battlefield Focus: ${briefing.battlefieldFocus}. Anchor Scripture: ${briefing.memoryVerse}. Field Wisdom: ${briefing.proverb}. Tactical Directive: Stand fast in truth and maintain spiritual discernment. You are equipped for victory.`;
+    this.speakVerse(script, onFinished);
+  }
 }
 
 export const soundEngine = new SoundEngine();

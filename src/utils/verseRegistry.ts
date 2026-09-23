@@ -6,38 +6,40 @@ import { CANON_BOOKS } from '../data/canon';
 import type { MemoryVerse } from '../types';
 
 /**
- * Maps each Story Act's unlockedScripture into a first-class MemoryVerse
+ * Maps each Story Quest into ONE definitive MemoryVerse for the entire quest.
+ * (Requirement 1: One memory verse should apply to the quest no matter how many acts)
  */
-export const STORY_MEMORY_VERSES: MemoryVerse[] = STORY_QUESTS.flatMap((quest) => {
-  return quest.acts.map((act) => {
-    // Determine the most fitting category
-    let category: MemoryVerse['category'] = 'Courage & Facing Giants';
-    if (quest.id === 'peter-journey' || quest.id === 'joseph-journey' || quest.id === 'ruth-journey') {
-      category = 'Restoration After Failure';
-    } else if (quest.id === 'paul-journey' || quest.id === 'nehemiah-journey' || quest.id === 'joshua-journey') {
-      category = 'Endurance & Brotherhood';
-    } else if (quest.id === 'moses-journey' || quest.id === 'elijah-journey' || quest.id === 'jonah-journey' || quest.id === 'john-baptist-journey') {
-      category = 'Pressure & Anxiety';
-    } else if (quest.id === 'daniel-journey' || quest.id === 'esther-journey') {
-      category = 'Anger & Self-Control';
-    }
+export const STORY_MEMORY_VERSES: MemoryVerse[] = STORY_QUESTS.map((quest) => {
+  // Use quest's primary anchor scripture (Act 1's unlocked scripture) as the definitive memory verse
+  const primaryAct = quest.acts[0];
 
-    return {
-      id: `story-${act.id}`,
-      reference: act.unlockedScripture.reference,
-      translation: act.unlockedScripture.translation.split('/')[0].trim(),
-      text: act.unlockedScripture.text,
-      plainEnglishSummary: act.realTalkTakeaway.practicalLesson,
-      category,
-      difficulty: 'Core',
-      keyTakeaway: act.realTalkTakeaway.dailyAction,
-      storyQuestId: quest.id,
-      storyTitle: quest.title,
-      heroName: quest.heroName,
-      actId: act.id,
-      actTitle: act.actTitle
-    };
-  });
+  // Determine the most fitting category
+  let category: MemoryVerse['category'] = 'Courage & Facing Giants';
+  if (quest.id === 'peter-journey' || quest.id === 'joseph-journey' || quest.id === 'ruth-journey') {
+    category = 'Restoration After Failure';
+  } else if (quest.id === 'paul-journey' || quest.id === 'nehemiah-journey' || quest.id === 'joshua-journey') {
+    category = 'Endurance & Brotherhood';
+  } else if (quest.id === 'moses-journey' || quest.id === 'elijah-journey' || quest.id === 'jonah-journey' || quest.id === 'john-baptist-journey') {
+    category = 'Pressure & Anxiety';
+  } else if (quest.id === 'daniel-journey' || quest.id === 'esther-journey') {
+    category = 'Anger & Self-Control';
+  }
+
+  return {
+    id: `story-${quest.id}`,
+    reference: primaryAct.unlockedScripture.reference,
+    translation: primaryAct.unlockedScripture.translation.split('/')[0].trim(),
+    text: primaryAct.unlockedScripture.text,
+    plainEnglishSummary: primaryAct.realTalkTakeaway.practicalLesson,
+    category,
+    difficulty: 'Core',
+    keyTakeaway: primaryAct.realTalkTakeaway.dailyAction,
+    storyQuestId: quest.id,
+    storyTitle: quest.title,
+    heroName: quest.heroName,
+    actId: primaryAct.id,
+    actTitle: primaryAct.actTitle
+  };
 });
 
 /**
@@ -152,7 +154,7 @@ export const getStoryVerses = (): MemoryVerse[] => {
 };
 
 /**
- * Look up a verse by its ID (handles both 'verse-1' and 'story-david-act-1' or raw 'david-act-1')
+ * Look up a verse by its ID (handles 'verse-1', 'story-david-journey', legacy 'story-david-act-1', 'david-act-1', etc.)
  */
 export const getVerseById = (id?: string | null): MemoryVerse | null => {
   if (!id) return null;
@@ -161,9 +163,25 @@ export const getVerseById = (id?: string | null): MemoryVerse | null => {
   const match = ALL_AVAILABLE_VERSES.find(v => v.id === id);
   if (match) return match;
 
-  // Check if stripped of 'story-' prefix
-  const storyMatch = ALL_AVAILABLE_VERSES.find(v => v.id === `story-${id}` || v.actId === id);
+  // Check if stripped of 'story-' prefix or exact quest match
+  const storyMatch = ALL_AVAILABLE_VERSES.find(v => 
+    v.id === `story-${id}` || 
+    v.storyQuestId === id ||
+    `story-${v.storyQuestId}` === id ||
+    v.actId === id
+  );
   if (storyMatch) return storyMatch;
+
+  // Resolve legacy act IDs (e.g. 'story-david-act-1' or 'david-act-1') to the quest's one memory verse
+  const parentQuest = STORY_QUESTS.find(q => 
+    q.acts.some(a => a.id === id || `story-${a.id}` === id) ||
+    id.startsWith(`story-${q.id.replace('-journey', '')}`) ||
+    id.startsWith(q.id.replace('-journey', ''))
+  );
+  if (parentQuest) {
+    const questVerse = STORY_MEMORY_VERSES.find(v => v.storyQuestId === parentQuest.id);
+    if (questVerse) return questVerse;
+  }
 
   // Fallback to reference match
   const refMatch = ALL_AVAILABLE_VERSES.find(v => v.reference.toLowerCase() === id.toLowerCase());
@@ -171,8 +189,16 @@ export const getVerseById = (id?: string | null): MemoryVerse | null => {
 };
 
 /**
- * Retrieve the memory verse associated with a specific story quest and act
+ * Retrieve the single memory verse associated with a specific story quest
  */
-export const getStoryVerseForAct = (questId: string, actId: string): MemoryVerse | null => {
-  return STORY_MEMORY_VERSES.find(v => v.storyQuestId === questId && v.actId === actId) || null;
+export const getStoryVerseForQuest = (questId: string): MemoryVerse | null => {
+  return STORY_MEMORY_VERSES.find(v => v.storyQuestId === questId || v.id === `story-${questId}`) || null;
+};
+
+/**
+ * Retrieve the memory verse associated with a specific story quest and act
+ * (Always returns the ONE defining memory verse of the quest, satisfying requirement 1)
+ */
+export const getStoryVerseForAct = (questId: string, _actId?: string): MemoryVerse | null => {
+  return getStoryVerseForQuest(questId) || STORY_MEMORY_VERSES.find(v => v.storyQuestId === questId) || null;
 };

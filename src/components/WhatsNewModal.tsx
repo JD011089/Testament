@@ -15,7 +15,9 @@ import {
   ChevronRight,
   Flame,
   Volume2,
-  Brain
+  Brain,
+  Compass,
+  Swords
 } from 'lucide-react';
 
 interface WhatsNewModalProps {
@@ -37,10 +39,38 @@ interface ReleaseMilestone {
 
 const RELEASES: ReleaseMilestone[] = [
   {
-    version: 'v1.6.1',
-    tagline: 'PWA Background Updates & Push Notifications',
+    version: 'v1.7.0',
+    tagline: 'Desktop Layout Overhaul & Socratic Tactical AI',
     dateBadge: 'Current Release',
     isLatest: true,
+    highlights: [
+      {
+        icon: <Compass className="w-4 h-4 text-amber-400" />,
+        title: 'Desktop Top Nav & 2-Column Command Center',
+        description: 'Clean frosted-glass top navigation on desktop, streamlined morning command bar, and all 14 Quests right above the fold with zero banner fatigue.'
+      },
+      {
+        icon: <Swords className="w-4 h-4 text-amber-400" />,
+        title: 'Multi-Turn Socratic AI & Virtue Archetypes',
+        description: 'Turn 2 interactive probe analyzes your answers for tactical blind spots and categorizes your instincts into 6 biblical virtue archetypes (Nathan, Abigail, Solomon, etc.).'
+      },
+      {
+        icon: <Brain className="w-4 h-4 text-amber-400" />,
+        title: 'FSRS Spaced Repetition & Multi-Tier Memory',
+        description: 'Cognitive science spaced repetition schedules review drills with 3 progressive scaffolding tiers: Builder, Ghost Letters, and Blind Recall.'
+      },
+      {
+        icon: <Layers className="w-4 h-4 text-amber-400" />,
+        title: 'Tactical Nexus Knowledge Graph & Consequence Ripples',
+        description: 'Contextually links story crises to historical Psalms, adversary psychological dossiers, and modern workplace dilemmas with cross-act consequence tracking.'
+      }
+    ]
+  },
+  {
+    version: 'v1.6.1',
+    tagline: 'PWA Background Updates & Push Notifications',
+    dateBadge: 'Previous Release',
+    isLatest: false,
     highlights: [
       {
         icon: <Bell className="w-4 h-4 text-amber-400" />,
@@ -206,12 +236,12 @@ const RELEASES: ReleaseMilestone[] = [
 ];
 
 export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose }) => {
-  const [activeTab, setActiveTab] = useState<string>('v1.6.1');
+  const [activeTab, setActiveTab] = useState<string>('v1.7.0');
 
   const handleDismiss = () => {
     soundEngine.playClick();
     try {
-      localStorage.setItem('testament_last_seen_version', '1.6.1');
+      localStorage.setItem('testament_last_seen_version', '1.7.0');
     } catch {
       // ignore
     }
