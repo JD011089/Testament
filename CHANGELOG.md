@@ -5,6 +5,18 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2026-09-22
+
+### Fixed
+- **Status Bar & Notification Shade Badge Silhouette**:
+  - Replaced opaque square badge icon (`/favicon.png`) with dedicated Android-compliant monochrome alpha-mask badges (`/icons/badge-96.png`, `/icons/badge-72.png`, and `/icons/badge-48.png`).
+  - Rendered a sharp, high-contrast Testament Shield, Sword, and Sacred Flame emblem in pure white on a transparent background, ensuring the phone's status bar and the notification shade header display the crisp emblem silhouette instead of a blank white/tinted square.
+- **PWA & Notification Shade Large Icon Assets**:
+  - Resized and cleaned `icon-192.png`, `icon-512.png`, `notification-icon.png`, `favicon.png`, and `apple-touch-icon.png` to eliminate solid white rectangular borders.
+  - Ensured large icons blend into system notification cards, dark mode, and launcher squircles.
+
+---
+
 ## [1.1.1] - 2026-09-22
 
 ### Fixed

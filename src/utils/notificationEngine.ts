@@ -212,7 +212,7 @@ export const dispatchNotification = async (
   const notificationOptions: ExtendedNotificationOptions = {
     body,
     icon: '/icons/icon-192.png',
-    badge: '/favicon.png',
+    badge: '/icons/badge-96.png',
     tag: `testament-verse-${verseId}-${Date.now()}`,
     renotify: true,
     vibrate: [120, 60, 120],
@@ -404,7 +404,7 @@ export const syncNextAlarmToServiceWorker = async (): Promise<void> => {
   const options = {
     body,
     icon: '/icons/icon-192.png',
-    badge: '/favicon.png',
+    badge: '/icons/badge-96.png',
     tag: `testament-verse-${verse.id}-${Date.now()}`,
     renotify: true,
     vibrate: [120, 60, 120],

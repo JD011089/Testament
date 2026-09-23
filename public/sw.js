@@ -159,7 +159,7 @@ self.addEventListener('push', (event) => {
   const options = {
     body: data.body,
     icon: '/icons/icon-192.png',
-    badge: '/favicon.png',
+    badge: '/icons/badge-96.png',
     tag: data.data?.verseId ? `testament-verse-${data.data.verseId}` : 'testament-pulse',
     renotify: true,
     vibrate: [120, 60, 120],
