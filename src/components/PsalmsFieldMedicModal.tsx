@@ -1,0 +1,346 @@
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  X, 
+  HeartHandshake, 
+  Brain, 
+  Bell, 
+  Wind, 
+  Flame, 
+  Music, 
+  Volume2, 
+  CheckCircle2, 
+  ShieldAlert,
+  Compass,
+  Sparkles,
+  MapPin
+} from 'lucide-react';
+import { 
+  PSALM_PRESCRIPTIONS, 
+  PSALM_MOODS, 
+  type PsalmCrisisMood, 
+  type PsalmPrescription 
+} from '../data/psalms';
+import { soundEngine } from '../utils/audio';
+
+interface PsalmsFieldMedicModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onOpenWordForge?: (verseId: string) => void;
+  onSetMemoryVerse?: (verseId: string) => void;
+  currentAmbience?: 'none' | 'campfire' | 'wind' | 'sanctuary';
+  onToggleAmbience?: (type: 'campfire' | 'wind' | 'sanctuary') => void;
+  onRewardXP?: (xp: number) => void;
+}
+
+export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
+  isOpen,
+  onClose,
+  onOpenWordForge,
+  onSetMemoryVerse,
+  currentAmbience = 'none',
+  onToggleAmbience,
+  onRewardXP
+}) => {
+  const [selectedMood, setSelectedMood] = useState<PsalmCrisisMood>('panic-fear');
+  const [completedPrescriptions, setCompletedPrescriptions] = useState<Record<string, boolean>>({});
+  const [isFormalMode, setIsFormalMode] = useState<boolean>(false);
+
+  const activePrescriptions = PSALM_PRESCRIPTIONS.filter(p => p.moodId === selectedMood);
+  const activeItem: PsalmPrescription = activePrescriptions[0] || PSALM_PRESCRIPTIONS[0];
+
+  const handleApplyPrescription = () => {
+    soundEngine.playVictory();
+    if (!completedPrescriptions[activeItem.id]) {
+      setCompletedPrescriptions(prev => ({ ...prev, [activeItem.id]: true }));
+      onRewardXP?.(activeItem.xpReward);
+    }
+  };
+
+  const handleSwitchAmbience = (type: 'campfire' | 'wind' | 'sanctuary') => {
+    soundEngine.playClick();
+    onToggleAmbience?.(type);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/90 backdrop-blur-md overflow-y-auto">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 15 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 15 }}
+          className="relative w-full max-w-4xl bg-[#0b0e14] border border-amber-500/40 rounded-2xl sm:rounded-3xl shadow-glow-gold overflow-hidden my-auto max-h-[94vh] flex flex-col text-left"
+        >
+          {/* Header */}
+          <div className="p-4 sm:p-5 border-b border-stone-800 bg-gradient-to-r from-stone-900 via-[#141824] to-stone-900 flex flex-wrap items-center justify-between gap-3 shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
+                <HeartHandshake className="w-5 h-5 text-amber-400" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base sm:text-lg font-serif font-black text-parchment-50 leading-tight">
+                    Psalms Field Medic
+                  </h3>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-950/60 border border-amber-800/60 text-amber-300 font-bold uppercase tracking-wider">
+                    Soul Under Fire
+                  </span>
+                </div>
+                <p className="text-[11px] sm:text-xs text-stone-400">
+                  Emergency battlefield prescriptions for panic, insomnia, betrayal, and brokenness
+                </p>
+              </div>
+            </div>
+
+            {/* Ambience & Close Controls */}
+            <div className="flex items-center gap-2">
+              {onToggleAmbience && (
+                <div className="flex items-center gap-1 bg-stone-950 p-1 rounded-xl border border-stone-800 text-xs">
+                  <span className="text-[10px] font-mono text-stone-400 px-1.5 flex items-center gap-1">
+                    <Volume2 className="w-3 h-3 text-amber-500" />
+                    <span className="hidden sm:inline">Atmosphere:</span>
+                  </span>
+                  <button
+                    onClick={() => handleSwitchAmbience('wind')}
+                    className={`px-2 py-1 rounded-lg transition-all text-xs flex items-center gap-1 ${
+                      currentAmbience === 'wind' 
+                        ? 'bg-amber-600/30 text-amber-300 border border-amber-500/60 font-bold' 
+                        : 'text-stone-400 hover:text-stone-200'
+                    }`}
+                    title="Desert Wilderness Wind"
+                  >
+                    <Wind className="w-3 h-3" />
+                    <span>Wind</span>
+                  </button>
+                  <button
+                    onClick={() => handleSwitchAmbience('campfire')}
+                    className={`px-2 py-1 rounded-lg transition-all text-xs flex items-center gap-1 ${
+                      currentAmbience === 'campfire' 
+                        ? 'bg-amber-600/30 text-amber-300 border border-amber-500/60 font-bold' 
+                        : 'text-stone-400 hover:text-stone-200'
+                    }`}
+                    title="Adullam Cave Campfire"
+                  >
+                    <Flame className="w-3 h-3 text-orange-400" />
+                    <span>Fire</span>
+                  </button>
+                  <button
+                    onClick={() => handleSwitchAmbience('sanctuary')}
+                    className={`px-2 py-1 rounded-lg transition-all text-xs flex items-center gap-1 ${
+                      currentAmbience === 'sanctuary' 
+                        ? 'bg-amber-600/30 text-amber-300 border border-amber-500/60 font-bold' 
+                        : 'text-stone-400 hover:text-stone-200'
+                    }`}
+                    title="Sanctuary Reverb"
+                  >
+                    <Music className="w-3 h-3 text-blue-400" />
+                    <span>Sanctuary</span>
+                  </button>
+                </div>
+              )}
+
+              <button
+                onClick={() => {
+                  soundEngine.playClick();
+                  onClose();
+                }}
+                className="w-8 h-8 rounded-xl bg-stone-850 hover:bg-stone-800 border border-stone-700 flex items-center justify-center text-stone-400 hover:text-stone-100 transition-colors ml-1"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Crisis Mood Triage Selector */}
+          <div className="px-4 py-3 border-b border-stone-800/80 bg-stone-950/70 shrink-0">
+            <div className="text-[11px] font-mono text-stone-400 mb-2 flex items-center gap-1.5">
+              <Compass className="w-3.5 h-3.5 text-amber-500" />
+              <span>TRIAGE: What is attacking your soul right now?</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+              {(Object.keys(PSALM_MOODS) as PsalmCrisisMood[]).map((moodKey) => {
+                const info = PSALM_MOODS[moodKey];
+                const isSelected = selectedMood === moodKey;
+                return (
+                  <button
+                    key={moodKey}
+                    onClick={() => {
+                      soundEngine.playSnap();
+                      setSelectedMood(moodKey);
+                    }}
+                    className={`p-2.5 rounded-xl border text-left transition-all flex flex-col justify-between ${
+                      isSelected
+                        ? 'bg-amber-500/20 border-amber-500 text-parchment-50 ring-1 ring-amber-500 shadow-glow-amber'
+                        : 'bg-stone-900/90 border-stone-800 text-stone-400 hover:border-stone-700 hover:text-stone-200'
+                    }`}
+                  >
+                    <span className="text-lg mb-1">{info.icon}</span>
+                    <span className="text-xs font-semibold leading-tight line-clamp-2">
+                      {info.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Main Prescription Stage */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+            <div className="max-w-3xl mx-auto space-y-5">
+              
+              {/* Active Prescription Card */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-[#121622] border-2 border-amber-500/30 shadow-2xl relative overflow-hidden">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                    <span>{activeItem.moodIcon}</span>
+                    <span>Emergency Prescription • {activeItem.moodLabel}</span>
+                  </span>
+                  <span className="text-sm font-mono font-bold text-amber-500">
+                    {activeItem.reference}
+                  </span>
+                </div>
+
+                <h4 className="text-xl sm:text-2xl font-serif font-black text-parchment-50 mb-3">
+                  {activeItem.title}
+                </h4>
+
+                {/* Symptom Check */}
+                <div className="p-3 rounded-xl bg-black/40 border border-stone-800 text-xs text-stone-300 leading-relaxed mb-4 flex items-start gap-2.5">
+                  <ShieldAlert className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-mono font-bold text-amber-400 uppercase text-[10px] block mb-0.5">
+                      Symptom Audit
+                    </span>
+                    <span>{activeItem.symptomCheck}</span>
+                  </div>
+                </div>
+
+                {/* Scripture & Street Breakdown */}
+                <div className="p-4 sm:p-5 rounded-2xl bg-amber-950/25 border border-amber-800/40 relative mb-4">
+                  <div className="flex items-center justify-between text-xs font-mono text-amber-400 mb-2">
+                    <span className="font-bold flex items-center gap-1">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Scripture Under Heavy Fire</span>
+                    </span>
+                    <button
+                      onClick={() => {
+                        soundEngine.playClick();
+                        setIsFormalMode(prev => !prev);
+                      }}
+                      className="text-[11px] underline text-stone-400 hover:text-amber-300"
+                    >
+                      {isFormalMode ? '⚡ View Street Translation' : '📖 View Formal Translation'}
+                    </button>
+                  </div>
+
+                  <blockquote className="text-sm sm:text-base font-serif italic text-parchment-50 leading-relaxed mb-3">
+                    "{isFormalMode ? activeItem.formalText : activeItem.streetTranslation}"
+                  </blockquote>
+
+                  {/* Cave Backstory */}
+                  <div className="pt-3 border-t border-amber-900/40 flex items-start gap-2 text-xs text-amber-300/80">
+                    <MapPin className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="text-amber-300">Where David Screamed This: </strong>
+                      <span>{activeItem.caveBackstory}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* The 3-Step Field Medic Protocol */}
+                <div className="space-y-3 pt-2">
+                  <div className="text-xs font-mono font-bold uppercase tracking-wider text-amber-400">
+                    The 3-Step Field Medic Protocol
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-2.5">
+                    {activeItem.fieldMedicSteps.map((step, idx) => {
+                      const titles = ['1. Physiological Reset', '2. Vocal Anchor', '3. Immediate Trench Action'];
+                      return (
+                        <div
+                          key={idx}
+                          className="p-3.5 rounded-xl bg-stone-900/90 border border-stone-800 text-xs sm:text-sm text-stone-200 leading-relaxed flex items-start gap-3"
+                        >
+                          <span className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center justify-center font-mono font-bold text-xs shrink-0 mt-0.5">
+                            {idx + 1}
+                          </span>
+                          <div>
+                            <span className="font-mono font-bold text-amber-400 text-xs block mb-0.5">
+                              {titles[idx]}
+                            </span>
+                            <span className="text-parchment-200">{step}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Action Bar */}
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-5 mt-5 border-t border-stone-800">
+                  <div className="flex items-center gap-2">
+                    {onOpenWordForge && (
+                      <button
+                        onClick={() => {
+                          soundEngine.playClick();
+                          onClose();
+                          onOpenWordForge(activeItem.id);
+                        }}
+                        className="px-3.5 py-1.5 rounded-xl bg-stone-850 hover:bg-stone-800 text-amber-400 border border-stone-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                      >
+                        <Brain className="w-3.5 h-3.5" />
+                        <span>Lock in Word Forge</span>
+                      </button>
+                    )}
+
+                    {onSetMemoryVerse && (
+                      <button
+                        onClick={() => {
+                          soundEngine.playClick();
+                          onSetMemoryVerse(activeItem.id);
+                          onClose();
+                        }}
+                        className="px-3.5 py-1.5 rounded-xl bg-stone-850 hover:bg-stone-800 text-amber-400 border border-stone-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                      >
+                        <Bell className="w-3.5 h-3.5" />
+                        <span>Train with Daily Pulse</span>
+                      </button>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={handleApplyPrescription}
+                    className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs flex items-center gap-1.5 shadow-glow-amber transition-all ml-auto"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Apply Prescription (+{activeItem.xpReward} XP)</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="p-3.5 sm:p-4 border-t border-stone-800 bg-[#090b10] flex items-center justify-between text-xs text-stone-400 shrink-0">
+            <span className="text-[11px] font-mono text-stone-400 flex items-center gap-1">
+              <span>Field medic prescriptions are designed for raw combat against despair</span>
+            </span>
+
+            <button
+              onClick={() => {
+                soundEngine.playClick();
+                onClose();
+              }}
+              className="px-4 py-1.5 rounded-xl bg-stone-850 hover:bg-stone-800 text-stone-200 text-xs font-semibold border border-stone-700"
+            >
+              Exit Medic Station
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    </AnimatePresence>
+  );
+};

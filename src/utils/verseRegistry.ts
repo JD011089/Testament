@@ -1,5 +1,7 @@
 import { MEMORY_VERSES } from '../data/verses';
 import { STORY_QUESTS } from '../data/stories';
+import { PROVERB_SCENARIOS } from '../data/proverbs';
+import { PSALM_PRESCRIPTIONS } from '../data/psalms';
 import type { MemoryVerse } from '../types';
 
 /**
@@ -36,11 +38,63 @@ export const STORY_MEMORY_VERSES: MemoryVerse[] = STORY_QUESTS.flatMap((quest) =
 });
 
 /**
- * All available verses (Core arsenal + all story unlocked scriptures)
+ * Maps Proverbs Tactical Codex entries into MemoryVerse format
+ */
+export const PROVERB_MEMORY_VERSES: MemoryVerse[] = PROVERB_SCENARIOS.map((p) => {
+  let category: MemoryVerse['category'] = 'Endurance & Brotherhood';
+  if (p.category === 'money-debt' || p.category === 'ego-criticism') {
+    category = 'Anger & Self-Control';
+  } else if (p.category === 'sluggard-work') {
+    category = 'Courage & Facing Giants';
+  }
+
+  return {
+    id: p.id,
+    reference: p.reference,
+    translation: 'BSB',
+    text: p.formalText,
+    plainEnglishSummary: p.streetTranslation,
+    category,
+    difficulty: 'Core',
+    keyTakeaway: p.keyTakeaway,
+    heroName: 'Solomon (Proverbs Codex)',
+    storyTitle: p.title
+  };
+});
+
+/**
+ * Maps Psalms Field Medic prescriptions into MemoryVerse format
+ */
+export const PSALM_MEMORY_VERSES: MemoryVerse[] = PSALM_PRESCRIPTIONS.map((ps) => {
+  let category: MemoryVerse['category'] = 'Pressure & Anxiety';
+  if (ps.moodId === 'betrayal-hurt' || ps.moodId === 'guilt-ruin') {
+    category = 'Restoration After Failure';
+  } else if (ps.moodId === 'rage-injustice') {
+    category = 'Anger & Self-Control';
+  }
+
+  return {
+    id: ps.id,
+    reference: ps.reference,
+    translation: 'BSB',
+    text: ps.formalText,
+    plainEnglishSummary: ps.streetTranslation,
+    category,
+    difficulty: 'Core',
+    keyTakeaway: ps.keyTakeaway,
+    heroName: 'David (Psalms Field Medic)',
+    storyTitle: ps.title
+  };
+});
+
+/**
+ * All available verses (Core arsenal + all story unlocked scriptures + Proverbs Codex + Psalms Field Medic)
  */
 export const ALL_AVAILABLE_VERSES: MemoryVerse[] = [
   ...MEMORY_VERSES,
-  ...STORY_MEMORY_VERSES
+  ...STORY_MEMORY_VERSES,
+  ...PROVERB_MEMORY_VERSES,
+  ...PSALM_MEMORY_VERSES
 ];
 
 /**

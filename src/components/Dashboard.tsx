@@ -26,10 +26,13 @@ import {
   SlidersHorizontal,
   Mic,
   Bell,
-  Send
+  Send,
+  HeartHandshake
 } from 'lucide-react';
 import type { UserCalibrationProfile } from './OnboardingModal';
 import { MemoryPulseModal } from './MemoryPulseModal';
+import { ProverbsCodexModal } from './ProverbsCodexModal';
+import { PsalmsFieldMedicModal } from './PsalmsFieldMedicModal';
 import { 
   getNotificationSettings, 
   sendTestMemoryNotification, 
@@ -37,7 +40,8 @@ import {
   getNotificationPermission,
   getNextScheduledReminder,
   checkAndDispatchDueReminders,
-  formatSlot12h
+  formatSlot12h,
+  setActiveMemoryVerse
 } from '../utils/notificationEngine';
 import { getVerseById, getAllVerses } from '../utils/verseRegistry';
 import { 
@@ -113,6 +117,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [isPlayingBriefing, setIsPlayingBriefing] = useState<boolean>(false);
   const [narratorProfile, setNarratorProfile] = useState<NarratorProfile>(() => soundEngine.getNarratorProfile());
   const [isMemoryPulseModalOpen, setIsMemoryPulseModalOpen] = useState<boolean>(false);
+  const [isProverbsModalOpen, setIsProverbsModalOpen] = useState<boolean>(false);
+  const [isPsalmsMedicModalOpen, setIsPsalmsMedicModalOpen] = useState<boolean>(false);
   const [notificationSettings, setNotificationSettings] = useState(() => getNotificationSettings());
   const [testNoticeStatus, setTestNoticeStatus] = useState<string | null>(null);
   const [, setPulseRefreshTrigger] = useState(0);
@@ -123,13 +129,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
       setPulseRefreshTrigger(t => t + 1);
     };
 
+    const handleOpenProverbs = () => setIsProverbsModalOpen(true);
+    const handleOpenPsalms = () => setIsPsalmsMedicModalOpen(true);
+
     window.addEventListener('testament-notifications-updated', handleSettingsUpdated);
+    window.addEventListener('open-proverbs-codex', handleOpenProverbs);
+    window.addEventListener('open-psalms-medic', handleOpenPsalms);
+
     const timer = setInterval(() => {
       setPulseRefreshTrigger(t => t + 1);
     }, 60000);
 
     return () => {
       window.removeEventListener('testament-notifications-updated', handleSettingsUpdated);
+      window.removeEventListener('open-proverbs-codex', handleOpenProverbs);
+      window.removeEventListener('open-psalms-medic', handleOpenPsalms);
       clearInterval(timer);
     };
   }, []);
@@ -488,7 +502,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="text-xs font-mono font-bold uppercase tracking-widest text-amber-500 mb-3">
               The Learner’s Toolkit • Anti-Textbook Accelerators
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
               <button
                 onClick={() => {
                   soundEngine.playSnap();
@@ -535,6 +549,30 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <ShieldAlert className="w-5 h-5 text-amber-400 mb-2 group-hover:scale-110 transition-transform" />
                 <div className="text-xs font-serif font-bold text-parchment-50">"What’s the Play?"</div>
                 <div className="text-[10px] text-stone-400 mt-0.5">Real-life simulator</div>
+              </button>
+
+              <button
+                onClick={() => {
+                  soundEngine.playSnap();
+                  setIsProverbsModalOpen(true);
+                }}
+                className="p-4 rounded-2xl bg-[#141822] border border-stone-800 hover:border-amber-500/70 hover:bg-[#181d2a] transition-all text-left group shadow-sm"
+              >
+                <Shield className="w-5 h-5 text-amber-500 mb-2 group-hover:scale-110 transition-transform" />
+                <div className="text-xs font-serif font-bold text-parchment-50">Proverbs Codex</div>
+                <div className="text-[10px] text-stone-400 mt-0.5">Solomon's playbook</div>
+              </button>
+
+              <button
+                onClick={() => {
+                  soundEngine.playSnap();
+                  setIsPsalmsMedicModalOpen(true);
+                }}
+                className="p-4 rounded-2xl bg-[#141822] border border-stone-800 hover:border-rose-500/70 hover:bg-[#181d2a] transition-all text-left group shadow-sm"
+              >
+                <HeartHandshake className="w-5 h-5 text-rose-400 mb-2 group-hover:scale-110 transition-transform" />
+                <div className="text-xs font-serif font-bold text-parchment-50">Psalms Medic</div>
+                <div className="text-[10px] text-stone-400 mt-0.5">Emergency triage</div>
               </button>
             </div>
           </div>
@@ -1087,6 +1125,38 @@ export const Dashboard: React.FC<DashboardProps> = ({
           setIsMemoryPulseModalOpen(false);
           onOpenWordForge(verseId);
         }}
+      />
+
+      {/* Proverbs Tactical Codex Modal */}
+      <ProverbsCodexModal
+        isOpen={isProverbsModalOpen}
+        onClose={() => setIsProverbsModalOpen(false)}
+        onOpenWordForge={(verseId) => {
+          setIsProverbsModalOpen(false);
+          onOpenWordForge(verseId);
+        }}
+        onSetMemoryVerse={(verseId) => {
+          setActiveMemoryVerse(verseId);
+          setPulseRefreshTrigger(t => t + 1);
+        }}
+        onRewardXP={onRewardXP}
+      />
+
+      {/* Psalms Field Medic Modal */}
+      <PsalmsFieldMedicModal
+        isOpen={isPsalmsMedicModalOpen}
+        onClose={() => setIsPsalmsMedicModalOpen(false)}
+        onOpenWordForge={(verseId) => {
+          setIsPsalmsMedicModalOpen(false);
+          onOpenWordForge(verseId);
+        }}
+        onSetMemoryVerse={(verseId) => {
+          setActiveMemoryVerse(verseId);
+          setPulseRefreshTrigger(t => t + 1);
+        }}
+        currentAmbience={currentAmbience}
+        onToggleAmbience={onToggleAmbience}
+        onRewardXP={onRewardXP}
       />
     </div>
   );

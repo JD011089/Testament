@@ -5,6 +5,44 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-09-22
+
+### Added
+- **The Proverbs Tactical Codex (Solomon's High-Stakes Simulator)**:
+  - Built an interactive dilemma simulator transforming the book of Proverbs into a modern tactical playbook for life, work, and relationships.
+  - Added 8 high-stakes real-world scenario dilemmas across 5 battle categories:
+    - *Money & Debt*: Navigating predatory get-rich-quick schemes and high-interest cosigning traps (Proverbs 22:7, 21:5).
+    - *Tongue & Meetings*: Strategic tactical silence during executive ambush meetings and extinguishing office rumor fires (Proverbs 17:28, 26:20).
+    - *Sluggard vs. Relentless*: The 1% compound micro-habits of the ant vs. the insidious tomorrow trap (Proverbs 6:6-8, 12:24).
+    - *Ego & Brutal Feedback*: Distinguishing wound of a loyal friend from flattering poison, and diagnosing pride blind spots (Proverbs 27:6, 16:18).
+    - *Toxic Allies & Boundary Warfare*: Eliminating manipulative peers and establishing clean perimeter boundaries (Proverbs 22:24-25, 13:20).
+  - Included 3 distinct tactical choices per scenario with instant Solomon Debriefs explaining the psychological and spiritual mechanics of each outcome (+35 XP rewards with celebration confetti).
+  - Added dual-lens translation switcher: seamlessly toggle between canonical scripture and punchy street translations.
+  - Added Tactical Vault drawer to browse all proverbs by category with integrated text-to-speech audio narration.
+  - Linked all Proverbs directly into the Spaced Memory Pulse notification engine and Word Forge puzzle game.
+
+- **The Psalms Field Medic (Emergency Spiritual Triage)**:
+  - Built an acute emotional emergency triage interface diagnosing modern psychological fires through David's battlefield prayers.
+  - Added 6 targeted crisis triage presets:
+    - *Panic Attack / Claustrophobia*: Psalm 91 (*The Fortress Protocol*).
+    - *3 AM Insomnia / Racing Dread*: Psalm 4 (*The Battlefield Rest*).
+    - *Betrayal by Inner Circle / Close Ally*: Psalm 55 (*The Poisoned Cup*).
+    - *Guilt / Self-Disgust / Moral Failure*: Psalm 51 (*The Core Reset Protocol*).
+    - *Rage at Injustice & Corrupt Winners*: Psalm 37 (*The Long Horizon Game*).
+    - *Deep Grief / Soul Desert Emptiness*: Psalm 42 (*The Deep Water Well*).
+  - Provided David's cave situation reports highlighting the exact physical and political peril behind the verses (Cave of Adullam, En-Gedi, fleeing his son Absalom, Nathan's confrontation).
+  - Engineered 3-step field medic protocol:
+    1. *Physiological Reset*: 4-7-8 tactical down-regulation breathing timer.
+    2. *Vocal Anchor*: Out-loud auditory override of anxiety thought loops.
+    3. *Trench Action*: Immediate physical micro-step to anchor psychological stability.
+  - Integrated 1-tap ambient sound switcher (Cave Wind, Campfire Embers, Night Sanctuary) to match the triage environment.
+  - Connected all Psalms to active recall in Word Forge and multi-daily Memory Pulse notifications.
+
+- **Learner's Toolkit Expansion**:
+  - Expanded the Dashboard Learner's Toolkit to 6 responsive accelerators: 60-Sec Timeline, Character Dossiers, Street Translator, "What's the Play?", Proverbs Codex, and Psalms Medic.
+
+---
+
 ## [1.1.2] - 2026-09-22
 
 ### Fixed
