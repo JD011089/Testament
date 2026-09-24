@@ -63,6 +63,11 @@ async function checkAndFirePendingAlarm() {
     // Time has passed — show the notification
     await self.registration.showNotification(alarm.title, alarm.options).catch(() => {});
 
+    // Update app badge if supported
+    if (self.navigator && 'setAppBadge' in self.navigator) {
+      self.navigator.setAppBadge().catch(() => {});
+    }
+
     // Record that this slot fired
     await idbPut(db, {
       id: 'lastFired',
@@ -296,5 +301,8 @@ self.addEventListener('push', (event) => {
     ]
   };
 
+  if (self.navigator && 'setAppBadge' in self.navigator) {
+    self.navigator.setAppBadge().catch(() => {});
+  }
   event.waitUntil(self.registration.showNotification(data.title, options));
 });

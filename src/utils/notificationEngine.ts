@@ -4,6 +4,27 @@ import { getTodayDateKey } from './dailyEngine';
 
 const STORAGE_KEY = 'testament_notification_settings';
 
+// Public VAPID key for Web Push subscription
+export const VAPID_PUBLIC_KEY = 'BEfEgb6cK-WggWIf4URhfzgTsoqCSG4-sS1FsejQVPHPPVJKq9YRc36oZZSGJ2-Sdz5XCsvJgKpwpTTF_eHGpZM';
+
+// Supabase configuration for storing push subscription endpoints (Zero-cost tier)
+export const SUPABASE_URL = 'https://ofdlhnbpkzkbuqbzcysz.supabase.co';
+export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mZGxobmJwa3prYnVxYnpjeXN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyNTY1MTgsImV4cCI6MjEwNTgzMjUxOH0.5PPJUd1Yyqc5wsjYp4X4CwS_cibfIYNbmNB-Tnx3t-U';
+
+/**
+ * Utility to convert a base64 string to a Uint8Array for PushManager subscription
+ */
+export const urlBase64ToUint8Array = (base64String: string): Uint8Array => {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+};
+
 /**
  * Default notification configuration
  */
@@ -122,6 +143,80 @@ export const getNotificationPermission = (): NotificationPermission => {
 /**
  * Requests permission from the user
  */
+/**
+ * Subscribes to Web Push notifications via PushManager if supported
+ */
+export const subscribeToPush = async (): Promise<PushSubscription | null> => {
+  if (typeof window === 'undefined' || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+    return null;
+  }
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    if (!reg.pushManager) return null;
+
+    // Check existing subscription first
+    let subscription = await reg.pushManager.getSubscription();
+    if (!subscription) {
+      try {
+        subscription = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as unknown as BufferSource
+        });
+      } catch (subErr) {
+        console.info('Push subscription using sample VAPID key skipped or unsupported:', subErr);
+      }
+    }
+
+    if (subscription) {
+      localStorage.setItem('testament_push_subscription', JSON.stringify(subscription));
+      console.log('Web Push subscription ready:', subscription);
+
+      // Sync subscription directly to Supabase table
+      syncSubscriptionToSupabase(subscription).catch(() => {});
+    }
+    return subscription;
+  } catch (err) {
+    console.warn('Error during push registration:', err);
+    return null;
+  }
+};
+
+/**
+ * Saves or updates the push subscription endpoint in Supabase
+ */
+export const syncSubscriptionToSupabase = async (subscription: PushSubscription): Promise<boolean> => {
+  try {
+    const raw = subscription.toJSON();
+    if (!raw.endpoint || !raw.keys?.p256dh || !raw.keys?.auth) return false;
+
+    const payload = {
+      endpoint: raw.endpoint,
+      p256dh: raw.keys.p256dh,
+      auth: raw.keys.auth,
+      updated_at: new Date().toISOString()
+    };
+
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/push_subscriptions?on_conflict=endpoint`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    return res.ok;
+  } catch (err) {
+    console.warn('Could not sync push subscription to Supabase:', err);
+    return false;
+  }
+};
+
+/**
+ * Requests permission from the user
+ */
 export const requestNotificationPermission = async (): Promise<boolean> => {
   if (!isNotificationSupported()) return false;
   try {
@@ -131,6 +226,7 @@ export const requestNotificationPermission = async (): Promise<boolean> => {
       const current = getNotificationSettings();
       saveNotificationSettings({ ...current, enabled: true });
       syncNextAlarmToServiceWorker();
+      subscribeToPush().catch(() => {});
     }
     return isGranted;
   } catch (err) {
@@ -226,18 +322,28 @@ export const dispatchNotification = async (
       { action: 'dismiss', title: '✓ Got It' }
     ]
   };
-
   try {
+    let dispatched = false;
     if ('serviceWorker' in navigator) {
       const reg = await navigator.serviceWorker.ready;
       if (reg && 'showNotification' in reg) {
         await reg.showNotification(title, notificationOptions);
-        return true;
+        dispatched = true;
       }
     }
 
-    // Fallback for environments where serviceWorker.ready is pending
-    new Notification(title, notificationOptions as NotificationOptions);
+    if (!dispatched) {
+      // Fallback for environments where serviceWorker.ready is pending
+      new Notification(title, notificationOptions as NotificationOptions);
+      dispatched = true;
+    }
+
+    // Update app badge if supported (PWA App Badging API)
+    if ('setAppBadge' in navigator) {
+      const settings = getNotificationSettings();
+      navigator.setAppBadge(settings.notificationsSentToday + 1).catch(() => {});
+    }
+
     return true;
   } catch (err) {
     console.warn('Failed to dispatch notification:', err);
@@ -446,6 +552,11 @@ export const syncNextAlarmToServiceWorker = async (): Promise<void> => {
 
   const targetTimestamp = Date.now() + nextReminder.delayMs;
   const todayKey = getTodayDateKey();
+
+  // Notification Triggers fallback for exact-time alerts (Chromium)
+  if ('showTrigger' in Notification.prototype && typeof (window as any).TimestampTrigger !== 'undefined') {
+    (options as any).showTrigger = new (window as any).TimestampTrigger(targetTimestamp);
+  }
 
   // 1. Write directly to IDB — this is the primary persistence path.
   //    The SW will read this on its next wakeup and fire the notification.
@@ -683,6 +794,21 @@ export const initNotificationScheduler = (): (() => void) => {
   window.addEventListener('focus', onVisibilityOrFocus);
   window.addEventListener('pageshow', onVisibilityOrFocus);
 
+  // Safari / foreground fallback timer for exact next slot
+  let nextAlarmTimer: ReturnType<typeof setTimeout> | null = null;
+  const scheduleNextMemoryTimer = () => {
+    if (nextAlarmTimer) clearTimeout(nextAlarmTimer);
+    const next = getNextScheduledReminder();
+    if (next && next.delayMs > 0 && next.delayMs <= 24 * 60 * 60 * 1000) {
+      nextAlarmTimer = setTimeout(() => {
+        checkAndDispatchDueReminders();
+        syncNextAlarmToServiceWorker();
+        scheduleNextMemoryTimer();
+      }, next.delayMs);
+    }
+  };
+  scheduleNextMemoryTimer();
+
   // Heartbeat check every 60 seconds while open
   const interval = setInterval(() => {
     checkAndDispatchDueReminders();
@@ -690,6 +816,7 @@ export const initNotificationScheduler = (): (() => void) => {
 
   return () => {
     clearInterval(interval);
+    if (nextAlarmTimer) clearTimeout(nextAlarmTimer);
     document.removeEventListener('visibilitychange', onVisibilityOrFocus);
     window.removeEventListener('focus', onVisibilityOrFocus);
     window.removeEventListener('pageshow', onVisibilityOrFocus);
