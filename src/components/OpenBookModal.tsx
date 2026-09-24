@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, 
@@ -74,6 +74,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
   const [currentVoice, setCurrentVoice] = useState<NarratorProfile>(() => soundEngine.getNarratorProfile());
 
   const modalRef = useModalLock(book !== null);
+  const readerScrollRef = useRef<HTMLDivElement | null>(null);
 
   const totalChapters = book ? getBookChapterCount(book.name) : 1;
 
@@ -99,6 +100,11 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
     setIsPlayingChapterAudio(false);
     soundEngine.stopSpeaking();
   }, [book?.id]);
+
+  // Smooth scroll reader to top on chapter change
+  useEffect(() => {
+    readerScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [selectedChapter]);
 
   // Fetch chapter data when in reader mode or when book/chapter/translation changes
   useEffect(() => {
@@ -254,7 +260,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
       } else {
         showToast(`${reference} is already in your Arsenal.`);
       }
-    } catch (e) {
+    } catch {
       showToast(`Saved ${reference} to Arsenal!`);
     }
   };
@@ -283,29 +289,42 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 md:p-6 bg-black/85 backdrop-blur-md overflow-y-auto overscroll-contain">
+      <div className="fixed inset-0 z-50 flex items-center justify-center sm:p-4 md:p-6 bg-black/90 md:backdrop-blur-md overflow-x-hidden overflow-y-auto overscroll-contain">
         {/* Click outside backdrop */}
         <div className="fixed inset-0" onClick={onClose} />
 
-        {/* The Open Leather Codex Container */}
+        {/* The Open Leather Codex Container (Edge-to-edge full-screen on mobile, centered modal on desktop) */}
         <motion.div
           ref={modalRef}
           tabIndex={-1}
           role="dialog"
           aria-modal="true"
           key={book.id}
-          initial={{ opacity: 0, scale: 0.94, y: 15 }}
+          initial={{ opacity: 0, scale: 0.98, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          transition={{ duration: 0.22, ease: 'easeOut' }}
-          className="relative z-10 w-full max-w-5xl rounded-3xl bg-white dark:bg-[#12151d] border border-amber-500/40 dark:border-amber-500/40 shadow-2xl dark:shadow-black/90 overflow-hidden flex flex-col my-auto max-h-[94vh] transition-colors focus:outline-none"
+          exit={{ opacity: 0, scale: 0.98, y: 10 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+          className="relative z-10 w-full h-[100dvh] sm:h-auto sm:max-h-[94vh] max-w-5xl rounded-none sm:rounded-3xl bg-[#fcfbfa] dark:bg-[#12151d] border-0 sm:border border-amber-500/40 shadow-2xl dark:shadow-black/90 overflow-x-hidden flex flex-col focus:outline-none touch-pan-y"
         >
-          {/* Top Brass Header Bar */}
-          <div className="flex items-center justify-between px-4 sm:px-6 py-3 bg-stone-50 dark:bg-[#0c0e14] border-b border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300">
+          {/* Top Header Bar */}
+          <div className="flex items-center justify-between px-3.5 sm:px-6 py-2.5 sm:py-3 bg-stone-50 dark:bg-[#0c0e14] border-b border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 shrink-0">
             <div className="flex items-center gap-2 min-w-0">
-              <BookOpen className="w-4 h-4 text-amber-600 dark:text-amber-500 shrink-0" />
+              {/* Mobile Back Button */}
+              <button
+                onClick={() => {
+                  soundEngine.playClick();
+                  onClose();
+                }}
+                className="sm:hidden flex items-center gap-1 px-2.5 py-1 rounded-lg bg-stone-200/80 dark:bg-stone-850 hover:bg-stone-300 dark:hover:bg-stone-800 text-stone-800 dark:text-stone-200 text-xs font-semibold shrink-0 transition-colors"
+                aria-label="Back to library"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <span>Books</span>
+              </button>
+
+              <BookOpen className="w-4 h-4 text-amber-600 dark:text-amber-500 shrink-0 hidden sm:inline" />
               <span className="text-xs font-mono uppercase tracking-widest text-amber-700 dark:text-amber-400 font-bold truncate">
-                {book.name} • Volume #{String(book.order).padStart(2, '0')} of 66
+                {book.name} <span className="hidden sm:inline">• Volume #{String(book.order).padStart(2, '0')} of 66</span>
               </span>
             </div>
 
@@ -327,21 +346,21 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
           </div>
 
           {/* MODE SELECTOR BAR: TACTICAL BRIEFING vs READ FULL SCRIPTURE */}
-          <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-2.5 bg-stone-100/70 dark:bg-[#10131b] border-b border-stone-200 dark:border-stone-800/90">
-            <div className="inline-flex p-1 rounded-xl bg-white dark:bg-stone-900 border border-stone-250 dark:border-stone-800 shadow-xs">
+          <div className="flex items-center justify-between gap-2 px-3 sm:px-6 py-2 bg-stone-100/70 dark:bg-[#10131b] border-b border-stone-200 dark:border-stone-800/90 shrink-0">
+            <div className="grid grid-cols-2 p-1 rounded-xl bg-white dark:bg-stone-900 border border-stone-250 dark:border-stone-800 shadow-xs w-full sm:w-auto sm:inline-flex">
               <button
                 onClick={() => {
                   soundEngine.playClick();
                   setActiveMode('briefing');
                 }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   activeMode === 'briefing'
                     ? 'bg-amber-500 text-stone-950 shadow-xs'
                     : 'text-stone-600 dark:text-stone-400 hover:text-stone-950 dark:hover:text-stone-100'
                 }`}
               >
-                <Shield className="w-3.5 h-3.5" />
-                <span>🛡️ Tactical Briefing</span>
+                <Shield className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">Briefing</span>
               </button>
 
               <button
@@ -349,19 +368,19 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                   soundEngine.playClick();
                   setActiveMode('reader');
                 }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   activeMode === 'reader'
                     ? 'bg-amber-500 text-stone-950 shadow-xs'
                     : 'text-stone-600 dark:text-stone-400 hover:text-stone-950 dark:hover:text-stone-100'
                 }`}
               >
-                <BookOpen className="w-3.5 h-3.5" />
-                <span>📖 Read Scripture ({totalChapters} Chs)</span>
+                <BookOpen className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">Read ({totalChapters} Ch{totalChapters > 1 ? 's' : ''})</span>
               </button>
             </div>
 
-            {/* Quick meta indicators */}
-            <div className="flex items-center gap-2">
+            {/* Quick meta indicators (desktop only) */}
+            <div className="hidden sm:flex items-center gap-2">
               <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-stone-200/80 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-semibold">
                 {book.testament === 'OT' ? 'Old Testament' : 'New Testament'}
               </span>
@@ -373,7 +392,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
 
           {/* VIEW 1: TACTICAL BRIEFING (TWO-PAGE OPEN TOME) */}
           {activeMode === 'briefing' ? (
-            <div className="flex-1 overflow-y-auto grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-stone-200 dark:divide-stone-800/80 bg-gradient-to-br from-stone-50 via-white to-amber-50/20 dark:from-[#12161f] dark:via-[#10131a] dark:to-[#0d1015]">
+            <div className="flex-1 overflow-x-hidden overflow-y-auto grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-stone-200 dark:divide-stone-800/80 bg-gradient-to-br from-stone-50 via-white to-amber-50/20 dark:from-[#12161f] dark:via-[#10131a] dark:to-[#0d1015] touch-pan-y">
               {/* LEFT PAGE: SitRep, Historical Peril, & Practical Life */}
               <div className="p-5 sm:p-7 md:p-8 flex flex-col justify-between space-y-6">
                 <div>
@@ -585,40 +604,43 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
             </div>
           ) : (
             /* VIEW 2: FULL SCRIPTURE CHAPTER & VERSE READER */
-            <div className="flex-1 overflow-y-auto flex flex-col bg-[#fcfbfa] dark:bg-[#0c0e14]">
+            <div 
+              ref={readerScrollRef}
+              className="flex-1 overflow-x-hidden overflow-y-auto flex flex-col bg-[#fcfbfa] dark:bg-[#0c0e14] w-full max-w-full touch-pan-y"
+            >
               {/* READER CONTROLS TOOLBAR */}
-              <div className="sticky top-0 z-20 px-4 sm:px-6 py-3 bg-white/95 dark:bg-[#12161f]/95 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+              <div className="sticky top-0 z-20 px-3 sm:px-6 py-2.5 bg-white/95 dark:bg-[#12161f]/95 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 flex flex-wrap items-center justify-between gap-2 sm:gap-3 shadow-xs w-full max-w-full overflow-x-hidden">
                 {/* Left: Chapter Selector Controls */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                   <button
                     disabled={selectedChapter <= 1}
                     onClick={() => {
                       soundEngine.playPageTurn();
                       setSelectedChapter(c => Math.max(1, c - 1));
                     }}
-                    className="p-2 rounded-xl bg-stone-100 dark:bg-stone-850 hover:bg-stone-200 dark:hover:bg-stone-800 disabled:opacity-30 disabled:pointer-events-none text-stone-700 dark:text-stone-300 transition-colors"
+                    className="p-1.5 sm:p-2 rounded-xl bg-stone-100 dark:bg-stone-850 hover:bg-stone-200 dark:hover:bg-stone-800 disabled:opacity-30 disabled:pointer-events-none text-stone-700 dark:text-stone-300 transition-colors"
                     title="Previous chapter"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
 
-                  {/* Chapter Dropdown Picker */}
-                  <div className="relative">
+                  {/* Chapter Dropdown Picker with truncation */}
+                  <div className="relative min-w-0 max-w-[130px] sm:max-w-xs">
                     <select
                       value={selectedChapter}
                       onChange={(e) => {
                         soundEngine.playSnap();
                         setSelectedChapter(Number(e.target.value));
                       }}
-                      className="appearance-none px-3.5 py-1.5 pr-8 rounded-xl bg-amber-500/10 dark:bg-amber-950/50 border border-amber-500/40 text-stone-900 dark:text-parchment-50 font-serif font-bold text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer"
+                      className="appearance-none w-full pl-2.5 sm:pl-3.5 pr-7 py-1.5 rounded-xl bg-amber-500/10 dark:bg-amber-950/50 border border-amber-500/40 text-stone-900 dark:text-parchment-50 font-serif font-bold text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer truncate"
                     >
                       {Array.from({ length: totalChapters }, (_, idx) => idx + 1).map((ch) => (
                         <option key={ch} value={ch} className="bg-white dark:bg-stone-900 text-stone-900 dark:text-parchment-100">
-                          {book.name} Chapter {ch} of {totalChapters}
+                          Ch {ch} of {totalChapters}
                         </option>
                       ))}
                     </select>
-                    <ChevronDown className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <ChevronDown className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
 
                   <button
@@ -627,7 +649,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                       soundEngine.playPageTurn();
                       setSelectedChapter(c => Math.min(totalChapters, c + 1));
                     }}
-                    className="p-2 rounded-xl bg-stone-100 dark:bg-stone-850 hover:bg-stone-200 dark:hover:bg-stone-800 disabled:opacity-30 disabled:pointer-events-none text-stone-700 dark:text-stone-300 transition-colors"
+                    className="p-1.5 sm:p-2 rounded-xl bg-stone-100 dark:bg-stone-850 hover:bg-stone-200 dark:hover:bg-stone-800 disabled:opacity-30 disabled:pointer-events-none text-stone-700 dark:text-stone-300 transition-colors"
                     title="Next chapter"
                   >
                     <ChevronRight className="w-4 h-4" />
@@ -635,7 +657,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                 </div>
 
                 {/* Right: Translation, Font Size & Audio */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                   {/* Translation Switcher */}
                   <select
                     value={selectedTranslation}
@@ -643,7 +665,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                       soundEngine.playClick();
                       setSelectedTranslation(e.target.value as TranslationId);
                     }}
-                    className="px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-250 dark:border-stone-800 text-xs font-mono font-medium text-stone-700 dark:text-stone-300 cursor-pointer focus:outline-none"
+                    className="px-2 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-250 dark:border-stone-800 text-[11px] sm:text-xs font-mono font-medium text-stone-700 dark:text-stone-300 cursor-pointer focus:outline-none"
                   >
                     {BIBLE_TRANSLATIONS.map(t => (
                       <option key={t.id} value={t.id} className="bg-white dark:bg-stone-900">
@@ -658,11 +680,10 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                       soundEngine.playClick();
                       setIsVoiceModalOpen(true);
                     }}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 border border-stone-250 dark:border-stone-800 text-xs font-mono font-medium text-stone-700 dark:text-stone-300 transition-colors"
+                    className="flex items-center gap-1 px-2 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 border border-stone-250 dark:border-stone-800 text-[11px] sm:text-xs font-mono font-medium text-stone-700 dark:text-stone-300 transition-colors"
                     title="Change reading voice"
                   >
                     <Mic className="w-3.5 h-3.5 text-amber-500" />
-                    <span className="hidden sm:inline">Voice:</span>
                     <span className="font-bold">{NARRATOR_VOICES[currentVoice]?.name.split(' ')[0] || 'Adam'}</span>
                   </button>
 
@@ -691,7 +712,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                   {/* Chapter Audio Reader */}
                   <button
                     onClick={handleToggleChapterAudio}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
+                    className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border text-[11px] sm:text-xs font-semibold transition-all ${
                       isPlayingChapterAudio
                         ? 'bg-amber-500 text-stone-950 border-amber-600 shadow-glow-gold'
                         : 'bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 text-stone-700 dark:text-stone-300 border-stone-250 dark:border-stone-800'
@@ -714,7 +735,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
               </div>
 
               {/* SCRIPTURE TEXT CANVAS */}
-              <div className="p-4 sm:p-8 md:p-12 max-w-3xl mx-auto w-full text-left">
+              <div className="p-3.5 sm:p-8 md:p-12 max-w-3xl mx-auto w-full text-left overflow-x-hidden">
                 {isLoadingChapter ? (
                   <div className="py-20 flex flex-col items-center justify-center text-center space-y-3">
                     <Loader2 className="w-8 h-8 text-amber-500 animate-spin" />
@@ -740,13 +761,13 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                     </button>
                   </div>
                 ) : chapterData ? (
-                  <div>
+                  <div className="w-full max-w-full overflow-x-hidden">
                     {/* Chapter Header */}
-                    <div className="text-center pb-6 sm:pb-8 mb-6 sm:mb-8 border-b border-stone-200 dark:border-stone-800">
+                    <div className="text-center pb-5 sm:pb-8 mb-5 sm:mb-8 border-b border-stone-200 dark:border-stone-800">
                       <span className="text-xs font-mono uppercase tracking-widest text-amber-700 dark:text-amber-400 font-bold block mb-1">
                         {book.name}
                       </span>
-                      <h2 className="text-3xl sm:text-4xl font-serif font-black text-stone-900 dark:text-parchment-50">
+                      <h2 className="text-2xl sm:text-4xl font-serif font-black text-stone-900 dark:text-parchment-50">
                         Chapter {selectedChapter}
                       </h2>
                       <p className="text-xs font-mono text-stone-500 dark:text-stone-400 mt-1">
@@ -755,7 +776,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                     </div>
 
                     {/* Verses Container */}
-                    <div className={`space-y-3.5 font-reading leading-relaxed ${
+                    <div className={`space-y-3.5 font-reading leading-relaxed w-full max-w-full overflow-x-hidden ${
                       readingFontSize === 'sm' ? 'text-sm' : readingFontSize === 'lg' ? 'text-lg sm:text-xl' : 'text-base sm:text-lg'
                     }`}>
                       {chapterData.verses.map((v) => {
@@ -764,19 +785,19 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                         return (
                           <div
                             key={v.verse}
-                            className={`group relative p-2.5 -mx-2.5 rounded-xl transition-colors ${
+                            className={`group relative p-2 rounded-xl transition-colors ${
                               isSpeakingThis 
                                 ? 'bg-amber-100/60 dark:bg-amber-950/40 text-stone-950 dark:text-white' 
                                 : 'hover:bg-stone-100/70 dark:hover:bg-stone-900/50 text-stone-800 dark:text-stone-200'
                             }`}
                           >
-                            <span className="inline-block text-[11px] font-mono font-bold text-amber-700 dark:text-amber-400 mr-2 select-none align-baseline">
+                            <span className="inline-block text-[11px] font-mono font-bold text-amber-700 dark:text-amber-400 mr-2 select-none align-baseline shrink-0">
                               {v.verse}
                             </span>
-                            <span>{v.text}</span>
+                            <span className="break-words">{v.text}</span>
 
                             {/* Tactical Quick Action Icons on hover / focus */}
-                            <div className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 inline-flex items-center gap-1.5 ml-2 align-middle transition-opacity">
+                            <div className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 flex sm:inline-flex items-center gap-1.5 mt-1.5 sm:mt-0 sm:ml-2 align-middle transition-opacity">
                               {/* Train in Word Forge */}
                               <button
                                 onClick={() => handleSendVerseToForge(v.verse, v.text)}
@@ -819,18 +840,18 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                     </div>
 
                     {/* Bottom Chapter Navigation & Quick Jump */}
-                    <div className="mt-12 pt-6 border-t border-stone-200 dark:border-stone-800 flex items-center justify-between gap-4">
+                    <div className="mt-10 pt-5 border-t border-stone-200 dark:border-stone-800 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2.5 w-full max-w-full overflow-x-hidden">
                       <button
                         disabled={selectedChapter <= 1}
                         onClick={() => {
                           soundEngine.playPageTurn();
                           setSelectedChapter(c => Math.max(1, c - 1));
-                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                          readerScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
                         }}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-stone-100 dark:bg-stone-900 hover:bg-stone-200 dark:hover:bg-stone-850 text-xs font-bold text-stone-700 dark:text-stone-300 disabled:opacity-30 disabled:pointer-events-none"
+                        className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-stone-100 dark:bg-stone-900 hover:bg-stone-200 dark:hover:bg-stone-850 text-xs font-bold text-stone-700 dark:text-stone-300 disabled:opacity-30 disabled:pointer-events-none transition-colors"
                       >
-                        <ChevronLeft className="w-4 h-4" />
-                        <span>Previous Chapter</span>
+                        <ChevronLeft className="w-4 h-4 shrink-0" />
+                        <span>Prev Ch</span>
                       </button>
 
                       <button
@@ -838,7 +859,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                           soundEngine.playClick();
                           setActiveMode('briefing');
                         }}
-                        className="text-xs font-mono font-bold text-amber-700 dark:text-amber-400 hover:underline"
+                        className="w-full sm:w-auto text-xs font-mono font-bold text-amber-700 dark:text-amber-400 hover:underline py-1 text-center order-first sm:order-none"
                       >
                         View Tactical Briefing
                       </button>
@@ -848,12 +869,12 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                         onClick={() => {
                           soundEngine.playPageTurn();
                           setSelectedChapter(c => Math.min(totalChapters, c + 1));
-                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                          readerScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
                         }}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-xs font-bold text-stone-950 disabled:opacity-30 disabled:pointer-events-none shadow-xs"
+                        className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-xs font-bold text-stone-950 disabled:opacity-30 disabled:pointer-events-none shadow-xs transition-colors"
                       >
-                        <span>Next Chapter</span>
-                        <ChevronRight className="w-4 h-4" />
+                        <span>Next Ch</span>
+                        <ChevronRight className="w-4 h-4 shrink-0" />
                       </button>
                     </div>
                   </div>

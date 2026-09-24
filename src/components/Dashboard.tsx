@@ -324,7 +324,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-4 md:pt-6 pb-28 md:pb-12 text-left transition-colors">
       {/* Top Banner Status - Streamlined Header */}
-      <div className="pb-3.5 sm:p-5 mb-5 sm:mb-6 border-b sm:border border-stone-200/70 dark:border-stone-800/70 sm:rounded-2xl sm:bg-white sm:dark:bg-[#11141a] sm:shadow-xs dark:sm:shadow-md transition-colors">
+      <div className="pb-3.5 mb-5 border-b border-stone-200/60 dark:border-stone-800/60 transition-colors w-full">
         {/* Row 1: Brand & Status Header */}
         <div className="flex items-center justify-between gap-3 w-full">
           {/* Left: Emblem, Title & Subtle Version Pill */}
@@ -351,9 +351,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       onOpenWhatsNew();
                     }}
                     className="text-[10px] font-mono px-2 py-0.2 rounded-full bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-600 hover:text-stone-950 dark:text-stone-400 dark:hover:text-amber-300 border border-stone-250 dark:border-stone-750 transition-colors flex items-center gap-1"
-                    title="View field update notes (v1.8.0)"
+                    title="View field update notes (v1.9.2)"
                   >
-                    <span>v1.8</span>
+                    <span>v1.9.2</span>
                   </button>
                 )}
               </div>
@@ -371,7 +371,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   soundEngine.playClick();
                   onOpenTour();
                 }}
-                className="p-1.5 sm:p-2 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                className="p-1.5 sm:p-2 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 text-stone-600 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
                 title="Field Guide & Tour"
                 aria-label="Field Guide"
               >
@@ -380,12 +380,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
             )}
             <ThemeToggle compact />
 
-            <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs font-mono font-bold text-orange-600 dark:text-orange-400" title="Daily streak">
+            <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/50 dark:bg-stone-800 text-xs font-mono font-bold text-orange-600 dark:text-orange-400" title="Daily streak">
               <Flame className="w-3.5 h-3.5 fill-orange-500/20 text-orange-500" />
               <span>{streakCount}d</span>
             </div>
 
-            <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs font-mono font-bold text-amber-700 dark:text-amber-300" title="Scripture XP">
+            <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/50 dark:bg-stone-800 text-xs font-mono font-bold text-amber-700 dark:text-amber-300" title="Scripture XP">
               <Award className="w-3.5 h-3.5 text-amber-500" />
               <span>{xp}</span>
             </div>
@@ -400,10 +400,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
               soundEngine.playClick();
               setIsBattlefieldModalOpen(true);
             }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold whitespace-nowrap transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
               activeBattlefield
-                ? 'bg-cyan-50 dark:bg-cyan-950/70 border-cyan-400/80 dark:border-cyan-500/80 text-cyan-800 dark:text-cyan-200 shadow-sm'
-                : 'bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 border-stone-200 dark:border-cyan-800/40 text-cyan-700 dark:text-cyan-400'
+                ? 'bg-cyan-500/15 text-cyan-800 dark:text-cyan-200'
+                : 'bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-cyan-700 dark:text-cyan-400'
             }`}
             title="Declare today's trial"
           >
@@ -414,10 +414,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {/* 45-Second Briefing Audio */}
           <button
             onClick={handlePlayMorningTacticalAudio}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold whitespace-nowrap transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
               isPlayingMorningTacticalAudio
-                ? 'bg-amber-500 border-amber-600 text-stone-950 font-bold shadow-sm'
-                : 'bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 border-stone-200 dark:border-amber-500/40 text-amber-700 dark:text-amber-300'
+                ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                : 'bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-amber-700 dark:text-amber-300'
             }`}
             title="Listen to 45s audio briefing"
           >
@@ -435,7 +435,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               soundEngine.playClick();
               setIsVoiceSelectorOpen(true);
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 hover:dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 text-xs font-semibold whitespace-nowrap transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 hover:dark:bg-stone-750 text-stone-700 dark:text-stone-300 text-xs font-semibold whitespace-nowrap transition-colors"
             title="Choose app-wide reading voice"
           >
             <Mic className="w-3.5 h-3.5 text-amber-500" />
@@ -446,7 +446,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {dueFSRSCount > 0 && (
             <button
               onClick={() => onOpenWordForge()}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-100/80 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-500/60 text-amber-800 dark:text-amber-300 text-xs font-bold whitespace-nowrap shadow-sm"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 text-amber-800 dark:text-amber-300 text-xs font-bold whitespace-nowrap"
               title="Scriptures due for memory review"
             >
               <Brain className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 animate-pulse" />
@@ -457,7 +457,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {/* 3-Min Morning Briefing */}
           <button
             onClick={() => setShowMorningBriefing(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 text-xs font-medium whitespace-nowrap transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs font-medium whitespace-nowrap transition-colors"
           >
             <Coffee className="w-3.5 h-3.5 text-amber-500" />
             <span>3-Min Briefing</span>
@@ -475,7 +475,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 soundEngine.playClick();
                 onOpenTour();
               }}
-              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/70 border border-amber-300 dark:border-amber-500/50 text-amber-800 dark:text-amber-300 text-xs font-bold whitespace-nowrap shadow-xs transition-all"
+              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 text-xs font-bold whitespace-nowrap transition-all"
               title="How to navigate and use Testament"
             >
               <HelpCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
@@ -489,7 +489,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 soundEngine.playClick();
                 onOpenOnboarding();
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 text-xs font-medium whitespace-nowrap transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs font-medium whitespace-nowrap transition-colors"
               title="Calibrate your battle plan"
             >
               <SlidersHorizontal className="w-3.5 h-3.5 text-amber-500" />
@@ -503,7 +503,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {/* GUIDED CAMPAIGN vs FREE ROAM MODE SELECTOR - Single Sleek Segmented Control */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-        <div className="w-full sm:w-auto inline-flex p-1 rounded-xl bg-stone-200/60 dark:bg-stone-900 border border-stone-300/60 dark:border-stone-800 transition-colors">
+        <div className="w-full sm:w-auto inline-flex p-1 rounded-xl bg-stone-200/60 dark:bg-stone-900 transition-colors">
           <button
             onClick={() => handleToggleDashboardMode('guided')}
             className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
@@ -551,7 +551,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {/* MAIN STAGE (65-70% on Desktop) */}
           <div className="lg:col-span-8 space-y-8">
             {/* Cinematic Hero Study Table Banner */}
-          <div className="rounded-2xl overflow-hidden border border-stone-200 dark:border-amber-700/40 shadow-md dark:shadow-2xl relative bg-white dark:bg-[#0e1117] transition-colors">
+          <div className="rounded-2xl overflow-hidden relative bg-stone-100 dark:bg-[#0e1117] transition-colors">
             <div className="relative h-44 sm:h-64 w-full overflow-hidden bg-stone-950">
               <img 
                 src="/images/hero_banner.jpg" 
@@ -567,7 +567,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <Sparkles className="w-4 h-4 text-amber-500" />
                   <span>Daily Truth For The Trenches</span>
                 </div>
-                <span className="text-[10px] font-mono text-amber-700 dark:text-amber-400/90 px-2.5 py-0.5 rounded bg-amber-100/70 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/40">
+                <span className="text-[10px] font-mono text-amber-700 dark:text-amber-400/90 px-2.5 py-0.5 rounded bg-amber-500/10">
                   {todayFormatted}
                 </span>
               </div>
@@ -580,10 +580,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 {dailyVerse.plainEnglishSummary}
               </p>
 
-              <div className="flex items-center justify-between pt-3 border-t border-stone-200 dark:border-stone-800">
+              <div className="flex items-center justify-between pt-3 border-t border-stone-200/60 dark:border-stone-800/60">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-mono text-amber-600 dark:text-amber-500 font-semibold">{dailyVerse.reference}</span>
-                  <span className="text-[10px] font-mono text-stone-500 dark:text-stone-400 px-2 py-0.5 rounded bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 hidden sm:inline-block">
+                  <span className="text-[10px] font-mono text-stone-500 dark:text-stone-400 px-2 py-0.5 rounded bg-stone-200/60 dark:bg-stone-900 hidden sm:inline-block">
                     {dailyVerse.category}
                   </span>
                 </div>
@@ -601,9 +601,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {/* Curated Starter Tracks & Quests Grid (Directly Below Hero Banner) */}
           <div>
             {userProfile && (
-              <div className="mb-4 p-4 rounded-2xl bg-amber-50/70 dark:bg-gradient-to-r dark:from-amber-950/40 dark:via-[#141822] dark:to-stone-900 border border-amber-300 dark:border-amber-600/40 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="mb-4 p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-950/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-500/20 border border-amber-300 dark:border-amber-500/40 flex items-center justify-center text-lg shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-stone-900 dark:text-amber-300 flex items-center justify-center text-lg shrink-0">
                     🎯
                   </div>
                   <div>
@@ -627,7 +627,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       soundEngine.playClick();
                       onOpenOnboarding();
                     }}
-                    className="self-start sm:self-auto text-xs font-semibold px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-300 border border-stone-250 dark:border-stone-700 transition-colors whitespace-nowrap"
+                    className="self-start sm:self-auto text-xs font-semibold px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-300 transition-colors whitespace-nowrap"
                   >
                     Re-Calibrate
                   </button>
@@ -658,7 +658,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     className={`text-xs px-3.5 py-1.5 rounded-full font-medium whitespace-nowrap transition-all ${
                       activeTrack === track
                         ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
-                        : 'bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                        : 'bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                     }`}
                   >
                     {track}
@@ -681,7 +681,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       soundEngine.playClick();
                       onSelectQuest(quest);
                     }}
-                    className="flex flex-col justify-between rounded-2xl bg-white dark:bg-[#12151b] border border-stone-200 dark:border-stone-800 hover:border-amber-500 transition-all shadow-sm hover:shadow-md overflow-hidden group cursor-pointer"
+                    className="flex flex-col justify-between rounded-2xl bg-stone-100/70 hover:bg-stone-100 dark:bg-stone-900/60 dark:hover:bg-stone-850 transition-all overflow-hidden group cursor-pointer"
                   >
                     {/* Visual Illustration Thumbnail */}
                     <div className="relative h-44 w-full shrink-0 overflow-hidden bg-stone-950">
@@ -691,26 +691,26 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 dark:from-[#12151b] via-transparent to-transparent" />
-                      <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded bg-black/80 backdrop-blur-md border border-amber-600/30 text-[10px] font-mono text-amber-400 uppercase">
+                      <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded bg-black/80 backdrop-blur-md text-[10px] font-mono text-amber-400 uppercase">
                         {quest.heroName}
                       </div>
 
                       {isFullyComplete ? (
-                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-emerald-950/90 backdrop-blur-md border border-emerald-500/60 text-emerald-300 text-[10px] font-mono font-bold uppercase tracking-wider shadow-sm flex items-center gap-1">
+                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-emerald-950/90 backdrop-blur-md text-emerald-300 text-[10px] font-mono font-bold uppercase tracking-wider flex items-center gap-1">
                           <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                           <span>Completed</span>
                         </div>
                       ) : userProfile?.recommendedQuestId === quest.id ? (
-                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 text-stone-950 text-[10px] font-bold uppercase tracking-wider shadow-glow-gold flex items-center gap-1">
+                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 text-stone-950 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
                           <span>🎯</span>
                           <span>Your Battle Plan</span>
                         </div>
                       ) : !userProfile && quest.id === 'david-journey' && completedCount === 0 ? (
-                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-amber-500 text-stone-950 text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-amber-500 text-stone-950 text-[10px] font-bold uppercase tracking-wider">
                           Recommended First
                         </div>
                       ) : quest.starterTrack ? (
-                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded bg-amber-950/80 backdrop-blur-md border border-amber-800/40 text-[9px] font-mono text-amber-300 uppercase">
+                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded bg-amber-950/80 backdrop-blur-md text-[9px] font-mono text-amber-300 uppercase">
                           {quest.starterTrack}
                         </div>
                       ) : null}
@@ -738,7 +738,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         </p>
                       </div>
 
-                      <div className="pt-4 mt-3 border-t border-stone-200 dark:border-stone-800/80 flex items-center justify-between">
+                      <div className="pt-4 mt-3 border-t border-stone-200/60 dark:border-stone-800/60 flex items-center justify-between">
                         <div className="flex items-center gap-2 text-xs text-stone-500 dark:text-stone-400 font-mono">
                           <Clock className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500" />
                           <span>{quest.estimatedMinutes} min</span>
@@ -781,14 +781,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div className="hidden lg:block lg:col-span-4 space-y-6">
           
           {/* ADAPTIVE NEXT OBJECTIVE */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-stone-50 dark:bg-gradient-to-r dark:from-amber-950/40 dark:via-[#131722] dark:to-stone-900 border border-amber-300 dark:border-amber-500/40 shadow-sm dark:shadow-md">
+          <div className="p-4 sm:p-5 rounded-2xl bg-stone-100/60 dark:bg-stone-900/40">
             <div className="flex items-center gap-3 mb-2.5">
-              <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-500/20 border border-amber-300 dark:border-amber-500/40 flex items-center justify-center text-lg shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-stone-900 dark:text-amber-300 flex items-center justify-center text-lg shrink-0">
                 {adaptiveObjective.type === 'retention_drill' ? '🧠' : adaptiveObjective.type === 'next_act' ? '⚔️' : '👑'}
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 mb-0.5">
-                  <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 px-1.5 py-0.2 rounded bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/60">
+                  <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 px-1.5 py-0.2 rounded bg-amber-500/10">
                     {adaptiveObjective.badge}
                   </span>
                   <span className="text-[11px] text-stone-500 dark:text-stone-400">Next Objective</span>
@@ -820,7 +820,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
 
           {/* LEARNER'S TACTICAL TOOLKIT (Anti-Textbook Accelerators) */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#13161c] border border-stone-200 dark:border-stone-800 shadow-sm dark:shadow-md">
+          <div className="p-4 sm:p-5 rounded-2xl bg-stone-100/60 dark:bg-stone-900/40">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-amber-500" />
@@ -842,7 +842,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   soundEngine.playSnap();
                   onOpenTimeline();
                 }}
-                className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 hover:border-amber-500 dark:hover:border-amber-500/70 hover:bg-stone-100 dark:hover:bg-[#181d2a] transition-all text-left group shadow-sm"
+                className="p-2.5 rounded-xl bg-white/80 dark:bg-stone-900/80 hover:bg-white dark:hover:bg-[#181d2a] transition-all text-left group"
               >
                 <Clock className="w-4 h-4 text-amber-500 mb-1 group-hover:scale-110 transition-transform" />
                 <div className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100">60s Timeline</div>
@@ -854,7 +854,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   soundEngine.playSnap();
                   onOpenDossiers();
                 }}
-                className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 hover:border-amber-500 dark:hover:border-amber-500/70 hover:bg-stone-100 dark:hover:bg-[#181d2a] transition-all text-left group shadow-sm"
+                className="p-2.5 rounded-xl bg-white/80 dark:bg-stone-900/80 hover:bg-white dark:hover:bg-[#181d2a] transition-all text-left group"
               >
                 <Zap className="w-4 h-4 text-amber-500 mb-1 group-hover:scale-110 transition-transform" />
                 <div className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100">Character Dossiers</div>
@@ -866,7 +866,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   soundEngine.playSnap();
                   onOpenStreetTranslator();
                 }}
-                className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 hover:border-amber-500 dark:hover:border-amber-500/70 hover:bg-stone-100 dark:hover:bg-[#181d2a] transition-all text-left group shadow-sm"
+                className="p-2.5 rounded-xl bg-white/80 dark:bg-stone-900/80 hover:bg-white dark:hover:bg-[#181d2a] transition-all text-left group"
               >
                 <BookA className="w-4 h-4 text-amber-500 mb-1 group-hover:scale-110 transition-transform" />
                 <div className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100">Street Translator</div>
@@ -878,7 +878,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   soundEngine.playSnap();
                   onOpenDilemmas();
                 }}
-                className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 hover:border-amber-500 dark:hover:border-amber-500/70 hover:bg-stone-100 dark:hover:bg-[#181d2a] transition-all text-left group shadow-sm"
+                className="p-2.5 rounded-xl bg-white/80 dark:bg-stone-900/80 hover:bg-white dark:hover:bg-[#181d2a] transition-all text-left group"
               >
                 <ShieldAlert className="w-4 h-4 text-amber-500 mb-1 group-hover:scale-110 transition-transform" />
                 <div className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100">"What’s the Play?"</div>
@@ -890,7 +890,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   soundEngine.playSnap();
                   setIsProverbsModalOpen(true);
                 }}
-                className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 hover:border-amber-500 dark:hover:border-amber-500/70 hover:bg-stone-100 dark:hover:bg-[#181d2a] transition-all text-left group shadow-sm"
+                className="p-2.5 rounded-xl bg-white/80 dark:bg-stone-900/80 hover:bg-white dark:hover:bg-[#181d2a] transition-all text-left group"
               >
                 <Shield className="w-4 h-4 text-amber-500 mb-1 group-hover:scale-110 transition-transform" />
                 <div className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100">Proverbs Codex</div>
@@ -902,7 +902,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   soundEngine.playSnap();
                   setIsPsalmsMedicModalOpen(true);
                 }}
-                className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900/80 border border-rose-300 dark:border-rose-500/70 hover:border-rose-500 hover:bg-rose-50 dark:hover:bg-[#181d2a] transition-all text-left group shadow-sm"
+                className="p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/15 dark:bg-stone-900/80 dark:hover:bg-[#181d2a] transition-all text-left group"
               >
                 <HeartHandshake className="w-4 h-4 text-rose-500 mb-1 group-hover:scale-110 transition-transform" />
                 <div className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100">Psalms Medic</div>
@@ -912,10 +912,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
 
           {/* SPACED MEMORY PULSE CARD */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-gradient-to-b dark:from-[#151922] dark:via-[#10131a] dark:to-[#141822] border border-stone-200 dark:border-amber-500/40 shadow-sm dark:shadow-glow-gold relative overflow-hidden text-left">
+          <div className="p-4 sm:p-5 rounded-2xl bg-stone-100/60 dark:bg-stone-900/40 relative overflow-hidden text-left">
             <div className="flex items-center justify-between gap-2 mb-2.5">
               <div className="flex items-center gap-2">
-                <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30">
+                <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400">
                   <Bell className="w-3.5 h-3.5 animate-pulse" />
                 </span>
                 <div>
@@ -936,14 +936,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 )}
                 <button
                   onClick={handleCheckAndSyncReminders}
-                  className="p-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-600 hover:text-stone-900 dark:text-stone-300 dark:hover:text-amber-300 border border-stone-200 dark:border-stone-700 transition-colors"
+                  className="p-1.5 rounded-lg bg-stone-200/60 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-600 hover:text-stone-900 dark:text-stone-300 dark:hover:text-amber-300 transition-colors"
                   title="Check and sync reminder schedule"
                 >
                   <Clock className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={handleQuickTestNotification}
-                  className="p-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-amber-600 dark:text-amber-400 border border-stone-200 dark:border-stone-700 transition-colors"
+                  className="p-1.5 rounded-lg bg-stone-200/60 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-amber-600 dark:text-amber-400 transition-colors"
                   title="Sends an instant recall prompt to this device"
                 >
                   <Send className="w-3.5 h-3.5" />
@@ -960,7 +960,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
             </div>
 
-            <div className="bg-stone-50 dark:bg-black/40 p-3 rounded-xl border border-stone-200 dark:border-stone-800 mb-3">
+            <div className="bg-white/80 dark:bg-black/30 p-3 rounded-xl mb-3">
               <div className="flex items-center justify-between gap-2 mb-1">
                 <span className="text-xs font-serif font-bold text-amber-700 dark:text-amber-300">
                   {activeMemoryVerse.reference}
@@ -977,7 +977,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
 
             {nextReminder && notificationSettings.enabled && (
-              <div className="text-[10px] font-mono text-amber-800 dark:text-amber-300/90 mb-3 flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 px-2.5 py-1 rounded-lg">
+              <div className="text-[10px] font-mono text-amber-800 dark:text-amber-300/90 mb-3 flex items-center gap-1.5 bg-amber-500/10 px-2.5 py-1 rounded-lg">
                 <Clock className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
                 <span>Next slot: {nextReminder.label} ({nextReminder.remainingFormatted})</span>
               </div>
@@ -993,13 +993,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
 
           {/* THE CANON CODEX BANNER (66-BOOK FIELD LIBRARY & ARSENAL) */}
-          <div className="p-4 rounded-2xl bg-stone-50 dark:bg-gradient-to-r dark:from-amber-950/40 dark:via-[#151926] dark:to-stone-900 border border-stone-200 dark:border-amber-500/40 shadow-sm dark:shadow-md">
+          <div className="p-4 rounded-2xl bg-stone-100/60 dark:bg-stone-900/40">
             <div className="flex items-center gap-3 mb-2.5">
-              <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-500/20 border border-amber-300 dark:border-amber-500/40 flex items-center justify-center text-lg shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-lg shrink-0 flex items-center justify-center">
                 📜
               </div>
               <div>
-                <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 px-1.5 py-0.2 rounded bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/60 inline-block mb-0.5">
+                <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 px-1.5 py-0.2 rounded bg-amber-500/10 inline-block mb-0.5">
                   Complete Canon • 66 Books
                 </span>
                 <h4 className="text-xs sm:text-sm font-serif font-bold text-stone-900 dark:text-parchment-50">
@@ -1027,7 +1027,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   soundEngine.playSnap();
                   onOpenArsenal();
                 }}
-                className="py-2 px-3 rounded-xl bg-white hover:bg-stone-100 dark:bg-stone-900 dark:hover:bg-stone-850 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-300 border border-stone-250 dark:border-stone-800 text-xs font-semibold flex items-center justify-center gap-1 transition-all"
+                className="py-2 px-3 rounded-xl bg-stone-200/60 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-300 text-xs font-semibold flex items-center justify-center gap-1 transition-all"
                 title="Open Scripture Arsenal Journal"
               >
                 <span>Arsenal</span>
@@ -1037,7 +1037,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
 
           {/* THE ARMORY: RELICS OF FAITH */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#13161c] border border-stone-200 dark:border-stone-800 shadow-sm dark:shadow-md">
+          <div className="p-4 sm:p-5 rounded-2xl bg-stone-100/60 dark:bg-stone-900/40">
             <div className="flex items-center justify-between mb-2.5">
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4 text-amber-500" />
@@ -1060,10 +1060,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <div
                     key={relic.id}
                     title={isUnlocked ? `${relic.name}: ${relic.desc}` : `Locked (Complete ${relic.character}'s journey)`}
-                    className={`p-2.5 rounded-xl border text-left transition-all ${
+                    className={`p-2.5 rounded-xl text-left transition-all ${
                       isUnlocked
-                        ? 'bg-amber-50 dark:bg-amber-950/30 border-amber-300 dark:border-amber-600/50 text-stone-900 dark:text-parchment-100 shadow-sm'
-                        : 'bg-stone-100 dark:bg-stone-900/50 border-stone-200 dark:border-stone-800/80 text-stone-400 dark:text-stone-600 opacity-60'
+                        ? 'bg-amber-500/15 text-stone-900 dark:text-parchment-100 shadow-sm'
+                        : 'bg-stone-200/50 dark:bg-stone-900/50 text-stone-400 dark:text-stone-600 opacity-60'
                     }`}
                   >
                     <div className="text-lg mb-0.5">{relic.icon}</div>
@@ -1080,7 +1080,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
 
           {/* ATMOSPHERIC AUDIO SOUNDSCAPE */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800">
+          <div className="p-4 sm:p-5 rounded-2xl bg-stone-100/60 dark:bg-stone-900/40">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2 text-xs font-medium text-stone-700 dark:text-stone-300">
                 <Music className="w-4 h-4 text-amber-500" />

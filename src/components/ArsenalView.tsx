@@ -128,7 +128,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
               className={`text-xs px-3.5 py-1.5 rounded-full font-medium whitespace-nowrap transition-all ${
                 selectedCategory === cat
                   ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
-                  : 'bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                  : 'bg-stone-200/50 dark:bg-stone-900 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
               }`}
             >
               {cat}
@@ -147,7 +147,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
           return (
             <div 
               key={verse.id}
-              className="p-5 md:p-6 rounded-2xl bg-white dark:bg-[#12151b] border border-stone-200 dark:border-stone-800 hover:border-amber-500/50 dark:hover:border-amber-600/50 transition-all shadow-sm flex flex-col justify-between"
+              className="p-5 md:p-6 rounded-2xl bg-stone-100/70 hover:bg-stone-100 dark:bg-stone-900/60 dark:hover:bg-stone-850 transition-all flex flex-col justify-between"
             >
               <div>
                 {/* Card Header */}
@@ -156,11 +156,11 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
                     <span className="text-lg font-serif font-bold text-amber-700 dark:text-amber-400">
                       {verse.reference}
                     </span>
-                    <span className="text-[11px] px-2 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 font-mono">
+                    <span className="text-[11px] px-2 py-0.5 rounded bg-stone-200/70 dark:bg-stone-800 text-stone-600 dark:text-stone-400 font-mono">
                       {verse.translation}
                     </span>
                     {isMastered && (
-                      <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-200 dark:border-emerald-800/40 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-full">
                         ✓ Memorized
                       </span>
                     )}
@@ -170,7 +170,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
                     <button
                       onClick={() => handleSpeak(verse)}
                       title="Audio Recital"
-                      className="p-1.5 rounded-lg text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                      className="p-1.5 rounded-lg text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-200/50 dark:hover:bg-stone-800 transition-colors"
                     >
                       {isSpeakingThis ? (
                         <VolumeX className="w-4 h-4 text-amber-500 animate-pulse" />
@@ -185,7 +185,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
                         onToggleBookmark(verse.id);
                       }}
                       title="Bookmark to Arsenal"
-                      className="p-1.5 rounded-lg text-stone-500 dark:text-stone-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                      className="p-1.5 rounded-lg text-stone-500 dark:text-stone-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-stone-200/50 dark:hover:bg-stone-800 transition-colors"
                     >
                       {isBookmarked ? (
                         <BookmarkCheck className="w-4 h-4 text-amber-500 fill-amber-500/20" />
@@ -202,7 +202,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
                 </blockquote>
 
                 {/* Plain English Translation Breakdown */}
-                <div className="my-3 p-3.5 rounded-xl bg-stone-50 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800/80 text-xs md:text-sm text-stone-700 dark:text-stone-300">
+                <div className="my-3 p-3.5 rounded-xl bg-white/80 dark:bg-stone-950/70 text-xs md:text-sm text-stone-700 dark:text-stone-300">
                   <div className="flex items-center gap-1.5 text-amber-700 dark:text-amber-400 font-semibold mb-1">
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>Plain English Real Talk</span>
@@ -220,7 +220,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
               </div>
 
               {/* Footer Actions */}
-              <div className="pt-3 border-t border-stone-200 dark:border-stone-800/80 flex flex-wrap items-center justify-between gap-2">
+              <div className="pt-3 border-t border-stone-200/60 dark:border-stone-800/60 flex flex-wrap items-center justify-between gap-2">
                 <span className="text-[11px] text-stone-500 dark:text-stone-400 font-mono">
                   {verse.heroName ? `Story: ${verse.heroName}` : verse.category}
                 </span>
@@ -231,7 +231,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
                       soundEngine.playClick();
                       setPulseModalVerse(verse);
                     }}
-                    className="flex items-center gap-1 text-xs font-semibold text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-300 py-1.5 px-2.5 rounded-lg bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 hover:border-amber-500/50 transition-colors"
+                    className="flex items-center gap-1 text-xs font-semibold text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-300 py-1.5 px-2.5 rounded-lg bg-stone-200/60 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 transition-colors"
                     title="Train with daily spaced notifications"
                   >
                     <Bell className="w-3.5 h-3.5 text-amber-500" />
@@ -263,7 +263,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
 
       {/* Saved Journal Notes Section */}
       {Object.keys(notes).length > 0 && (
-        <div className="mt-12 pt-8 border-t border-stone-200 dark:border-stone-800">
+        <div className="mt-12 pt-8 border-t border-stone-200/60 dark:border-stone-800/60">
           <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-3">
             <FileText className="w-4 h-4" />
             <span>Your Personal Reflections & Journal</span>
@@ -271,7 +271,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Object.entries(notes).map(([actId, noteText]) => (
-              <div key={actId} className="p-4 rounded-xl bg-white dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 text-xs">
+              <div key={actId} className="p-4 rounded-xl bg-stone-100/60 dark:bg-stone-900/40 text-xs">
                 <div className="text-amber-700 dark:text-amber-400 font-serif font-bold text-sm mb-1">{getActTitle(actId)}</div>
                 <p className="text-stone-700 dark:text-stone-300 italic">"{noteText}"</p>
               </div>

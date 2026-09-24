@@ -37,7 +37,7 @@ export const TimelineModal: React.FC<TimelineModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-50 bg-black/60 dark:bg-black/85 backdrop-blur-md overflow-y-auto overscroll-contain p-3 sm:p-6 flex items-start sm:items-center justify-center animate-fadeIn"
+      className="fixed inset-0 z-50 bg-black/60 dark:bg-black/85 backdrop-blur-md overflow-y-auto overscroll-contain p-0 sm:p-6 flex items-start sm:items-center justify-center animate-fadeIn"
       onClick={onClose}
     >
       <div 
@@ -46,11 +46,11 @@ export const TimelineModal: React.FC<TimelineModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="timeline-modal-title"
-        className="max-w-4xl w-full bg-white dark:bg-[#11141b] border-2 border-amber-400 dark:border-amber-600/50 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] my-auto outline-none"
+        className="max-w-4xl w-full h-[100dvh] sm:h-auto sm:max-h-[90vh] bg-white dark:bg-[#11141b] border-0 sm:border-2 border-amber-400 dark:border-amber-600/50 rounded-none sm:rounded-3xl shadow-none sm:shadow-2xl overflow-hidden flex flex-col my-auto outline-none"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-5 md:p-6 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between bg-stone-50 dark:bg-stone-950/60">
+        <div className="p-5 md:p-6 border-b border-stone-200/60 dark:border-stone-800 flex items-center justify-between bg-stone-50 dark:bg-stone-950/60">
           <div>
             <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-1">
               <Clock className="w-4 h-4" />
@@ -63,14 +63,14 @@ export const TimelineModal: React.FC<TimelineModalProps> = ({
           <button 
             onClick={onClose}
             aria-label="Close timeline modal"
-            className="p-2 rounded-xl bg-white dark:bg-stone-900 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white border border-stone-200 dark:border-stone-800 focus-visible:ring-2 focus-visible:ring-amber-500 transition-colors"
+            className="p-2 rounded-xl bg-stone-200/70 hover:bg-stone-200 dark:bg-stone-900 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white focus-visible:ring-2 focus-visible:ring-amber-500 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Scrubbable Eras Bar */}
-        <div className="flex gap-2 p-3 bg-stone-100 dark:bg-stone-900/70 border-b border-stone-200 dark:border-stone-800/80 overflow-x-auto scrollbar-none px-4 md:px-6">
+        <div className="flex gap-2 p-3 bg-stone-100/70 dark:bg-stone-900/70 border-b border-stone-200/60 dark:border-stone-800/80 overflow-x-auto scrollbar-none px-4 md:px-6">
           {TIMELINE_ERAS.map((era, idx) => (
             <button
               key={era.id}
@@ -78,10 +78,10 @@ export const TimelineModal: React.FC<TimelineModalProps> = ({
                 soundEngine.playSnap();
                 setSelectedEraIndex(idx);
               }}
-              className={`flex-shrink-0 text-left px-3.5 py-2 rounded-xl border transition-all ${
+              className={`flex-shrink-0 text-left px-3.5 py-2 rounded-xl transition-all ${
                 selectedEraIndex === idx
-                  ? 'bg-amber-500 text-stone-950 border-amber-600 font-bold shadow-sm'
-                  : 'bg-white dark:bg-stone-950/60 border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:border-stone-300 dark:hover:border-stone-700'
+                  ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                  : 'bg-stone-200/60 dark:bg-stone-950/60 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-800'
               }`}
             >
               <div className="text-[10px] font-mono uppercase tracking-wider opacity-80">
@@ -110,12 +110,12 @@ export const TimelineModal: React.FC<TimelineModalProps> = ({
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 text-sm text-stone-800 dark:text-stone-200 leading-relaxed font-reading">
+          <div className="p-4 rounded-2xl bg-stone-100/70 dark:bg-stone-900/60 text-sm text-stone-800 dark:text-stone-200 leading-relaxed font-reading">
             {currentEra.summary}
           </div>
 
           {/* Defining Moment Card */}
-          <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 text-xs md:text-sm">
+          <div className="p-4 rounded-xl bg-amber-500/10 dark:bg-amber-950/30 text-xs md:text-sm">
             <strong className="text-amber-800 dark:text-amber-400 block mb-1">Defining Breakthrough Moment: </strong>
             <span className="text-amber-950 dark:text-amber-100 italic">"{currentEra.definingMoment}"</span>
           </div>
@@ -129,7 +129,7 @@ export const TimelineModal: React.FC<TimelineModalProps> = ({
               {currentEra.keyFigures.map((fig, idx) => (
                 <span
                   key={idx}
-                  className="px-3 py-1 rounded-lg bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs font-semibold text-stone-800 dark:text-stone-300"
+                  className="px-3 py-1 rounded-lg bg-stone-200/60 dark:bg-stone-900 text-xs font-semibold text-stone-800 dark:text-stone-300"
                 >
                   {fig}
                 </span>
@@ -139,7 +139,7 @@ export const TimelineModal: React.FC<TimelineModalProps> = ({
 
           {/* Connected Quests in this Era */}
           {currentEra.questIds.length > 0 && (
-            <div className="pt-4 border-t border-stone-200 dark:border-stone-800 space-y-3">
+            <div className="pt-4 border-t border-stone-200/60 dark:border-stone-800 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono uppercase tracking-wider text-stone-600 dark:text-stone-400">
                   Interactive Quests in this Era ({currentEra.questIds.length}):
@@ -160,7 +160,7 @@ export const TimelineModal: React.FC<TimelineModalProps> = ({
                         onSelectEraQuest(questId);
                         onClose();
                       }}
-                      className="p-3 rounded-xl bg-stone-50 dark:bg-stone-900/90 hover:bg-stone-100 dark:hover:bg-stone-800 border border-stone-200 dark:border-stone-800 hover:border-amber-500/60 text-left flex items-center justify-between group transition-all"
+                      className="p-3 rounded-xl bg-stone-100/70 dark:bg-stone-900/90 hover:bg-amber-500/10 dark:hover:bg-amber-500/10 text-left flex items-center justify-between group transition-all"
                     >
                       <div className="min-w-0 pr-2">
                         <div className="text-xs font-bold text-stone-900 dark:text-parchment-100 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors truncate">
@@ -170,7 +170,7 @@ export const TimelineModal: React.FC<TimelineModalProps> = ({
                           {characterTitle}
                         </div>
                       </div>
-                      <div className="w-7 h-7 rounded-lg bg-amber-500/10 group-hover:bg-amber-500 group-hover:text-stone-950 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center justify-center shrink-0 transition-all">
+                      <div className="w-7 h-7 rounded-lg bg-amber-500/10 group-hover:bg-amber-500 group-hover:text-stone-950 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 transition-all">
                         <ArrowRight className="w-3.5 h-3.5" />
                       </div>
                     </button>

@@ -142,7 +142,7 @@ export const CanonCodexModal: React.FC<CanonCodexModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/60 dark:bg-black/85 backdrop-blur-md overflow-y-auto overscroll-contain animate-fadeIn"
+      className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-5 bg-black/60 dark:bg-black/85 backdrop-blur-md overflow-y-auto overscroll-contain animate-fadeIn"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
@@ -150,7 +150,7 @@ export const CanonCodexModal: React.FC<CanonCodexModalProps> = ({
       <div 
         ref={modalRef}
         tabIndex={-1}
-        className="relative w-full max-w-5xl max-h-[92vh] flex flex-col rounded-3xl bg-white dark:bg-[#0f1219] border border-amber-500/30 dark:border-amber-500/40 shadow-2xl overflow-hidden transition-colors outline-none"
+        className="relative w-full max-w-5xl h-[100dvh] sm:h-auto sm:max-h-[92vh] flex flex-col rounded-none sm:rounded-3xl bg-white dark:bg-[#0f1219] border-0 sm:border border-amber-500/30 dark:border-amber-500/40 shadow-none sm:shadow-2xl overflow-hidden transition-colors outline-none"
         onClick={e => e.stopPropagation()}
       >
         
@@ -341,13 +341,13 @@ export const CanonCodexModal: React.FC<CanonCodexModalProps> = ({
                 return (
                   <div
                     key={book.id}
-                    className="p-4 sm:p-5 rounded-2xl bg-stone-50 dark:bg-[#141824] border border-stone-200 dark:border-stone-800 hover:border-amber-400 dark:hover:border-amber-500/40 transition-all flex flex-col justify-between shadow-sm"
+                    className="p-4 sm:p-5 rounded-2xl bg-stone-100/70 dark:bg-[#141824] transition-all flex flex-col justify-between"
                   >
                     <div>
                       {/* Top Meta Line */}
                       <div className="flex items-center justify-between gap-2 mb-2">
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-stone-100 dark:bg-stone-900 border border-stone-250 dark:border-stone-800 text-amber-800 dark:text-amber-400">
+                          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-stone-200/70 dark:bg-stone-900 text-amber-800 dark:text-amber-400">
                             #{String(book.order).padStart(2, '0')}
                           </span>
                           <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400 font-medium">
@@ -355,7 +355,7 @@ export const CanonCodexModal: React.FC<CanonCodexModalProps> = ({
                           </span>
                         </div>
 
-                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 px-2 py-0.5 rounded bg-stone-100 dark:bg-stone-900/80 border border-stone-250 dark:border-stone-800">
+                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 px-2 py-0.5 rounded bg-stone-200/70 dark:bg-stone-900/80">
                           {book.testament === 'OT' ? 'Old Testament' : 'New Testament'}
                         </span>
                       </div>
@@ -377,13 +377,13 @@ export const CanonCodexModal: React.FC<CanonCodexModalProps> = ({
 
                       {/* Life Theme Tag */}
                       <div className="mb-3.5">
-                        <span className="text-[10px] font-mono text-stone-600 dark:text-stone-400 px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-900 border border-stone-250 dark:border-stone-800/80">
+                        <span className="text-[10px] font-mono text-stone-600 dark:text-stone-400 px-2 py-0.5 rounded-full bg-stone-200/60 dark:bg-stone-900">
                           🎯 {book.lifeTheme}
                         </span>
                       </div>
 
                       {/* SCRIPTURE ANCHOR BOX WITH DUAL-LENS TOGGLE */}
-                      <div className="p-3.5 rounded-xl bg-white dark:bg-stone-950/70 border border-amber-400/30 dark:border-amber-500/20 mb-3 space-y-2">
+                      <div className="p-3.5 rounded-xl bg-white/90 dark:bg-stone-950/70 mb-3 space-y-2">
                         <div className="flex items-center justify-between gap-2">
                           <span className="text-xs font-mono font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
                             <Flame className="w-3.5 h-3.5 text-amber-600 dark:text-amber-500" />
@@ -392,7 +392,7 @@ export const CanonCodexModal: React.FC<CanonCodexModalProps> = ({
 
                           <button
                             onClick={() => toggleTranslationLens(book.id)}
-                            className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-700 hover:text-stone-950 dark:text-stone-300 dark:hover:text-amber-300 border border-stone-250 dark:border-stone-800 transition-colors"
+                            className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-700 hover:text-stone-950 dark:text-stone-300 dark:hover:text-amber-300 transition-colors"
                           >
                             {lens === 'street' ? 'Switch to Canonical Text' : 'Switch to Street Translation'}
                           </button>
@@ -402,7 +402,7 @@ export const CanonCodexModal: React.FC<CanonCodexModalProps> = ({
                           "{lens === 'street' ? book.anchorScripture.streetTranslation : book.anchorScripture.canonicalText}"
                         </p>
 
-                        <div className="pt-1.5 border-t border-stone-200 dark:border-stone-800/60 flex items-start gap-1.5 text-[11px] text-stone-600 dark:text-stone-400">
+                        <div className="pt-1.5 border-t border-stone-200/60 dark:border-stone-800/60 flex items-start gap-1.5 text-[11px] text-stone-600 dark:text-stone-400">
                           <span className="text-amber-700 dark:text-amber-400 font-bold shrink-0">Monday Play:</span>
                           <span>{book.anchorScripture.takeaway}</span>
                         </div>
@@ -410,7 +410,7 @@ export const CanonCodexModal: React.FC<CanonCodexModalProps> = ({
 
                       {/* EXPANDABLE SITUATION REPORT (DRAWER) */}
                       {isSitRepOpen && (
-                        <div className="p-3.5 rounded-xl bg-stone-100 dark:bg-[#0c0e14] border border-stone-200 dark:border-stone-800 mb-3 space-y-2.5 text-xs animate-fadeIn">
+                        <div className="p-3.5 rounded-xl bg-stone-200/50 dark:bg-[#0c0e14] mb-3 space-y-2.5 text-xs animate-fadeIn">
                           <div>
                             <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-700 dark:text-amber-500 mb-0.5">
                               Historical Peril & Author Context
@@ -433,11 +433,11 @@ export const CanonCodexModal: React.FC<CanonCodexModalProps> = ({
                     </div>
 
                     {/* CARD ACTION BUTTONS */}
-                    <div className="pt-3 border-t border-stone-200 dark:border-stone-800/60 flex flex-wrap items-center justify-between gap-2">
+                    <div className="pt-3 border-t border-stone-200/60 dark:border-stone-800/60 flex flex-wrap items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5">
                         <button
                           onClick={() => toggleSitRep(book.id)}
-                          className="px-2.5 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-700 hover:text-stone-950 dark:text-stone-300 text-[11px] font-medium flex items-center gap-1 border border-stone-250 dark:border-stone-800 transition-all"
+                          className="px-2.5 py-1.5 rounded-lg bg-stone-200/70 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-700 hover:text-stone-950 dark:text-stone-300 text-[11px] font-medium flex items-center gap-1 transition-all"
                         >
                           <span>{isSitRepOpen ? 'Hide SitRep' : 'Full SitRep'}</span>
                           {isSitRepOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
@@ -445,10 +445,10 @@ export const CanonCodexModal: React.FC<CanonCodexModalProps> = ({
 
                         <button
                           onClick={() => handleToggleAudio(book)}
-                          className={`px-2.5 py-1.5 rounded-lg text-[11px] font-medium flex items-center gap-1 border transition-all ${
+                          className={`px-2.5 py-1.5 rounded-lg text-[11px] font-medium flex items-center gap-1 transition-all ${
                             isPlaying
-                              ? 'bg-amber-500 text-stone-950 font-bold border-amber-600 shadow-sm'
-                              : 'bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-700 hover:text-stone-950 dark:text-stone-300 border-stone-250 dark:border-stone-800'
+                              ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                              : 'bg-stone-200/70 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-700 hover:text-stone-950 dark:text-stone-300'
                           }`}
                           title="Listen to Situational Briefing"
                         >
@@ -461,7 +461,7 @@ export const CanonCodexModal: React.FC<CanonCodexModalProps> = ({
                         {book.deepLinkType && (
                           <button
                             onClick={() => handleLaunchDeepLink(book)}
-                            className="px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-stone-900 dark:hover:bg-stone-800 text-amber-800 hover:text-amber-900 dark:text-amber-300 dark:hover:text-amber-200 text-[11px] font-bold flex items-center gap-1 border border-amber-300 dark:border-amber-500/40 transition-all"
+                            className="px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500 hover:text-stone-950 dark:bg-stone-900 dark:hover:bg-stone-800 text-amber-800 dark:text-amber-300 text-[11px] font-bold flex items-center gap-1 transition-all"
                             title="Open deep interactive simulator for this book"
                           >
                             <ExternalLink className="w-3 h-3" />
@@ -478,7 +478,7 @@ export const CanonCodexModal: React.FC<CanonCodexModalProps> = ({
                               onSetMemoryVerse(book.id);
                               showToast(`Anchor verse for ${book.name} set as Memory Pulse!`);
                             }}
-                            className="px-2.5 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-700 hover:text-stone-950 dark:text-stone-300 dark:hover:text-amber-300 text-[11px] font-medium flex items-center gap-1 border border-stone-250 dark:border-stone-800 transition-all"
+                            className="px-2.5 py-1.5 rounded-lg bg-stone-200/70 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-700 hover:text-stone-950 dark:text-stone-300 dark:hover:text-amber-300 text-[11px] font-medium flex items-center gap-1 transition-all"
                             title="Set as lock-screen Memory Pulse notification"
                           >
                             <Bell className="w-3 h-3 text-amber-700 dark:text-amber-400" />

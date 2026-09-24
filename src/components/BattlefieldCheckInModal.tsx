@@ -130,7 +130,7 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
   return (
     <AnimatePresence>
       <div 
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-md overflow-y-auto overscroll-contain"
+        className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/60 dark:bg-black/80 backdrop-blur-md overflow-y-auto overscroll-contain"
         onClick={onClose}
         role="dialog"
         aria-modal="true"
@@ -142,12 +142,12 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="w-full max-w-xl bg-white dark:bg-[#11141c] border-2 border-amber-400 dark:border-amber-500/50 rounded-3xl p-6 md:p-8 shadow-2xl relative text-left overflow-y-auto max-h-[90vh] outline-none"
+          className="w-full max-w-xl h-[100dvh] sm:h-auto sm:max-h-[90vh] bg-white dark:bg-[#11141c] border-0 sm:border-2 border-amber-400 dark:border-amber-500/50 rounded-none sm:rounded-3xl p-5 sm:p-6 md:p-8 shadow-none sm:shadow-2xl relative text-left overflow-y-auto outline-none"
         >
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-5 right-5 p-2 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white transition-all"
+            className="absolute top-5 right-5 p-2 rounded-xl bg-stone-200/70 hover:bg-stone-200 dark:bg-stone-900 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white transition-all"
             aria-label="Close modal"
           >
             <X className="w-4 h-4" />
@@ -175,13 +175,13 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
                 <button
                   key={opt.id}
                   onClick={() => handleSelect(opt.id)}
-                  className={`w-full p-4 rounded-2xl border text-left transition-all flex items-start gap-3.5 ${
+                  className={`w-full p-4 rounded-2xl text-left transition-all flex items-start gap-3.5 ${
                     isSelected
-                      ? `${opt.colorBorder} bg-amber-50 dark:bg-gradient-to-r ${opt.colorBg} dark:to-stone-900 shadow-sm ring-2 ring-amber-400/50`
-                      : 'border-stone-200 dark:border-stone-800/90 bg-stone-50 dark:bg-stone-900/60 hover:bg-stone-100 dark:hover:bg-stone-900 hover:border-stone-300 dark:hover:border-stone-700'
+                      ? `bg-amber-500/15 ring-2 ring-amber-400/50`
+                      : 'bg-stone-100/70 dark:bg-stone-900/60 hover:bg-stone-200 dark:hover:bg-stone-800'
                   }`}
                 >
-                  <div className="p-2.5 rounded-xl bg-white dark:bg-black/40 border border-stone-200 dark:border-stone-800 shrink-0 mt-0.5">
+                  <div className="p-2.5 rounded-xl bg-white/80 dark:bg-black/40 shrink-0 mt-0.5">
                     {renderIcon(opt.icon)}
                   </div>
 
@@ -191,7 +191,7 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
                         {opt.title}
                       </h4>
                       {isSelected && (
-                        <span className="flex items-center gap-1 text-[11px] font-mono text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/50">
+                        <span className="flex items-center gap-1 text-[11px] font-mono text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/80 px-2 py-0.5 rounded-full">
                           <CheckCircle2 className="w-3 h-3" />
                           <span>Active</span>
                         </span>
@@ -201,7 +201,7 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
                       {opt.subtitle}
                     </p>
                     <div className="text-[10px] font-mono text-amber-800 dark:text-amber-300/80 mt-1.5 flex items-center gap-1">
-                      <Sparkles className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                      <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                       <span>Field Armor: {opt.psalmReference}</span>
                     </div>
                   </div>
@@ -211,7 +211,7 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
           </div>
 
           {/* Footer Reset & Close */}
-          <div className="flex items-center justify-between pt-4 border-t border-stone-200 dark:border-stone-800 text-xs">
+          <div className="flex items-center justify-between pt-4 border-t border-stone-200/60 dark:border-stone-800 text-xs">
             {activeBattlefieldId ? (
               <button
                 onClick={handleReset}
@@ -228,7 +228,7 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
 
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 font-bold transition-all"
+              className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold transition-all"
             >
               Done
             </button>
