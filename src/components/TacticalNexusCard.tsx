@@ -30,7 +30,7 @@ export const TacticalNexusCard: React.FC<TacticalNexusCardProps> = ({ entityId, 
   };
 
   return (
-    <div className="rounded-2xl bg-cyan-50/50 dark:bg-gradient-to-r dark:from-stone-900/95 dark:via-[#10141c] dark:to-stone-900/95 border border-cyan-200 dark:border-cyan-800/40 p-4 shadow-sm dark:shadow-lg">
+    <div className="rounded-2xl bg-cyan-50/50 dark:bg-cyan-950/20 p-4">
       <div 
         className="flex items-center justify-between cursor-pointer select-none"
         onClick={() => {
@@ -60,11 +60,11 @@ export const TacticalNexusCard: React.FC<TacticalNexusCardProps> = ({ entityId, 
             {items.map(({ connection, target }) => (
               <div 
                 key={target.id}
-                className="p-3 rounded-xl bg-white dark:bg-black/40 border border-stone-200 dark:border-stone-800/80 hover:border-cyan-500/50 transition-all text-xs flex flex-col justify-between shadow-xs"
+                className="p-3 rounded-xl bg-white/80 dark:bg-black/40 transition-all text-xs flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between gap-1 mb-1">
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-100 dark:bg-cyan-950/80 text-cyan-800 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800/40 font-bold">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-100 dark:bg-cyan-950/80 text-cyan-800 dark:text-cyan-300 font-bold">
                       {connection.badgeLabel}
                     </span>
                     <div className="flex items-center gap-1 text-[10px] text-stone-500 dark:text-stone-400 font-mono">

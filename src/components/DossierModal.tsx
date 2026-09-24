@@ -36,7 +36,7 @@ export const DossierModal: React.FC<DossierModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-50 bg-black/60 dark:bg-black/85 backdrop-blur-md overflow-y-auto overscroll-contain p-3 sm:p-6 flex items-start sm:items-center justify-center animate-fadeIn"
+      className="fixed inset-0 z-50 bg-black/60 dark:bg-black/85 backdrop-blur-md overflow-y-auto overscroll-contain p-0 sm:p-6 flex items-start sm:items-center justify-center animate-fadeIn"
       onClick={onClose}
     >
       <div 
@@ -45,11 +45,11 @@ export const DossierModal: React.FC<DossierModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="dossier-modal-title"
-        className="max-w-4xl w-full bg-white dark:bg-[#11141b] border-2 border-amber-400 dark:border-amber-600/50 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] my-auto outline-none"
+        className="max-w-4xl w-full h-[100dvh] sm:h-auto sm:max-h-[90vh] bg-white dark:bg-[#11141b] border-0 sm:border-2 border-amber-400 dark:border-amber-600/50 rounded-none sm:rounded-3xl shadow-none sm:shadow-2xl overflow-hidden flex flex-col my-auto outline-none"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-5 md:p-6 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between bg-stone-50 dark:bg-stone-950/60">
+        <div className="p-5 md:p-6 border-b border-stone-200/60 dark:border-stone-800 flex items-center justify-between bg-stone-50 dark:bg-stone-950/60">
           <div>
             <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-1">
               <Zap className="w-4 h-4" />
@@ -62,14 +62,14 @@ export const DossierModal: React.FC<DossierModalProps> = ({
           <button 
             onClick={onClose}
             aria-label="Close character dossier modal"
-            className="p-2 rounded-xl bg-white dark:bg-stone-900 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white border border-stone-200 dark:border-stone-800 focus-visible:ring-2 focus-visible:ring-amber-500 transition-colors"
+            className="p-2 rounded-xl bg-stone-200/70 hover:bg-stone-200 dark:bg-stone-900 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white focus-visible:ring-2 focus-visible:ring-amber-500 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Character Selector Pills */}
-        <div className="flex gap-2 p-3 bg-stone-100 dark:bg-stone-900/70 border-b border-stone-200 dark:border-stone-800/80 overflow-x-auto scrollbar-none px-4 md:px-6">
+        <div className="flex gap-2 p-3 bg-stone-100/70 dark:bg-stone-900/70 border-b border-stone-200/60 dark:border-stone-800/80 overflow-x-auto scrollbar-none px-4 md:px-6">
           {CHARACTER_DOSSIERS.map((char, idx) => (
             <button
               key={char.id}
@@ -77,10 +77,10 @@ export const DossierModal: React.FC<DossierModalProps> = ({
                 soundEngine.playSnap();
                 setSelectedCharIndex(idx);
               }}
-              className={`flex-shrink-0 px-4 py-2 rounded-xl border transition-all text-xs font-semibold ${
+              className={`flex-shrink-0 px-4 py-2 rounded-xl transition-all text-xs font-semibold ${
                 selectedCharIndex === idx
-                  ? 'bg-amber-500 text-stone-950 border-amber-600 font-bold shadow-sm'
-                  : 'bg-white dark:bg-stone-950/60 border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:border-stone-300 dark:hover:border-stone-700'
+                  ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                  : 'bg-stone-200/60 dark:bg-stone-950/60 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-800'
               }`}
             >
               {char.name}
@@ -93,7 +93,7 @@ export const DossierModal: React.FC<DossierModalProps> = ({
           
           <div className="flex flex-col md:flex-row gap-6 items-start">
             {/* Image Thumbnail */}
-            <div className="w-full md:w-56 h-48 rounded-2xl overflow-hidden border-2 border-stone-200 dark:border-stone-800 shrink-0 bg-stone-100 dark:bg-stone-950">
+            <div className="w-full md:w-56 h-48 rounded-2xl overflow-hidden shrink-0 bg-stone-100 dark:bg-stone-950">
               <img 
                 src={character.image} 
                 alt={character.name} 
@@ -109,7 +109,7 @@ export const DossierModal: React.FC<DossierModalProps> = ({
               <h3 className="text-2xl md:text-3xl font-serif font-black text-stone-900 dark:text-parchment-50">
                 {character.name}
               </h3>
-              <div className="inline-block px-3 py-1 rounded-md bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/40 text-xs font-mono text-amber-800 dark:text-amber-300">
+              <div className="inline-block px-3 py-1 rounded-md bg-amber-500/15 text-xs font-mono text-amber-800 dark:text-amber-300">
                 Code: {character.codename}
               </div>
               <p className="text-xs md:text-sm text-stone-700 dark:text-stone-300 pt-1">
@@ -120,7 +120,7 @@ export const DossierModal: React.FC<DossierModalProps> = ({
 
           {/* Superpower vs Major Flaws Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl bg-emerald-50 dark:bg-[#141d17] border border-emerald-200 dark:border-emerald-800/40">
+            <div className="p-4 rounded-xl bg-emerald-500/10 dark:bg-[#141d17]">
               <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider mb-1.5">
                 <Award className="w-4 h-4" />
                 <span>Superpower</span>
@@ -130,7 +130,7 @@ export const DossierModal: React.FC<DossierModalProps> = ({
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-red-50 dark:bg-[#201414] border border-red-200 dark:border-red-800/40">
+            <div className="p-4 rounded-xl bg-red-500/10 dark:bg-[#201414]">
               <div className="flex items-center gap-1.5 text-xs font-bold text-red-700 dark:text-red-400 uppercase tracking-wider mb-1.5">
                 <ShieldAlert className="w-4 h-4" />
                 <span>Major Flaws & Screw-Ups</span>
@@ -144,13 +144,13 @@ export const DossierModal: React.FC<DossierModalProps> = ({
           </div>
 
           {/* Defining Moment */}
-          <div className="p-4 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs md:text-sm text-stone-700 dark:text-stone-300">
+          <div className="p-4 rounded-xl bg-stone-100/70 dark:bg-stone-900 text-xs md:text-sm text-stone-700 dark:text-stone-300">
             <strong className="text-amber-700 dark:text-amber-400 block mb-1">Defining Moment: </strong>
             {character.definingMoment}
           </div>
 
           {/* Real Talk Lesson for Men Today */}
-          <div className="p-4 rounded-xl bg-amber-50 dark:bg-gradient-to-r dark:from-amber-950/40 dark:to-stone-900 border border-amber-200 dark:border-amber-800/40 text-xs md:text-sm">
+          <div className="p-4 rounded-xl bg-amber-500/10 dark:bg-amber-950/25 text-xs md:text-sm">
             <strong className="text-amber-800 dark:text-amber-300 block mb-1">Real Talk Lesson For You Today: </strong>
             <p className="text-stone-800 dark:text-parchment-200 leading-relaxed italic">
               "{character.realTalkLesson}"
@@ -158,14 +158,14 @@ export const DossierModal: React.FC<DossierModalProps> = ({
           </div>
 
           {/* Jump to Quest button */}
-          <div className="pt-4 border-t border-stone-200 dark:border-stone-800 flex justify-end">
+          <div className="pt-4 border-t border-stone-200/60 dark:border-stone-800 flex justify-end">
             <button
               onClick={() => {
                 soundEngine.playClick();
                 onSelectCharacterQuest(character.relatedQuestId);
                 onClose();
               }}
-              className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center gap-2 shadow-md transition-all"
+              className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center gap-2 shadow-sm transition-all"
             >
               <span>Play {character.name}’s Journey</span>
               <ArrowRight className="w-4 h-4" />

@@ -82,7 +82,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
   return (
     <AnimatePresence>
       <div 
-        className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/60 dark:bg-black/90 backdrop-blur-md overflow-y-auto overscroll-contain"
+        className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/60 dark:bg-black/90 backdrop-blur-md overflow-y-auto overscroll-contain"
         onClick={onClose}
         role="dialog"
         aria-modal="true"
@@ -93,11 +93,11 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          className="relative w-full max-w-4xl bg-white dark:bg-[#0b0e14] border border-amber-500/30 dark:border-amber-500/40 rounded-2xl sm:rounded-3xl shadow-2xl dark:shadow-glow-gold overflow-hidden my-auto max-h-[94vh] flex flex-col text-left transition-colors outline-none"
+          className="relative w-full max-w-4xl h-[100dvh] sm:h-auto sm:max-h-[94vh] bg-white dark:bg-[#0b0e14] border-0 sm:border border-amber-500/30 dark:border-amber-500/40 rounded-none sm:rounded-3xl shadow-none sm:shadow-2xl overflow-hidden my-auto flex flex-col text-left transition-colors outline-none"
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="p-4 sm:p-5 border-b border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-gradient-to-r dark:from-stone-900 dark:via-[#141824] dark:to-stone-900 flex flex-wrap items-center justify-between gap-3 shrink-0">
+          <div className="p-4 sm:p-5 border-b border-stone-200/60 dark:border-stone-800 bg-stone-50 dark:bg-gradient-to-r dark:from-stone-900 dark:via-[#141824] dark:to-stone-900 flex flex-wrap items-center justify-between gap-3 shrink-0">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-500/20 border border-amber-300 dark:border-amber-500/40 flex items-center justify-center text-amber-700 dark:text-amber-400 shrink-0">
                 <HeartHandshake className="w-5 h-5 text-amber-600 dark:text-amber-400" />

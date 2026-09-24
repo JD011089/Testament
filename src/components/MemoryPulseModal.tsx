@@ -210,7 +210,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
   return (
     <AnimatePresence>
       <div 
-        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 dark:bg-black/85 backdrop-blur-md overflow-y-auto overscroll-contain"
+        className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/60 dark:bg-black/85 backdrop-blur-md overflow-y-auto overscroll-contain"
         onClick={onClose}
         role="dialog"
         aria-modal="true"
@@ -221,13 +221,13 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          className="relative w-full max-w-lg bg-white dark:bg-[#0e1117] border border-amber-400 dark:border-amber-500/40 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col text-left text-stone-900 dark:text-parchment-100 outline-none"
+          className="relative w-full max-w-lg h-[100dvh] sm:h-auto sm:max-h-[92vh] bg-white dark:bg-[#0e1117] border-0 sm:border border-amber-400 dark:border-amber-500/40 rounded-none sm:rounded-3xl shadow-none sm:shadow-2xl overflow-hidden my-auto flex flex-col text-left text-stone-900 dark:text-parchment-100 outline-none"
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="p-4 sm:p-6 border-b border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-gradient-to-r dark:from-stone-900 dark:via-[#131720] dark:to-stone-900 flex items-center justify-between shrink-0">
+          <div className="p-4 sm:p-6 border-b border-stone-200/60 dark:border-stone-800 bg-stone-50 dark:bg-gradient-to-r dark:from-stone-900 dark:via-[#131720] dark:to-stone-900 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-500/20 border border-amber-300 dark:border-amber-500/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+              <div className="w-9 h-9 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400">
                 <Bell className="w-5 h-5 animate-pulse" />
               </div>
               <div>
@@ -245,7 +245,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
                 soundEngine.playClick();
                 onClose();
               }}
-              className="p-1.5 rounded-lg text-stone-400 hover:text-stone-900 dark:hover:text-parchment-100 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+              className="p-1.5 rounded-lg text-stone-400 hover:text-stone-900 dark:hover:text-parchment-100 hover:bg-stone-200/60 dark:hover:bg-stone-800 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -255,10 +255,10 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
           <div className="p-4 sm:p-6 overflow-y-auto space-y-5 text-stone-800 dark:text-parchment-100 scrollbar-none">
             
             {/* Target Verse Focus Card */}
-            <div className="p-4 rounded-2xl bg-stone-50 dark:bg-[#141822] border border-stone-200 dark:border-amber-500/30 relative overflow-hidden shadow-xs">
+            <div className="p-4 rounded-2xl bg-stone-100/70 dark:bg-[#141822] relative overflow-hidden">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-mono uppercase tracking-widest font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30">
+                  <span className="text-[10px] font-mono uppercase tracking-widest font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300">
                     Active Memory Target
                   </span>
                   {activeVerse.heroName && (
@@ -285,7 +285,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
 
               {/* Verse Selector Dropdown */}
               {showVerseSelector && (
-                <div className="mt-3 pt-3 border-t border-stone-200 dark:border-stone-800 max-h-48 overflow-y-auto space-y-1.5 pr-1">
+                <div className="mt-3 pt-3 border-t border-stone-200/60 dark:border-stone-800 max-h-48 overflow-y-auto space-y-1.5 pr-1">
                   <span className="text-[10px] uppercase font-mono font-bold text-stone-500 dark:text-stone-400 block mb-1">
                     Select any verse from quests or arsenal:
                   </span>
@@ -300,7 +300,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
                       className={`w-full text-left p-2 rounded-xl text-xs flex items-center justify-between transition-colors ${
                         v.id === selectedVerseId
                           ? 'bg-amber-500 text-stone-950 font-bold'
-                          : 'bg-stone-100 dark:bg-stone-900/80 hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300'
+                          : 'bg-stone-200/60 dark:bg-stone-900/80 hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300'
                       }`}
                     >
                       <span className="truncate mr-2">
@@ -315,7 +315,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
 
             {/* Notification Permission Banner */}
             {permission !== 'granted' && (
-              <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-600/50 flex items-start gap-3">
+              <div className="p-3.5 rounded-2xl bg-amber-500/10 dark:bg-amber-950/40 flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                 <div className="text-xs space-y-1">
                   <p className="text-stone-900 dark:text-parchment-100 font-semibold">
@@ -347,10 +347,10 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
                   <button
                     key={freq}
                     onClick={() => handleFrequencyChange(freq)}
-                    className={`py-2 px-1 rounded-xl text-center border text-xs font-bold transition-all ${
+                    className={`py-2 px-1 rounded-xl text-center text-xs font-bold transition-all ${
                       settings.frequencyPerDay === freq
-                        ? 'bg-amber-500 text-stone-950 border-amber-600 shadow-sm'
-                        : 'bg-stone-50 dark:bg-stone-900 border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:border-stone-300 dark:hover:border-stone-700'
+                        ? 'bg-amber-500 text-stone-950 shadow-sm'
+                        : 'bg-stone-200/60 dark:bg-stone-900 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-800'
                     }`}
                   >
                     <div className="text-sm font-black">{freq}x</div>
@@ -372,7 +372,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
               </div>
 
               <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800">
+                <div className="p-2.5 rounded-xl bg-stone-100/70 dark:bg-stone-900">
                   <label className="text-[10px] text-stone-500 dark:text-stone-400 block mb-1">Start Time</label>
                   <select
                     value={settings.startHour}
@@ -381,7 +381,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
                       const updatedSlots = calculateDailySlots(settings.frequencyPerDay, val, settings.endHour);
                       setSettings(prev => ({ ...prev, startHour: val, scheduledSlots: updatedSlots }));
                     }}
-                    className="w-full bg-white dark:bg-stone-950 border border-stone-300 dark:border-stone-700 rounded-lg p-1.5 text-stone-800 dark:text-stone-200 text-xs focus:outline-none focus:border-amber-500"
+                    className="w-full bg-white dark:bg-stone-950 rounded-lg p-1.5 text-stone-800 dark:text-stone-200 text-xs focus:outline-none focus:ring-1 focus:ring-amber-500"
                   >
                     {[6, 7, 8, 9, 10].map(h => (
                       <option key={h} value={h}>{formatHour(h)}</option>
@@ -389,7 +389,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
                   </select>
                 </div>
 
-                <div className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800">
+                <div className="p-2.5 rounded-xl bg-stone-100/70 dark:bg-stone-900">
                   <label className="text-[10px] text-stone-500 dark:text-stone-400 block mb-1">Quiet Cutoff (End)</label>
                   <select
                     value={settings.endHour}
@@ -398,7 +398,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
                       const updatedSlots = calculateDailySlots(settings.frequencyPerDay, settings.startHour, val);
                       setSettings(prev => ({ ...prev, endHour: val, scheduledSlots: updatedSlots }));
                     }}
-                    className="w-full bg-white dark:bg-stone-950 border border-stone-300 dark:border-stone-700 rounded-lg p-1.5 text-stone-800 dark:text-stone-200 text-xs focus:outline-none focus:border-amber-500"
+                    className="w-full bg-white dark:bg-stone-950 rounded-lg p-1.5 text-stone-800 dark:text-stone-200 text-xs focus:outline-none focus:ring-1 focus:ring-amber-500"
                   >
                     {[19, 20, 21, 22, 23].map(h => (
                       <option key={h} value={h}>{formatHour(h)}</option>
@@ -411,14 +411,14 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
               <div className="pt-1 flex items-center gap-1.5 flex-wrap">
                 <span className="text-[10px] font-mono text-stone-500 dark:text-stone-400">Scheduled:</span>
                 {currentSlots.map((slot, idx) => (
-                  <span key={idx} className="text-[10px] font-mono px-2 py-0.5 rounded bg-stone-100 dark:bg-stone-850 text-amber-800 dark:text-amber-300 border border-stone-200 dark:border-stone-700">
+                  <span key={idx} className="text-[10px] font-mono px-2 py-0.5 rounded bg-stone-200/60 dark:bg-stone-850 text-amber-800 dark:text-amber-300">
                     {formatSlot12h(slot)}
                   </span>
                 ))}
               </div>
 
               {nextReminder && (
-                <div className="flex items-center gap-1.5 text-[11px] font-mono text-amber-900 dark:text-amber-300/90 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/40 rounded-lg px-2.5 py-1.5 mt-2">
+                <div className="flex items-center gap-1.5 text-[11px] font-mono text-amber-900 dark:text-amber-300/90 bg-amber-500/10 dark:bg-amber-950/40 rounded-lg px-2.5 py-1.5 mt-2">
                   <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
                   <span>Next scheduled pulse: <strong className="text-amber-800 dark:text-amber-200">{nextReminder.label}</strong> ({nextReminder.remainingFormatted})</span>
                 </div>
@@ -452,10 +452,10 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
                   <button
                     key={item.id}
                     onClick={() => handlePromptStyleChange(item.id)}
-                    className={`w-full text-left p-3 rounded-xl border transition-all ${
+                    className={`w-full text-left p-3 rounded-xl transition-all ${
                       settings.recallStyle === item.id
-                        ? 'bg-amber-50 dark:bg-amber-600/20 border-amber-500 text-stone-950 dark:text-parchment-50 ring-1 ring-amber-500 shadow-sm'
-                        : 'bg-stone-50 dark:bg-stone-900 border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:border-stone-300 dark:hover:border-stone-700'
+                        ? 'bg-amber-500/20 text-stone-950 dark:text-parchment-50 font-semibold shadow-xs'
+                        : 'bg-stone-100/70 dark:bg-stone-900 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-800'
                     }`}
                   >
                     <div className="font-semibold text-xs text-amber-800 dark:text-amber-300">{item.title}</div>
@@ -466,7 +466,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
             </div>
 
             {/* Test Reminder Trigger & Status */}
-            <div className="p-3.5 rounded-2xl bg-stone-50 dark:bg-stone-900/90 border border-stone-200 dark:border-stone-800 space-y-2">
+            <div className="p-3.5 rounded-2xl bg-stone-100/70 dark:bg-stone-900/90 space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-bold text-stone-800 dark:text-stone-300 flex items-center gap-1.5">
                   <Smartphone className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
@@ -483,7 +483,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
                 <button
                   onClick={() => handleSendTest(false)}
                   disabled={isSendingTest}
-                  className="p-2 rounded-xl bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 border border-stone-200 dark:border-transparent text-stone-700 dark:text-stone-200 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 shadow-xs"
+                  className="p-2 rounded-xl bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5"
                 >
                   <Send className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                   <span>Test Verse Now</span>
@@ -493,7 +493,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
                   onClick={() => handleSendTest(true)}
                   disabled={isSendingTest}
                   title="Sends in 4 seconds so you can lock your screen or switch apps"
-                  className="p-2 rounded-xl bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 border border-stone-200 dark:border-transparent text-stone-700 dark:text-stone-200 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 shadow-xs"
+                  className="p-2 rounded-xl bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5"
                 >
                   <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                   <span>Lock Screen (4s)</span>
@@ -503,7 +503,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
                   onClick={handleTestUpdatePush}
                   disabled={isSendingTest}
                   title="Simulate the system push notification for new app updates"
-                  className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/50 border border-amber-300 dark:border-amber-600/50 text-amber-800 dark:text-amber-300 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 shadow-xs"
+                  className="p-2 rounded-xl bg-amber-500/20 hover:bg-amber-500 hover:text-stone-950 text-amber-800 dark:text-amber-300 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5"
                 >
                   <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                   <span>Test Update Push</span>
@@ -518,7 +518,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
           </div>
 
           {/* Footer Actions */}
-          <div className="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#0b0e13] flex items-center justify-between gap-3 shrink-0">
+          <div className="p-4 sm:p-5 border-t border-stone-200/60 dark:border-stone-800 bg-stone-50 dark:bg-[#0b0e13] flex items-center justify-between gap-3 shrink-0">
             {onOpenWordForge ? (
               <button
                 onClick={() => {

@@ -90,20 +90,16 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
   };
 
   return (
-    <div className="relative rounded-2xl sm:rounded-3xl bg-white dark:bg-gradient-to-b dark:from-[#171b24] dark:via-[#10131b] dark:to-[#0c0e14] border border-stone-200/90 dark:border-amber-500/40 shadow-sm dark:shadow-2xl p-4 sm:p-7 text-left overflow-hidden transition-colors">
-      {/* Ambient background gold glow */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-600/5 rounded-full blur-2xl pointer-events-none -ml-20 -mb-20" />
-
+    <div className="relative text-left transition-colors w-full">
       {/* HEADER SECTION */}
-      <div className="relative z-10 flex flex-wrap items-start justify-between gap-4 pb-4 sm:pb-5 border-b border-stone-200 dark:border-stone-800/90">
+      <div className="relative z-10 flex flex-wrap items-start justify-between gap-4 pb-4 sm:pb-5">
         <div className="flex items-start gap-3 sm:gap-4">
-          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-stone-100 dark:bg-gradient-to-br dark:from-amber-950/80 dark:to-stone-900 border border-amber-500/40 dark:border-amber-500/60 flex items-center justify-center text-2xl sm:text-3xl shadow-glow-amber shrink-0">
+          <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-2xl bg-amber-500/15 dark:bg-amber-500/20 text-stone-900 dark:text-amber-300 flex items-center justify-center text-2xl sm:text-3xl shrink-0">
             {activeCampaign.heroIcon}
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap mb-1">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-amber-700 dark:text-amber-400 font-bold px-2 py-0.5 rounded-full bg-amber-100/70 dark:bg-amber-950/80 border border-amber-300/60 dark:border-amber-500/40 flex items-center gap-1">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-amber-700 dark:text-amber-400 font-bold px-2 py-0.5 rounded-full bg-amber-500/10 flex items-center gap-1">
                 <Target className="w-3 h-3 text-amber-600 dark:text-amber-400" />
                 <span>Today’s Tactical Campaign</span>
               </span>
@@ -129,14 +125,14 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
               soundEngine.playClick();
               setIsSelectorOpen(true);
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900/90 border border-stone-200 dark:border-stone-800 hover:border-amber-500/60 text-stone-700 hover:text-stone-950 dark:text-stone-300 dark:hover:text-amber-300 transition-all text-xs font-semibold"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900/90 text-stone-700 hover:text-stone-950 dark:text-stone-300 dark:hover:text-amber-300 transition-all text-xs font-semibold"
             title="Choose a different hero's campaign track"
           >
             <Compass className="w-3.5 h-3.5 text-amber-600 dark:text-amber-500" />
             <span>Switch Track (14)</span>
           </button>
 
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-100/70 dark:bg-amber-500/10 border border-amber-300/60 dark:border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-mono font-bold">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-300 text-xs font-mono font-bold">
             <Award className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
             <span>+{activeCampaign.bonusXP} XP</span>
           </div>
@@ -162,16 +158,16 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
           <span className="font-bold text-stone-900 dark:text-parchment-100 text-xs sm:text-sm">{percent}%</span>
         </div>
 
-        <div className="w-full h-2 rounded-full bg-stone-100 dark:bg-stone-850 overflow-hidden border border-stone-200/60 dark:border-stone-800">
+        <div className="w-full h-2 rounded-full bg-stone-200/70 dark:bg-stone-800 overflow-hidden">
           <motion.div 
             initial={{ width: 0 }}
             animate={{ width: `${percent}%` }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
-            className="h-full bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-400 rounded-full shadow-glow-amber"
+            className="h-full bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-400 rounded-full"
           />
         </div>
 
-        {/* 4 Interactive Step Nodes - Clean Pills */}
+        {/* 4 Interactive Step Nodes - Clean Stepper */}
         <div className="grid grid-cols-4 gap-1.5 sm:gap-2 mt-3">
           {activeCampaign.steps.map((step) => {
             const isDone = progress.completedSteps.includes(step.stepNumber);
@@ -185,15 +181,15 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
                   isDone 
                     ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-950/30' 
                     : isCurrent 
-                    ? 'text-amber-800 dark:text-amber-300 bg-amber-500/15 dark:bg-amber-500/20 font-bold shadow-xs' 
-                    : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 bg-stone-100/70 dark:bg-stone-900/40'
+                    ? 'text-amber-800 dark:text-amber-300 bg-amber-500/15 dark:bg-amber-500/20 font-bold' 
+                    : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 bg-stone-100/50 dark:bg-stone-900/30'
                 }`}
               >
                 <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[11px] sm:text-xs font-mono font-bold ${
                   isDone 
                     ? 'bg-emerald-500 text-black' 
                     : isCurrent 
-                    ? 'bg-amber-500 text-black animate-pulse' 
+                    ? 'bg-amber-500 text-black' 
                     : 'bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-400'
                 }`}>
                   {isDone ? '✓' : step.stepNumber}
@@ -207,8 +203,8 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
         </div>
       </div>
 
-      {/* ALL 4 MISSION STEP ROWS - Sleek, Expansive, No Heavy Nested Cards */}
-      <div className="relative z-10 space-y-2.5">
+      {/* ALL 4 MISSION STEP ROWS - Flat, Seamless Native List */}
+      <div className="relative z-10 divide-y divide-stone-200/60 dark:divide-stone-800/60">
         {activeCampaign.steps.map((step) => {
           const isDone = progress.completedSteps.includes(step.stepNumber);
           const isCurrent = step.stepNumber === currentActiveStepNumber && !isDone;
@@ -216,12 +212,12 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
           return (
             <div 
               key={step.stepNumber}
-              className={`p-3 sm:p-4 rounded-xl transition-all border ${
-                isDone 
-                  ? 'bg-emerald-50/40 dark:bg-emerald-950/15 border-l-4 border-l-emerald-500 border-stone-200/60 dark:border-stone-800/50' 
-                  : isCurrent 
-                  ? 'bg-amber-50/50 dark:bg-amber-950/20 border-l-4 border-l-amber-500 border-amber-300/50 dark:border-amber-500/30 shadow-xs' 
-                  : 'bg-stone-50/40 dark:bg-stone-900/30 border-l-4 border-l-stone-300 dark:border-l-stone-750 border-stone-200/40 dark:border-stone-850/40 opacity-80 hover:opacity-100'
+              className={`py-3.5 px-2 sm:px-3.5 transition-colors ${
+                isCurrent 
+                  ? 'bg-amber-500/10 dark:bg-amber-500/15' 
+                  : isDone
+                  ? 'bg-transparent opacity-85'
+                  : 'bg-transparent'
               }`}
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
@@ -276,10 +272,10 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
                     onClick={() => handleStepClick(step)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
                       isDone 
-                        ? 'bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 text-stone-700 dark:text-stone-300 border border-stone-250 dark:border-stone-700' 
+                        ? 'bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 text-stone-700 dark:text-stone-300' 
                         : isCurrent 
-                        ? 'bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-xs' 
-                        : 'bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-250 dark:border-stone-800'
+                        ? 'bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold' 
+                        : 'bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300'
                     }`}
                   >
                     <span>{isDone ? 'Review' : step.actionLabel}</span>
@@ -289,7 +285,7 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
                   {!isDone && (
                     <button
                       onClick={(e) => handleManualMarkStep(step.stepNumber, e)}
-                      className="p-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-500 hover:text-emerald-600 dark:text-stone-400 dark:hover:text-emerald-400 border border-stone-200 dark:border-stone-800 transition-colors"
+                      className="p-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-500 hover:text-emerald-600 dark:text-stone-400 dark:hover:text-emerald-400 transition-colors"
                       title="Mark as completed"
                     >
                       <CheckCircle2 className="w-4 h-4" />
@@ -304,7 +300,7 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
 
       {/* CELEBRATION BANNER (All 4 Steps Conquered) */}
       {progress.isFullyCompleted && (
-        <div className="relative z-10 mt-6 p-4 rounded-2xl bg-emerald-50 dark:bg-gradient-to-r dark:from-emerald-950/70 dark:via-stone-900 dark:to-amber-950/50 border border-emerald-300 dark:border-emerald-500/50 shadow-md dark:shadow-lg flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left transition-colors">
+        <div className="relative z-10 mt-6 p-4 rounded-2xl bg-emerald-500/10 dark:bg-emerald-950/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left transition-colors">
           <div className="flex items-center gap-3">
             <span className="text-3xl">🏆</span>
             <div>

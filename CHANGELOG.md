@@ -5,6 +5,42 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.2] - 2026-09-24
+
+### Changed
+- **App-Wide Card Border & Outline Elimination**:
+  - Removed 4-sided boxed card outlines, border enclosures, and drop shadows across the entire application as commanded.
+  - Redesigned `DailyCampaignCard` into a seamless native flow sitting directly on the canvas with subtle row dividers (`divide-y`) rather than an enclosed card container.
+  - Stripped card border boxes and heavy drop shadows from `Dashboard.tsx` (top status bar, segmented pill toggles, free-roam hero banners, battle plan, starter quest cards, and all right sidebar tool widgets).
+  - Stripped card borders from `ArsenalView.tsx` (all scripture defense cards, category filters, plain English summaries, and journals).
+  - Stripped card borders from `DilemmaSimulator.tsx` (briefing cards, situation boxes, human validation vs flesh trap grid, biblical redirection card, Socratic challenge drills, tactical battle moves, and side-by-side playbook analysis cards).
+  - Stripped card borders from `WordForge.tsx` (left-column workbench container, plain English summary boxes, FSRS stats widget, assembly word area, word tile buttons, and completion evaluation).
+  - Stripped card borders from `TacticalNexusCard.tsx` (nexus graph card container and connected items).
+  - Stripped outer division border box from `CanonLibraryPage.tsx` (bookshelf and tactical grid views).
+
+- **Mobile Full-Screen Modal Experience**:
+  - Updated all interactive modals (`CanonCodexModal`, `TimelineModal`, `DossierModal`, `MemoryPulseModal`, `BattlefieldCheckInModal`, `StreetTranslatorModal`, `ProverbsCodexModal`, `PsalmsFieldMedicModal`, `OpenBookModal`) to open as seamless, distraction-free full-screen pages on mobile touchscreens (`100dvh`, zero padding/margins, no floating borders or background card silhouettes peeking through).
+
+## [1.9.1] - 2026-09-24
+
+### Improved
+- **Full-Screen Mobile Scripture Reader Experience (`OpenBookModal.tsx`)**:
+  - Replaced the floating windowed modal on mobile with an edge-to-edge, distraction-free native reader view (`100dvh`, zero margins, no background cards or shelves peeking through).
+  - Added dedicated mobile header with `← Books` back navigation to return directly to the library.
+  - Implemented responsive, 50/50 segmented mode switcher (`Briefing` vs `Read`) that eliminates pixel-based button overflows.
+  - Added tap-to-read triggers on book titles and cards in the 66-book grid view (`CanonLibraryPage.tsx`).
+
+### Fixed
+- **Mobile Horizontal Scroll Elimination**:
+  - Constrained chapter dropdown picker to prevent long book names (e.g. *1 Thessalonians*, *Song of Solomon*) from pushing toolbar bounds.
+  - Eliminated negative margins (`-mx-2.5`) on scripture verses.
+  - Redesigned verse quick actions on mobile into a non-disruptive row beneath the verse, preventing inline button blowout.
+  - Replaced fixed-width bottom chapter navigation with responsive, wrapping navigation controls that smoothly scroll reader back to top.
+  - Added `touch-pan-y` and strict `overflow-x-hidden` containment across the reader container and library pages.
+- **Sticky Tooltips on Touch Devices (`BookSpine.tsx`)**:
+  - Restricted 3D book spine hover preview tooltips to true mouse pointers (`(hover: hover) and (pointer: fine)`).
+  - Added touch dismissal to prevent tooltip preview cards from sticking to the screen on mobile devices.
+
 ## [1.9.0] - 2026-09-24
 
 ### Added

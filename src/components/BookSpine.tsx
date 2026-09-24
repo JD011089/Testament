@@ -100,8 +100,10 @@ export const BookSpine: React.FC<BookSpineProps> = ({
   const height = getSpineHeight(book.order);
 
   const handleMouseEnter = () => {
-    setIsHovered(true);
-    soundEngine.playBookSlide();
+    if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      setIsHovered(true);
+      soundEngine.playBookSlide();
+    }
   };
 
   const handleMouseLeave = () => {
@@ -156,9 +158,11 @@ export const BookSpine: React.FC<BookSpineProps> = ({
       <motion.button
         type="button"
         onClick={() => {
+          setIsHovered(false);
           soundEngine.playClick();
           onSelect();
         }}
+        onTouchStart={() => setIsHovered(false)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         whileHover={{

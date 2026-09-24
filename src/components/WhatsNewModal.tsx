@@ -40,10 +40,33 @@ interface ReleaseMilestone {
 
 const RELEASES: ReleaseMilestone[] = [
   {
-    version: 'v1.9.0',
-    tagline: 'Full 66-Book Scripture Reader, Voice Engine & Clean Mobile Aesthetic',
+    version: 'v1.9.2',
+    tagline: 'Seamless Borderless Design & Full-Screen Mobile Modals',
     dateBadge: 'Current Release',
     isLatest: true,
+    highlights: [
+      {
+        icon: <Sparkles className="w-4 h-4 text-amber-400" />,
+        title: 'App-Wide Border Elimination',
+        description: 'Stripped 4-sided boxed card outlines, harsh borders, and drop shadows across the entire app. Daily campaigns, arsenal cards, dilemma simulators, and workbench now flow seamlessly on the background canvas.'
+      },
+      {
+        icon: <BookOpen className="w-4 h-4 text-amber-400" />,
+        title: 'Full-Screen Mobile Readers & Modals',
+        description: 'All dialogs—including the 66-Book Scripture Reader, Canon Codex, Timeline, Dossiers, and Spaced Memory Pulse—now open edge-to-edge on mobile touchscreens with zero horizontal scroll.'
+      },
+      {
+        icon: <Zap className="w-4 h-4 text-amber-400" />,
+        title: 'Distraction-Free Reading Focus',
+        description: 'Softened dividers, native list layouts, and dedicated mobile back-navigation give you maximum immersion in God’s Word without box fatigue.'
+      }
+    ]
+  },
+  {
+    version: 'v1.9.0',
+    tagline: 'Full 66-Book Scripture Reader, Voice Engine & Clean Mobile Aesthetic',
+    dateBadge: 'Previous Release',
+    isLatest: false,
     highlights: [
       {
         icon: <BookOpen className="w-4 h-4 text-amber-400" />,
@@ -279,12 +302,12 @@ const RELEASES: ReleaseMilestone[] = [
 
 export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose }) => {
   const modalRef = useModalLock(isOpen);
-  const [activeTab, setActiveTab] = useState<string>('v1.9.0');
+  const [activeTab, setActiveTab] = useState<string>('v1.9.2');
 
   const handleDismiss = () => {
     soundEngine.playClick();
     try {
-      localStorage.setItem('testament_last_seen_version', '1.9.0');
+      localStorage.setItem('testament_last_seen_version', '1.9.2');
     } catch {
       // ignore
     }
@@ -297,7 +320,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
     <AnimatePresence>
       {isOpen && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/60 dark:bg-black/85 backdrop-blur-md overflow-y-auto overscroll-contain"
+          className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-5 bg-black/60 dark:bg-black/85 backdrop-blur-md overflow-y-auto overscroll-contain"
           onClick={handleDismiss}
           role="dialog"
           aria-modal="true"
@@ -310,7 +333,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 15 }}
             transition={{ duration: 0.2 }}
-            className="w-full max-w-3xl max-h-[90vh] rounded-3xl bg-white dark:bg-gradient-to-b dark:from-[#161a24] dark:via-[#10131c] dark:to-[#0c0e14] border-2 border-amber-400 dark:border-amber-500/50 shadow-2xl flex flex-col text-left overflow-hidden relative outline-none"
+            className="w-full max-w-3xl h-[100dvh] sm:h-auto sm:max-h-[90vh] rounded-none sm:rounded-3xl bg-white dark:bg-gradient-to-b dark:from-[#161a24] dark:via-[#10131c] dark:to-[#0c0e14] border-0 sm:border-2 border-amber-400 dark:border-amber-500/50 shadow-none sm:shadow-2xl flex flex-col text-left overflow-hidden relative outline-none"
           >
         {/* Ambient Top Glow */}
         <div className="absolute top-0 right-1/4 w-80 h-32 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -327,7 +350,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
                   Field Update Dispatches
                 </h2>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 font-bold">
-                  v1.9.0 Live
+                  v1.9.2 Live
                 </span>
               </div>
               <p className="text-xs text-stone-500 dark:text-stone-400">
@@ -417,7 +440,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
         {/* MODAL FOOTER */}
         <div className="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800/90 bg-stone-50 dark:bg-black/40 flex items-center justify-between gap-3 relative z-10">
           <div className="text-[11px] font-mono text-stone-500 dark:text-stone-400 hidden sm:block">
-            Testament v1.9.0 • Built with Next-Gen Biblical Education
+            Testament v1.9.2 • Built with Next-Gen Biblical Education
           </div>
 
           <button

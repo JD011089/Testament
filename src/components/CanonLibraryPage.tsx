@@ -129,8 +129,8 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#fcfbfa] dark:bg-[#0a0c10] text-stone-900 dark:text-parchment-100 transition-colors pb-36 pt-4 sm:pt-6">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#fcfbfa] dark:bg-[#0a0c10] text-stone-900 dark:text-parchment-100 transition-colors pb-36 pt-4 sm:pt-6 overflow-x-hidden w-full max-w-full">
+      <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 overflow-x-hidden w-full">
         
         {/* TOP NAVIGATION / BREADCRUMB HEADER */}
         <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-stone-200 dark:border-stone-800/80">
@@ -322,7 +322,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
             {shelvedDivisions.map((shelfGroup, shelfIndex) => (
               <div 
                 key={shelfGroup.division.id}
-                className="relative rounded-3xl bg-gradient-to-b from-[#f5ede3] via-[#ede2d2] to-[#e4d4c0] dark:from-[#16120e] dark:via-[#100d0a] dark:to-[#0a0806] border border-amber-300/60 dark:border-amber-950/40 p-4 sm:p-6 shadow-xl dark:shadow-2xl dark:shadow-black/80 transition-colors"
+                className="relative rounded-3xl bg-stone-100/40 dark:bg-stone-900/30 p-4 sm:p-6 transition-colors"
               >
                 {/* SHELF BRASS HEADER PLAQUE */}
                 <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-amber-600/30 dark:border-amber-900/30">
@@ -391,7 +391,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
             ))}
 
             {shelvedDivisions.length === 0 && (
-              <div className="py-20 text-center rounded-3xl bg-white dark:bg-stone-900/50 border border-stone-200 dark:border-stone-800 shadow-sm">
+              <div className="py-20 text-center rounded-3xl bg-stone-100/50 dark:bg-stone-900/30">
                 <BookOpen className="w-12 h-12 text-stone-400 dark:text-stone-600 mx-auto mb-3" />
                 <h3 className="text-lg font-serif font-bold text-stone-900 dark:text-stone-300">No volumes match your search</h3>
                 <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">Try clearing filters or search terms.</p>
@@ -413,7 +413,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
               return (
                 <div
                   key={book.id}
-                  className="flex flex-col justify-between rounded-2xl bg-white dark:bg-[#11141b] border border-stone-200 dark:border-stone-800 hover:border-amber-500/60 transition-all p-5 shadow-sm dark:shadow-lg group hover:shadow-glow-gold/10 text-left"
+                  className="flex flex-col justify-between rounded-2xl bg-stone-100/70 hover:bg-stone-100 dark:bg-stone-900/60 dark:hover:bg-stone-850 transition-all p-5 group text-left"
                 >
                   {/* Card Header */}
                   <div>
@@ -421,28 +421,36 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                       <span className="text-[10px] font-mono uppercase tracking-widest text-amber-700 dark:text-amber-400 font-bold">
                         #{String(book.order).padStart(2, '0')} • {book.testament} • {book.division}
                       </span>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-850 border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-stone-200/60 dark:bg-stone-800 text-stone-700 dark:text-stone-300">
                         {book.lifeTheme}
                       </span>
                     </div>
 
-                    <h3 className="text-xl font-serif font-black text-stone-900 dark:text-parchment-100 group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-colors">
-                      {book.name}
-                    </h3>
-                    <div className="text-xs font-serif italic text-amber-700 dark:text-amber-400/90 font-semibold mt-0.5">
-                      "{book.codename}"
-                    </div>
-                    <p className="text-xs text-stone-600 dark:text-stone-400 mt-1 line-clamp-2">
-                      {book.subtitle}
-                    </p>
+                    <button
+                      onClick={() => {
+                        soundEngine.playClick();
+                        setActiveBookForModal(book);
+                      }}
+                      className="text-left w-full group/title cursor-pointer focus:outline-none"
+                    >
+                      <h3 className="text-xl font-serif font-black text-stone-900 dark:text-parchment-100 group-hover/title:text-amber-600 dark:group-hover/title:text-amber-300 transition-colors">
+                        {book.name}
+                      </h3>
+                      <div className="text-xs font-serif italic text-amber-700 dark:text-amber-400/90 font-semibold mt-0.5">
+                        "{book.codename}"
+                      </div>
+                      <p className="text-xs text-stone-600 dark:text-stone-400 mt-1 line-clamp-2">
+                        {book.subtitle}
+                      </p>
+                    </button>
 
                     {/* Dual-Lens Scripture Box */}
-                    <div className="mt-4 rounded-xl bg-stone-50 dark:bg-stone-950/80 border border-stone-200 dark:border-stone-850 p-3.5 space-y-2">
+                    <div className="mt-4 rounded-xl bg-white/80 dark:bg-stone-950/70 p-3.5 space-y-2">
                       <div className="flex items-center justify-between text-[11px] font-mono">
                         <span className="text-amber-700 dark:text-amber-400 font-bold">{book.anchorScripture.reference}</span>
                         <button
                           onClick={() => handleToggleLens(book.id)}
-                          className="text-[10px] px-2 py-0.5 rounded bg-white dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-800 border border-stone-200 dark:border-stone-700 text-amber-800 dark:text-amber-300 transition-colors shadow-xs"
+                          className="text-[10px] px-2 py-0.5 rounded bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 text-amber-800 dark:text-amber-300 transition-colors"
                         >
                           {lens === 'street' ? '⚡ Street Plain' : '📜 Canonical'}
                         </button>
@@ -463,7 +471,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                     </button>
 
                     {isExpanded && (
-                      <div className="mt-2 space-y-3 pt-2 border-t border-stone-200 dark:border-stone-850 text-xs text-stone-700 dark:text-stone-300">
+                      <div className="mt-2 space-y-3 pt-2 border-t border-stone-200/60 dark:border-stone-850 text-xs text-stone-700 dark:text-stone-300">
                         <div>
                           <div className="text-[10px] font-mono uppercase text-amber-700 dark:text-amber-500/90 font-bold">Author & Context</div>
                           <p className="text-[11px] text-stone-600 dark:text-stone-400 mt-0.5 leading-normal">
@@ -476,7 +484,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                             {book.historicalPeril}
                           </p>
                         </div>
-                        <div className="rounded-lg bg-amber-100/70 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/20 p-2.5">
+                        <div className="rounded-lg bg-amber-500/10 p-2.5">
                           <div className="text-[10px] font-mono uppercase text-amber-900 dark:text-amber-300 font-bold">Why It Matters Monday</div>
                           <p className="text-[11px] text-stone-800 dark:text-parchment-200 mt-0.5 leading-normal">
                             {book.whyItMattersMonday}
@@ -487,14 +495,14 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                   </div>
 
                   {/* Actions Bar */}
-                  <div className="pt-4 mt-4 border-t border-stone-200 dark:border-stone-850/80 space-y-2">
+                  <div className="pt-4 mt-4 border-t border-stone-200/60 dark:border-stone-850/80 space-y-2">
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleToggleAudio(book)}
-                        className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg border text-xs font-medium transition-all ${
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-medium transition-all ${
                           isPlaying
-                            ? 'bg-amber-500 text-stone-950 border-amber-400 font-bold shadow-xs'
-                            : 'bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700 hover:text-stone-950 dark:hover:text-white shadow-xs'
+                            ? 'bg-amber-500 text-stone-950 font-bold'
+                            : 'bg-stone-200/60 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 text-stone-700 dark:text-stone-300 hover:text-stone-950 dark:hover:text-white'
                         }`}
                       >
                         {isPlaying ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />}
@@ -502,10 +510,14 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                       </button>
 
                       <button
-                        onClick={() => setActiveBookForModal(book)}
-                        className="px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 border border-stone-200 dark:border-stone-700 text-xs text-amber-800 dark:text-amber-300 font-semibold transition-colors shadow-xs"
+                        onClick={() => {
+                          soundEngine.playClick();
+                          setActiveBookForModal(book);
+                        }}
+                        className="px-3.5 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500 text-amber-800 hover:text-stone-950 dark:text-amber-300 dark:hover:text-black text-xs font-bold transition-all flex items-center gap-1.5"
                       >
-                        Read / Codex
+                        <BookOpen className="w-3.5 h-3.5" />
+                        <span>Read Book</span>
                       </button>
                     </div>
 
@@ -515,7 +527,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                           soundEngine.playClick();
                           if (onOpenWordForge) onOpenWordForge(`canon-${book.id}`);
                         }}
-                        className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-900/80 dark:hover:bg-stone-850 border border-stone-200 dark:border-stone-800 text-[11px] text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-300 transition-colors shadow-xs"
+                        className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 text-[11px] text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
                       >
                         <Brain className="w-3 h-3 text-amber-600 dark:text-amber-400" />
                         <span>Word Forge</span>
@@ -529,7 +541,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                             showToast(`Anchored ${book.anchorScripture.reference} to Memory Pulse!`);
                           }
                         }}
-                        className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-900/80 dark:hover:bg-stone-850 border border-stone-200 dark:border-stone-800 text-[11px] text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-300 transition-colors shadow-xs"
+                        className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 text-[11px] text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
                       >
                         <Bell className="w-3 h-3 text-amber-600 dark:text-amber-400" />
                         <span>Memory Pulse</span>
