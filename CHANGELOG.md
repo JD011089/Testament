@@ -5,6 +5,24 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.3] - 2026-09-24
+
+### Added
+- **Native Web Push Subscriptions (`PushManager` & VAPID)**:
+  - Added full client-side Web Push subscription generation in `notificationEngine.ts` utilizing browser `PushManager` and production VAPID credentials.
+  - Implemented automatic local caching of push tokens in `localStorage`.
+  - Added zero-cost Supabase backend subscription sync via `syncSubscriptionToSupabase()` to save device endpoints into `push_subscriptions`.
+- **App Badging API Integration**:
+  - Integrated `navigator.setAppBadge()` into client notification dispatch and `self.navigator.setAppBadge()` inside the Service Worker (`sw-notifications.js`) to display unread verse practice counters on the PWA app icon.
+- **Notification Triggers API Support**:
+  - Added native `TimestampTrigger` support for scheduled exact-time notifications on supporting Chromium browsers.
+- **Safari / iOS In-Memory Timer Fallback**:
+  - Added exact next-reminder `setTimeout` scheduler in `initNotificationScheduler` to guarantee timely delivery while the PWA is active or backgrounded in iOS Safari.
+
+### Fixed
+- **Deep-Link URL Encoding in Notifications**:
+  - Fixed parameter references and URL formatting so notification taps navigate cleanly to `/?action=wordforge&verseId=...` without unescaped characters.
+
 ## [1.9.2] - 2026-09-24
 
 ### Changed
