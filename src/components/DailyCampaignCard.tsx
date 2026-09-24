@@ -20,6 +20,7 @@ import {
   X,
   Flame
 } from 'lucide-react';
+import { useModalLock } from '../utils/useModalLock';
 
 interface DailyCampaignCardProps {
   onLaunchStep: (step: DailyCampaignStep) => void;
@@ -35,6 +36,7 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
   });
 
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
+  const selectorModalRef = useModalLock(isSelectorOpen);
   const [progress, setProgress] = useState<DailyCampaignProgress>(() => {
     return getDailyCampaignProgress(selectedCampaignId);
   });
@@ -88,33 +90,33 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
   };
 
   return (
-    <div className="relative rounded-3xl bg-gradient-to-b from-[#171b24] via-[#10131b] to-[#0c0e14] border-2 border-amber-500/50 shadow-2xl p-5 sm:p-7 text-left overflow-hidden">
+    <div className="relative rounded-2xl sm:rounded-3xl bg-white dark:bg-gradient-to-b dark:from-[#171b24] dark:via-[#10131b] dark:to-[#0c0e14] border border-stone-200/90 dark:border-amber-500/40 shadow-sm dark:shadow-2xl p-4 sm:p-7 text-left overflow-hidden transition-colors">
       {/* Ambient background gold glow */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-600/5 rounded-full blur-2xl pointer-events-none -ml-20 -mb-20" />
 
       {/* HEADER SECTION */}
-      <div className="relative z-10 flex flex-wrap items-start justify-between gap-4 pb-5 border-b border-stone-800/90">
-        <div className="flex items-start gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-950/80 to-stone-900 border-2 border-amber-500/60 flex items-center justify-center text-3xl shadow-glow-amber shrink-0">
+      <div className="relative z-10 flex flex-wrap items-start justify-between gap-4 pb-4 sm:pb-5 border-b border-stone-200 dark:border-stone-800/90">
+        <div className="flex items-start gap-3 sm:gap-4">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-stone-100 dark:bg-gradient-to-br dark:from-amber-950/80 dark:to-stone-900 border border-amber-500/40 dark:border-amber-500/60 flex items-center justify-center text-2xl sm:text-3xl shadow-glow-amber shrink-0">
             {activeCampaign.heroIcon}
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap mb-1">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-amber-400 font-bold px-2 py-0.5 rounded-full bg-amber-950/80 border border-amber-500/40 flex items-center gap-1">
-                <Target className="w-3 h-3 text-amber-400" />
+              <span className="text-[10px] font-mono uppercase tracking-widest text-amber-700 dark:text-amber-400 font-bold px-2 py-0.5 rounded-full bg-amber-100/70 dark:bg-amber-950/80 border border-amber-300/60 dark:border-amber-500/40 flex items-center gap-1">
+                <Target className="w-3 h-3 text-amber-600 dark:text-amber-400" />
                 <span>Today’s Tactical Campaign</span>
               </span>
-              <span className="text-xs font-mono text-stone-400">
+              <span className="text-xs font-mono text-stone-500 dark:text-stone-400">
                 • {activeCampaign.heroName} Track
               </span>
             </div>
 
-            <h3 className="text-xl sm:text-2xl font-serif font-black text-parchment-50 leading-tight">
+            <h3 className="text-lg sm:text-2xl font-serif font-black text-stone-900 dark:text-parchment-50 leading-tight">
               {activeCampaign.title}
             </h3>
 
-            <p className="text-xs sm:text-sm text-amber-300/90 font-medium italic mt-0.5">
+            <p className="text-xs sm:text-sm text-amber-700 dark:text-amber-300/90 font-medium italic mt-0.5">
               Virtue: {activeCampaign.virtueTheme}
             </p>
           </div>
@@ -127,40 +129,40 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
               soundEngine.playClick();
               setIsSelectorOpen(true);
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-900/90 border border-stone-800 hover:border-amber-500/60 text-stone-300 hover:text-amber-300 transition-all text-xs font-semibold"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900/90 border border-stone-200 dark:border-stone-800 hover:border-amber-500/60 text-stone-700 hover:text-stone-950 dark:text-stone-300 dark:hover:text-amber-300 transition-all text-xs font-semibold"
             title="Choose a different hero's campaign track"
           >
-            <Compass className="w-3.5 h-3.5 text-amber-500" />
+            <Compass className="w-3.5 h-3.5 text-amber-600 dark:text-amber-500" />
             <span>Switch Track (14)</span>
           </button>
 
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold">
-            <Award className="w-3.5 h-3.5 text-amber-400" />
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-100/70 dark:bg-amber-500/10 border border-amber-300/60 dark:border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-mono font-bold">
+            <Award className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
             <span>+{activeCampaign.bonusXP} XP</span>
           </div>
         </div>
       </div>
 
       {/* MISSION BRIEFING TEASER */}
-      <p className="relative z-10 text-xs sm:text-sm text-stone-300/90 leading-relaxed mt-4 mb-5">
+      <p className="relative z-10 text-xs sm:text-sm text-stone-600 dark:text-stone-300/90 leading-relaxed mt-3 sm:mt-4 mb-4 sm:mb-5">
         {activeCampaign.summary}
       </p>
 
-      {/* PROGRESS TRACKER BAR */}
-      <div className="relative z-10 bg-black/40 p-4 rounded-2xl border border-stone-800/80 mb-6">
+      {/* PROGRESS TRACKER SECTION - Clean and Unboxed */}
+      <div className="relative z-10 mb-5 sm:mb-6">
         <div className="flex items-center justify-between text-xs font-mono mb-2">
           <div className="flex items-center gap-2">
-            <span className="text-amber-400 font-bold uppercase tracking-wider">
+            <span className="text-amber-700 dark:text-amber-400 font-bold uppercase tracking-wider text-[11px] sm:text-xs">
               Mission Progression
             </span>
-            <span className="text-stone-400">
-              ({completedCount} of 4 Objectives Completed)
+            <span className="text-stone-500 dark:text-stone-400 text-[11px] sm:text-xs">
+              ({completedCount} of 4 Objectives)
             </span>
           </div>
-          <span className="font-bold text-parchment-100">{percent}%</span>
+          <span className="font-bold text-stone-900 dark:text-parchment-100 text-xs sm:text-sm">{percent}%</span>
         </div>
 
-        <div className="w-full h-2.5 rounded-full bg-stone-900 overflow-hidden border border-stone-800">
+        <div className="w-full h-2 rounded-full bg-stone-100 dark:bg-stone-850 overflow-hidden border border-stone-200/60 dark:border-stone-800">
           <motion.div 
             initial={{ width: 0 }}
             animate={{ width: `${percent}%` }}
@@ -169,8 +171,8 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
           />
         </div>
 
-        {/* 4 Interactive Step Nodes */}
-        <div className="grid grid-cols-4 gap-2 mt-3 pt-2">
+        {/* 4 Interactive Step Nodes - Clean Pills */}
+        <div className="grid grid-cols-4 gap-1.5 sm:gap-2 mt-3">
           {activeCampaign.steps.map((step) => {
             const isDone = progress.completedSteps.includes(step.stepNumber);
             const isCurrent = step.stepNumber === currentActiveStepNumber && !isDone;
@@ -179,20 +181,20 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
               <button
                 key={step.stepNumber}
                 onClick={() => handleStepClick(step)}
-                className={`flex flex-col items-center gap-1 text-center py-1.5 px-1 rounded-xl transition-all ${
+                className={`flex flex-col items-center gap-1 text-center py-2 px-1 rounded-xl transition-all ${
                   isDone 
-                    ? 'text-emerald-400 bg-emerald-950/20 border border-emerald-800/40' 
+                    ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-950/30' 
                     : isCurrent 
-                    ? 'text-amber-300 bg-amber-500/10 border border-amber-500/50 shadow-glow-amber' 
-                    : 'text-stone-500 hover:text-stone-300'
+                    ? 'text-amber-800 dark:text-amber-300 bg-amber-500/15 dark:bg-amber-500/20 font-bold shadow-xs' 
+                    : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 bg-stone-100/70 dark:bg-stone-900/40'
                 }`}
               >
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-mono font-bold ${
+                <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[11px] sm:text-xs font-mono font-bold ${
                   isDone 
                     ? 'bg-emerald-500 text-black' 
                     : isCurrent 
                     ? 'bg-amber-500 text-black animate-pulse' 
-                    : 'bg-stone-800 text-stone-400'
+                    : 'bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-400'
                 }`}>
                   {isDone ? '✓' : step.stepNumber}
                 </div>
@@ -205,8 +207,8 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
         </div>
       </div>
 
-      {/* ALL 4 MISSION STEP CARDS */}
-      <div className="relative z-10 space-y-3.5">
+      {/* ALL 4 MISSION STEP ROWS - Sleek, Expansive, No Heavy Nested Cards */}
+      <div className="relative z-10 space-y-2.5">
         {activeCampaign.steps.map((step) => {
           const isDone = progress.completedSteps.includes(step.stepNumber);
           const isCurrent = step.stepNumber === currentActiveStepNumber && !isDone;
@@ -214,70 +216,70 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
           return (
             <div 
               key={step.stepNumber}
-              className={`p-4 sm:p-5 rounded-2xl border transition-all ${
+              className={`p-3 sm:p-4 rounded-xl transition-all border ${
                 isDone 
-                  ? 'bg-[#101614]/80 border-emerald-900/40 opacity-85' 
+                  ? 'bg-emerald-50/40 dark:bg-emerald-950/15 border-l-4 border-l-emerald-500 border-stone-200/60 dark:border-stone-800/50' 
                   : isCurrent 
-                  ? 'bg-gradient-to-r from-[#1c2230] via-[#141926] to-[#121622] border-amber-500/70 shadow-glow-amber ring-1 ring-amber-500/30' 
-                  : 'bg-stone-900/60 border-stone-800/80 opacity-75 hover:opacity-100'
+                  ? 'bg-amber-50/50 dark:bg-amber-950/20 border-l-4 border-l-amber-500 border-amber-300/50 dark:border-amber-500/30 shadow-xs' 
+                  : 'bg-stone-50/40 dark:bg-stone-900/30 border-l-4 border-l-stone-300 dark:border-l-stone-750 border-stone-200/40 dark:border-stone-850/40 opacity-80 hover:opacity-100'
               }`}
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-start gap-3.5">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0 mt-0.5 ${
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
+                <div className="flex items-start gap-2.5 sm:gap-3 min-w-0">
+                  <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center text-base sm:text-lg shrink-0 mt-0.5 ${
                     isDone 
-                      ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-700/60' 
+                      ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' 
                       : isCurrent 
-                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/60' 
-                      : 'bg-stone-850 text-stone-400 border border-stone-800'
+                      ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold' 
+                      : 'bg-stone-200/80 dark:bg-stone-800 text-stone-500 dark:text-stone-400'
                   }`}>
                     {isDone ? '✓' : step.icon}
                   </div>
 
-                  <div>
-                    <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                      <span className={`text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+                      <span className={`text-[10px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.2 rounded ${
                         isDone 
-                          ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800/60' 
+                          ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300' 
                           : isCurrent 
-                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' 
-                          : 'bg-stone-800 text-stone-400'
+                          ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300' 
+                          : 'bg-stone-200/80 dark:bg-stone-800 text-stone-600 dark:text-stone-400'
                       }`}>
                         {step.badge}
                       </span>
                       {isCurrent && (
-                        <span className="text-[10px] font-mono text-amber-400 font-bold animate-pulse flex items-center gap-1">
-                          <Flame className="w-2.5 h-2.5 text-amber-400" />
+                        <span className="text-[10px] font-mono text-amber-700 dark:text-amber-400 font-bold flex items-center gap-1">
+                          <Flame className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400" />
                           <span>Current Objective</span>
                         </span>
                       )}
                       {isDone && (
-                        <span className="text-[10px] font-mono text-emerald-400">
+                        <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-400 font-semibold">
                           Completed (+30 XP)
                         </span>
                       )}
                     </div>
 
-                    <h4 className="text-sm sm:text-base font-serif font-bold text-parchment-50">
+                    <h4 className="text-sm font-serif font-bold text-stone-900 dark:text-parchment-50 truncate">
                       {step.subtitle}
                     </h4>
 
-                    <p className="text-xs text-stone-400 mt-0.5 leading-relaxed">
+                    <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5 leading-relaxed">
                       {step.intel}
                     </p>
                   </div>
                 </div>
 
                 {/* Step Action Buttons */}
-                <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                <div className="flex items-center gap-2 self-end sm:self-center shrink-0 pt-1 sm:pt-0">
                   <button
                     onClick={() => handleStepClick(step)}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
                       isDone 
-                        ? 'bg-stone-800 hover:bg-stone-750 text-stone-300 border border-stone-700' 
+                        ? 'bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 text-stone-700 dark:text-stone-300 border border-stone-250 dark:border-stone-700' 
                         : isCurrent 
-                        ? 'bg-amber-500 hover:bg-amber-400 text-black shadow-glow-gold' 
-                        : 'bg-stone-850 hover:bg-stone-800 text-stone-300 border border-stone-800'
+                        ? 'bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-xs' 
+                        : 'bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-250 dark:border-stone-800'
                     }`}
                   >
                     <span>{isDone ? 'Review' : step.actionLabel}</span>
@@ -287,7 +289,7 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
                   {!isDone && (
                     <button
                       onClick={(e) => handleManualMarkStep(step.stepNumber, e)}
-                      className="p-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-stone-400 hover:text-emerald-400 border border-stone-800 transition-colors"
+                      className="p-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-500 hover:text-emerald-600 dark:text-stone-400 dark:hover:text-emerald-400 border border-stone-200 dark:border-stone-800 transition-colors"
                       title="Mark as completed"
                     >
                       <CheckCircle2 className="w-4 h-4" />
@@ -302,14 +304,14 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
 
       {/* CELEBRATION BANNER (All 4 Steps Conquered) */}
       {progress.isFullyCompleted && (
-        <div className="relative z-10 mt-6 p-4 rounded-2xl bg-gradient-to-r from-emerald-950/70 via-stone-900 to-amber-950/50 border border-emerald-500/50 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+        <div className="relative z-10 mt-6 p-4 rounded-2xl bg-emerald-50 dark:bg-gradient-to-r dark:from-emerald-950/70 dark:via-stone-900 dark:to-amber-950/50 border border-emerald-300 dark:border-emerald-500/50 shadow-md dark:shadow-lg flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left transition-colors">
           <div className="flex items-center gap-3">
             <span className="text-3xl">🏆</span>
             <div>
-              <div className="text-xs font-mono uppercase tracking-widest text-emerald-400 font-bold">
+              <div className="text-xs font-mono uppercase tracking-widest text-emerald-800 dark:text-emerald-400 font-bold">
                 Daily Campaign Conquered!
               </div>
-              <p className="text-xs text-parchment-100">
+              <p className="text-xs text-stone-700 dark:text-parchment-100">
                 You executed all 4 tactical phases of {activeCampaign.heroName}'s campaign today (+{activeCampaign.bonusXP} XP).
               </p>
             </div>
@@ -320,7 +322,7 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
               soundEngine.playClick();
               setIsSelectorOpen(true);
             }}
-            className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm"
+            className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm"
           >
             <span>Choose Next Campaign</span>
             <ChevronRight className="w-4 h-4" />
@@ -331,25 +333,31 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
       {/* TRACK SELECTOR MODAL */}
       <AnimatePresence>
         {isSelectorOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-sm overscroll-contain">
+            {/* Click outside backdrop */}
+            <div className="fixed inset-0" onClick={() => setIsSelectorOpen(false)} />
             <motion.div 
+              ref={selectorModalRef}
+              tabIndex={-1}
+              role="dialog"
+              aria-modal="true"
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="w-full max-w-2xl max-h-[85vh] rounded-3xl bg-[#12151d] border border-amber-500/40 shadow-2xl p-6 flex flex-col text-left overflow-hidden"
+              className="relative z-10 w-full max-w-2xl max-h-[85vh] rounded-3xl bg-white dark:bg-[#12151d] border border-stone-200 dark:border-amber-500/40 shadow-2xl p-5 sm:p-6 flex flex-col text-left overflow-hidden focus:outline-none"
             >
-              <div className="flex items-center justify-between pb-4 border-b border-stone-800">
+              <div className="flex items-center justify-between pb-4 border-b border-stone-200 dark:border-stone-800">
                 <div>
-                  <h3 className="text-lg font-serif font-bold text-parchment-100">
+                  <h3 className="text-lg font-serif font-bold text-stone-900 dark:text-parchment-100">
                     Select Tactical Campaign Track
                   </h3>
-                  <p className="text-xs text-stone-400">
+                  <p className="text-xs text-stone-500 dark:text-stone-400">
                     Choose from 14 curated multi-step battle tracks
                   </p>
                 </div>
                 <button
                   onClick={() => setIsSelectorOpen(false)}
-                  className="p-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-stone-400 hover:text-stone-200 border border-stone-800 transition-colors"
+                  className="p-2 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 border border-stone-200 dark:border-stone-800 transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -370,24 +378,24 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
                       }}
                       className={`w-full p-3.5 rounded-2xl border text-left flex items-center justify-between gap-3 transition-all ${
                         isSelected 
-                          ? 'bg-amber-500/15 border-amber-500 text-parchment-50 shadow-glow-amber' 
-                          : 'bg-stone-900/70 border-stone-800 text-stone-300 hover:border-stone-700 hover:bg-stone-850'
+                          ? 'bg-amber-50 dark:bg-amber-500/15 border-amber-500 text-stone-950 dark:text-parchment-50 shadow-sm dark:shadow-glow-amber' 
+                          : 'bg-stone-50 dark:bg-stone-900/70 border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:border-amber-500/50 hover:bg-stone-100 dark:hover:bg-stone-850'
                       }`}
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <span className="text-2xl w-10 h-10 rounded-xl bg-stone-950 flex items-center justify-center border border-stone-800 shrink-0">
+                        <span className="text-2xl w-10 h-10 rounded-xl bg-stone-100 dark:bg-stone-950 flex items-center justify-center border border-stone-250 dark:border-stone-800 shrink-0">
                           {c.heroIcon}
                         </span>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-serif font-bold text-parchment-100 truncate">
+                            <span className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100 truncate">
                               {c.title}
                             </span>
-                            <span className="text-[10px] font-mono text-amber-400">
+                            <span className="text-[10px] font-mono text-amber-700 dark:text-amber-400 font-semibold">
                               • {c.heroName}
                             </span>
                           </div>
-                          <p className="text-[11px] text-stone-400 truncate">
+                          <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
                             {c.virtueTheme}
                           </p>
                         </div>
@@ -395,7 +403,7 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
 
                       <div className="flex items-center gap-2 shrink-0">
                         {cProgress.isFullyCompleted && (
-                          <span className="text-[10px] font-mono text-emerald-400 px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-800/60 font-bold">
+                          <span className="text-[10px] font-mono text-emerald-800 dark:text-emerald-400 px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800/60 font-bold">
                             ✓ Mastered
                           </span>
                         )}
@@ -408,10 +416,10 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
                 })}
               </div>
 
-              <div className="pt-3 border-t border-stone-800 flex justify-end">
+              <div className="pt-3 border-t border-stone-200 dark:border-stone-800 flex justify-end">
                 <button
                   onClick={() => setIsSelectorOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-stone-900 border border-stone-800 text-stone-300 hover:text-white text-xs font-semibold"
+                  className="px-4 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:text-stone-950 dark:hover:text-white text-xs font-semibold"
                 >
                   Close
                 </button>

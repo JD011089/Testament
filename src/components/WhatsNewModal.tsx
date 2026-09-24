@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { soundEngine } from '../utils/audio';
+import { useModalLock } from '../utils/useModalLock';
 import { 
   Sparkles, 
   X, 
@@ -39,10 +40,33 @@ interface ReleaseMilestone {
 
 const RELEASES: ReleaseMilestone[] = [
   {
-    version: 'v1.8.0',
-    tagline: 'Background Notifications & IDB-Persisted Alarms',
+    version: 'v1.9.0',
+    tagline: 'Full 66-Book Scripture Reader, Voice Engine & Clean Mobile Aesthetic',
     dateBadge: 'Current Release',
     isLatest: true,
+    highlights: [
+      {
+        icon: <BookOpen className="w-4 h-4 text-amber-400" />,
+        title: 'Complete 66-Book Scripture Reader',
+        description: 'Unrestricted chapter and verse reading across all 66 books of the Bible. Seamlessly jump to any chapter, adjust typography, listen to audio narration, and send any verse directly to Word Forge or your Tactical Arsenal.'
+      },
+      {
+        icon: <Volume2 className="w-4 h-4 text-amber-400" />,
+        title: 'App-Wide Reading Voice Selector',
+        description: 'Choose your preferred reading voice across the entire app with live preview samples. Select from Adam (Cinematic & Deep), Antoni (Calm & Grounded), George (Authoritative Scholar), or Rachel (Grace & Peace).'
+      },
+      {
+        icon: <Sparkles className="w-4 h-4 text-amber-400" />,
+        title: 'Streamlined Mobile & Unified Action Bar',
+        description: 'De-cluttered the mobile layout by unifying Field Guide, Light/Dark Theme, streak, and XP into a single command row, giving you maximum screen space for scripture.'
+      }
+    ]
+  },
+  {
+    version: 'v1.8.0',
+    tagline: 'Background Notifications & IDB-Persisted Alarms',
+    dateBadge: 'Previous Release',
+    isLatest: false,
     highlights: [
       {
         icon: <Bell className="w-4 h-4 text-amber-400" />,
@@ -254,12 +278,13 @@ const RELEASES: ReleaseMilestone[] = [
 ];
 
 export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose }) => {
-  const [activeTab, setActiveTab] = useState<string>('v1.8.0');
+  const modalRef = useModalLock(isOpen);
+  const [activeTab, setActiveTab] = useState<string>('v1.9.0');
 
   const handleDismiss = () => {
     soundEngine.playClick();
     try {
-      localStorage.setItem('testament_last_seen_version', '1.8.0');
+      localStorage.setItem('testament_last_seen_version', '1.9.0');
     } catch {
       // ignore
     }
@@ -271,33 +296,41 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/60 dark:bg-black/85 backdrop-blur-md overflow-y-auto overscroll-contain"
+          onClick={handleDismiss}
+          role="dialog"
+          aria-modal="true"
+        >
           <motion.div 
+            ref={modalRef}
+            tabIndex={-1}
+            onClick={e => e.stopPropagation()}
             initial={{ opacity: 0, scale: 0.95, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 15 }}
             transition={{ duration: 0.2 }}
-            className="w-full max-w-3xl max-h-[90vh] rounded-3xl bg-gradient-to-b from-[#161a24] via-[#10131c] to-[#0c0e14] border-2 border-amber-500/50 shadow-2xl flex flex-col text-left overflow-hidden relative"
+            className="w-full max-w-3xl max-h-[90vh] rounded-3xl bg-white dark:bg-gradient-to-b dark:from-[#161a24] dark:via-[#10131c] dark:to-[#0c0e14] border-2 border-amber-400 dark:border-amber-500/50 shadow-2xl flex flex-col text-left overflow-hidden relative outline-none"
           >
         {/* Ambient Top Glow */}
         <div className="absolute top-0 right-1/4 w-80 h-32 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
         {/* MODAL HEADER */}
-        <div className="p-5 sm:p-6 border-b border-stone-800/90 flex items-center justify-between gap-4 relative z-10 bg-black/20">
+        <div className="p-5 sm:p-6 border-b border-stone-200 dark:border-stone-800/90 flex items-center justify-between gap-4 relative z-10 bg-stone-50 dark:bg-black/20">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500/30 to-amber-600/10 border border-amber-500/40 flex items-center justify-center text-amber-400 shadow-glow-amber shrink-0">
+            <div className="w-11 h-11 rounded-xl bg-amber-100 dark:bg-gradient-to-br dark:from-amber-500/30 dark:to-amber-600/10 border border-amber-300 dark:border-amber-500/40 flex items-center justify-center text-amber-700 dark:text-amber-400 shadow-sm shrink-0">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg sm:text-xl font-serif font-black text-parchment-50">
+                <h2 className="text-lg sm:text-xl font-serif font-black text-stone-900 dark:text-parchment-50">
                   Field Update Dispatches
                 </h2>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold">
-                  v1.8.0 Live
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 font-bold">
+                  v1.9.0 Live
                 </span>
               </div>
-              <p className="text-xs text-stone-400">
+              <p className="text-xs text-stone-500 dark:text-stone-400">
                 Chronological evolution and major features built in Testament
               </p>
             </div>
@@ -305,14 +338,14 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
 
           <button
             onClick={handleDismiss}
-            className="p-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-stone-400 hover:text-stone-200 border border-stone-800 transition-colors"
+            className="p-2 rounded-xl bg-white dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 border border-stone-200 dark:border-stone-800 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* VERSION SELECTOR PILLS */}
-        <div className="px-5 sm:px-6 pt-3 pb-2 border-b border-stone-800/60 bg-black/30 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+        <div className="px-5 sm:px-6 pt-3 pb-2 border-b border-stone-200 dark:border-stone-800/60 bg-stone-100/70 dark:bg-black/30 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
           {RELEASES.map((release) => {
             const isSelected = release.version === activeTab;
             return (
@@ -324,14 +357,14 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
                 }}
                 className={`text-xs px-3 py-1.5 rounded-xl font-mono whitespace-nowrap transition-all flex items-center gap-1.5 ${
                   isSelected
-                    ? 'bg-amber-500 text-black font-bold shadow-glow-amber'
-                    : 'bg-stone-900/80 border border-stone-800 text-stone-400 hover:text-stone-200'
+                    ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                    : 'bg-white dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-400 hover:text-stone-950 dark:hover:text-stone-200'
                 }`}
               >
                 <span>{release.version}</span>
                 {release.isLatest && (
                   <span className={`text-[9px] px-1 py-0.2 rounded-full uppercase ${
-                    isSelected ? 'bg-black/20 text-black font-extrabold' : 'bg-amber-500/20 text-amber-400'
+                    isSelected ? 'bg-black/20 text-stone-950 font-extrabold' : 'bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400'
                   }`}>
                     New
                   </span>
@@ -343,17 +376,17 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
 
         {/* RELEASE CONTENT BODY */}
         <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 scrollbar-thin">
-          <div className="flex items-center justify-between gap-3 pb-2 border-b border-stone-800/60">
+          <div className="flex items-center justify-between gap-3 pb-2 border-b border-stone-200 dark:border-stone-800/60">
             <div>
-              <span className="text-[10px] font-mono uppercase tracking-widest text-amber-400 font-bold">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-amber-700 dark:text-amber-400 font-bold">
                 {selectedRelease.dateBadge}
               </span>
-              <h3 className="text-base sm:text-lg font-serif font-bold text-parchment-100">
+              <h3 className="text-base sm:text-lg font-serif font-bold text-stone-900 dark:text-parchment-100">
                 {selectedRelease.version}: {selectedRelease.tagline}
               </h3>
             </div>
             {selectedRelease.isLatest && (
-              <span className="text-xs font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-2.5 py-1 rounded-full font-bold shrink-0">
+              <span className="text-xs font-mono text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/60 px-2.5 py-1 rounded-full font-bold shrink-0">
                 ✓ Installed
               </span>
             )}
@@ -363,16 +396,16 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
             {selectedRelease.highlights.map((highlight, idx) => (
               <div 
                 key={idx}
-                className="p-4 rounded-2xl bg-stone-900/80 border border-stone-800/90 hover:border-amber-500/40 transition-all flex items-start gap-3.5"
+                className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800/90 hover:border-amber-400 dark:hover:border-amber-500/40 transition-all flex items-start gap-3.5 shadow-xs"
               >
-                <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shrink-0 mt-0.5">
+                <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/30 flex items-center justify-center shrink-0 mt-0.5 text-amber-700 dark:text-amber-400">
                   {highlight.icon}
                 </div>
                 <div>
-                  <h4 className="text-sm font-serif font-bold text-amber-200 mb-0.5">
+                  <h4 className="text-sm font-serif font-bold text-amber-800 dark:text-amber-200 mb-0.5">
                     {highlight.title}
                   </h4>
-                  <p className="text-xs text-stone-300 leading-relaxed">
+                  <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
                     {highlight.description}
                   </p>
                 </div>
@@ -382,14 +415,14 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
         </div>
 
         {/* MODAL FOOTER */}
-        <div className="p-4 sm:p-5 border-t border-stone-800/90 bg-black/40 flex items-center justify-between gap-3 relative z-10">
-          <div className="text-[11px] font-mono text-stone-400 hidden sm:block">
-            Testament v1.6.0 • Built with Next-Gen Biblical Education
+        <div className="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800/90 bg-stone-50 dark:bg-black/40 flex items-center justify-between gap-3 relative z-10">
+          <div className="text-[11px] font-mono text-stone-500 dark:text-stone-400 hidden sm:block">
+            Testament v1.9.0 • Built with Next-Gen Biblical Education
           </div>
 
           <button
             onClick={handleDismiss}
-            className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs flex items-center justify-center gap-2 shadow-glow-amber transition-all"
+            className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all"
           >
             <span>Got It • Enter Field HQ</span>
             <ChevronRight className="w-4 h-4" />

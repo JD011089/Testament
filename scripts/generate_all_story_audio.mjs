@@ -2,25 +2,36 @@ import { MsEdgeTTS, OUTPUT_FORMAT } from 'msedge-tts';
 import fs from 'fs';
 import path from 'path';
 
-// We import the raw JSON representation or read the story data
-const storiesPath = path.resolve('src/data/stories.ts');
-const _rawCode = fs.readFileSync(storiesPath, 'utf8');
+const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY || 'sk_b2c386ca902d917f5618a6a3c012dc885c8b3ef55c61e41e';
+const ELEVENLABS_ADAM_VOICE_ID = 'pNInz6obpgDQGcFmaJgB'; // Adam: Cinematic Baritone
 
-// Quick parser to extract quest acts from data
-// Or we can import from a compiled or ts-node/direct script
+function normalizeScriptureForSpeech(text) {
+  return text
+    .replace(/\b(\d?[A-Za-z]+(?:\s+[A-Za-z]+)?)\s+(\d+):(\d+)\b/g, '$1 $2 verse $3')
+    .replace(/(\d+):(\d+)/g, '$1 verse $2')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/_{1,2}(.*?)_{1,2}/g, '$1')
+    .replace(/`{1,3}(.*?)`{1,3}/g, '$1')
+    .replace(/^#+\s+/gm, '')
+    .replace(/^\s*[-*•]\s+/gm, '')
+    .replace(/\.{3,}/g, ', ')
+    .replace(/—/g, ', ')
+    .replace(/--+/g, ', ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 async function run() {
   const outputDir = path.resolve('public/audio/stories');
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
   }
 
-  const tts = new MsEdgeTTS();
-  await tts.setMetadata('en-US-ChristopherNeural', OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
-
   console.log('Generating audio for Morning Briefing...');
   const morningText = `Today's 3-Minute Morning Briefing. Act 1: Real Moment. Moses stood at the edge of the Red Sea with six hundred iron chariots charging behind him. He had no army, just a shepherd's staff, and a command to be still. Act 2: Truth for the Pocket. The Lord will fight for you; you need only to be still. Exodus 14:14. Act 3: Your Call Today. When an unexpected crisis or stressful message arrives today, do not react with impulsive anger or panic. Take three deep breaths, stand firm, and let the Lord fight the battle.`;
 
-  await generateFile(tts, path.join('public/audio', 'morning_briefing.mp3'), morningText);
+  await generateFile(path.join('public/audio', 'morning_briefing.mp3'), morningText);
 
   // Generate key story acts
   const storyAudios = [
@@ -100,30 +111,77 @@ async function run() {
 
   for (const item of storyAudios) {
     const dest = path.join(outputDir, item.file);
-    await generateFile(tts, dest, item.text);
+    await generateFile(dest, item.text);
   }
 
-  tts.close();
   console.log('ALL AUDIO ASSETS GENERATED SUCCESSFULLY!');
 }
 
-async function generateFile(tts, dest, text) {
+async function generateFile(dest, text) {
   if (fs.existsSync(dest) && fs.statSync(dest).size > 5000) {
     console.log(`Skipping existing: ${dest} (${fs.statSync(dest).size} bytes)`);
     return;
   }
+
+  const cleanText = normalizeScriptureForSpeech(text);
   console.log(`Generating: ${dest}...`);
+
+  // Try ElevenLabs first
+  if (ELEVENLABS_API_KEY) {
+    try {
+      const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_ADAM_VOICE_ID}`, {
+        method: 'POST',
+        headers: {
+          'xi-api-key': ELEVENLABS_API_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          text: cleanText,
+          model_id: 'eleven_turbo_v2_5',
+          voice_settings: {
+            stability: 0.45,
+            similarity_boost: 0.85,
+            style: 0.20,
+            use_speaker_boost: true
+          }
+        })
+      });
+
+      if (res.ok) {
+        const arrayBuf = await res.arrayBuffer();
+        fs.writeFileSync(dest, Buffer.from(arrayBuf));
+        console.log(`✓ Completed with ElevenLabs Adam: ${dest} (${fs.statSync(dest).size} bytes)`);
+        return;
+      } else {
+        console.warn(`ElevenLabs HTTP ${res.status}: ${await res.text()}`);
+      }
+    } catch (err) {
+      console.warn('ElevenLabs generation failed, using EdgeTTS fallback:', err.message);
+    }
+  }
+
+  // Backup fallback
   return new Promise((resolve, reject) => {
     try {
-      const { audioStream } = tts.toStream(text);
-      const writeStream = fs.createWriteStream(dest);
-      audioStream.pipe(writeStream);
-      writeStream.on('finish', () => {
-        console.log(`✓ Completed: ${dest} (${fs.statSync(dest).size} bytes)`);
-        resolve();
-      });
-      writeStream.on('error', reject);
-      audioStream.on('error', reject);
+      const tts = new MsEdgeTTS();
+      tts.setMetadata('en-US-ChristopherNeural', OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3).then(() => {
+        const { audioStream } = tts.toStream(cleanText);
+        const writeStream = fs.createWriteStream(dest);
+        audioStream.pipe(writeStream);
+        writeStream.on('finish', () => {
+          console.log(`✓ Completed with fallback: ${dest} (${fs.statSync(dest).size} bytes)`);
+          try { tts.close(); } catch { /* ignore */ }
+          resolve();
+        });
+        writeStream.on('error', (e) => {
+          try { tts.close(); } catch { /* ignore */ }
+          reject(e);
+        });
+        audioStream.on('error', (e) => {
+          try { tts.close(); } catch { /* ignore */ }
+          reject(e);
+        });
+      }).catch(reject);
     } catch (err) {
       reject(err);
     }

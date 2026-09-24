@@ -163,24 +163,24 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
       {/* LEFT COLUMN: VERSE CARD & SUMMARY */}
       <div className="lg:col-span-5 space-y-5">
-        <div className="p-5 md:p-6 rounded-2xl bg-stone-900/90 border border-stone-800 shadow-md">
+        <div className="p-5 md:p-6 rounded-2xl bg-white dark:bg-stone-900/90 border border-stone-200 dark:border-stone-800 shadow-sm dark:shadow-md transition-colors">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <span className="text-lg font-serif font-bold text-amber-400">
+              <span className="text-lg font-serif font-bold text-amber-700 dark:text-amber-400">
                 {verse.reference}
               </span>
-              <span className="text-xs px-2 py-0.5 rounded bg-stone-800 text-stone-400 font-mono">
+              <span className="text-xs px-2 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 font-mono">
                 {verse.translation}
               </span>
               {isMastered && (
-                <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-2 py-0.5 rounded-full">
+                <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-100/80 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800/40 px-2 py-0.5 rounded-full">
                   <ShieldCheck className="w-3 h-3" />
                   <span>Mastered</span>
                 </span>
               )}
               {verse.id === getDailyVerse().id && (
-                <span className="flex items-center gap-1 text-[10px] font-mono font-bold text-amber-300 bg-amber-950/70 border border-amber-600/50 px-2 py-0.5 rounded-full">
-                  <Sparkles className="w-3 h-3 text-amber-400" />
+                <span className="flex items-center gap-1 text-[10px] font-mono font-bold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/70 border border-amber-300 dark:border-amber-600/50 px-2 py-0.5 rounded-full">
+                  <Sparkles className="w-3 h-3 text-amber-600 dark:text-amber-400" />
                   <span>Daily Truth</span>
                 </span>
               )}
@@ -191,9 +191,9 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                 onClick={handleToggleSpeak}
                 title={isSpeaking ? "Stop speech" : "Listen to verse"}
                 aria-label={isSpeaking ? "Stop speech" : "Listen to verse"}
-                className="p-2 rounded-lg bg-stone-800 text-stone-300 hover:bg-amber-600 hover:text-black transition-colors focus-visible:ring-2 focus-visible:ring-amber-500"
+                className="p-2 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-amber-600 text-stone-700 dark:text-stone-300 hover:text-stone-950 dark:hover:text-black transition-colors focus-visible:ring-2 focus-visible:ring-amber-500 shadow-xs"
               >
-                {isSpeaking ? <VolumeX className="w-4 h-4 text-amber-400 animate-pulse" /> : <Volume2 className="w-4 h-4" />}
+                {isSpeaking ? <VolumeX className="w-4 h-4 text-amber-600 dark:text-amber-400 animate-pulse" /> : <Volume2 className="w-4 h-4" />}
               </button>
               <button
                 onClick={() => {
@@ -202,10 +202,10 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                 }}
                 title={showHint ? "Hide full verse hint" : "Show full verse hint"}
                 aria-label={showHint ? "Hide full verse hint" : "Show full verse hint"}
-                className={`p-2 rounded-lg border text-xs font-medium flex items-center gap-1 transition-colors focus-visible:ring-2 focus-visible:ring-amber-500 ${
+                className={`p-2 rounded-lg border text-xs font-medium flex items-center gap-1 transition-colors focus-visible:ring-2 focus-visible:ring-amber-500 shadow-xs ${
                   showHint 
-                    ? 'bg-amber-500/20 border-amber-500 text-amber-300' 
-                    : 'bg-stone-800 border-stone-700 text-stone-400 hover:text-stone-200'
+                    ? 'bg-amber-500/20 border-amber-500 text-amber-800 dark:text-amber-300' 
+                    : 'bg-stone-100 dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                 }`}
               >
                 <Eye className="w-4 h-4" />
@@ -215,31 +215,31 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                 onClick={resetPuzzle}
                 title="Reset puzzle words"
                 aria-label="Reset puzzle words"
-                className="p-2 rounded-lg bg-stone-800 text-stone-400 hover:text-stone-200 transition-colors focus-visible:ring-2 focus-visible:ring-amber-500"
+                className="p-2 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 transition-colors focus-visible:ring-2 focus-visible:ring-amber-500 shadow-xs"
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
             </div>
           </div>
 
-          <div className="p-3 bg-stone-950/70 rounded-xl border border-stone-800 text-xs md:text-sm text-stone-300 italic mb-3">
+          <div className="p-3 bg-stone-50 dark:bg-stone-950/70 rounded-xl border border-stone-200 dark:border-stone-800 text-xs md:text-sm text-stone-700 dark:text-stone-300 italic mb-3">
             "{verse.plainEnglishSummary}"
           </div>
 
-          <div className="text-xs text-stone-400 mb-3">
-            <strong className="text-amber-400">Takeaway for Today: </strong>
+          <div className="text-xs text-stone-600 dark:text-stone-400 mb-3">
+            <strong className="text-amber-700 dark:text-amber-400">Takeaway for Today: </strong>
             {verse.keyTakeaway}
           </div>
 
           {/* FSRS Retention Stats Widget */}
-          <div className="p-3 bg-stone-950/60 rounded-xl border border-stone-800/80 flex items-center justify-between text-[11px] text-stone-400">
+          <div className="p-3 bg-stone-50 dark:bg-stone-950/60 rounded-xl border border-stone-200 dark:border-stone-800/80 flex items-center justify-between text-[11px] text-stone-600 dark:text-stone-400 shadow-xs">
             <div className="flex items-center gap-1.5">
-              <Brain className="w-3.5 h-3.5 text-amber-400" />
-              <span>Cognitive Stability: <strong className="text-stone-200">{currentFsrs.stability} days</strong></span>
+              <Brain className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+              <span>Cognitive Stability: <strong className="text-stone-800 dark:text-stone-200">{currentFsrs.stability} days</strong></span>
             </div>
             <div className="flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Next Review: <strong className="text-stone-200">{currentFsrs.nextReviewDate}</strong></span>
+              <Clock className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+              <span>Next Review: <strong className="text-stone-800 dark:text-stone-200">{currentFsrs.nextReviewDate}</strong></span>
             </div>
           </div>
 
@@ -249,7 +249,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="mt-3 p-3 rounded-lg bg-amber-950/40 border border-amber-900/50 text-xs text-amber-200 font-reading leading-relaxed"
+                className="mt-3 p-3 rounded-lg bg-amber-100/70 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-900/50 text-xs text-amber-900 dark:text-amber-200 font-reading leading-relaxed"
               >
                 <strong>Full Verse Reference: </strong> {verse.text}
               </motion.div>
@@ -261,9 +261,9 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
       {/* RIGHT COLUMN: WORKBENCH & WORD BANK */}
       <div className="lg:col-span-7 space-y-6">
         {/* Scaffolding Mode Selector */}
-        <div className="flex items-center justify-between bg-stone-900/80 p-1.5 rounded-xl border border-stone-800">
-          <div className="flex items-center gap-1.5 text-xs font-mono font-medium text-stone-400 px-2">
-            <Layers className="w-3.5 h-3.5 text-amber-400" />
+        <div className="flex items-center justify-between bg-stone-100 dark:bg-stone-900/80 p-1.5 rounded-xl border border-stone-200 dark:border-stone-800 shadow-xs">
+          <div className="flex items-center gap-1.5 text-xs font-mono font-medium text-stone-600 dark:text-stone-400 px-2">
+            <Layers className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
             <span>Mode:</span>
           </div>
           <div className="flex items-center gap-1">
@@ -271,8 +271,8 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
               onClick={() => setScaffoldMode('builder')}
               className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
                 scaffoldMode === 'builder'
-                  ? 'bg-amber-600 text-black font-bold shadow-sm'
-                  : 'text-stone-400 hover:text-stone-200 hover:bg-stone-800'
+                  ? 'bg-amber-500 text-stone-950 font-bold shadow-xs'
+                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-stone-200/60 dark:hover:bg-stone-800'
               }`}
             >
               1. Builder
@@ -281,8 +281,8 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
               onClick={() => setScaffoldMode('ghost')}
               className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
                 scaffoldMode === 'ghost'
-                  ? 'bg-amber-600 text-black font-bold shadow-sm'
-                  : 'text-stone-400 hover:text-stone-200 hover:bg-stone-800'
+                  ? 'bg-amber-500 text-stone-950 font-bold shadow-xs'
+                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-stone-200/60 dark:hover:bg-stone-800'
               }`}
             >
               2. Ghost Letters
@@ -291,8 +291,8 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
               onClick={() => setScaffoldMode('blind')}
               className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
                 scaffoldMode === 'blind'
-                  ? 'bg-amber-600 text-black font-bold shadow-sm'
-                  : 'text-stone-400 hover:text-stone-200 hover:bg-stone-800'
+                  ? 'bg-amber-500 text-stone-950 font-bold shadow-xs'
+                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-stone-200/60 dark:hover:bg-stone-800'
               }`}
             >
               3. Blind Recall
@@ -302,16 +302,16 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
 
         {/* Assembly Work Area */}
         <div>
-          <div className="text-xs uppercase font-mono tracking-wider text-stone-400 mb-2 flex items-center justify-between">
+          <div className="text-xs uppercase font-mono tracking-wider text-stone-600 dark:text-stone-400 mb-2 flex items-center justify-between">
             <span>Your Forged Verse ({assembledWords.length}/{targetWords.length} words)</span>
             {assembledWords.length > 0 && (
               <span className="text-[11px] text-stone-500 italic">Tap any word to return it</span>
             )}
           </div>
 
-          <div className="min-h-[140px] md:min-h-[160px] p-4 md:p-5 rounded-2xl bg-[#0b0e12] border-2 border-dashed border-stone-800 flex flex-wrap items-center content-start gap-2.5 shadow-inner">
+          <div className="min-h-[140px] md:min-h-[160px] p-4 md:p-5 rounded-2xl bg-stone-50 dark:bg-[#0b0e12] border-2 border-dashed border-stone-300 dark:border-stone-800 flex flex-wrap items-center content-start gap-2.5 shadow-inner transition-colors">
             {assembledWords.length === 0 ? (
-              <div className="w-full text-center text-stone-500 text-sm py-10 font-reading italic">
+              <div className="w-full text-center text-stone-400 dark:text-stone-500 text-sm py-10 font-reading italic">
                 {scaffoldMode === 'builder' && 'Tap the word tiles below to forge the scripture...'}
                 {scaffoldMode === 'ghost' && 'Assemble the verse using first-letter anchors...'}
                 {scaffoldMode === 'blind' && 'Blind reconstruction active: test pure recall...'}
@@ -327,10 +327,10 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                     animate={{ scale: 1, opacity: 1 }}
                     onClick={() => handleRemoveWord(idx)}
                     title="Tap to return word to bank"
-                    className={`px-3.5 py-2 rounded-xl text-sm md:text-base font-reading font-medium transition-all shadow-sm focus-visible:ring-2 focus-visible:ring-amber-500 ${
+                    className={`px-3.5 py-2 rounded-xl text-sm md:text-base font-reading font-medium transition-all shadow-xs focus-visible:ring-2 focus-visible:ring-amber-500 ${
                       isCorrect
-                        ? 'bg-amber-600/25 border border-amber-500/80 text-parchment-50 hover:bg-red-950/40 hover:border-red-500'
-                        : 'bg-red-950/40 border border-red-500 text-red-200'
+                        ? 'bg-amber-100 dark:bg-amber-600/25 border border-amber-400 dark:border-amber-500/80 text-amber-950 dark:text-parchment-50 hover:bg-red-100 dark:hover:bg-red-950/40 hover:border-red-400 dark:hover:border-red-500 hover:text-red-900 dark:hover:text-red-200'
+                        : 'bg-red-100 dark:bg-red-950/40 border border-red-300 dark:border-red-500 text-red-800 dark:text-red-200'
                     }`}
                   >
                     {item.word}
@@ -343,23 +343,23 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
 
         {/* Available Words Bank */}
         <div>
-          <div className="text-xs uppercase font-mono tracking-wider text-stone-400 mb-2">
+          <div className="text-xs uppercase font-mono tracking-wider text-stone-600 dark:text-stone-400 mb-2">
             Available Words ({scaffoldMode})
           </div>
-          <div className="p-4 md:p-5 rounded-2xl bg-stone-900/60 border border-stone-800 flex flex-wrap gap-2.5 min-h-[120px]">
+          <div className="p-4 md:p-5 rounded-2xl bg-stone-100 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 flex flex-wrap gap-2.5 min-h-[120px] transition-colors">
             {availableWords.map((item) => (
               <motion.button
                 key={item.id}
                 layout
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleSelectWord(item)}
-                className="px-4 py-2.5 rounded-xl text-sm md:text-base font-reading font-medium bg-[#1a1f29] border border-stone-700 text-parchment-200 hover:border-amber-500 hover:bg-stone-800 shadow-sm active:bg-amber-700 focus-visible:ring-2 focus-visible:ring-amber-500"
+                className="px-4 py-2.5 rounded-xl text-sm md:text-base font-reading font-medium bg-white dark:bg-[#1a1f29] border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-parchment-200 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-stone-800 shadow-xs active:bg-amber-600 active:text-stone-950 focus-visible:ring-2 focus-visible:ring-amber-500 transition-colors"
               >
                 {getTileLabel(item.word, true)}
               </motion.button>
             ))}
             {availableWords.length === 0 && !isCompleted && (
-              <div className="text-xs text-stone-400 italic py-2">
+              <div className="text-xs text-stone-500 dark:text-stone-400 italic py-2">
                 All words placed. Check the sequence above!
               </div>
             )}
@@ -372,63 +372,63 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              className="p-5 md:p-6 rounded-2xl bg-gradient-to-br from-emerald-950/90 to-stone-900 border-2 border-emerald-500/50 shadow-glow-gold text-left"
+              className="p-5 md:p-6 rounded-2xl bg-gradient-to-br from-emerald-100/90 via-emerald-50 to-stone-50 dark:from-emerald-950/90 dark:to-stone-900 border-2 border-emerald-400 dark:border-emerald-500/50 shadow-md text-left transition-colors"
             >
-              <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm mb-2">
+              <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-400 font-bold text-sm mb-2">
                 <CheckCircle className="w-5 h-5" />
                 <span>Scripture Locked in Memory! (+40 XP)</span>
               </div>
-              <p className="text-base md:text-lg font-reading text-emerald-100 italic mb-3">
+              <p className="text-base md:text-lg font-reading text-stone-900 dark:text-emerald-100 italic mb-3">
                 "{verse.text}"
               </p>
-              <div className="text-xs text-emerald-300 font-medium mb-4">
+              <div className="text-xs text-emerald-800 dark:text-emerald-300 font-medium mb-4">
                 <strong>Takeaway for Today: </strong> {verse.keyTakeaway}
               </div>
 
               {/* FSRS Self-Assessment */}
-              <div className="p-3.5 rounded-xl bg-black/40 border border-emerald-800/40 mb-3">
-                <div className="text-xs font-mono font-medium text-emerald-300 mb-2 flex items-center justify-between">
-                  <span>How easily did you recall this verse? {fsrsRated && <strong className="text-emerald-400">✓ Retention Logged</strong>}</span>
+              <div className="p-3.5 rounded-xl bg-white/80 dark:bg-black/40 border border-emerald-200 dark:border-emerald-800/40 mb-3 shadow-xs">
+                <div className="text-xs font-mono font-medium text-emerald-800 dark:text-emerald-300 mb-2 flex items-center justify-between">
+                  <span>How easily did you recall this verse? {fsrsRated && <strong className="text-emerald-600 dark:text-emerald-400">✓ Retention Logged</strong>}</span>
                   {scheduledNextDays && (
-                    <span className="text-amber-400 font-bold">Scheduled in {scheduledNextDays} days</span>
+                    <span className="text-amber-700 dark:text-amber-400 font-bold">Scheduled in {scheduledNextDays} days</span>
                   )}
                 </div>
                 <div className="grid grid-cols-4 gap-2">
                   <button
                     onClick={() => handleRateFSRS(1)}
-                    className="p-2 rounded-lg bg-stone-900 border border-red-800/60 hover:border-red-500 text-[11px] font-medium text-red-300 text-center transition-all"
+                    className="p-2 rounded-lg bg-white dark:bg-stone-900 border border-red-200 dark:border-red-800/60 hover:border-red-500 text-[11px] font-medium text-red-700 dark:text-red-300 text-center transition-all shadow-xs"
                   >
                     <div className="font-bold">Again</div>
-                    <div className="text-[10px] text-stone-400">1 day</div>
+                    <div className="text-[10px] text-stone-500 dark:text-stone-400">1 day</div>
                   </button>
                   <button
                     onClick={() => handleRateFSRS(2)}
-                    className="p-2 rounded-lg bg-stone-900 border border-amber-800/60 hover:border-amber-500 text-[11px] font-medium text-amber-300 text-center transition-all"
+                    className="p-2 rounded-lg bg-white dark:bg-stone-900 border border-amber-200 dark:border-amber-800/60 hover:border-amber-500 text-[11px] font-medium text-amber-800 dark:text-amber-300 text-center transition-all shadow-xs"
                   >
                     <div className="font-bold">Hard</div>
-                    <div className="text-[10px] text-stone-400">2-3 days</div>
+                    <div className="text-[10px] text-stone-500 dark:text-stone-400">2-3 days</div>
                   </button>
                   <button
                     onClick={() => handleRateFSRS(3)}
-                    className="p-2 rounded-lg bg-stone-900 border border-emerald-800/60 hover:border-emerald-500 text-[11px] font-medium text-emerald-300 text-center transition-all"
+                    className="p-2 rounded-lg bg-white dark:bg-stone-900 border border-emerald-200 dark:border-emerald-800/60 hover:border-emerald-500 text-[11px] font-medium text-emerald-700 dark:text-emerald-300 text-center transition-all shadow-xs"
                   >
                     <div className="font-bold">Good</div>
-                    <div className="text-[10px] text-stone-400">4-7 days</div>
+                    <div className="text-[10px] text-stone-500 dark:text-stone-400">4-7 days</div>
                   </button>
                   <button
                     onClick={() => handleRateFSRS(4)}
-                    className="p-2 rounded-lg bg-stone-900 border border-cyan-800/60 hover:border-cyan-500 text-[11px] font-medium text-cyan-300 text-center transition-all"
+                    className="p-2 rounded-lg bg-white dark:bg-stone-900 border border-cyan-200 dark:border-cyan-800/60 hover:border-cyan-500 text-[11px] font-medium text-cyan-800 dark:text-cyan-300 text-center transition-all shadow-xs"
                   >
                     <div className="font-bold">Easy</div>
-                    <div className="text-[10px] text-stone-400">14+ days</div>
+                    <div className="text-[10px] text-stone-500 dark:text-stone-400">14+ days</div>
                   </button>
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-emerald-900/40 flex justify-end">
+              <div className="mt-4 pt-3 border-t border-emerald-200 dark:border-emerald-900/40 flex justify-end">
                 <button
                   onClick={onNextVerse}
-                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-black font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm focus-visible:ring-2 focus-visible:ring-emerald-400"
+                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-stone-950 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm focus-visible:ring-2 focus-visible:ring-emerald-400"
                 >
                   <span>Next Verse</span>
                   <ArrowRight className="w-4 h-4" />
@@ -520,14 +520,14 @@ export const WordForge: React.FC<WordForgeProps> = ({
       {/* Header */}
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-500 mb-1">
+          <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-1">
             <Flame className="w-4 h-4" />
             <span>The Word Forge • Scripture Retention</span>
           </div>
-          <h1 className="text-2xl md:text-4xl font-serif font-black text-parchment-50">
+          <h1 className="text-2xl md:text-4xl font-serif font-black text-stone-900 dark:text-parchment-50">
             Lock Truth Into Memory
           </h1>
-          <p className="text-xs md:text-sm text-stone-400 mt-1">
+          <p className="text-xs md:text-sm text-stone-600 dark:text-stone-400 mt-1">
             Tactile word assembly designed for adult retention. Assemble the verse by tapping words in sequence.
           </p>
         </div>
@@ -537,10 +537,10 @@ export const WordForge: React.FC<WordForgeProps> = ({
             soundEngine.playClick();
             setIsMemoryPulseOpen(true);
           }}
-          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-stone-900 border border-amber-500/40 text-amber-300 text-xs font-semibold hover:bg-amber-600 hover:text-black transition-all shadow-glow-amber"
+          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white dark:bg-stone-900 border border-amber-500/40 text-amber-800 dark:text-amber-300 text-xs font-semibold hover:bg-amber-500 hover:text-stone-950 transition-all shadow-xs"
           title="Set this verse as your daily memory challenge"
         >
-          <Bell className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+          <Bell className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 animate-pulse" />
           <span>Train This Verse (Reminders)</span>
         </button>
       </div>
@@ -557,10 +557,10 @@ export const WordForge: React.FC<WordForgeProps> = ({
               setSelectedCategory(cat);
               setActiveVerseIndex(0);
             }}
-            className={`text-xs px-3.5 py-1.5 rounded-full font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-amber-500 ${
+            className={`text-xs px-3.5 py-1.5 rounded-full font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-amber-500 shadow-xs ${
               selectedCategory === cat
-                ? 'bg-amber-600 text-black font-bold shadow-sm'
-                : 'bg-stone-900 border border-stone-800 text-stone-400 hover:text-stone-200'
+                ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                : 'bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
             }`}
           >
             {cat}
@@ -578,21 +578,21 @@ export const WordForge: React.FC<WordForgeProps> = ({
       />
 
       {/* Pager Controls */}
-      <div className="flex items-center justify-between pt-6 mt-6 border-t border-stone-800">
+      <div className="flex items-center justify-between pt-6 mt-6 border-t border-stone-200 dark:border-stone-800">
         <button
           onClick={handlePrevVerse}
-          className="text-xs font-medium text-stone-400 hover:text-stone-200 px-3.5 py-2 rounded-lg bg-stone-900 border border-stone-800 focus-visible:ring-2 focus-visible:ring-amber-500"
+          className="text-xs font-medium text-stone-700 dark:text-stone-400 hover:text-stone-950 dark:hover:text-stone-200 px-3.5 py-2 rounded-lg bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 focus-visible:ring-2 focus-visible:ring-amber-500 shadow-xs"
         >
           Previous Verse
         </button>
 
-        <span className="text-xs font-mono text-stone-400">
+        <span className="text-xs font-mono text-stone-500 dark:text-stone-400 font-medium">
           Verse {safeIndex + 1} of {filteredVerses.length}
         </span>
 
         <button
           onClick={handleNextVerse}
-          className="text-xs font-medium text-amber-400 hover:text-amber-300 px-3.5 py-2 rounded-lg bg-stone-900 border border-amber-900/40 focus-visible:ring-2 focus-visible:ring-amber-500"
+          className="text-xs font-medium text-amber-800 dark:text-amber-400 hover:text-amber-950 dark:hover:text-amber-300 px-3.5 py-2 rounded-lg bg-white dark:bg-stone-900 border border-amber-300 dark:border-amber-900/40 focus-visible:ring-2 focus-visible:ring-amber-500 shadow-xs"
         >
           Next Verse
         </button>

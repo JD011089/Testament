@@ -14,6 +14,7 @@ import { StreetTranslatorModal } from './components/StreetTranslatorModal';
 import { DriveModePlayer } from './components/DriveModePlayer';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { OnboardingModal, type UserCalibrationProfile } from './components/OnboardingModal';
+import { AppTourModal } from './components/AppTourModal';
 import { CanonLibraryPage } from './components/CanonLibraryPage';
 import { WhatsNewModal } from './components/WhatsNewModal';
 import { UpdateNotificationBanner } from './components/UpdateNotificationBanner';
@@ -42,8 +43,13 @@ export function App() {
   const [isStreetTranslatorOpen, setIsStreetTranslatorOpen] = useState(false);
   const [isDriveModeOpen, setIsDriveModeOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState<boolean>(() => {
-    return !localStorage.getItem('testament_onboarding_completed');
+    try {
+      return !localStorage.getItem('testament_onboarding_completed');
+    } catch {
+      return false;
+    }
   });
+  const [isTourOpen, setIsTourOpen] = useState<boolean>(false);
 
   const [userProfile, setUserProfile] = useState<UserCalibrationProfile | null>(() => {
     try {
@@ -107,14 +113,7 @@ export function App() {
 
   const [targetDilemmaId, setTargetDilemmaId] = useState<string | null>(null);
   const [campaignPrompt, setCampaignPrompt] = useState<{ completedStep: number; nextStep: DailyCampaignStep } | null>(null);
-  const [isWhatsNewOpen, setIsWhatsNewOpen] = useState<boolean>(() => {
-    try {
-      const lastSeen = localStorage.getItem('testament_last_seen_version');
-      return lastSeen !== '1.6.0';
-    } catch {
-      return false;
-    }
-  });
+  const [isWhatsNewOpen, setIsWhatsNewOpen] = useState<boolean>(false);
 
   const [streakCount] = useState<number>(() => {
     const storedStreak = Number(localStorage.getItem('testament_streak')) || 1;
@@ -323,7 +322,11 @@ export function App() {
     localStorage.setItem('testament_bookmarked_verses', JSON.stringify(updated));
   };
 
-  const handleCompleteOnboarding = (profile: UserCalibrationProfile, startRecommendedQuest?: boolean) => {
+  const handleCompleteOnboarding = (
+    profile: UserCalibrationProfile, 
+    startRecommendedQuest?: boolean,
+    openTour?: boolean
+  ) => {
     setUserProfile(profile);
     setIsOnboardingOpen(false);
 
@@ -335,7 +338,9 @@ export function App() {
       localStorage.setItem('testament_onboarding_xp_awarded', 'true');
     }
 
-    if (startRecommendedQuest && profile.recommendedQuestId) {
+    if (openTour) {
+      setIsTourOpen(true);
+    } else if (startRecommendedQuest && profile.recommendedQuestId) {
       handleSelectQuestById(profile.recommendedQuestId);
     }
   };
@@ -370,8 +375,8 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-iron-950 text-parchment-100 w-full relative">
-      <main className="w-full pb-28 sm:pb-32 md:pb-12 md:pt-16">
+    <div className="min-h-screen bg-[#fcfbfa] dark:bg-iron-950 text-stone-900 dark:text-parchment-100 transition-colors duration-200 w-full relative">
+      <main className="w-full pt-3 sm:pt-4 md:pt-16 pb-28 sm:pb-32 md:pb-12">
         {activeQuest ? (
           <StoryViewer 
             quest={activeQuest}
@@ -422,6 +427,7 @@ export function App() {
                 onRewardXP={handleRewardXP}
                 onOpenWhatsNew={() => setIsWhatsNewOpen(true)}
                 onLaunchCampaignStep={handleLaunchCampaignStep}
+                onOpenTour={() => setIsTourOpen(true)}
               />
             )}
 
@@ -488,12 +494,24 @@ export function App() {
           currentAmbience={currentAmbience}
           onToggleAmbience={handleCycleAmbience}
           onOpenDriveMode={() => setIsDriveModeOpen(true)}
+          onOpenTour={() => setIsTourOpen(true)}
           streakCount={streakCount}
           xp={xp}
         />
       )}
 
       {/* MODALS */}
+      <AppTourModal 
+        isOpen={isTourOpen}
+        onClose={() => setIsTourOpen(false)}
+        onNavigateToTab={(tab) => {
+          soundEngine.stopSpeaking();
+          setCurrentTab(tab);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+        onOpenDriveMode={() => setIsDriveModeOpen(true)}
+      />
+
       <TimelineModal 
         isOpen={isTimelineOpen}
         onClose={() => setIsTimelineOpen(false)}

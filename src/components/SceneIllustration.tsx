@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Maximize2, X } from 'lucide-react';
+import { useModalLock } from '../utils/useModalLock';
 
 interface SceneIllustrationProps {
   theme: 'valley_battlefield' | 'cave_refuge' | 'desert_canyon' | 'courtyard_fire' | 'prison_cell' | 'sea_storm' | 'palace_hall' | 'red_sea' | 'mount_carmel';
@@ -62,6 +63,7 @@ const SCENE_DATA: Record<string, SceneMeta> = {
 
 export const SceneIllustration: React.FC<SceneIllustrationProps> = ({ theme, className = '' }) => {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const lightboxRef = useModalLock(isLightboxOpen);
   const [isLoaded, setIsLoaded] = useState(false);
 
   const scene = SCENE_DATA[theme] || {
@@ -108,18 +110,23 @@ export const SceneIllustration: React.FC<SceneIllustrationProps> = ({ theme, cla
 
       {isLightboxOpen && (
         <div 
-          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl overflow-y-auto flex flex-col items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl overflow-y-auto overscroll-contain flex flex-col items-center justify-center p-4"
           onClick={() => setIsLightboxOpen(false)}
+          role="dialog"
+          aria-modal="true"
         >
           <button
             onClick={() => setIsLightboxOpen(false)}
             className="absolute top-4 right-4 p-2 rounded-xl bg-stone-900 border border-stone-700 text-stone-300 hover:text-white hover:bg-stone-800"
+            aria-label="Close image zoom"
           >
             <X className="w-6 h-6" />
           </button>
 
           <div 
-            className="max-w-5xl w-full flex flex-col items-center gap-3"
+            ref={lightboxRef}
+            tabIndex={-1}
+            className="max-w-5xl w-full flex flex-col items-center gap-3 focus:outline-none"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-full rounded-2xl overflow-hidden border-2 border-amber-600/40 shadow-glow-gold">

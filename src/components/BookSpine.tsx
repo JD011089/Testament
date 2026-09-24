@@ -128,26 +128,26 @@ export const BookSpine: React.FC<BookSpineProps> = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 4 }}
             transition={{ duration: 0.15 }}
-            className="w-56 p-2.5 rounded-xl bg-stone-900/95 border border-amber-500/50 backdrop-blur-md shadow-2xl text-left relative"
+            className="w-56 p-2.5 rounded-xl bg-white/95 dark:bg-stone-900/95 border border-amber-500/50 backdrop-blur-md shadow-2xl text-left relative"
           >
-            <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-widest text-amber-400 font-bold mb-0.5">
+            <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-widest text-amber-700 dark:text-amber-400 font-bold mb-0.5">
               <span>Vol #{String(book.order).padStart(2, '0')}</span>
-              <span className="px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-[9px]">
+              <span className="px-1.5 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 text-[9px] text-amber-800 dark:text-amber-300">
                 {book.testament}
               </span>
             </div>
-            <h4 className="text-sm font-serif font-black text-parchment-100 leading-tight">
+            <h4 className="text-sm font-serif font-black text-stone-900 dark:text-parchment-100 leading-tight">
               {book.name}
             </h4>
-            <p className="text-[11px] text-stone-300 line-clamp-1 italic mt-0.5">
+            <p className="text-[11px] text-stone-600 dark:text-stone-300 line-clamp-1 italic mt-0.5">
               "{book.codename}"
             </p>
-            <div className="text-[10px] text-amber-300/80 font-mono mt-1 flex items-center gap-1">
+            <div className="text-[10px] text-amber-700 dark:text-amber-300/80 font-mono mt-1 flex items-center gap-1 font-semibold">
               <span>⚡ Click to pull & open codex</span>
             </div>
 
             {/* Downward pointing arrow caret */}
-            <div className={`absolute -bottom-1.5 w-3 h-3 bg-stone-900 border-r border-b border-amber-500/50 rotate-45 ${caretClass}`} />
+            <div className={`absolute -bottom-1.5 w-3 h-3 bg-white dark:bg-stone-900 border-r border-b border-amber-500/50 rotate-45 ${caretClass}`} />
           </motion.div>
         </div>
       )}

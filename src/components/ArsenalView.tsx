@@ -90,14 +90,14 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-8 pb-36 sm:pb-40 md:pb-48 text-left">
       {/* Header */}
       <div className="mb-6">
-        <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-500 mb-1">
+        <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-1">
           <Shield className="w-4 h-4" />
           <span>The Arsenal • Battle-Ready Scriptures</span>
         </div>
-        <h1 className="text-2xl md:text-4xl font-serif font-black text-parchment-50">
+        <h1 className="text-2xl md:text-4xl font-serif font-black text-stone-900 dark:text-parchment-50">
           Wisdom for Real Battles
         </h1>
-        <p className="text-xs md:text-sm text-stone-400 mt-1 max-w-2xl">
+        <p className="text-xs md:text-sm text-stone-600 dark:text-stone-400 mt-1 max-w-2xl">
           Direct scriptures categorized for practical adult challenges. Plain English breakdowns without religious complexity.
         </p>
       </div>
@@ -105,14 +105,14 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
       {/* Search Input & Category Filters */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-3 w-4 h-4 text-stone-500 pointer-events-none" />
+          <Search className="absolute left-3.5 top-3 w-4 h-4 text-stone-400 dark:text-stone-500 pointer-events-none" />
           <input 
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             aria-label="Search scriptures by topic, keyword, or reference"
             placeholder="Search by topic, keyword, or reference (e.g. anxiety, courage, Proverbs)..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-stone-900 border border-stone-800 text-sm text-parchment-100 placeholder:text-stone-500 focus:outline-none focus:border-amber-500/70 focus-visible:ring-2 focus-visible:ring-amber-500"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-sm text-stone-900 dark:text-parchment-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:border-amber-500/70 focus-visible:ring-2 focus-visible:ring-amber-500"
           />
         </div>
 
@@ -127,8 +127,8 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
               }}
               className={`text-xs px-3.5 py-1.5 rounded-full font-medium whitespace-nowrap transition-all ${
                 selectedCategory === cat
-                  ? 'bg-amber-600 text-black font-bold shadow-sm'
-                  : 'bg-stone-900 border border-stone-800 text-stone-400 hover:text-stone-200'
+                  ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                  : 'bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
               }`}
             >
               {cat}
@@ -147,20 +147,20 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
           return (
             <div 
               key={verse.id}
-              className="p-5 md:p-6 rounded-2xl bg-[#12151b] border border-stone-800 hover:border-amber-600/50 transition-all shadow-md flex flex-col justify-between"
+              className="p-5 md:p-6 rounded-2xl bg-white dark:bg-[#12151b] border border-stone-200 dark:border-stone-800 hover:border-amber-500/50 dark:hover:border-amber-600/50 transition-all shadow-sm flex flex-col justify-between"
             >
               <div>
                 {/* Card Header */}
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg font-serif font-bold text-amber-400">
+                    <span className="text-lg font-serif font-bold text-amber-700 dark:text-amber-400">
                       {verse.reference}
                     </span>
-                    <span className="text-[11px] px-2 py-0.5 rounded bg-stone-800 text-stone-400 font-mono">
+                    <span className="text-[11px] px-2 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 font-mono">
                       {verse.translation}
                     </span>
                     {isMastered && (
-                      <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-950/70 border border-emerald-800/40 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-200 dark:border-emerald-800/40 px-2 py-0.5 rounded-full">
                         ✓ Memorized
                       </span>
                     )}
@@ -170,10 +170,10 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
                     <button
                       onClick={() => handleSpeak(verse)}
                       title="Audio Recital"
-                      className="p-1.5 rounded-lg text-stone-400 hover:text-white hover:bg-stone-800 transition-colors"
+                      className="p-1.5 rounded-lg text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
                     >
                       {isSpeakingThis ? (
-                        <VolumeX className="w-4 h-4 text-amber-400 animate-pulse" />
+                        <VolumeX className="w-4 h-4 text-amber-500 animate-pulse" />
                       ) : (
                         <Volume2 className="w-4 h-4" />
                       )}
@@ -185,7 +185,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
                         onToggleBookmark(verse.id);
                       }}
                       title="Bookmark to Arsenal"
-                      className="p-1.5 rounded-lg text-stone-400 hover:text-amber-400 hover:bg-stone-800 transition-colors"
+                      className="p-1.5 rounded-lg text-stone-500 dark:text-stone-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
                     >
                       {isBookmarked ? (
                         <BookmarkCheck className="w-4 h-4 text-amber-500 fill-amber-500/20" />
@@ -197,13 +197,13 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
                 </div>
 
                 {/* Verse Scripture Text */}
-                <blockquote className="font-reading text-base md:text-lg text-parchment-100 italic pl-3 border-l-2 border-amber-600/60 my-2 leading-relaxed">
+                <blockquote className="font-reading text-base md:text-lg text-stone-800 dark:text-parchment-100 italic pl-3 border-l-2 border-amber-500 dark:border-amber-600/60 my-2 leading-relaxed">
                   "{verse.text}"
                 </blockquote>
 
                 {/* Plain English Translation Breakdown */}
-                <div className="my-3 p-3.5 rounded-xl bg-stone-900/80 border border-stone-800/80 text-xs md:text-sm text-stone-300">
-                  <div className="flex items-center gap-1.5 text-amber-400 font-semibold mb-1">
+                <div className="my-3 p-3.5 rounded-xl bg-stone-50 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800/80 text-xs md:text-sm text-stone-700 dark:text-stone-300">
+                  <div className="flex items-center gap-1.5 text-amber-700 dark:text-amber-400 font-semibold mb-1">
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>Plain English Real Talk</span>
                   </div>
@@ -213,15 +213,15 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
                 </div>
 
                 {/* Actionable Takeaway */}
-                <div className="text-xs text-stone-400 flex items-start gap-1.5 mb-4">
-                  <strong className="text-stone-300 shrink-0">Today's Call: </strong>
+                <div className="text-xs text-stone-600 dark:text-stone-400 flex items-start gap-1.5 mb-4">
+                  <strong className="text-stone-900 dark:text-stone-300 shrink-0">Today's Call: </strong>
                   <span>{verse.keyTakeaway}</span>
                 </div>
               </div>
 
               {/* Footer Actions */}
-              <div className="pt-3 border-t border-stone-800/80 flex flex-wrap items-center justify-between gap-2">
-                <span className="text-[11px] text-stone-500 font-mono">
+              <div className="pt-3 border-t border-stone-200 dark:border-stone-800/80 flex flex-wrap items-center justify-between gap-2">
+                <span className="text-[11px] text-stone-500 dark:text-stone-400 font-mono">
                   {verse.heroName ? `Story: ${verse.heroName}` : verse.category}
                 </span>
 
@@ -231,7 +231,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
                       soundEngine.playClick();
                       setPulseModalVerse(verse);
                     }}
-                    className="flex items-center gap-1 text-xs font-semibold text-stone-300 hover:text-amber-300 py-1.5 px-2.5 rounded-lg bg-stone-900 border border-stone-800 hover:border-amber-500/50 transition-colors"
+                    className="flex items-center gap-1 text-xs font-semibold text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-300 py-1.5 px-2.5 rounded-lg bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 hover:border-amber-500/50 transition-colors"
                     title="Train with daily spaced notifications"
                   >
                     <Bell className="w-3.5 h-3.5 text-amber-500" />
@@ -243,7 +243,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
                       soundEngine.playClick();
                       onPracticeVerse(verse.id);
                     }}
-                    className="flex items-center gap-1.5 text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors py-1.5 px-3 rounded-lg hover:bg-amber-600/10"
+                    className="flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 transition-colors py-1.5 px-3 rounded-lg hover:bg-amber-500/10"
                   >
                     <Brain className="w-3.5 h-3.5" />
                     <span>Practice &rarr;</span>
@@ -263,17 +263,17 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
 
       {/* Saved Journal Notes Section */}
       {Object.keys(notes).length > 0 && (
-        <div className="mt-12 pt-8 border-t border-stone-800">
-          <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-500 mb-3">
+        <div className="mt-12 pt-8 border-t border-stone-200 dark:border-stone-800">
+          <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-3">
             <FileText className="w-4 h-4" />
             <span>Your Personal Reflections & Journal</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Object.entries(notes).map(([actId, noteText]) => (
-              <div key={actId} className="p-4 rounded-xl bg-stone-900/60 border border-stone-800 text-xs">
-                <div className="text-amber-400 font-serif font-bold text-sm mb-1">{getActTitle(actId)}</div>
-                <p className="text-stone-300 italic">"{noteText}"</p>
+              <div key={actId} className="p-4 rounded-xl bg-white dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 text-xs">
+                <div className="text-amber-700 dark:text-amber-400 font-serif font-bold text-sm mb-1">{getActTitle(actId)}</div>
+                <p className="text-stone-700 dark:text-stone-300 italic">"{noteText}"</p>
               </div>
             ))}
           </div>

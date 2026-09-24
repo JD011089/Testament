@@ -11,6 +11,7 @@ import {
   X
 } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
+import { useModalLock } from '../utils/useModalLock';
 import confetti from 'canvas-confetti';
 
 export interface UserCalibrationProfile {
@@ -25,7 +26,7 @@ export interface UserCalibrationProfile {
 
 interface OnboardingModalProps {
   isOpen: boolean;
-  onComplete: (profile: UserCalibrationProfile, startRecommendedQuest?: boolean) => void;
+  onComplete: (profile: UserCalibrationProfile, startRecommendedQuest?: boolean, openTour?: boolean) => void;
   onClose: () => void;
   initialProfile?: UserCalibrationProfile | null;
 }
@@ -36,6 +37,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   onClose,
   initialProfile
 }) => {
+  const modalRef = useModalLock(isOpen);
   const [step, setStep] = useState<number>(1);
   const [battle, setBattle] = useState<string>(initialProfile?.battleId || 'responsibility');
   const [learningStyle, setLearningStyle] = useState<'visual' | 'audio' | 'tactical' | 'plain'>(initialProfile?.learningStyle || 'visual');
@@ -199,7 +201,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
     }
   };
 
-  const handleFinishCalibration = (startQuest: boolean) => {
+  const handleFinishCalibration = (startQuest: boolean, openTour: boolean = false) => {
     soundEngine.playVictory();
     const profile: UserCalibrationProfile = {
       battleId: selectedBattleObj.id,
@@ -212,26 +214,30 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
     };
     localStorage.setItem('testament_user_profile', JSON.stringify(profile));
     localStorage.setItem('testament_onboarding_completed', 'true');
-    onComplete(profile, startQuest);
+    onComplete(profile, startQuest, openTour);
   };
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/85 backdrop-blur-md overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/60 dark:bg-black/85 backdrop-blur-md overflow-y-auto overscroll-contain"
       role="dialog"
       aria-modal="true"
       aria-labelledby="onboarding-modal-title"
+      onClick={onClose}
     >
       <motion.div 
+        ref={modalRef}
+        tabIndex={-1}
+        onClick={e => e.stopPropagation()}
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.96 }}
-        className="w-full max-w-2xl bg-[#12151c] border-2 border-amber-600/70 rounded-3xl shadow-2xl overflow-hidden flex flex-col my-auto max-h-[92vh]"
+        className="w-full max-w-2xl bg-white dark:bg-[#12151c] border-2 border-amber-400 dark:border-amber-600/70 rounded-3xl shadow-2xl overflow-hidden flex flex-col my-auto max-h-[92vh] outline-none"
       >
         {/* Top Header Bar */}
-        <div className="p-4 sm:p-5 border-b border-stone-800 bg-[#161a22] flex items-center justify-between">
+        <div className="p-4 sm:p-5 border-b border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#161a22] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl overflow-hidden border border-amber-500/60 shadow-glow-gold bg-stone-950 shrink-0">
+            <div className="w-9 h-9 rounded-xl overflow-hidden border border-amber-500/60 shadow-md bg-stone-100 dark:bg-stone-950 shrink-0">
               <img 
                 src="/icons/icon-192.png" 
                 alt="Testament Emblem" 
@@ -240,14 +246,14 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 id="onboarding-modal-title" className="text-sm sm:text-base font-serif font-bold text-parchment-50">
+                <h3 id="onboarding-modal-title" className="text-sm sm:text-base font-serif font-bold text-stone-900 dark:text-parchment-50">
                   Battle Plan Calibration
                 </h3>
-                <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30">
                   {step < 5 ? `Step ${step} of 4` : 'Ready'}
                 </span>
               </div>
-              <p className="text-[11px] text-stone-400">
+              <p className="text-[11px] text-stone-500 dark:text-stone-400">
                 Tailoring your authentic biblical learning experience
               </p>
             </div>
@@ -256,14 +262,14 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={() => handleFinishCalibration(false)}
-              className="text-xs text-stone-400 hover:text-amber-400 transition-colors px-2.5 py-1 rounded-lg hover:bg-stone-800 focus-visible:ring-2 focus-visible:ring-amber-500"
+              className="text-xs text-stone-500 dark:text-stone-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors px-2.5 py-1 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 focus-visible:ring-2 focus-visible:ring-amber-500"
             >
               Skip
             </button>
             <button
               onClick={onClose}
               aria-label="Close calibration modal"
-              className="p-1 rounded-lg text-stone-500 hover:text-stone-300 hover:bg-stone-800 transition-colors focus-visible:ring-2 focus-visible:ring-amber-500"
+              className="p-1 rounded-lg text-stone-400 hover:text-stone-700 dark:text-stone-500 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors focus-visible:ring-2 focus-visible:ring-amber-500"
               title="Close"
             >
               <X className="w-4 h-4" />
@@ -272,12 +278,12 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
         </div>
 
         {/* Step Progress Bar */}
-        <div className="w-full bg-stone-900 h-1.5 flex">
+        <div className="w-full bg-stone-200 dark:bg-stone-900 h-1.5 flex">
           {[1, 2, 3, 4, 5].map((s) => (
             <div 
               key={s} 
               className={`h-full flex-1 transition-all duration-300 ${
-                s <= step ? 'bg-gradient-to-r from-amber-600 to-amber-400' : 'bg-stone-850'
+                s <= step ? 'bg-gradient-to-r from-amber-500 to-amber-400' : 'bg-stone-200 dark:bg-stone-850'
               }`}
             />
           ))}
@@ -290,14 +296,14 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
           {step === 1 && (
             <div className="space-y-4 animate-fadeIn">
               <div>
-                <div className="flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-widest text-amber-500 mb-1">
+                <div className="flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-1">
                   <Shield className="w-3.5 h-3.5" />
                   <span>The Front Lines</span>
                 </div>
-                <h2 className="text-lg sm:text-xl font-serif font-bold text-parchment-50">
+                <h2 className="text-lg sm:text-xl font-serif font-bold text-stone-900 dark:text-parchment-50">
                   What battle are you fighting in your daily life right now?
                 </h2>
-                <p className="text-xs text-stone-400 mt-1">
+                <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">
                   We will prioritize stories and tactical scriptures that directly address this weight.
                 </p>
               </div>
@@ -314,21 +320,21 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       }}
                       className={`w-full text-left p-3.5 sm:p-4 rounded-2xl border transition-all flex items-start gap-3.5 ${
                         isSelected 
-                          ? 'bg-gradient-to-r from-amber-950/50 to-stone-900 border-amber-500 shadow-glow-ember ring-1 ring-amber-500/50 text-parchment-50' 
-                          : 'bg-stone-900/70 border-stone-800 hover:border-stone-700 text-stone-300 hover:bg-stone-850/60'
+                          ? 'bg-amber-50 dark:bg-gradient-to-r dark:from-amber-950/50 dark:to-stone-900 border-amber-500 shadow-sm dark:shadow-glow-ember ring-1 ring-amber-500/50 text-stone-950 dark:text-parchment-50' 
+                          : 'bg-stone-50 dark:bg-stone-900/70 border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-850/60'
                       }`}
                     >
                       <span className="text-2xl mt-0.5 shrink-0">{b.icon}</span>
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
-                          <h4 className="text-sm font-bold text-parchment-100">{b.title}</h4>
+                          <h4 className="text-sm font-bold text-stone-900 dark:text-parchment-100">{b.title}</h4>
                           <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] shrink-0 ${
-                            isSelected ? 'bg-amber-500 text-black font-bold' : 'border border-stone-700'
+                            isSelected ? 'bg-amber-500 text-stone-950 font-bold' : 'border border-stone-300 dark:border-stone-700'
                           }`}>
                             {isSelected ? '✓' : ''}
                           </div>
                         </div>
-                        <p className="text-xs text-stone-400 mt-1 leading-relaxed">{b.desc}</p>
+                        <p className="text-xs text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">{b.desc}</p>
                       </div>
                     </button>
                   );
@@ -341,14 +347,14 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
           {step === 2 && (
             <div className="space-y-4 animate-fadeIn">
               <div>
-                <div className="flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-widest text-amber-500 mb-1">
+                <div className="flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-1">
                   <Brain className="w-3.5 h-3.5" />
                   <span>Cognitive Style</span>
                 </div>
-                <h2 className="text-lg sm:text-xl font-serif font-bold text-parchment-50">
+                <h2 className="text-lg sm:text-xl font-serif font-bold text-stone-900 dark:text-parchment-50">
                   How does your mind lock in information best?
                 </h2>
-                <p className="text-xs text-stone-400 mt-1">
+                <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">
                   Built for practical thinkers who hate boring seminary textbooks.
                 </p>
               </div>
@@ -365,18 +371,18 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       }}
                       className={`text-left p-4 rounded-2xl border transition-all flex flex-col justify-between ${
                         isSelected 
-                          ? 'bg-amber-950/40 border-amber-500 shadow-glow-gold/20 ring-1 ring-amber-500/50 text-parchment-50' 
-                          : 'bg-stone-900/70 border-stone-800 hover:border-stone-700 text-stone-300 hover:bg-stone-850/60'
+                          ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-500 shadow-sm ring-1 ring-amber-500/50 text-stone-950 dark:text-parchment-50' 
+                          : 'bg-stone-50 dark:bg-stone-900/70 border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-850/60'
                       }`}
                     >
                       <div>
                         <div className="text-2xl mb-2">{ls.icon}</div>
-                        <h4 className="text-sm font-bold text-parchment-100">{ls.title}</h4>
-                        <p className="text-xs text-stone-400 mt-1.5 leading-relaxed">{ls.desc}</p>
+                        <h4 className="text-sm font-bold text-stone-900 dark:text-parchment-100">{ls.title}</h4>
+                        <p className="text-xs text-stone-600 dark:text-stone-400 mt-1.5 leading-relaxed">{ls.desc}</p>
                       </div>
                       <div className="mt-3 pt-2 flex items-center justify-end">
                         <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${
-                          isSelected ? 'bg-amber-500 text-black font-bold' : 'border border-stone-700'
+                          isSelected ? 'bg-amber-500 text-stone-950 font-bold' : 'border border-stone-300 dark:border-stone-700'
                         }`}>
                           {isSelected ? '✓' : ''}
                         </div>
@@ -392,14 +398,14 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
           {step === 3 && (
             <div className="space-y-4 animate-fadeIn">
               <div>
-                <div className="flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-widest text-amber-500 mb-1">
+                <div className="flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-1">
                   <BookOpen className="w-3.5 h-3.5" />
                   <span>Scripture Familiarity</span>
                 </div>
-                <h2 className="text-lg sm:text-xl font-serif font-bold text-parchment-50">
+                <h2 className="text-lg sm:text-xl font-serif font-bold text-stone-900 dark:text-parchment-50">
                   Where are you starting from?
                 </h2>
-                <p className="text-xs text-stone-400 mt-1">
+                <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">
                   We adapt our context cards and ancient customs translator to your comfort level.
                 </p>
               </div>
@@ -416,21 +422,21 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       }}
                       className={`w-full text-left p-4 rounded-2xl border transition-all flex items-start gap-3.5 ${
                         isSelected 
-                          ? 'bg-amber-950/40 border-amber-500 shadow-glow-gold/20 ring-1 ring-amber-500/50 text-parchment-50' 
-                          : 'bg-stone-900/70 border-stone-800 hover:border-stone-700 text-stone-300 hover:bg-stone-850/60'
+                          ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-500 ring-1 ring-amber-500/50 text-stone-950 dark:text-parchment-50' 
+                          : 'bg-stone-50 dark:bg-stone-900/70 border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-850/60'
                       }`}
                     >
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-1">
-                          <h4 className="text-sm font-bold text-parchment-100">{fam.title}</h4>
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-stone-800 text-amber-400 border border-stone-700">
+                          <h4 className="text-sm font-bold text-stone-900 dark:text-parchment-100">{fam.title}</h4>
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-amber-700 dark:text-amber-400 border border-stone-200 dark:border-stone-700">
                             {fam.tag}
                           </span>
                         </div>
-                        <p className="text-xs text-stone-400 leading-relaxed">{fam.desc}</p>
+                        <p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed">{fam.desc}</p>
                       </div>
                       <div className={`w-4 h-4 rounded-full mt-1 flex items-center justify-center text-[10px] shrink-0 ${
-                        isSelected ? 'bg-amber-500 text-black font-bold' : 'border border-stone-700'
+                        isSelected ? 'bg-amber-500 text-stone-950 font-bold' : 'border border-stone-300 dark:border-stone-700'
                       }`}>
                         {isSelected ? '✓' : ''}
                       </div>
@@ -445,14 +451,14 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
           {step === 4 && (
             <div className="space-y-4 animate-fadeIn">
               <div>
-                <div className="flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-widest text-amber-500 mb-1">
+                <div className="flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-1">
                   <Clock className="w-3.5 h-3.5" />
                   <span>Daily Commitment</span>
                 </div>
-                <h2 className="text-lg sm:text-xl font-serif font-bold text-parchment-50">
+                <h2 className="text-lg sm:text-xl font-serif font-bold text-stone-900 dark:text-parchment-50">
                   How much time can you realistically invest daily?
                 </h2>
-                <p className="text-xs text-stone-400 mt-1">
+                <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">
                   Consistency beats intensity. Set a pace you can actually maintain.
                 </p>
               </div>
@@ -469,17 +475,17 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       }}
                       className={`w-full text-left p-4 rounded-2xl border transition-all flex items-center gap-4 ${
                         isSelected 
-                          ? 'bg-amber-950/40 border-amber-500 shadow-glow-gold/20 ring-1 ring-amber-500/50 text-parchment-50' 
-                          : 'bg-stone-900/70 border-stone-800 hover:border-stone-700 text-stone-300 hover:bg-stone-850/60'
+                          ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-500 ring-1 ring-amber-500/50 text-stone-950 dark:text-parchment-50' 
+                          : 'bg-stone-50 dark:bg-stone-900/70 border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-850/60'
                       }`}
                     >
                       <span className="text-2xl shrink-0">{cad.icon}</span>
                       <div className="flex-1">
-                        <h4 className="text-sm font-bold text-parchment-100">{cad.title}</h4>
-                        <p className="text-xs text-stone-400 mt-0.5">{cad.desc}</p>
+                        <h4 className="text-sm font-bold text-stone-900 dark:text-parchment-100">{cad.title}</h4>
+                        <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5">{cad.desc}</p>
                       </div>
                       <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] shrink-0 ${
-                        isSelected ? 'bg-amber-500 text-black font-bold' : 'border border-stone-700'
+                        isSelected ? 'bg-amber-500 text-stone-950 font-bold' : 'border border-stone-300 dark:border-stone-700'
                       }`}>
                         {isSelected ? '✓' : ''}
                       </div>
@@ -494,26 +500,26 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
           {step === 5 && (
             <div className="space-y-5 animate-fadeIn">
               <div className="text-center py-2">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-600/50 text-emerald-300 text-xs font-mono font-bold mb-3 shadow-sm">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-600/50 text-emerald-800 dark:text-emerald-300 text-xs font-mono font-bold mb-3 shadow-sm">
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>Calibration Complete • +50 Starter XP Awarded</span>
                 </div>
-                <h2 className="text-xl sm:text-2xl font-serif font-black text-parchment-50">
+                <h2 className="text-xl sm:text-2xl font-serif font-black text-stone-900 dark:text-parchment-50">
                   Your Personal Battle Plan
                 </h2>
-                <p className="text-xs text-stone-400 mt-1 max-w-md mx-auto">
+                <p className="text-xs text-stone-600 dark:text-stone-400 mt-1 max-w-md mx-auto">
                   Based on your daily season and cognitive style, here is your customized launchpad:
                 </p>
               </div>
 
               {/* Recommendation Card */}
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-[#1a1713] to-[#101217] border-2 border-amber-500/70 shadow-glow-gold space-y-4">
-                <div className="flex items-start justify-between gap-3 border-b border-amber-900/40 pb-3">
+              <div className="p-5 rounded-2xl bg-amber-50/60 dark:bg-gradient-to-br dark:from-[#1a1713] dark:to-[#101217] border-2 border-amber-400 dark:border-amber-500/70 shadow-sm dark:shadow-glow-gold space-y-4">
+                <div className="flex items-start justify-between gap-3 border-b border-amber-200 dark:border-amber-900/40 pb-3">
                   <div>
-                    <div className="text-[10px] font-mono uppercase tracking-widest text-amber-400 font-bold">
+                    <div className="text-[10px] font-mono uppercase tracking-widest text-amber-700 dark:text-amber-400 font-bold">
                       Recommended Starter Quest
                     </div>
-                    <h3 className="text-base sm:text-lg font-serif font-bold text-parchment-100 mt-0.5">
+                    <h3 className="text-base sm:text-lg font-serif font-bold text-stone-900 dark:text-parchment-100 mt-0.5">
                       {selectedBattleObj.questTitle}
                     </h3>
                   </div>
@@ -521,45 +527,56 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 </div>
 
                 <div className="space-y-2 text-xs">
-                  <div className="text-stone-300">
-                    <strong className="text-amber-400">Targeting Your Battle: </strong>
+                  <div className="text-stone-700 dark:text-stone-300">
+                    <strong className="text-amber-800 dark:text-amber-400">Targeting Your Battle: </strong>
                     {selectedBattleObj.title}
                   </div>
 
-                  <div className="p-3 rounded-xl bg-stone-900/80 border border-stone-800 text-parchment-200 italic">
-                    <strong className="text-amber-300 not-italic">Primary Tactical Verse: </strong>
+                  <div className="p-3 rounded-xl bg-white dark:bg-stone-900/80 border border-amber-200 dark:border-stone-800 text-stone-800 dark:text-parchment-200 italic shadow-xs">
+                    <strong className="text-amber-800 dark:text-amber-300 not-italic">Primary Tactical Verse: </strong>
                     "{selectedBattleObj.primaryVerse}"
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 pt-1 text-[11px] text-stone-400 font-mono">
+                  <div className="grid grid-cols-2 gap-2 pt-1 text-[11px] text-stone-600 dark:text-stone-400 font-mono">
                     <div>
                       <span className="text-stone-500">Mode: </span>
-                      <span className="text-amber-300 font-bold uppercase">{learningStyle}</span>
+                      <span className="text-amber-800 dark:text-amber-300 font-bold uppercase">{learningStyle}</span>
                     </div>
                     <div>
                       <span className="text-stone-500">Cadence: </span>
-                      <span className="text-amber-300 font-bold">{dailyCadence === '3min' ? '3 Min / Day' : dailyCadence === '10min' ? '7-10 Min / Day' : 'Deep Study'}</span>
+                      <span className="text-amber-800 dark:text-amber-300 font-bold">{dailyCadence === '3min' ? '3 Min / Day' : dailyCadence === '10min' ? '7-10 Min / Day' : 'Deep Study'}</span>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-2 flex flex-col sm:flex-row gap-3">
+              <div className="pt-2 flex flex-col gap-2.5">
                 <button
-                  onClick={() => handleFinishCalibration(true)}
-                  className="flex-1 py-3.5 px-5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-bold text-sm sm:text-base flex items-center justify-center gap-2 transition-all shadow-glow-gold cursor-pointer"
+                  onClick={() => handleFinishCalibration(false, true)}
+                  className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-bold text-sm sm:text-base flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
                 >
-                  <span>Begin My Starter Journey</span>
+                  <Sparkles className="w-4 h-4 text-stone-950" />
+                  <span>Take 1-Minute App Tour (Recommended)</span>
                   <ArrowRight className="w-4 h-4 stroke-[2.5]" />
                 </button>
 
-                <button
-                  onClick={() => handleFinishCalibration(false)}
-                  className="py-3 px-4 rounded-2xl bg-stone-900 hover:bg-stone-850 text-stone-300 border border-stone-800 text-xs font-semibold transition-all text-center"
-                >
-                  Go to Dashboard
-                </button>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <button
+                    onClick={() => handleFinishCalibration(true, false)}
+                    className="py-3 px-4 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 text-xs font-semibold transition-all text-center flex items-center justify-center gap-1.5"
+                  >
+                    <span>Jump Straight to Story</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+
+                  <button
+                    onClick={() => handleFinishCalibration(false, false)}
+                    className="py-3 px-4 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-800 text-xs font-semibold transition-all text-center"
+                  >
+                    Go to Home
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -568,12 +585,12 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
         {/* Footer Navigation (Steps 1 to 4) */}
         {step < 5 && (
-          <div className="p-4 sm:p-5 border-t border-stone-800 bg-[#141720] flex items-center justify-between">
+          <div className="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#141720] flex items-center justify-between">
             <button
               onClick={handlePrevStep}
               disabled={step === 1}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors ${
-                step === 1 ? 'opacity-30 cursor-not-allowed text-stone-600' : 'text-stone-300 hover:text-white bg-stone-900 border border-stone-800'
+                step === 1 ? 'opacity-30 cursor-not-allowed text-stone-400 dark:text-stone-600' : 'text-stone-700 dark:text-stone-300 hover:text-stone-950 dark:hover:text-white bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800'
               }`}
             >
               <ArrowLeft className="w-3.5 h-3.5" />
@@ -582,7 +599,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
             <button
               onClick={handleNextStep}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold text-xs sm:text-sm transition-all shadow-glow-gold cursor-pointer"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs sm:text-sm transition-all shadow-md cursor-pointer"
             >
               <span>{step === 4 ? 'Build My Battle Plan' : 'Continue'}</span>
               <ArrowRight className="w-4 h-4" />
