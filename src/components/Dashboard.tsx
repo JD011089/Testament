@@ -351,9 +351,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       onOpenWhatsNew();
                     }}
                     className="text-[10px] font-mono px-2 py-0.2 rounded-full bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-600 hover:text-stone-950 dark:text-stone-400 dark:hover:text-amber-300 border border-stone-250 dark:border-stone-750 transition-colors flex items-center gap-1"
-                    title="View field update notes (v1.9.2)"
+                    title="View field update notes (v1.9.3)"
                   >
-                    <span>v1.9.2</span>
+                    <span>v1.9.3</span>
                   </button>
                 )}
               </div>
