@@ -40,10 +40,33 @@ interface ReleaseMilestone {
 
 const RELEASES: ReleaseMilestone[] = [
   {
-    version: 'v1.9.2',
-    tagline: 'Seamless Borderless Design & Full-Screen Mobile Modals',
+    version: 'v1.9.3',
+    tagline: 'Enterprise-Grade Web Push & PWA App Badging',
     dateBadge: 'Current Release',
     isLatest: true,
+    highlights: [
+      {
+        icon: <Bell className="w-4 h-4 text-amber-400" />,
+        title: 'Native Web Push & Zero-Cost Supabase Sync',
+        description: 'Subscribes your device to Web Push notifications and syncs encrypted push endpoints directly to Supabase so you can receive memory scripture prompts even when the app is completely closed.'
+      },
+      {
+        icon: <Award className="w-4 h-4 text-amber-400" />,
+        title: 'Home Screen App Badging',
+        description: 'Your PWA home screen icon now displays an unread practice badge whenever daily memory verse challenges are awaiting review.'
+      },
+      {
+        icon: <Zap className="w-4 h-4 text-amber-400" />,
+        title: 'Notification Triggers & Exact Safari Timers',
+        description: 'Utilizes native Chromium TimestampTrigger for scheduled delivery alongside exact-second in-memory fallback timers for iOS Safari.'
+      }
+    ]
+  },
+  {
+    version: 'v1.9.2',
+    tagline: 'Seamless Borderless Design & Full-Screen Mobile Modals',
+    dateBadge: 'Previous Release',
+    isLatest: false,
     highlights: [
       {
         icon: <Sparkles className="w-4 h-4 text-amber-400" />,
@@ -302,12 +325,12 @@ const RELEASES: ReleaseMilestone[] = [
 
 export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose }) => {
   const modalRef = useModalLock(isOpen);
-  const [activeTab, setActiveTab] = useState<string>('v1.9.2');
+  const [activeTab, setActiveTab] = useState<string>('v1.9.3');
 
   const handleDismiss = () => {
     soundEngine.playClick();
     try {
-      localStorage.setItem('testament_last_seen_version', '1.9.2');
+      localStorage.setItem('testament_last_seen_version', '1.9.3');
     } catch {
       // ignore
     }
@@ -350,7 +373,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
                   Field Update Dispatches
                 </h2>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 font-bold">
-                  v1.9.2 Live
+                  v1.9.3 Live
                 </span>
               </div>
               <p className="text-xs text-stone-500 dark:text-stone-400">
@@ -440,7 +463,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
         {/* MODAL FOOTER */}
         <div className="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800/90 bg-stone-50 dark:bg-black/40 flex items-center justify-between gap-3 relative z-10">
           <div className="text-[11px] font-mono text-stone-500 dark:text-stone-400 hidden sm:block">
-            Testament v1.9.2 • Built with Next-Gen Biblical Education
+            Testament v1.9.3 • Built with Next-Gen Biblical Education
           </div>
 
           <button
