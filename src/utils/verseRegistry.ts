@@ -202,3 +202,27 @@ export const getStoryVerseForQuest = (questId: string): MemoryVerse | null => {
 export const getStoryVerseForAct = (questId: string, _actId?: string): MemoryVerse | null => {
   return getStoryVerseForQuest(questId) || STORY_MEMORY_VERSES.find(v => v.storyQuestId === questId) || null;
 };
+
+/**
+ * Register any dynamic Bible verse selected from the full chapter reader
+ * so it can be practiced immediately in Word Forge and saved in Arsenal
+ */
+export const registerDynamicBibleVerse = (reference: string, text: string, translation: string = 'CSB'): MemoryVerse => {
+  const cleanId = `custom-bible-${reference.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+  const existing = ALL_AVAILABLE_VERSES.find(v => v.id === cleanId || v.reference.toLowerCase() === reference.toLowerCase());
+  if (existing) return existing;
+
+  const newVerse: MemoryVerse = {
+    id: cleanId,
+    reference,
+    translation,
+    text,
+    plainEnglishSummary: `Meditate on and internalize ${reference} from the Scriptures.`,
+    category: 'Courage & Facing Giants',
+    difficulty: 'Core',
+    keyTakeaway: `Anchor this truth in your memory and apply it to today's trials.`
+  };
+
+  ALL_AVAILABLE_VERSES.push(newVerse);
+  return newVerse;
+};

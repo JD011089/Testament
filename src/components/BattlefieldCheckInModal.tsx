@@ -12,6 +12,7 @@ import {
   RotateCcw 
 } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
+import { useModalLock } from '../utils/useModalLock';
 
 export interface BattlefieldOption {
   id: string;
@@ -96,6 +97,7 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
   activeBattlefieldId,
   onSelectBattlefield
 }) => {
+  const modalRef = useModalLock(isOpen);
   if (!isOpen) return null;
 
   const handleSelect = (id: string) => {
@@ -127,17 +129,25 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+      <div 
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-md overflow-y-auto overscroll-contain"
+        onClick={onClose}
+        role="dialog"
+        aria-modal="true"
+      >
         <motion.div
+          ref={modalRef}
+          tabIndex={-1}
+          onClick={e => e.stopPropagation()}
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="w-full max-w-xl bg-[#11141c] border-2 border-amber-500/50 rounded-3xl p-6 md:p-8 shadow-2xl relative text-left overflow-y-auto max-h-[90vh]"
+          className="w-full max-w-xl bg-white dark:bg-[#11141c] border-2 border-amber-400 dark:border-amber-500/50 rounded-3xl p-6 md:p-8 shadow-2xl relative text-left overflow-y-auto max-h-[90vh] outline-none"
         >
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-5 right-5 p-2 rounded-xl bg-stone-900 border border-stone-800 text-stone-400 hover:text-white transition-all"
+            className="absolute top-5 right-5 p-2 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white transition-all"
             aria-label="Close modal"
           >
             <X className="w-4 h-4" />
@@ -145,14 +155,14 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
 
           {/* Header */}
           <div className="mb-6">
-            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-400 mb-1.5">
+            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-700 dark:text-amber-400 mb-1.5">
               <Swords className="w-4 h-4" />
               <span>5-Second Battlefield Check-In</span>
             </div>
-            <h3 className="text-xl md:text-2xl font-serif font-bold text-parchment-50">
+            <h3 className="text-xl md:text-2xl font-serif font-bold text-stone-900 dark:text-parchment-50">
               What Trial Are You Facing Today?
             </h3>
-            <p className="text-xs md:text-sm text-stone-400 mt-1">
+            <p className="text-xs md:text-sm text-stone-600 dark:text-stone-400 mt-1">
               Select your immediate battlefield. We’ll tailor today's scripture campaign, dilemma, and field prayers to arm you right where you stand.
             </p>
           </div>
@@ -167,31 +177,31 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
                   onClick={() => handleSelect(opt.id)}
                   className={`w-full p-4 rounded-2xl border text-left transition-all flex items-start gap-3.5 ${
                     isSelected
-                      ? `${opt.colorBorder} bg-gradient-to-r ${opt.colorBg} to-stone-900 shadow-md ring-2 ring-amber-400/50`
-                      : 'border-stone-800/90 bg-stone-900/60 hover:bg-stone-900 hover:border-stone-700'
+                      ? `${opt.colorBorder} bg-amber-50 dark:bg-gradient-to-r ${opt.colorBg} dark:to-stone-900 shadow-sm ring-2 ring-amber-400/50`
+                      : 'border-stone-200 dark:border-stone-800/90 bg-stone-50 dark:bg-stone-900/60 hover:bg-stone-100 dark:hover:bg-stone-900 hover:border-stone-300 dark:hover:border-stone-700'
                   }`}
                 >
-                  <div className="p-2.5 rounded-xl bg-black/40 border border-stone-800 shrink-0 mt-0.5">
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-black/40 border border-stone-200 dark:border-stone-800 shrink-0 mt-0.5">
                     {renderIcon(opt.icon)}
                   </div>
 
                   <div className="flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <h4 className="font-serif font-bold text-sm md:text-base text-stone-100">
+                      <h4 className="font-serif font-bold text-sm md:text-base text-stone-900 dark:text-stone-100">
                         {opt.title}
                       </h4>
                       {isSelected && (
-                        <span className="flex items-center gap-1 text-[11px] font-mono text-emerald-400 font-bold bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-800/50">
+                        <span className="flex items-center gap-1 text-[11px] font-mono text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/50">
                           <CheckCircle2 className="w-3 h-3" />
                           <span>Active</span>
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-stone-400 mt-1 leading-relaxed">
+                    <p className="text-xs text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">
                       {opt.subtitle}
                     </p>
-                    <div className="text-[10px] font-mono text-amber-300/80 mt-1.5 flex items-center gap-1">
-                      <Sparkles className="w-3 h-3 text-amber-400" />
+                    <div className="text-[10px] font-mono text-amber-800 dark:text-amber-300/80 mt-1.5 flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-amber-600 dark:text-amber-400" />
                       <span>Field Armor: {opt.psalmReference}</span>
                     </div>
                   </div>
@@ -201,24 +211,24 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
           </div>
 
           {/* Footer Reset & Close */}
-          <div className="flex items-center justify-between pt-4 border-t border-stone-800 text-xs">
+          <div className="flex items-center justify-between pt-4 border-t border-stone-200 dark:border-stone-800 text-xs">
             {activeBattlefieldId ? (
               <button
                 onClick={handleReset}
-                className="flex items-center gap-1.5 text-stone-400 hover:text-amber-400 transition-colors"
+                className="flex items-center gap-1.5 text-stone-500 dark:text-stone-400 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Reset to Standard Daily Rotation</span>
               </button>
             ) : (
-              <span className="text-stone-500 font-mono text-[11px]">
+              <span className="text-stone-500 dark:text-stone-400 font-mono text-[11px]">
                 Currently following general rotation
               </span>
             )}
 
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold transition-all"
+              className="px-4 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 font-bold transition-all"
             >
               Done
             </button>

@@ -5,6 +5,36 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2026-09-24
+
+### Added
+- **Full 66-Book Bible Scripture Reader (`OpenBookModal.tsx`, `bibleService.ts`)**:
+  - Unlocked free-choice scripture reading across all **66 canonical books, 1,189 chapters, and ~31,102 verses** with zero forced railroading.
+  - Multi-translation support: **CSB / Modern Reader (WEB)**, **Classic King James (KJV)**, and **Basic Bible English (BBE)**.
+  - Offline local caching via `localStorage`: Chapters loaded once are stored permanently for instant, offline PWA access.
+  - Interactive verse superpowers:
+    - 🔨 **Tap-to-WordForge**: Send any individual scripture verse directly into the Word Forge tile memory workbench.
+    - 🛡️ **Save to Arsenal**: Bookmark any verse instantly to your defense cards.
+    - 🔊 **Voice Narration**: Listen to entire chapters or speak individual verses on demand.
+    - 📋 **Quick Citation Copy**: Copy formatted scripture text and citations in one click.
+  - Reader ergonomics: Adjustable typography (`A-`, `A`, `A+`) and comfortable parchment/editorial line heights.
+- **App-Wide Reading Voice Selection & Live Previews (`VoiceSelectorModal.tsx`, `audio.ts`)**:
+  - Unified voice selection modal with interactive audio sample previews.
+  - Added new reflective voice profile: **Rachel (Grace & Peace)** alongside **Adam (Cinematic)**, **Antoni (Grounded)**, and **George (Scholar)**.
+  - Selection applies across chapters, daily briefings, and story quest narrations app-wide via persistent storage and reactive broadcast events.
+
+### Improved
+- **Mobile Decluttering & Expansive Layouts (`Dashboard.tsx`, `DailyCampaignCard.tsx`, `Navigation.tsx`)**:
+  - Eliminated box-in-a-box nested containers in the morning command area and mode selection controls.
+  - Replaced bulky step cards with sleek, expansive list rows featuring left-accent status borders (`border-l-4`).
+  - Removed duplicate floating mobile header; consolidated **Guide** and **Theme Toggle** directly alongside version #, date, streak, and XP in the main top command bar.
+
+### Fixed
+- **App-Wide Light / Dark Mode Consistency**:
+  - Extended theme classes across all modals including Proverbs Codex, Psalms Field Medic, Canon Codex, and Campaign Selector.
+- **PWA Installation Banner Suppression (`PWAInstallPrompt.tsx`)**:
+  - Added multi-source standalone detection and `appinstalled` listeners to permanently suppress install banners once installed.
+
 ## [1.8.0] - 2026-09-23
 
 ### Fixed

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/favicon.png" />
@@ -13,6 +13,25 @@
     <meta name="apple-mobile-web-app-title" content="Testament" />
     <meta name="description" content="An interactive graphic-novel Bible study experience for adults. Plain English, real history, actionable wisdom." />
 
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('testament_theme');
+          var isDark = saved === 'dark' || (!saved && (!window.matchMedia || !window.matchMedia('(prefers-color-scheme: light)').matches));
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.style.colorScheme = 'dark';
+          } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.add('light');
+            document.documentElement.style.colorScheme = 'light';
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', '#fcfbfa');
+          }
+        } catch (e) {}
+      })();
+    </script>
+
     <!-- Google Fonts for Epic Scripture & Clean UI -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,7 +39,7 @@
 
     <title>Testament — The Living Word</title>
   </head>
-  <body class="bg-iron-950 text-parchment-100 font-sans antialiased selection:bg-amber-600/30 selection:text-amber-200">
+  <body class="bg-[#fcfbfa] text-stone-900 dark:bg-iron-950 dark:text-parchment-100 font-sans antialiased selection:bg-amber-600/30 selection:text-amber-200">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

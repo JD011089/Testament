@@ -1,7 +1,113 @@
 // Procedural Ambient Soundscape, Cinematic Dramatized Audio & Studio Voice Engine via Web Audio API
 // 100% Offline-capable, zero external asset dependencies with Neural Studio Voice streaming
 
-export type NarratorProfile = 'cinematic' | 'brotherhood' | 'scholar';
+export type NarratorProfile = 'cinematic' | 'brotherhood' | 'scholar' | 'grace';
+
+export interface VoiceMetadata {
+  id: NarratorProfile;
+  name: string;
+  subtitle: string;
+  actor: string;
+  elevenVoiceId: string;
+  description: string;
+  settings: {
+    stability: number;
+    similarity_boost: number;
+    style: number;
+    use_speaker_boost: boolean;
+  };
+}
+
+export const NARRATOR_VOICES: Record<NarratorProfile, VoiceMetadata> = {
+  cinematic: {
+    id: 'cinematic',
+    name: 'Cinematic',
+    subtitle: 'Epic & Resonant',
+    actor: 'Adam (ElevenLabs)',
+    elevenVoiceId: 'pNInz6obpgDQGcFmaJgB',
+    description: 'Deep, commanding baritone with cinematic gravitas. Ideal for battles and epics.',
+    settings: {
+      stability: 0.45,
+      similarity_boost: 0.85,
+      style: 0.20,
+      use_speaker_boost: true
+    }
+  },
+  brotherhood: {
+    id: 'brotherhood',
+    name: 'Grounded',
+    subtitle: 'Warm & Relatable',
+    actor: 'Antoni (ElevenLabs)',
+    elevenVoiceId: 'ErXwobaYiN019PkySvjV',
+    description: 'Warm, conversational tempo with natural pacing. Perfect for daily guidance.',
+    settings: {
+      stability: 0.55,
+      similarity_boost: 0.80,
+      style: 0.10,
+      use_speaker_boost: true
+    }
+  },
+  scholar: {
+    id: 'scholar',
+    name: 'Scholar',
+    subtitle: 'Wise & Articulate',
+    actor: 'George (ElevenLabs UK)',
+    elevenVoiceId: 'JBFqnCBsd6RMkjVDRZzb',
+    description: 'Sophisticated British cadence with thoughtful, intellectual clarity.',
+    settings: {
+      stability: 0.65,
+      similarity_boost: 0.82,
+      style: 0.05,
+      use_speaker_boost: true
+    }
+  },
+  grace: {
+    id: 'grace',
+    name: 'Grace & Peace',
+    subtitle: 'Gentle & Reflective',
+    actor: 'Rachel (ElevenLabs)',
+    elevenVoiceId: '21m00Tcm4TlvDq8ikWAM',
+    description: 'Gentle, soothing, and clear cadence. Perfect for quiet reflection, meditation, and prayer.',
+    settings: {
+      stability: 0.60,
+      similarity_boost: 0.85,
+      style: 0.15,
+      use_speaker_boost: true
+    }
+  }
+};
+
+/**
+ * Normalizes scripture references, punctuation, and markdown formatting
+ * to create smooth, human-like cadence with natural pauses.
+ */
+export function normalizeScriptureForSpeech(text: string): string {
+  return text
+    // Replace scripture citations e.g. "Exodus 14:14" -> "Exodus 14 verse 14"
+    .replace(/\b(\d?[A-Za-z]+(?:\s+[A-Za-z]+)?)\s+(\d+):(\d+)\b/g, '$1 $2 verse $3')
+    .replace(/(\d+):(\d+)/g, '$1 verse $2')
+    // Remove markdown formatting (bold, italics, code blocks)
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/_{1,2}(.*?)_{1,2}/g, '$1')
+    .replace(/`{1,3}(.*?)`{1,3}/g, '$1')
+    .replace(/^#+\s+/gm, '')
+    // Clean bullet list symbols
+    .replace(/^\s*[-*•]\s+/gm, '')
+    // Handle ellipses at end of sentence vs mid-sentence
+    .replace(/\.{3,}\s*$/g, '.')
+    .replace(/\.{3,}/g, ', ')
+    .replace(/—/g, ', ')
+    .replace(/--+/g, ', ')
+    // Fix punctuation spacing
+    .replace(/\s+([,.:;?!])/g, '$1')
+    // Clean up doubled punctuation
+    .replace(/,\s*\./g, '.')
+    .replace(/\s+/g, ' ')
+    // Ensure no trailing dangling comma
+    .replace(/,\s*$/, '.')
+    .trim();
+}
 
 class SoundEngine {
   private ctx: AudioContext | null = null;
@@ -56,6 +162,7 @@ class SoundEngine {
     if (typeof window !== 'undefined') {
       try {
         localStorage.setItem('testament_narrator_profile', profile);
+        window.dispatchEvent(new CustomEvent('testament-voice-changed', { detail: profile }));
       } catch {
         /* ignore localStorage quota/disabled errors */
       }
@@ -463,6 +570,16 @@ class SoundEngine {
       if (cinematicVoice) return cinematicVoice;
     }
 
+    if (profile === 'grace') {
+      // Seek gentle, natural female English voice
+      const gentleVoice = voices.find(v => {
+        const name = v.name.toLowerCase();
+        return v.lang.toLowerCase().startsWith('en') && 
+               (name.includes('natural') || name.includes('online') || name.includes('jenny') || name.includes('aria') || name.includes('samantha') || name.includes('karen') || name.includes('victoria') || name.includes('female'));
+      }) || voices.find(v => v.lang.toLowerCase().startsWith('en') && !v.name.toLowerCase().includes('david'));
+      if (gentleVoice) return gentleVoice;
+    }
+
     if (profile === 'brotherhood') {
       // Seek warm, conversational US English voice
       const warmVoice = pool.find(v => {
@@ -526,8 +643,50 @@ class SoundEngine {
     const controller = new AbortController();
     this.currentAbortController = controller;
 
-    // Real-time Azure Neural endpoint
-    const streamUrl = `/api/tts?text=${encodeURIComponent(text)}&voice=${encodeURIComponent(this.currentNarratorProfile)}`;
+    const cleanText = normalizeScriptureForSpeech(text);
+
+    // Primary: High-fidelity ElevenLabs via Vite local proxy
+    const streamUrl = `/api/tts?text=${encodeURIComponent(cleanText)}&voice=${encodeURIComponent(this.currentNarratorProfile)}`;
+
+    const playBlob = (blob: Blob) => {
+      const objectUrl = URL.createObjectURL(blob);
+      this.currentObjectUrl = objectUrl;
+
+      const audio = new Audio(objectUrl);
+      this.currentAudioElement = audio;
+
+      const cleanup = () => {
+        if (this.currentObjectUrl === objectUrl) {
+          try {
+            URL.revokeObjectURL(objectUrl);
+          } catch {
+            /* ignore */
+          }
+          this.currentObjectUrl = null;
+        }
+        if (this.currentAudioElement === audio) {
+          this.currentAudioElement = null;
+        }
+        if (this.currentAbortController === controller) {
+          this.currentAbortController = null;
+        }
+      };
+
+      audio.onended = () => {
+        cleanup();
+        onFinished();
+      };
+
+      audio.onerror = () => {
+        cleanup();
+        this.fallbackWithAssetOrSpeech(cleanText, onFinished, audioAssetUrl);
+      };
+
+      audio.play().catch(() => {
+        cleanup();
+        this.fallbackWithAssetOrSpeech(cleanText, onFinished, audioAssetUrl);
+      });
+    };
 
     fetch(streamUrl, { signal: controller.signal })
       .then(async (res) => {
@@ -541,47 +700,49 @@ class SoundEngine {
           throw new Error('TTS payload too small');
         }
 
-        const objectUrl = URL.createObjectURL(blob);
-        this.currentObjectUrl = objectUrl;
-
-        const audio = new Audio(objectUrl);
-        this.currentAudioElement = audio;
-
-        const cleanup = () => {
-          if (this.currentObjectUrl === objectUrl) {
-            try {
-              URL.revokeObjectURL(objectUrl);
-            } catch {
-              /* ignore */
-            }
-            this.currentObjectUrl = null;
-          }
-          if (this.currentAudioElement === audio) {
-            this.currentAudioElement = null;
-          }
-          if (this.currentAbortController === controller) {
-            this.currentAbortController = null;
-          }
-        };
-
-        audio.onended = () => {
-          cleanup();
-          onFinished();
-        };
-
-        audio.onerror = () => {
-          cleanup();
-          this.fallbackWithAssetOrSpeech(text, onFinished, audioAssetUrl);
-        };
-
-        audio.play().catch(() => {
-          cleanup();
-          this.fallbackWithAssetOrSpeech(text, onFinished, audioAssetUrl);
-        });
+        playBlob(blob);
       })
-      .catch((_err) => {
+      .catch(async (_err) => {
         if (controller.signal.aborted) return;
-        this.fallbackWithAssetOrSpeech(text, onFinished, audioAssetUrl);
+
+        // Secondary fallback: Direct ElevenLabs API call (for static production / offline-to-online PWA)
+        const clientApiKey = (
+          (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ELEVENLABS_API_KEY) ||
+          (typeof window !== 'undefined' ? localStorage.getItem('elevenlabs_api_key') : null) ||
+          'REDACTED'
+        );
+
+        if (clientApiKey) {
+          try {
+            const voiceMeta = NARRATOR_VOICES[this.currentNarratorProfile] || NARRATOR_VOICES.cinematic;
+            const directRes = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceMeta.elevenVoiceId}`, {
+              method: 'POST',
+              headers: {
+                'xi-api-key': clientApiKey,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                text: cleanText,
+                model_id: 'eleven_turbo_v2_5',
+                voice_settings: voiceMeta.settings
+              }),
+              signal: controller.signal
+            });
+
+            if (directRes.ok) {
+              const blob = await directRes.blob();
+              if (!controller.signal.aborted && blob.size > 100) {
+                playBlob(blob);
+                return;
+              }
+            }
+          } catch {
+            /* ignore direct fetch failure */
+          }
+        }
+
+        if (controller.signal.aborted) return;
+        this.fallbackWithAssetOrSpeech(cleanText, onFinished, audioAssetUrl);
       });
   }
 
