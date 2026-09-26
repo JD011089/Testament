@@ -82,20 +82,18 @@ export const TacticalNexusCard: React.FC<TacticalNexusCardProps> = ({ entityId, 
                   </p>
                 </div>
 
-                {target.scriptureRef && (
-                  <div className="text-[10px] font-mono text-amber-700 dark:text-amber-400 flex items-center justify-between pt-1 border-t border-stone-100 dark:border-stone-900">
-                    <span>{target.scriptureRef}</span>
-                    {onOpenEntity && (
-                      <button 
-                        onClick={() => onOpenEntity(target.type, target.id)}
-                        className="text-cyan-700 dark:text-cyan-400 hover:underline flex items-center gap-0.5"
-                      >
-                        <span>Inspect</span>
-                        <ExternalLink className="w-2.5 h-2.5" />
-                      </button>
-                    )}
-                  </div>
-                )}
+                <div className="text-[10px] font-mono text-amber-700 dark:text-amber-400 flex items-center justify-between pt-1 border-t border-stone-100 dark:border-stone-900">
+                  <span>{target.scriptureRef || target.label}</span>
+                  {onOpenEntity && (
+                    <button 
+                      onClick={() => onOpenEntity(target.type, target.id)}
+                      className="text-cyan-700 dark:text-cyan-400 hover:underline flex items-center gap-0.5"
+                    >
+                      <span>Open</span>
+                      <ExternalLink className="w-2.5 h-2.5" />
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>

@@ -553,30 +553,21 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               {/* Action Buttons */}
               <div className="pt-2 flex flex-col gap-2.5">
                 <button
-                  onClick={() => handleFinishCalibration(false, true)}
+                  onClick={() => handleFinishCalibration(false, false)}
                   className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-bold text-sm sm:text-base flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
                 >
                   <Sparkles className="w-4 h-4 text-stone-950" />
-                  <span>Take 1-Minute App Tour (Recommended)</span>
+                  <span>Start today's mission</span>
                   <ArrowRight className="w-4 h-4 stroke-[2.5]" />
                 </button>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  <button
-                    onClick={() => handleFinishCalibration(true, false)}
-                    className="py-3 px-4 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 text-xs font-semibold transition-all text-center flex items-center justify-center gap-1.5"
-                  >
-                    <span>Jump Straight to Story</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-
-                  <button
-                    onClick={() => handleFinishCalibration(false, false)}
-                    className="py-3 px-4 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-800 text-xs font-semibold transition-all text-center"
-                  >
-                    Go to Home
-                  </button>
-                </div>
+                <button
+                  onClick={() => handleFinishCalibration(true, false)}
+                  className="w-full py-3 px-4 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 text-xs font-semibold transition-all text-center flex items-center justify-center gap-1.5"
+                >
+                  <span>Jump straight to the story</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
           )}

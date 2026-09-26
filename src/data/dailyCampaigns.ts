@@ -1,6 +1,6 @@
 export interface DailyCampaignStep {
   stepNumber: 1 | 2 | 3 | 4;
-  type: 'quest' | 'dilemma' | 'wordforge' | 'canon';
+  type: 'quest' | 'dilemma' | 'wordforge' | 'canon' | 'proverb' | 'psalm';
   title: string;
   badge: string;
   subtitle: string;
@@ -20,7 +20,7 @@ export interface DailyCampaign {
   heroSubtitle: string;
   summary: string;
   bonusXP: number;
-  steps: [DailyCampaignStep, DailyCampaignStep, DailyCampaignStep, DailyCampaignStep];
+  steps: DailyCampaignStep[];
 }
 
 export interface DailyCampaignProgress {
@@ -927,12 +927,13 @@ export const getDailyCampaignProgress = (campaignId: string, dateKey = getCampai
 export const markCampaignStepCompleted = (
   campaignId: string,
   stepNumber: number,
-  dateKey = getCampaignDateKey()
+  dateKey = getCampaignDateKey(),
+  totalSteps = 4
 ): DailyCampaignProgress => {
   const current = getDailyCampaignProgress(campaignId, dateKey);
   if (!current.completedSteps.includes(stepNumber)) {
     const updatedSteps = [...current.completedSteps, stepNumber].sort((a, b) => a - b);
-    const isFullyCompleted = updatedSteps.length >= 4;
+    const isFullyCompleted = updatedSteps.length >= totalSteps;
     const updated: DailyCampaignProgress = {
       ...current,
       completedSteps: updatedSteps,

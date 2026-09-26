@@ -27,6 +27,8 @@ import {
 } from 'lucide-react';
 import { MemoryPulseModal } from './MemoryPulseModal';
 import { getStoryVerseForAct, getStoryVerseForQuest } from '../utils/verseRegistry';
+import { parseScriptureReference, passageWindow } from '../utils/scriptureRef';
+import { fetchBibleChapter, type BibleVerse } from '../utils/bibleService';
 import { deriveConsequenceRipple, generateAfterActionReport } from '../utils/narrativeMomentum';
 import { TacticalNexusCard } from './TacticalNexusCard';
 
@@ -36,6 +38,8 @@ interface StoryViewerProps {
   onCompleteAct: (actId: string, questId: string, relicId?: string) => void;
   completedActs: string[];
   onOpenWordForge?: (verseId: string) => void;
+  onOpenNexus?: (type: string, id: string) => void;
+  onOpenBibleChapter?: (target: { book: string; chapter: number; verseStart: number; verseEnd: number }) => void;
 }
 
 export const StoryViewer: React.FC<StoryViewerProps> = ({ 
@@ -43,7 +47,9 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
   onBack, 
   onCompleteAct, 
   completedActs,
-  onOpenWordForge
+  onOpenWordForge,
+  onOpenNexus,
+  onOpenBibleChapter
 }) => {
   const [currentActIndex, setCurrentActIndex] = useState(0);
   const [selectedChoiceId, setSelectedChoiceId] = useState<string | null>(null);
@@ -55,6 +61,8 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
   const [isNoteSaved, setIsNoteSaved] = useState(false);
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [isMemoryPulseOpen, setIsMemoryPulseOpen] = useState(false);
+  const [passageVerses, setPassageVerses] = useState<BibleVerse[] | null>(null);
+  const [passageStatus, setPassageStatus] = useState<'idle' | 'loading' | 'ready' | 'fallback'>('idle');
 
   // Wisdom Quiz state
   const [selectedQuizOption, setSelectedQuizOption] = useState<number | null>(null);
@@ -64,6 +72,36 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
   const isActFinished = completedActs.includes(act.id);
   const isQuestFullyCompleted = quest.acts.every(a => completedActs.includes(a.id));
   const questAnchorVerse = getStoryVerseForQuest(quest.id) || getStoryVerseForAct(quest.id, act.id);
+  const scriptureRef = parseScriptureReference(act.unlockedScripture.reference);
+
+  useEffect(() => {
+    if (!selectedChoiceId || !scriptureRef) {
+      setPassageVerses(null);
+      setPassageStatus(selectedChoiceId ? 'fallback' : 'idle');
+      return;
+    }
+    let cancelled = false;
+    setPassageStatus('loading');
+    setPassageVerses(null);
+    fetchBibleChapter(scriptureRef.book, scriptureRef.chapter, 'web')
+      .then((data) => {
+        if (cancelled) return;
+        const window = passageWindow(scriptureRef.verseStart, scriptureRef.verseEnd, data.verses.length);
+        const slice = data.verses.filter(v => v.verse >= window.from && v.verse <= window.to);
+        if (slice.length === 0) {
+          setPassageStatus('fallback');
+          return;
+        }
+        setPassageVerses(slice);
+        setPassageStatus('ready');
+      })
+      .catch(() => {
+        if (!cancelled) setPassageStatus('fallback');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [act.id, selectedChoiceId, act.unlockedScripture.reference]);
 
   // Load saved choices, quizzes, and reflection notes for the current act (Requirement 3)
   useEffect(() => {
@@ -143,6 +181,13 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     }
   };
 
+  const scriptureSpeech = () => {
+    const body = passageStatus === 'ready' && passageVerses
+      ? passageVerses.map(v => v.text).join(' ')
+      : act.unlockedScripture.text;
+    return `${act.unlockedScripture.reference}. ${body}. ${act.unlockedScripture.deepDive}`;
+  };
+
   const handleToggleSpeakScripture = () => {
     if (isSpeakingScripture) {
       soundEngine.stopSpeaking();
@@ -151,10 +196,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
       soundEngine.stopSpeaking();
       setIsNarratingFullStory(false);
       setIsSpeakingScripture(true);
-      soundEngine.speakVerse(
-        `${act.unlockedScripture.reference}. ${act.unlockedScripture.text}. Deep reflection: ${act.unlockedScripture.deepDive}`,
-        () => setIsSpeakingScripture(false)
-      );
+      soundEngine.speakVerse(scriptureSpeech(), () => setIsSpeakingScripture(false));
     }
   };
 
@@ -184,10 +226,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     } else if (isSpeakingScripture) {
       soundEngine.stopSpeaking();
       setIsSpeakingScripture(true);
-      soundEngine.speakVerse(
-        `${act.unlockedScripture.reference}. ${act.unlockedScripture.text}. Deep reflection: ${act.unlockedScripture.deepDive}`,
-        () => setIsSpeakingScripture(false)
-      );
+      soundEngine.speakVerse(scriptureSpeech(), () => setIsSpeakingScripture(false));
     }
   };
 
@@ -492,19 +531,19 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             </div>
             <nav className="space-y-1 text-xs">
               <button
-                onClick={() => scrollToSection('section-narrative')}
-                className="w-full flex items-center gap-2 p-2 rounded-lg text-left text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-stone-100 dark:hover:bg-stone-850/60 transition-colors"
-              >
-                <span className="w-5 h-5 rounded-full bg-stone-100 dark:bg-stone-800 text-[11px] font-mono flex items-center justify-center font-bold text-amber-700 dark:text-amber-400 shrink-0">1</span>
-                <span>The Story Narrative</span>
-              </button>
-
-              <button
                 onClick={() => scrollToSection('section-crossroads')}
                 className="w-full flex items-center gap-2 p-2 rounded-lg text-left text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-stone-100 dark:hover:bg-stone-850/60 transition-colors"
               >
+                <span className="w-5 h-5 rounded-full bg-stone-100 dark:bg-stone-800 text-[11px] font-mono flex items-center justify-center font-bold text-amber-700 dark:text-amber-400 shrink-0">1</span>
+                <span>Decide First (What would you do?)</span>
+              </button>
+
+              <button
+                onClick={() => scrollToSection('section-narrative')}
+                className="w-full flex items-center gap-2 p-2 rounded-lg text-left text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-stone-100 dark:hover:bg-stone-850/60 transition-colors"
+              >
                 <span className="w-5 h-5 rounded-full bg-stone-100 dark:bg-stone-800 text-[11px] font-mono flex items-center justify-center font-bold text-amber-700 dark:text-amber-400 shrink-0">2</span>
-                <span>The Decision Point (What would you do?)</span>
+                <span>What Actually Unfolded</span>
               </button>
 
               <button
@@ -553,11 +592,77 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             </p>
           </div>
 
-          {/* STEP 1: THE GRAPHIC NOVEL NARRATIVE */}
+          {/* STEP 1: DECIDE FIRST (BEFORE THE LONG READ) */}
+          <section id="section-crossroads" className="p-5 md:p-6 rounded-2xl bg-stone-50 dark:bg-gradient-to-b dark:from-[#1c1612] dark:to-[#120f0d] border-2 border-amber-300 dark:border-amber-600/60 shadow-sm dark:shadow-glow-gold scroll-mt-6">
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-700 dark:text-amber-400">
+                <span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30">Step 1 of 5</span>
+                <span>Decide First</span>
+              </div>
+              <Flame className="w-4 h-4 text-amber-600 dark:text-amber-500 animate-pulse" />
+            </div>
+
+            <h3 className="text-base md:text-xl font-serif font-bold text-stone-900 dark:text-parchment-50 mb-4 leading-snug">
+              {act.perspectivePrompt}
+            </h3>
+
+            {/* Choice Buttons */}
+            <div className="space-y-2.5 mb-3">
+              {act.choices.map((choice) => {
+                const isSelected = selectedChoiceId === choice.id;
+                return (
+                  <button
+                    key={choice.id}
+                    onClick={() => handleSelectChoice(choice.id)}
+                    className={`w-full text-left p-4 rounded-xl transition-all duration-200 border ${
+                      isSelected 
+                        ? 'bg-amber-100/70 dark:bg-amber-600/25 border-amber-500 text-stone-950 dark:text-parchment-50 ring-1 ring-amber-500 shadow-sm dark:shadow-glow-ember' 
+                        : 'bg-white dark:bg-stone-900/90 border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:border-amber-400 dark:hover:border-amber-500/50 hover:bg-stone-100 dark:hover:bg-stone-800/80'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`w-5 h-5 rounded-full mt-0.5 flex items-center justify-center text-xs font-bold shrink-0 ${
+                        isSelected ? 'bg-amber-500 text-stone-950' : 'bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-400'
+                      }`}>
+                        {isSelected ? '✓' : ''}
+                      </div>
+                      <span className="text-sm md:text-base font-medium leading-relaxed">{choice.text}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Reaction & Biblical Reality Reveal */}
+            <AnimatePresence>
+              {selectedChoice && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-4 pt-4 border-t border-amber-200 dark:border-amber-900/50 space-y-3"
+                >
+                  <div className="text-xs md:text-sm text-stone-700 dark:text-stone-300">
+                    <strong className="text-amber-800 dark:text-amber-400 font-bold">The Human Instinct: </strong> 
+                    {selectedChoice.reaction}
+                  </div>
+                  <div className="text-xs md:text-sm text-stone-900 dark:text-parchment-100 bg-amber-50 dark:bg-amber-950/40 p-4 rounded-xl border border-amber-200 dark:border-amber-800/50 leading-relaxed">
+                    <strong className="text-amber-800 dark:text-amber-300 font-bold">The Historical Pivot: </strong> 
+                    {selectedChoice.historicalPivot}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </section>
+
+
+          {selectedChoiceId ? (
+          <>
+          {/* STEP 2: WHAT ACTUALLY UNFOLDED */}
           <section id="section-narrative" className="space-y-4 scroll-mt-6">
             <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-700 dark:text-amber-400">
-              <span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30">Step 1 of 5</span>
-              <span>The Narrative</span>
+              <span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30">Step 2 of 5</span>
+              <span>What Actually Unfolded</span>
             </div>
 
             {/* Paragraph Cards */}
@@ -626,69 +731,14 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
               </div>
             )}
           </section>
-
-          {/* STEP 2: THE CROSSROADS DECISION (PLACED DIRECTLY AFTER THE STORY TENSION) */}
-          <section id="section-crossroads" className="p-5 md:p-6 rounded-2xl bg-stone-50 dark:bg-gradient-to-b dark:from-[#1c1612] dark:to-[#120f0d] border-2 border-amber-300 dark:border-amber-600/60 shadow-sm dark:shadow-glow-gold scroll-mt-6">
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-700 dark:text-amber-400">
-                <span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30">Step 2 of 5</span>
-                <span>The Crossroads Decision</span>
-              </div>
-              <Flame className="w-4 h-4 text-amber-600 dark:text-amber-500 animate-pulse" />
-            </div>
-
-            <h3 className="text-base md:text-xl font-serif font-bold text-stone-900 dark:text-parchment-50 mb-4 leading-snug">
-              {act.perspectivePrompt}
-            </h3>
-
-            {/* Choice Buttons */}
-            <div className="space-y-2.5 mb-3">
-              {act.choices.map((choice) => {
-                const isSelected = selectedChoiceId === choice.id;
-                return (
-                  <button
-                    key={choice.id}
-                    onClick={() => handleSelectChoice(choice.id)}
-                    className={`w-full text-left p-4 rounded-xl transition-all duration-200 border ${
-                      isSelected 
-                        ? 'bg-amber-100/70 dark:bg-amber-600/25 border-amber-500 text-stone-950 dark:text-parchment-50 ring-1 ring-amber-500 shadow-sm dark:shadow-glow-ember' 
-                        : 'bg-white dark:bg-stone-900/90 border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:border-amber-400 dark:hover:border-amber-500/50 hover:bg-stone-100 dark:hover:bg-stone-800/80'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={`w-5 h-5 rounded-full mt-0.5 flex items-center justify-center text-xs font-bold shrink-0 ${
-                        isSelected ? 'bg-amber-500 text-stone-950' : 'bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-400'
-                      }`}>
-                        {isSelected ? '✓' : ''}
-                      </div>
-                      <span className="text-sm md:text-base font-medium leading-relaxed">{choice.text}</span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Reaction & Biblical Reality Reveal */}
-            <AnimatePresence>
-              {selectedChoice && (
-                <motion.div 
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="mt-4 pt-4 border-t border-amber-200 dark:border-amber-900/50 space-y-3"
-                >
-                  <div className="text-xs md:text-sm text-stone-700 dark:text-stone-300">
-                    <strong className="text-amber-800 dark:text-amber-400 font-bold">The Human Instinct: </strong> 
-                    {selectedChoice.reaction}
-                  </div>
-                  <div className="text-xs md:text-sm text-stone-900 dark:text-parchment-100 bg-amber-50 dark:bg-amber-950/40 p-4 rounded-xl border border-amber-200 dark:border-amber-800/50 leading-relaxed">
-                    <strong className="text-amber-800 dark:text-amber-300 font-bold">The Historical Pivot: </strong> 
-                    {selectedChoice.historicalPivot}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </section>
+          </>
+          ) : (
+            <section id="section-narrative" className="p-5 rounded-2xl bg-stone-50 dark:bg-stone-900/50 border border-dashed border-amber-300 dark:border-amber-700/50 scroll-mt-6 text-center">
+              <p className="text-sm text-stone-600 dark:text-stone-400">
+                Make your call above — then see how the story actually unfolded.
+              </p>
+            </section>
+          )}
 
           {/* STEP 3: UNLOCKED SCRIPTURE CARD (Requirement 1: 1 memory verse applies to the quest) */}
           <section id="section-scripture" className="p-5 md:p-6 rounded-2xl bg-white dark:bg-[#151922] border-2 border-amber-300 dark:border-amber-500/50 shadow-sm dark:shadow-glow-gold relative overflow-hidden scroll-mt-6">
@@ -709,7 +759,8 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
 
               <button
                 onClick={handleToggleSpeakScripture}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-850 hover:bg-amber-500 dark:hover:bg-amber-600 hover:text-stone-950 transition-colors"
+                disabled={!selectedChoiceId}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-850 hover:bg-amber-500 dark:hover:bg-amber-600 hover:text-stone-950 transition-colors disabled:opacity-40 disabled:pointer-events-none"
               >
                 {isSpeakingScripture ? (
                   <>
@@ -729,14 +780,57 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
               {act.unlockedScripture.reference}
             </h4>
 
-            <blockquote className="font-reading text-lg md:text-xl text-stone-900 dark:text-parchment-50 italic my-3 pl-4 border-l-2 border-amber-500 leading-relaxed">
-              "{act.unlockedScripture.text}"
-            </blockquote>
+            {!selectedChoiceId ? (
+              <p className="text-sm text-stone-600 dark:text-stone-400 italic">
+                Make your call above — then this passage opens from the Bible.
+              </p>
+            ) : passageStatus === 'loading' ? (
+              <p className="text-sm text-stone-500 dark:text-stone-400">Opening the passage…</p>
+            ) : passageStatus === 'ready' && passageVerses && scriptureRef ? (
+              <div className="space-y-2 my-3 pl-4 border-l-2 border-amber-500">
+                {passageVerses.map((v) => {
+                  const cited = v.verse >= scriptureRef.verseStart && v.verse <= scriptureRef.verseEnd;
+                  return (
+                    <p
+                      key={v.verse}
+                      className={`font-reading text-base md:text-lg leading-relaxed ${
+                        cited
+                          ? 'text-stone-950 dark:text-parchment-50 font-medium'
+                          : 'text-stone-500 dark:text-stone-400'
+                      }`}
+                    >
+                      <span className="text-[11px] font-mono font-bold text-amber-700 dark:text-amber-400 mr-2">{v.verse}</span>
+                      {v.text}
+                    </p>
+                  );
+                })}
+              </div>
+            ) : (
+              <blockquote className="font-reading text-lg md:text-xl text-stone-900 dark:text-parchment-50 italic my-3 pl-4 border-l-2 border-amber-500 leading-relaxed">
+                "{act.unlockedScripture.text}"
+              </blockquote>
+            )}
 
-            <p className="text-xs md:text-sm text-stone-700 dark:text-stone-300 mt-4 pt-3 border-t border-stone-200 dark:border-stone-800 leading-relaxed">
-              <strong className="text-amber-700 dark:text-amber-400">Context: </strong>
-              {act.unlockedScripture.deepDive}
-            </p>
+            {selectedChoiceId && scriptureRef && onOpenBibleChapter && (
+              <button
+                type="button"
+                onClick={() => {
+                  soundEngine.playClick();
+                  onOpenBibleChapter(scriptureRef);
+                }}
+                className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/15 border border-amber-300 dark:border-amber-500/40 hover:bg-amber-500 hover:text-stone-950 transition-colors"
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                Read this chapter
+              </button>
+            )}
+
+            {selectedChoiceId && (
+              <p className="text-xs md:text-sm text-stone-700 dark:text-stone-300 mt-4 pt-3 border-t border-stone-200 dark:border-stone-800 leading-relaxed">
+                <strong className="text-amber-700 dark:text-amber-400">Context: </strong>
+                {act.unlockedScripture.deepDive}
+              </p>
+            )}
 
             {/* Memory Pulse Reminders Call to Action */}
             <div className="mt-4 pt-3 border-t border-amber-200 dark:border-amber-900/30 flex flex-wrap items-center justify-between gap-2.5">
@@ -888,7 +982,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
           )}
 
           {/* LIVING CANON: TACTICAL NEXUS KNOWLEDGE GRAPH */}
-          <TacticalNexusCard entityId={quest.id} />
+          <TacticalNexusCard entityId={quest.id} onOpenEntity={onOpenNexus} />
 
           {/* Bottom Action Controls */}
           <div className="flex flex-col sm:flex-row gap-3 items-center justify-between pt-6 border-t border-stone-200 dark:border-stone-800">

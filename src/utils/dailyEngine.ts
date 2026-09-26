@@ -6,8 +6,10 @@ import { REAL_LIFE_DILEMMAS } from '../data/dilemmas';
 import type { RealLifeDilemma } from '../data/dilemmas';
 import { STORY_QUESTS } from '../data/stories';
 import { getTodayDailyCampaign } from '../data/dailyCampaigns';
+import { getComposedDailyMission } from './missionComposer';
 import type { StoryQuest, StoryAct } from '../types';
 import type { UserCalibrationProfile } from '../components/OnboardingModal';
+import { getDueFSRSCards } from './fsrsEngine';
 
 export interface AdaptiveObjective {
   type: 'next_act' | 'retention_drill' | 'all_completed';
@@ -105,7 +107,7 @@ export const getDailyDilemma = (offsetDays = 0): RealLifeDilemma => {
     }
   }
 
-  const campaign = getTodayDailyCampaign(offsetDays);
+  const campaign = offsetDays === 0 ? getComposedDailyMission() : getTodayDailyCampaign(offsetDays);
   const dilemmaStep = campaign.steps.find(s => s.type === 'dilemma');
   if (dilemmaStep) {
     const matched = REAL_LIFE_DILEMMAS.find(d => d.id === dilemmaStep.targetId);
@@ -132,66 +134,40 @@ export const recordVerseMasteryDate = (verseId: string): void => {
 };
 
 /**
- * Checks for any mastered verse due for retention review (mastered >= 3 days ago)
+ * Returns the first FSRS-due verse (single spaced-repetition source of truth).
+ * Prefer this over any legacy mastery-date heuristics.
  */
-export const getSpacedRepetitionDueVerse = (memorizedVerses: string[]): MemoryVerse | null => {
-  if (memorizedVerses.length === 0) return null;
-  if (typeof window === 'undefined' || !window.localStorage) return null;
-
-  try {
-    const dates: Record<string, string> = JSON.parse(
-      localStorage.getItem('testament_verse_mastery_dates') || '{}'
-    );
-    const threeDaysAgo = Date.now() - (3 * 24 * 60 * 60 * 1000);
-
-    // Find first verse mastered > 3 days ago, or the oldest reviewed verse
-    let oldestVerseId: string | null = null;
-    let oldestTimestamp = Infinity;
-
-    for (const verseId of memorizedVerses) {
-      const timestamp = dates[verseId] ? new Date(dates[verseId]).getTime() : 0;
-      if (timestamp < threeDaysAgo) {
-        // Due for review!
-        const verse = getVerseById(verseId);
-        if (verse) return verse;
-      }
-      if (timestamp < oldestTimestamp) {
-        oldestTimestamp = timestamp;
-        oldestVerseId = verseId;
-      }
-    }
-
-    // If all are recent but user has 2+ mastered verses, pick the oldest
-    if (oldestVerseId) {
-      return getVerseById(oldestVerseId);
-    }
-  } catch (err) {
-    console.error('Error computing spaced repetition', err);
+export const getSpacedRepetitionDueVerse = (_memorizedVerses: string[] = []): MemoryVerse | null => {
+  const dueCards = getDueFSRSCards();
+  for (const card of dueCards) {
+    const verse = getVerseById(card.verseId);
+    if (verse) return verse;
   }
   return null;
 };
 
 /**
- * Dynamically computes the user's Next Objective based on progress
+ * Computes a lightweight next objective. Daily Mission remains the primary path;
+ * this is used only as a fallback hint (e.g. FSRS due reviews).
  */
 export const getAdaptiveNextObjective = (
   completedActs: string[],
   userProfile?: UserCalibrationProfile | null,
-  memorizedVerses: string[] = []
+  _memorizedVerses: string[] = []
 ): AdaptiveObjective => {
-  // 1. Check if a verse is due for review
-  const dueVerse = getSpacedRepetitionDueVerse(memorizedVerses);
-  if (dueVerse && Math.random() < 0.35 && memorizedVerses.length >= 2) {
+  // 1. FSRS-due retention (deterministic — no random coin flip)
+  const dueVerse = getSpacedRepetitionDueVerse();
+  if (dueVerse) {
     return {
       type: 'retention_drill',
       title: `Retention Drill: ${dueVerse.reference}`,
-      subtitle: `Mastered previously • Keep your edge sharp before memory fades.`,
-      badge: 'Spaced Repetition',
+      subtitle: `Due for review • Keep your edge sharp before memory fades.`,
+      badge: 'FSRS Review',
       targetVerseId: dueVerse.id
     };
   }
 
-  // 2. Identify target quest: prioritized by today's battlefield check-in, then user profile recommendation
+  // 2. Identify target quest: battlefield check-in, then user profile recommendation
   const bfId = getTodayBattlefieldId();
   let preferredQuestId = userProfile?.recommendedQuestId || 'david-journey';
   if (bfId === 'anxiety-overwhelm') preferredQuestId = 'elijah-journey';

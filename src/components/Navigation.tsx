@@ -10,8 +10,7 @@ import {
   VolumeX, 
   Flame, 
   Award, 
-  Sparkles,
-  HelpCircle
+  Sparkles
 } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
 import { ThemeToggle } from './ThemeToggle';
@@ -24,7 +23,6 @@ interface NavigationProps {
   currentAmbience: 'none' | 'campfire' | 'wind' | 'sanctuary';
   onToggleAmbience: () => void;
   onOpenDriveMode: () => void;
-  onOpenTour?: () => void;
   streakCount?: number;
   xp?: number;
 }
@@ -35,7 +33,6 @@ export const Navigation: React.FC<NavigationProps> = ({
   currentAmbience,
   onToggleAmbience,
   onOpenDriveMode,
-  onOpenTour,
   streakCount = 0,
   xp = 0
 }) => {
@@ -108,23 +105,6 @@ export const Navigation: React.FC<NavigationProps> = ({
 
           {/* Right Action Controls: Guide, Audio, Streak, XP & Theme Toggle */}
           <div className="flex items-center gap-2">
-            {/* Auntie-Friendly App Guide & Tour Button */}
-            {onOpenTour && (
-              <button
-                onClick={() => {
-                  soundEngine.playClick();
-                  onOpenTour();
-                }}
-                title="How to Use Testament • 1-Minute App Guide"
-                aria-label="How to Use Testament"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 dark:bg-amber-950/40 dark:hover:bg-amber-900/50 border border-amber-500/40 text-amber-700 dark:text-amber-300 text-xs font-bold transition-all shadow-xs"
-              >
-                <HelpCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                <span>Guide</span>
-              </button>
-            )}
-
-            {/* Drive Mode Button */}
             <button
               onClick={onOpenDriveMode}
               title="Drive & Commute Audio"

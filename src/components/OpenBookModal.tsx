@@ -42,6 +42,9 @@ interface OpenBookModalProps {
   onSelectStoryQuest?: (questId: string) => void;
   initialMode?: 'briefing' | 'reader';
   initialChapter?: number;
+  launchToken?: number;
+  highlightVerseStart?: number;
+  highlightVerseEnd?: number;
 }
 
 export const OpenBookModal: React.FC<OpenBookModalProps> = ({
@@ -53,7 +56,10 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
   onSetMemoryVerse,
   onSelectStoryQuest,
   initialMode = 'briefing',
-  initialChapter = 1
+  initialChapter = 1,
+  launchToken = 0,
+  highlightVerseStart,
+  highlightVerseEnd
 }) => {
   // Navigation & View Mode
   const [activeMode, setActiveMode] = useState<'briefing' | 'reader'>(initialMode);
@@ -97,14 +103,29 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
   // Reset chapter to 1 when book changes
   useEffect(() => {
     setSelectedChapter(1);
+    setActiveMode('briefing');
     setIsPlayingChapterAudio(false);
     soundEngine.stopSpeaking();
   }, [book?.id]);
 
-  // Smooth scroll reader to top on chapter change
+  // Quest "Read this chapter" lands on the cited chapter in reader mode
   useEffect(() => {
+    if (!launchToken) return;
+    setSelectedChapter(initialChapter);
+    setActiveMode('reader');
+  }, [launchToken, initialChapter]);
+
+  // Smooth scroll reader to top on chapter change, or to the cited verse
+  useEffect(() => {
+    if (highlightVerseStart && chapterData && selectedChapter === initialChapter) {
+      const el = readerScrollRef.current?.querySelector(`[data-verse="${highlightVerseStart}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+    }
     readerScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [selectedChapter]);
+  }, [selectedChapter, chapterData, highlightVerseStart]);
 
   // Fetch chapter data when in reader mode or when book/chapter/translation changes
   useEffect(() => {
@@ -781,12 +802,16 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                     }`}>
                       {chapterData.verses.map((v) => {
                         const isSpeakingThis = activeReadingVerse === v.verse;
+                        const citeActive = launchToken > 0 && selectedChapter === initialChapter;
+                        const isCited = citeActive && highlightVerseStart != null && highlightVerseEnd != null
+                          && v.verse >= highlightVerseStart && v.verse <= highlightVerseEnd;
 
                         return (
                           <div
                             key={v.verse}
+                            data-verse={v.verse}
                             className={`group relative p-2 rounded-xl transition-colors ${
-                              isSpeakingThis 
+                              isSpeakingThis || isCited
                                 ? 'bg-amber-100/60 dark:bg-amber-950/40 text-stone-950 dark:text-white' 
                                 : 'hover:bg-stone-100/70 dark:hover:bg-stone-900/50 text-stone-800 dark:text-stone-200'
                             }`}

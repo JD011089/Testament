@@ -26,12 +26,14 @@ interface DilemmaSimulatorProps {
   onRewardXP: (amount: number) => void;
   targetDilemmaId?: string | null;
   onClearTargetDilemma?: () => void;
+  onOpenNexus?: (type: string, id: string) => void;
 }
 
 export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({ 
   onRewardXP,
   targetDilemmaId,
-  onClearTargetDilemma
+  onClearTargetDilemma,
+  onOpenNexus
 }) => {
   const dailyDilemma = getDailyDilemma();
   const [selectedDilemmaId, setSelectedDilemmaId] = useState<string>(() => {
@@ -781,7 +783,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
               </div>
 
               {/* LIVING CANON: TACTICAL NEXUS KNOWLEDGE GRAPH */}
-              <TacticalNexusCard entityId={dilemma.id} />
+              <TacticalNexusCard entityId={dilemma.id} onOpenEntity={onOpenNexus} />
 
               {/* 3 Tactical Moves For Tomorrow */}
               <div>
