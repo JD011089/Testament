@@ -5,6 +5,23 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0] - 2026-09-26
+
+### Added
+- **One composed Daily Mission**: Today's path is built from the battlefield check-in, the verse that is due, and the chosen cadence. A short reason line explains why that mission was picked.
+- **Real Bible passages inside quests**: After a choice, the scripture step loads the cited verses from the Library's Bible text, keeps the plain-English note, and falls back to the handwritten verse if the chapter cannot load.
+- **Read this chapter**: Opens that book and chapter in the Library with the cited verses highlighted.
+
+### Changed
+- **Word Forge practice**: Hints reveal only the next word. New verses start as first-letter tiles. Show me stays on screen until dismissed and counts as an Again review.
+- **Saved verses**: The Saved tab lists mastered and bookmarked verses only.
+- **Onboarding**: Calibration sets the battlefield, guided mode, and cadence. Finishing setup starts today's mission or jumps into the story.
+
+### Removed
+- **Switch Track**: The 14 hand-built campaigns are no longer a second "today" beside the composed mission.
+- **Competing introductions**: The app tour and Field Guide buttons are gone. Onboarding is the introduction.
+- **Side-tool peers on Explore**: Timeline, Character Dossiers, and Street Translator are no longer Field Tools. Dossiers still open from inside a quest.
+
 ## [1.9.3] - 2026-09-24
 
 ### Added

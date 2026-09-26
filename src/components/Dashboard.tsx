@@ -16,26 +16,19 @@ import {
   Shield,
   Coffee,
   X,
-  BookA,
-  Zap,
   ShieldAlert,
   Play,
   Pause,
   SlidersHorizontal,
   Mic,
   Bell,
-  Send,
   HeartHandshake,
   Target,
   CheckCircle2,
-  Swords,
-  HelpCircle
+  Swords
 } from 'lucide-react';
 import type { UserCalibrationProfile } from './OnboardingModal';
 import { MemoryPulseModal } from './MemoryPulseModal';
-import { ProverbsCodexModal } from './ProverbsCodexModal';
-import { PsalmsFieldMedicModal } from './PsalmsFieldMedicModal';
-import { CanonCodexModal } from './CanonCodexModal';
 import { DailyCampaignCard } from './DailyCampaignCard';
 import { BattlefieldCheckInModal, BATTLEFIELD_OPTIONS } from './BattlefieldCheckInModal';
 import { VoiceSelectorModal } from './VoiceSelectorModal';
@@ -44,23 +37,17 @@ import { useModalLock } from '../utils/useModalLock';
 import type { DailyCampaignStep } from '../data/dailyCampaigns';
 import { 
   getNotificationSettings, 
-  sendTestMemoryNotification, 
-  requestNotificationPermission, 
-  getNotificationPermission,
   getNextScheduledReminder,
-  checkAndDispatchDueReminders,
-  setActiveMemoryVerse
 } from '../utils/notificationEngine';
 import { getVerseById, getAllVerses } from '../utils/verseRegistry';
 import { 
   getTodayFormatted, 
   getDailyVerse, 
   getDailyBriefing, 
-  getAdaptiveNextObjective, 
   isDailyBonusClaimed, 
   claimDailyBonus,
   getTodayBattlefieldId,
-  setTodayBattlefieldId
+  setTodayBattlefieldId,
 } from '../utils/dailyEngine';
 import { getDueFSRSCount } from '../utils/fsrsEngine';
 
@@ -68,11 +55,9 @@ interface DashboardProps {
   onSelectQuest: (quest: StoryQuest) => void;
   onOpenWordForge: (verseId?: string) => void;
   onOpenArsenal: () => void;
-  onOpenTimeline: () => void;
-  onOpenDossiers: () => void;
-  onOpenStreetTranslator: () => void;
   onOpenDilemmas: () => void;
-  onOpenDriveMode: () => void;
+  onOpenProverbs?: () => void;
+  onOpenPsalms?: () => void;
   onOpenLibrary?: () => void;
   completedActs: string[];
   memorizedVerses: string[];
@@ -83,10 +68,9 @@ interface DashboardProps {
   onToggleAmbience: (type: 'campfire' | 'wind' | 'sanctuary') => void;
   userProfile?: UserCalibrationProfile | null;
   onOpenOnboarding?: () => void;
-  onRewardXP?: (points: number) => void;
   onOpenWhatsNew?: () => void;
+  onRewardXP?: (points: number) => void;
   onLaunchCampaignStep?: (step: DailyCampaignStep) => void;
-  onOpenTour?: () => void;
 }
 
 const QUEST_IMAGES: Record<string, string> = {
@@ -106,35 +90,39 @@ const QUEST_IMAGES: Record<string, string> = {
   'john-baptist-journey': '/images/desert_canyon.jpg',
 };
 
-const ALL_RELICS = [
-  { id: 'david-stones', name: '5 Smooth Stones', character: 'David', icon: '🪨', desc: 'Courage with your authentic tools.' },
-  { id: 'joseph-ring', name: 'Pharaoh’s Signet Ring', character: 'Joseph', icon: '💍', desc: 'Quiet integrity turns into authority.' },
-  { id: 'moses-staff', name: 'The Shepherd’s Staff', character: 'Moses', icon: '🪵', desc: 'Standing firm when panic surrounds you.' },
-  { id: 'elijah-mantle', name: 'Weathered Mantle', character: 'Elijah', icon: '🧥', desc: 'Hearing the gentle whisper in burnout.' },
-  { id: 'peter-brazier', name: 'Charcoal Brazier', character: 'Peter', icon: '🔥', desc: 'Grace transforms failure into mission.' },
-  { id: 'paul-stocks', name: 'Broken Stocks', character: 'Paul', icon: '⛓️', desc: 'An unshakable soul in chains.' },
-  { id: 'daniel-signet', name: 'Babylonian Signet Ring', character: 'Daniel', icon: '💍', desc: 'Zero moral compromise in the imperial den.' },
-  { id: 'esther-scepter', name: 'The Golden Scepter', character: 'Esther', icon: '🪄', desc: 'Courage to step into danger for others.' },
-  { id: 'nehemiah-trowel', name: 'Mason’s Chisel & Trowel', character: 'Nehemiah', icon: '🔨', desc: 'Building with one hand, weapon in the other.' },
-  { id: 'gideon-torch', name: 'Clay Jar & Torch', character: 'Gideon', icon: '🏺', desc: 'Breaking self-reliance so light can shine.' },
-  { id: 'jonah-anchor', name: 'The Sea Anchor', character: 'Jonah', icon: '⚓', desc: 'Surrendering your flight to God’s mercy.' },
-  { id: 'ruth-sheaf', name: 'Golden Barley Sheaf', character: 'Ruth', icon: '🌾', desc: 'Radical loyalty in seasons of grief.' },
-  { id: 'joshua-trumpet', name: 'The Jericho Shofar', character: 'Joshua', icon: '📯', desc: 'Bold obedience bringing down high walls.' },
-  { id: 'john-belt', name: 'Leather Belt & Locust Honey', character: 'John the Baptist', icon: '🥋', desc: 'Radical humility pointing all eyes to Christ.' },
-];
+const RELIC_ICONS: Record<string, string> = {
+  stones: '🪨',
+  staff: '🪵',
+  mantle: '🧥',
+  signet: '💍',
+  brazier: '🔥',
+  stocks: '⛓️',
+  scepter: '🪄',
+  trowel: '🔨',
+  torch: '🏺',
+  anchor: '⚓',
+  sheaf: '🌾',
+  trumpet: '📯',
+  belt: '🥋',
+};
+
+const ALL_RELICS = STORY_QUESTS.filter(q => q.relicReward).map(q => ({
+  id: q.relicReward!.id,
+  name: q.relicReward!.name,
+  character: q.heroName,
+  icon: RELIC_ICONS[q.relicReward!.iconName] || '⚔️',
+  desc: q.relicReward!.lesson,
+}));
 
 export const Dashboard: React.FC<DashboardProps> = ({
   onSelectQuest,
   onOpenWordForge,
   onOpenArsenal,
-  onOpenTimeline = () => {},
-  onOpenDossiers = () => {},
-  onOpenStreetTranslator = () => {},
   onOpenDilemmas = () => {},
-  onOpenDriveMode: _onOpenDriveMode = () => {},
+  onOpenProverbs = () => {},
+  onOpenPsalms = () => {},
   onOpenLibrary = () => {},
   completedActs,
-  memorizedVerses,
   unlockedRelics = [],
   streakCount,
   xp,
@@ -142,10 +130,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onToggleAmbience,
   userProfile,
   onOpenOnboarding,
-  onRewardXP,
   onOpenWhatsNew,
-  onLaunchCampaignStep,
-  onOpenTour
+  onRewardXP,
+  onLaunchCampaignStep
 }) => {
   const [dashboardMode, setDashboardMode] = useState<'guided' | 'freeroam'>(() => {
     try {
@@ -173,15 +160,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [isPlayingBriefing, setIsPlayingBriefing] = useState<boolean>(false);
   const [narratorProfile, setNarratorProfile] = useState<NarratorProfile>(() => soundEngine.getNarratorProfile());
   const [isMemoryPulseModalOpen, setIsMemoryPulseModalOpen] = useState<boolean>(false);
-  const [isProverbsModalOpen, setIsProverbsModalOpen] = useState<boolean>(false);
-  const [isPsalmsMedicModalOpen, setIsPsalmsMedicModalOpen] = useState<boolean>(false);
-  const [isCanonModalOpen, setIsCanonModalOpen] = useState<boolean>(false);
   const [isBattlefieldModalOpen, setIsBattlefieldModalOpen] = useState<boolean>(false);
   const [isVoiceSelectorOpen, setIsVoiceSelectorOpen] = useState<boolean>(false);
   const [activeBattlefieldId, setActiveBattlefieldId] = useState<string | null>(() => getTodayBattlefieldId());
   const [isPlayingMorningTacticalAudio, setIsPlayingMorningTacticalAudio] = useState<boolean>(false);
   const [notificationSettings, setNotificationSettings] = useState(() => getNotificationSettings());
-  const [testNoticeStatus, setTestNoticeStatus] = useState<string | null>(null);
   const [, setPulseRefreshTrigger] = useState(0);
 
   useEffect(() => {
@@ -190,9 +173,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
       setPulseRefreshTrigger(t => t + 1);
     };
 
-    const handleOpenProverbs = () => setIsProverbsModalOpen(true);
-    const handleOpenPsalms = () => setIsPsalmsMedicModalOpen(true);
-    const handleOpenCanon = () => setIsCanonModalOpen(true);
     const handleBattlefieldChanged = (e: Event) => {
       const custom = e as CustomEvent;
       setActiveBattlefieldId(custom.detail?.battlefieldId ?? getTodayBattlefieldId());
@@ -205,9 +185,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
     };
 
     window.addEventListener('testament-notifications-updated', handleSettingsUpdated);
-    window.addEventListener('open-proverbs-codex', handleOpenProverbs);
-    window.addEventListener('open-psalms-medic', handleOpenPsalms);
-    window.addEventListener('open-canon-codex', handleOpenCanon);
     window.addEventListener('testament-battlefield-changed', handleBattlefieldChanged);
     window.addEventListener('testament-voice-changed', handleVoiceChanged);
 
@@ -217,9 +194,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
     return () => {
       window.removeEventListener('testament-notifications-updated', handleSettingsUpdated);
-      window.removeEventListener('open-proverbs-codex', handleOpenProverbs);
-      window.removeEventListener('open-psalms-medic', handleOpenPsalms);
-      window.removeEventListener('open-canon-codex', handleOpenCanon);
       window.removeEventListener('testament-battlefield-changed', handleBattlefieldChanged);
       window.removeEventListener('testament-voice-changed', handleVoiceChanged);
       clearInterval(timer);
@@ -231,7 +205,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const dailyVerse = getDailyVerse();
   const dailyBriefing = getDailyBriefing();
   const todayFormatted = getTodayFormatted();
-  const adaptiveObjective = getAdaptiveNextObjective(completedActs, userProfile, memorizedVerses);
   const isBriefingBonusClaimed = isDailyBonusClaimed('briefing');
   const activeMemoryVerse = getVerseById(notificationSettings.activeVerseId) || getAllVerses()[0];
   const activeBattlefield = BATTLEFIELD_OPTIONS.find(b => b.id === activeBattlefieldId);
@@ -254,40 +227,25 @@ export const Dashboard: React.FC<DashboardProps> = ({
     });
   };
 
-  const handleCheckAndSyncReminders = async () => {
-    soundEngine.playClick();
-    setTestNoticeStatus('Checking schedule...');
-    const fired = await checkAndDispatchDueReminders();
-    setNotificationSettings(getNotificationSettings());
-    setPulseRefreshTrigger(t => t + 1);
-    if (fired) {
-      soundEngine.playVictory();
-      setTestNoticeStatus('Reminder sent to device!');
-    } else {
-      setTestNoticeStatus('Schedule synchronized!');
+  // Auto-play 45s briefing once for audio-calibrated learners
+  useEffect(() => {
+    try {
+      if (localStorage.getItem('testament_prefer_audio_briefing') !== 'true') return;
+      localStorage.removeItem('testament_prefer_audio_briefing');
+      const t = setTimeout(() => {
+        setIsPlayingMorningTacticalAudio(true);
+        soundEngine.playMorningTacticalBriefing({
+          title: getDailyBriefing().title,
+          battlefieldFocus: 'Daily Focus & Spiritual Resilience',
+          memoryVerse: `${getDailyVerse().reference}: ${getDailyVerse().text}`,
+          proverb: 'Proverbs 15:1: A gentle answer turns away wrath.'
+        }, () => setIsPlayingMorningTacticalAudio(false));
+      }, 600);
+      return () => clearTimeout(t);
+    } catch {
+      // ignore
     }
-    setTimeout(() => setTestNoticeStatus(null), 3000);
-  };
-
-  const handleQuickTestNotification = async () => {
-    soundEngine.playClick();
-    if (getNotificationPermission() !== 'granted') {
-      const granted = await requestNotificationPermission();
-      if (!granted) {
-        setTestNoticeStatus('Please enable notifications');
-        setIsMemoryPulseModalOpen(true);
-        return;
-      }
-    }
-    setTestNoticeStatus('Dispatched to device!');
-    const ok = await sendTestMemoryNotification(0);
-    if (ok) {
-      soundEngine.playVictory();
-    } else {
-      setTestNoticeStatus('Check permissions');
-    }
-    setTimeout(() => setTestNoticeStatus(null), 3500);
-  };
+  }, []);
 
   useEffect(() => {
     if (!showMorningBriefing) return;
@@ -344,18 +302,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <span className="text-[10px] font-mono px-2 py-0.2 rounded-full bg-amber-100/70 dark:bg-amber-950/80 border border-amber-300/60 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 font-bold">
                   {getRankTitle(xp)}
                 </span>
-                {onOpenWhatsNew && (
-                  <button
-                    onClick={() => {
-                      soundEngine.playClick();
-                      onOpenWhatsNew();
-                    }}
-                    className="text-[10px] font-mono px-2 py-0.2 rounded-full bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-600 hover:text-stone-950 dark:text-stone-400 dark:hover:text-amber-300 border border-stone-250 dark:border-stone-750 transition-colors flex items-center gap-1"
-                    title="View field update notes (v1.9.3)"
-                  >
-                    <span>v1.9.3</span>
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playClick();
+                    onOpenWhatsNew?.();
+                  }}
+                  className="text-[10px] font-mono px-2 py-0.2 rounded-full bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-600 hover:text-stone-950 dark:text-stone-400 dark:hover:text-amber-300 border border-stone-250 dark:border-stone-750 transition-colors"
+                  title="What changed in v1.10.0"
+                >
+                  v1.10.0
+                </button>
               </div>
               <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
                 <span className="text-amber-700 dark:text-amber-400 font-medium">{todayFormatted}</span> • The Living Word
@@ -365,19 +322,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           {/* Right: Guide & Theme Toggle + Universal Streak / XP */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {onOpenTour && (
-              <button
-                onClick={() => {
-                  soundEngine.playClick();
-                  onOpenTour();
-                }}
-                className="p-1.5 sm:p-2 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 text-stone-600 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
-                title="Field Guide & Tour"
-                aria-label="Field Guide"
-              >
-                <HelpCircle className="w-4 h-4" />
-              </button>
-            )}
             <ThemeToggle compact />
 
             <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/50 dark:bg-stone-800 text-xs font-mono font-bold text-orange-600 dark:text-orange-400" title="Daily streak">
@@ -392,9 +336,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
 
-        {/* Row 2: Streamlined Horizontal Action Bar */}
+        {/* Row 2: Streamlined action bar — one briefing, due reviews, calibrate */}
         <div className="flex items-center gap-2 pt-3 mt-3 border-t border-stone-200/60 dark:border-stone-800/60 overflow-x-auto scrollbar-none w-full">
-          {/* Battlefield Quick Check-in */}
           <button
             onClick={() => {
               soundEngine.playClick();
@@ -411,7 +354,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <span>{activeBattlefield ? `Battlefield: ${activeBattlefield.title.split('&')[0].trim()}` : 'Declare Battlefield'}</span>
           </button>
 
-          {/* 45-Second Briefing Audio */}
           <button
             onClick={handlePlayMorningTacticalAudio}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
@@ -426,23 +368,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
             ) : (
               <Play className="w-3.5 h-3.5 text-amber-500" />
             )}
-            <span>45s Audio</span>
+            <span>Briefing</span>
           </button>
 
-          {/* Reading Voice Selector */}
-          <button
-            onClick={() => {
-              soundEngine.playClick();
-              setIsVoiceSelectorOpen(true);
-            }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 hover:dark:bg-stone-750 text-stone-700 dark:text-stone-300 text-xs font-semibold whitespace-nowrap transition-colors"
-            title="Choose app-wide reading voice"
-          >
-            <Mic className="w-3.5 h-3.5 text-amber-500" />
-            <span>Voice: {NARRATOR_VOICES[narratorProfile]?.name.split(' ')[0] || 'Adam'}</span>
-          </button>
-
-          {/* Due for Review (if any) */}
           {dueFSRSCount > 0 && (
             <button
               onClick={() => onOpenWordForge()}
@@ -454,34 +382,31 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </button>
           )}
 
-          {/* 3-Min Morning Briefing */}
+          <button
+            onClick={() => {
+              soundEngine.playClick();
+              setIsMemoryPulseModalOpen(true);
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs font-medium whitespace-nowrap transition-colors"
+            title="Memory reminder settings"
+          >
+            <Bell className="w-3.5 h-3.5 text-amber-500" />
+            <span>Reminders</span>
+          </button>
+
           <button
             onClick={() => setShowMorningBriefing(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs font-medium whitespace-nowrap transition-colors"
+            title="Optional deeper written briefing"
           >
             <Coffee className="w-3.5 h-3.5 text-amber-500" />
-            <span>3-Min Briefing</span>
+            <span>Go Deeper</span>
             {!isBriefingBonusClaimed && (
               <span className="text-[9px] bg-amber-500 text-stone-950 font-extrabold px-1 py-0.2 rounded-full">
                 +50 XP
               </span>
             )}
           </button>
-
-          {/* Auntie-Friendly App Guide & Tour Button */}
-          {onOpenTour && (
-            <button
-              onClick={() => {
-                soundEngine.playClick();
-                onOpenTour();
-              }}
-              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 text-xs font-bold whitespace-nowrap transition-all"
-              title="How to navigate and use Testament"
-            >
-              <HelpCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-              <span>App Guide</span>
-            </button>
-          )}
 
           {onOpenOnboarding && (
             <button
@@ -493,7 +418,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               title="Calibrate your battle plan"
             >
               <SlidersHorizontal className="w-3.5 h-3.5 text-amber-500" />
-              <span>{userProfile ? 'My Battle Plan' : 'Calibrate'}</span>
+              <span>{userProfile ? 'My Plan' : 'Calibrate'}</span>
             </button>
           )}
         </div>
@@ -501,7 +426,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
 
 
-      {/* GUIDED CAMPAIGN vs FREE ROAM MODE SELECTOR - Single Sleek Segmented Control */}
+      {/* Daily Mission (default) vs Explore — Explore is browse-only, not a second product */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div className="w-full sm:w-auto inline-flex p-1 rounded-xl bg-stone-200/60 dark:bg-stone-900 transition-colors">
           <button
@@ -513,7 +438,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             }`}
           >
             <Target className="w-3.5 h-3.5" />
-            <span>🎯 Daily Mission</span>
+            <span>Daily Mission</span>
           </button>
 
           <button
@@ -525,14 +450,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
             }`}
           >
             <Compass className="w-3.5 h-3.5" />
-            <span>🗺️ Free Roam</span>
+            <span>Explore</span>
           </button>
         </div>
 
         <div className="text-xs text-stone-500 dark:text-stone-400 italic hidden md:block">
           {dashboardMode === 'guided'
-            ? 'Structured daily path: Story Quest → Dilemma Sim → Word Forge → Library Codex'
-            : 'Unrestricted open exploration across all 14 quests, 66 books, and drills'}
+            ? 'One path today, shaped by your check-in and what is due'
+            : 'Browse all stories and field tools'}
         </div>
       </div>
 
@@ -777,102 +702,24 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
 
-        {/* RIGHT SIDEBAR (30-35% on Desktop - Hidden on Mobile to remove compact cards & modals) */}
-        <div className="hidden lg:block lg:col-span-4 space-y-6">
+        {/* RIGHT SIDEBAR — tools + saved progress (mobile + desktop) */}
+        <div className="lg:col-span-4 space-y-6">
           
-          {/* ADAPTIVE NEXT OBJECTIVE */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-stone-100/60 dark:bg-stone-900/40">
-            <div className="flex items-center gap-3 mb-2.5">
-              <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-stone-900 dark:text-amber-300 flex items-center justify-center text-lg shrink-0">
-                {adaptiveObjective.type === 'retention_drill' ? '🧠' : adaptiveObjective.type === 'next_act' ? '⚔️' : '👑'}
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 px-1.5 py-0.2 rounded bg-amber-500/10">
-                    {adaptiveObjective.badge}
-                  </span>
-                  <span className="text-[11px] text-stone-500 dark:text-stone-400">Next Objective</span>
-                </div>
-                <h4 className="text-xs sm:text-sm font-serif font-bold text-stone-900 dark:text-parchment-50 truncate">
-                  {adaptiveObjective.title}
-                </h4>
-              </div>
-            </div>
-            <p className="text-[11px] text-stone-600 dark:text-stone-400 line-clamp-2 mb-3">
-              {adaptiveObjective.subtitle}
-            </p>
-            <button
-              onClick={() => {
-                soundEngine.playSnap();
-                if (adaptiveObjective.type === 'retention_drill' && adaptiveObjective.targetVerseId) {
-                  onOpenWordForge(adaptiveObjective.targetVerseId);
-                } else if (adaptiveObjective.targetQuest) {
-                  onSelectQuest(adaptiveObjective.targetQuest);
-                } else {
-                  onOpenWordForge();
-                }
-              }}
-              className="w-full py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
-            >
-              <span>{adaptiveObjective.type === 'retention_drill' ? 'Start Retention Drill' : 'Resume Mission'}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {/* LEARNER'S TACTICAL TOOLKIT (Anti-Textbook Accelerators) */}
+          {/* Field Tools */}
           <div className="p-4 sm:p-5 rounded-2xl bg-stone-100/60 dark:bg-stone-900/40">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-amber-500" />
                 <h4 className="text-sm font-serif font-bold text-stone-900 dark:text-parchment-50">
-                  Learner's Tactical Toolkit
+                  Field Tools
                 </h4>
               </div>
-              <span className="text-[10px] font-mono text-amber-700 dark:text-amber-400 uppercase tracking-wider">
-                HUD
-              </span>
             </div>
             <p className="text-[11px] text-stone-500 dark:text-stone-400 mb-3">
-              Visual, non-academic field manuals for rapid clarity.
+              Quick clarity — not textbooks.
             </p>
 
             <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => {
-                  soundEngine.playSnap();
-                  onOpenTimeline();
-                }}
-                className="p-2.5 rounded-xl bg-white/80 dark:bg-stone-900/80 hover:bg-white dark:hover:bg-[#181d2a] transition-all text-left group"
-              >
-                <Clock className="w-4 h-4 text-amber-500 mb-1 group-hover:scale-110 transition-transform" />
-                <div className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100">60s Timeline</div>
-                <div className="text-[10px] text-stone-500 dark:text-stone-400 truncate">6 Bible eras</div>
-              </button>
-
-              <button
-                onClick={() => {
-                  soundEngine.playSnap();
-                  onOpenDossiers();
-                }}
-                className="p-2.5 rounded-xl bg-white/80 dark:bg-stone-900/80 hover:bg-white dark:hover:bg-[#181d2a] transition-all text-left group"
-              >
-                <Zap className="w-4 h-4 text-amber-500 mb-1 group-hover:scale-110 transition-transform" />
-                <div className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100">Character Dossiers</div>
-                <div className="text-[10px] text-stone-500 dark:text-stone-400 truncate">Powers & flaws</div>
-              </button>
-
-              <button
-                onClick={() => {
-                  soundEngine.playSnap();
-                  onOpenStreetTranslator();
-                }}
-                className="p-2.5 rounded-xl bg-white/80 dark:bg-stone-900/80 hover:bg-white dark:hover:bg-[#181d2a] transition-all text-left group"
-              >
-                <BookA className="w-4 h-4 text-amber-500 mb-1 group-hover:scale-110 transition-transform" />
-                <div className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100">Street Translator</div>
-                <div className="text-[10px] text-stone-500 dark:text-stone-400 truncate">No church jargon</div>
-              </button>
-
               <button
                 onClick={() => {
                   soundEngine.playSnap();
@@ -888,7 +735,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <button
                 onClick={() => {
                   soundEngine.playSnap();
-                  setIsProverbsModalOpen(true);
+                  onOpenProverbs();
                 }}
                 className="p-2.5 rounded-xl bg-white/80 dark:bg-stone-900/80 hover:bg-white dark:hover:bg-[#181d2a] transition-all text-left group"
               >
@@ -900,7 +747,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <button
                 onClick={() => {
                   soundEngine.playSnap();
-                  setIsPsalmsMedicModalOpen(true);
+                  onOpenPsalms();
                 }}
                 className="p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/15 dark:bg-stone-900/80 dark:hover:bg-[#181d2a] transition-all text-left group"
               >
@@ -911,85 +758,57 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
 
-          {/* SPACED MEMORY PULSE CARD */}
+          {/* Reminder settings only — practice lives in Word Forge */}
           <div className="p-4 sm:p-5 rounded-2xl bg-stone-100/60 dark:bg-stone-900/40 relative overflow-hidden text-left">
             <div className="flex items-center justify-between gap-2 mb-2.5">
               <div className="flex items-center gap-2">
                 <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400">
-                  <Bell className="w-3.5 h-3.5 animate-pulse" />
+                  <Bell className="w-3.5 h-3.5" />
                 </span>
                 <div>
                   <div className="text-xs font-mono font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
-                    Spaced Memory Pulse
+                    Memory Reminders
                   </div>
                   <div className="text-[10px] text-stone-500 dark:text-stone-400">
-                    {notificationSettings.notificationsSentToday} of {notificationSettings.frequencyPerDay} prompts today
+                    {notificationSettings.enabled
+                      ? `${notificationSettings.notificationsSentToday} of ${notificationSettings.frequencyPerDay} today`
+                      : 'Off — tap to configure'}
                   </div>
                 </div>
               </div>
-
-              <div className="flex items-center gap-1.5">
-                {testNoticeStatus && (
-                  <span className="text-[10px] font-mono text-amber-700 dark:text-amber-300 animate-pulse">
-                    {testNoticeStatus}
-                  </span>
-                )}
-                <button
-                  onClick={handleCheckAndSyncReminders}
-                  className="p-1.5 rounded-lg bg-stone-200/60 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-600 hover:text-stone-900 dark:text-stone-300 dark:hover:text-amber-300 transition-colors"
-                  title="Check and sync reminder schedule"
-                >
-                  <Clock className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={handleQuickTestNotification}
-                  className="p-1.5 rounded-lg bg-stone-200/60 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-amber-600 dark:text-amber-400 transition-colors"
-                  title="Sends an instant recall prompt to this device"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => {
-                    soundEngine.playClick();
-                    setIsMemoryPulseModalOpen(true);
-                  }}
-                  className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 hover:underline underline-offset-2"
-                >
-                  Config
-                </button>
-              </div>
+              <button
+                onClick={() => {
+                  soundEngine.playClick();
+                  setIsMemoryPulseModalOpen(true);
+                }}
+                className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 hover:underline underline-offset-2"
+              >
+                Settings
+              </button>
             </div>
-
             <div className="bg-white/80 dark:bg-black/30 p-3 rounded-xl mb-3">
-              <div className="flex items-center justify-between gap-2 mb-1">
-                <span className="text-xs font-serif font-bold text-amber-700 dark:text-amber-300">
-                  {activeMemoryVerse.reference}
-                </span>
-                {activeMemoryVerse.heroName && (
-                  <span className="text-[10px] font-mono text-stone-500 dark:text-stone-400">
-                    {activeMemoryVerse.heroName}
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-stone-800 dark:text-parchment-100 italic line-clamp-2 leading-relaxed">
+              <span className="text-xs font-serif font-bold text-amber-700 dark:text-amber-300">
+                {activeMemoryVerse.reference}
+              </span>
+              <p className="text-xs text-stone-800 dark:text-parchment-100 italic line-clamp-2 leading-relaxed mt-1">
                 "{activeMemoryVerse.text}"
               </p>
             </div>
-
             {nextReminder && notificationSettings.enabled && (
               <div className="text-[10px] font-mono text-amber-800 dark:text-amber-300/90 mb-3 flex items-center gap-1.5 bg-amber-500/10 px-2.5 py-1 rounded-lg">
                 <Clock className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
-                <span>Next slot: {nextReminder.label} ({nextReminder.remainingFormatted})</span>
+                <span>Next: {nextReminder.label} ({nextReminder.remainingFormatted})</span>
               </div>
             )}
-
-            <button
-              onClick={() => onOpenWordForge(activeMemoryVerse.id)}
-              className="w-full py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all"
-            >
-              <Brain className="w-3.5 h-3.5" />
-              <span>Practice in Word Forge</span>
-            </button>
+            {dueFSRSCount > 0 && (
+              <button
+                onClick={() => onOpenWordForge()}
+                className="w-full py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all"
+              >
+                <Brain className="w-3.5 h-3.5" />
+                <span>Review {dueFSRSCount} due in Word Forge</span>
+              </button>
+            )}
           </div>
 
           {/* THE CANON CODEX BANNER (66-BOOK FIELD LIBRARY & ARSENAL) */}
@@ -1014,13 +833,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <button
                 onClick={() => {
                   soundEngine.playSnap();
-                  if (onOpenLibrary) onOpenLibrary();
-                  else setIsCanonModalOpen(true);
+                  onOpenLibrary();
                 }}
                 className="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all"
               >
                 <BookOpen className="w-3.5 h-3.5" />
-                <span>66 Books</span>
+                <span>Open Library</span>
               </button>
               <button
                 onClick={() => {
@@ -1326,59 +1144,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
         onOpenWordForge={(verseId) => {
           setIsMemoryPulseModalOpen(false);
           onOpenWordForge(verseId);
-        }}
-      />
-
-      {/* Proverbs Tactical Codex Modal */}
-      <ProverbsCodexModal
-        isOpen={isProverbsModalOpen}
-        onClose={() => setIsProverbsModalOpen(false)}
-        onOpenWordForge={(verseId) => {
-          setIsProverbsModalOpen(false);
-          onOpenWordForge(verseId);
-        }}
-        onSetMemoryVerse={(verseId) => {
-          setActiveMemoryVerse(verseId);
-          setPulseRefreshTrigger(t => t + 1);
-        }}
-        onRewardXP={onRewardXP}
-      />
-
-      {/* Psalms Field Medic Modal */}
-      <PsalmsFieldMedicModal
-        isOpen={isPsalmsMedicModalOpen}
-        onClose={() => setIsPsalmsMedicModalOpen(false)}
-        onOpenWordForge={(verseId) => {
-          setIsPsalmsMedicModalOpen(false);
-          onOpenWordForge(verseId);
-        }}
-        onSetMemoryVerse={(verseId) => {
-          setActiveMemoryVerse(verseId);
-          setPulseRefreshTrigger(t => t + 1);
-        }}
-        currentAmbience={currentAmbience}
-        onToggleAmbience={onToggleAmbience}
-        onRewardXP={onRewardXP}
-      />
-
-      {/* Canon Codex (66-Book Field Library) Modal */}
-      <CanonCodexModal
-        isOpen={isCanonModalOpen}
-        onClose={() => setIsCanonModalOpen(false)}
-        onOpenWordForge={(verseId) => {
-          setIsCanonModalOpen(false);
-          onOpenWordForge(verseId);
-        }}
-        onSetMemoryVerse={(verseId) => {
-          setActiveMemoryVerse(verseId);
-          setPulseRefreshTrigger(t => t + 1);
-        }}
-        onSelectStoryQuest={(questId) => {
-          setIsCanonModalOpen(false);
-          const quest = STORY_QUESTS.find(q => q.id === questId);
-          if (quest) {
-            onSelectQuest(quest);
-          }
         }}
       />
 

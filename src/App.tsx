@@ -8,22 +8,22 @@ import { ArsenalView } from './components/ArsenalView';
 import { DilemmaSimulator } from './components/DilemmaSimulator';
 import { Navigation } from './components/Navigation';
 import type { NavTab } from './components/Navigation';
-import { TimelineModal } from './components/TimelineModal';
 import { DossierModal } from './components/DossierModal';
-import { StreetTranslatorModal } from './components/StreetTranslatorModal';
+import { ProverbsCodexModal } from './components/ProverbsCodexModal';
+import { PsalmsFieldMedicModal } from './components/PsalmsFieldMedicModal';
 import { DriveModePlayer } from './components/DriveModePlayer';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { OnboardingModal, type UserCalibrationProfile } from './components/OnboardingModal';
-import { AppTourModal } from './components/AppTourModal';
-import { CanonLibraryPage } from './components/CanonLibraryPage';
 import { WhatsNewModal } from './components/WhatsNewModal';
+import { CanonLibraryPage } from './components/CanonLibraryPage';
 import { UpdateNotificationBanner } from './components/UpdateNotificationBanner';
 import { CampaignNextTaskPrompt } from './components/CampaignNextTaskPrompt';
 import { soundEngine } from './utils/audio';
-import { recordVerseMasteryDate } from './utils/dailyEngine';
-import { initNotificationScheduler } from './utils/notificationEngine';
-import { getTodayDailyCampaign, markCampaignStepCompleted } from './data/dailyCampaigns';
+import { recordVerseMasteryDate, setTodayBattlefieldId } from './utils/dailyEngine';
+import { initNotificationScheduler, setActiveMemoryVerse } from './utils/notificationEngine';
+import { markCampaignStepCompleted } from './data/dailyCampaigns';
 import type { DailyCampaignStep } from './data/dailyCampaigns';
+import { getComposedDailyMission } from './utils/missionComposer';
 
 export function App() {
   const [currentTab, setCurrentTab] = useState<NavTab>(() => {
@@ -35,13 +35,20 @@ export function App() {
     return 'dashboard';
   });
   const [activeQuest, setActiveQuest] = useState<StoryQuest | null>(null);
+  const [libraryPassage, setLibraryPassage] = useState<{
+    book: string;
+    chapter: number;
+    verseStart: number;
+    verseEnd: number;
+  } | null>(null);
   const [currentAmbience, setCurrentAmbience] = useState<'none' | 'campfire' | 'wind' | 'sanctuary'>('none');
 
-  // Modals state
-  const [isTimelineOpen, setIsTimelineOpen] = useState(false);
+  // Modals state (owned at App so Library deep-links work when Dashboard is unmounted)
   const [isDossierOpen, setIsDossierOpen] = useState(false);
-  const [isStreetTranslatorOpen, setIsStreetTranslatorOpen] = useState(false);
+  const [isProverbsOpen, setIsProverbsOpen] = useState(false);
+  const [isPsalmsOpen, setIsPsalmsOpen] = useState(false);
   const [isDriveModeOpen, setIsDriveModeOpen] = useState(false);
+  const [isWhatsNewOpen, setIsWhatsNewOpen] = useState<boolean>(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState<boolean>(() => {
     try {
       return !localStorage.getItem('testament_onboarding_completed');
@@ -49,7 +56,6 @@ export function App() {
       return false;
     }
   });
-  const [isTourOpen, setIsTourOpen] = useState<boolean>(false);
 
   const [userProfile, setUserProfile] = useState<UserCalibrationProfile | null>(() => {
     try {
@@ -113,7 +119,6 @@ export function App() {
 
   const [targetDilemmaId, setTargetDilemmaId] = useState<string | null>(null);
   const [campaignPrompt, setCampaignPrompt] = useState<{ completedStep: number; nextStep: DailyCampaignStep } | null>(null);
-  const [isWhatsNewOpen, setIsWhatsNewOpen] = useState<boolean>(false);
 
   const [streakCount] = useState<number>(() => {
     const storedStreak = Number(localStorage.getItem('testament_streak')) || 1;
@@ -176,17 +181,27 @@ export function App() {
       setCurrentTab('library');
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
-      // Mark Step 4 of Daily Campaign if opened
-      const todayCampaign = getTodayDailyCampaign();
-      markCampaignStepCompleted(todayCampaign.id, 4);
-      window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
+      // Mark the library step only when today's mission actually closes in the library
+      const todayCampaign = getComposedDailyMission();
+      const canonStep = todayCampaign.steps.find(step => step.type === 'canon');
+      if (canonStep) {
+        markCampaignStepCompleted(todayCampaign.id, canonStep.stepNumber, undefined, todayCampaign.steps.length);
+        window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
+      }
     };
+
+    const handleOpenProverbs = () => setIsProverbsOpen(true);
+    const handleOpenPsalms = () => setIsPsalmsOpen(true);
 
     window.addEventListener('open-canon-library', handleOpenLibrary);
     window.addEventListener('open-canon-codex', handleOpenLibrary);
+    window.addEventListener('open-proverbs-codex', handleOpenProverbs);
+    window.addEventListener('open-psalms-medic', handleOpenPsalms);
     return () => {
       window.removeEventListener('open-canon-library', handleOpenLibrary);
       window.removeEventListener('open-canon-codex', handleOpenLibrary);
+      window.removeEventListener('open-proverbs-codex', handleOpenProverbs);
+      window.removeEventListener('open-psalms-medic', handleOpenPsalms);
     };
   }, []);
 
@@ -194,11 +209,13 @@ export function App() {
   useEffect(() => {
     const handleDilemmaCompleted = (e: Event) => {
       const customEvent = e as CustomEvent<{ dilemmaId: string }>;
-      const todayCampaign = getTodayDailyCampaign();
-      if (todayCampaign.steps[1].targetId === customEvent.detail?.dilemmaId) {
-        markCampaignStepCompleted(todayCampaign.id, 2);
+      const todayCampaign = getComposedDailyMission();
+      const dilemmaStep = todayCampaign.steps.find(step => step.type === 'dilemma');
+      if (dilemmaStep && dilemmaStep.targetId === customEvent.detail?.dilemmaId) {
+        markCampaignStepCompleted(todayCampaign.id, dilemmaStep.stepNumber, undefined, todayCampaign.steps.length);
         window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
-        setCampaignPrompt({ completedStep: 2, nextStep: todayCampaign.steps[2] });
+        const nextStep = todayCampaign.steps.find(step => step.stepNumber === dilemmaStep.stepNumber + 1);
+        if (nextStep) setCampaignPrompt({ completedStep: dilemmaStep.stepNumber, nextStep });
       }
     };
 
@@ -231,9 +248,46 @@ export function App() {
       setActiveQuest(null);
       setCurrentTab('library');
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      const todayCampaign = getTodayDailyCampaign();
-      markCampaignStepCompleted(todayCampaign.id, 4);
+      const todayCampaign = getComposedDailyMission();
+      markCampaignStepCompleted(todayCampaign.id, step.stepNumber, undefined, todayCampaign.steps.length);
       window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
+    } else if (step.type === 'proverb') {
+      setIsProverbsOpen(true);
+      const todayCampaign = getComposedDailyMission();
+      markCampaignStepCompleted(todayCampaign.id, step.stepNumber, undefined, todayCampaign.steps.length);
+      window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
+    } else if (step.type === 'psalm') {
+      setIsPsalmsOpen(true);
+      const todayCampaign = getComposedDailyMission();
+      markCampaignStepCompleted(todayCampaign.id, step.stepNumber, undefined, todayCampaign.steps.length);
+      window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
+    }
+  };
+
+  const handleOpenNexus = (type: string, id: string) => {
+    soundEngine.playClick();
+    if (type === 'quest') {
+      handleSelectQuestById(id);
+      return;
+    }
+    if (type === 'dilemma') {
+      soundEngine.stopSpeaking();
+      setActiveQuest(null);
+      setTargetDilemmaId(id);
+      setCurrentTab('dilemmas');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    if (type === 'psalm') {
+      setIsPsalmsOpen(true);
+      return;
+    }
+    if (type === 'proverb') {
+      setIsProverbsOpen(true);
+      return;
+    }
+    if (type === 'dossier') {
+      setIsDossierOpen(true);
     }
   };
 
@@ -277,12 +331,13 @@ export function App() {
       setXp(newXp);
       localStorage.setItem('testament_xp', String(newXp));
 
-      // Check if this fulfills Step 1 of today's Daily Campaign
-      const todayCampaign = getTodayDailyCampaign();
-      if (todayCampaign.steps[0].targetId === _questId || todayCampaign.steps[0].targetSecondaryId === actId) {
-        markCampaignStepCompleted(todayCampaign.id, 1);
+      const todayCampaign = getComposedDailyMission();
+      const questStep = todayCampaign.steps.find(step => step.type === 'quest');
+      if (questStep && (questStep.targetId === _questId || questStep.targetSecondaryId === actId)) {
+        markCampaignStepCompleted(todayCampaign.id, questStep.stepNumber, undefined, todayCampaign.steps.length);
         window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
-        setCampaignPrompt({ completedStep: 1, nextStep: todayCampaign.steps[1] });
+        const nextStep = todayCampaign.steps.find(step => step.stepNumber === questStep.stepNumber + 1);
+        if (nextStep) setCampaignPrompt({ completedStep: questStep.stepNumber, nextStep });
       }
     }
   };
@@ -298,12 +353,13 @@ export function App() {
       setXp(newXp);
       localStorage.setItem('testament_xp', String(newXp));
 
-      // Check if this fulfills Step 3 of today's Daily Campaign
-      const todayCampaign = getTodayDailyCampaign();
-      if (todayCampaign.steps[2].targetId === verseId || verseId.includes(todayCampaign.steps[2].targetId.replace('story-', ''))) {
-        markCampaignStepCompleted(todayCampaign.id, 3);
+      const todayCampaign = getComposedDailyMission();
+      const forgeStep = todayCampaign.steps.find(step => step.type === 'wordforge');
+      if (forgeStep && (forgeStep.targetId === verseId || verseId.includes(forgeStep.targetId.replace('story-', '')))) {
+        markCampaignStepCompleted(todayCampaign.id, forgeStep.stepNumber, undefined, todayCampaign.steps.length);
         window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
-        setCampaignPrompt({ completedStep: 3, nextStep: todayCampaign.steps[3] });
+        const nextStep = todayCampaign.steps.find(step => step.stepNumber === forgeStep.stepNumber + 1);
+        if (nextStep) setCampaignPrompt({ completedStep: forgeStep.stepNumber, nextStep });
       }
     }
   };
@@ -324,11 +380,37 @@ export function App() {
 
   const handleCompleteOnboarding = (
     profile: UserCalibrationProfile, 
-    startRecommendedQuest?: boolean,
-    openTour?: boolean
+    startRecommendedQuest?: boolean
   ) => {
     setUserProfile(profile);
     setIsOnboardingOpen(false);
+
+    // Wire calibration into real session behavior
+    try {
+      localStorage.setItem('testament_dashboard_mode', 'guided');
+      // Map battle → today's battlefield focus
+      const battleToBattlefield: Record<string, string> = {
+        responsibility: 'workplace-politics',
+        betrayal: 'betrayal-relational',
+        regret: 'anxiety-overwhelm',
+        purpose: 'high-stakes-decision',
+        discipline: 'anxiety-overwhelm',
+      };
+      const bfId = battleToBattlefield[profile.battleId];
+      if (bfId) setTodayBattlefieldId(bfId);
+
+      // Audio-first learners get a one-shot flag to auto-play the 45s briefing
+      if (profile.learningStyle === 'audio') {
+        localStorage.setItem('testament_prefer_audio_briefing', 'true');
+      } else {
+        localStorage.removeItem('testament_prefer_audio_briefing');
+      }
+
+      // Cadence shapes how Explore surfaces stories (short vs deep)
+      localStorage.setItem('testament_daily_cadence', profile.dailyCadence);
+    } catch {
+      // ignore storage failures
+    }
 
     const onboardingXpAwarded = localStorage.getItem('testament_onboarding_xp_awarded');
     if (!onboardingXpAwarded) {
@@ -338,8 +420,12 @@ export function App() {
       localStorage.setItem('testament_onboarding_xp_awarded', 'true');
     }
 
-    if (openTour) {
-      setIsTourOpen(true);
+    if (profile.learningStyle === 'tactical') {
+      // Tactical learners jump into a dilemma after calibration
+      soundEngine.stopSpeaking();
+      setActiveQuest(null);
+      setCurrentTab('dilemmas');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (startRecommendedQuest && profile.recommendedQuestId) {
       handleSelectQuestById(profile.recommendedQuestId);
     }
@@ -384,6 +470,14 @@ export function App() {
             onCompleteAct={handleCompleteAct}
             completedActs={completedActs}
             onOpenWordForge={handlePracticeVerseFromArsenal}
+            onOpenNexus={handleOpenNexus}
+            onOpenBibleChapter={(target) => {
+              soundEngine.stopSpeaking();
+              setLibraryPassage(target);
+              setActiveQuest(null);
+              setCurrentTab('library');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
           />
         ) : (
           <>
@@ -401,15 +495,13 @@ export function App() {
                   setCurrentTab('arsenal');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                onOpenTimeline={() => setIsTimelineOpen(true)}
-                onOpenDossiers={() => setIsDossierOpen(true)}
-                onOpenStreetTranslator={() => setIsStreetTranslatorOpen(true)}
                 onOpenDilemmas={() => {
                   soundEngine.stopSpeaking();
                   setCurrentTab('dilemmas');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                onOpenDriveMode={() => setIsDriveModeOpen(true)}
+                onOpenProverbs={() => setIsProverbsOpen(true)}
+                onOpenPsalms={() => setIsPsalmsOpen(true)}
                 onOpenLibrary={() => {
                   soundEngine.stopSpeaking();
                   setCurrentTab('library');
@@ -424,10 +516,9 @@ export function App() {
                 onToggleAmbience={handleToggleAmbience}
                 userProfile={userProfile}
                 onOpenOnboarding={() => setIsOnboardingOpen(true)}
-                onRewardXP={handleRewardXP}
                 onOpenWhatsNew={() => setIsWhatsNewOpen(true)}
+                onRewardXP={handleRewardXP}
                 onLaunchCampaignStep={handleLaunchCampaignStep}
-                onOpenTour={() => setIsTourOpen(true)}
               />
             )}
 
@@ -450,6 +541,8 @@ export function App() {
                 onSelectStoryQuest={(questId) => {
                   handleSelectQuestById(questId);
                 }}
+                passageTarget={libraryPassage}
+                onPassageOpened={() => setLibraryPassage(null)}
               />
             )}
 
@@ -467,6 +560,7 @@ export function App() {
                 onRewardXP={handleRewardXP}
                 targetDilemmaId={targetDilemmaId}
                 onClearTargetDilemma={() => setTargetDilemmaId(null)}
+                onOpenNexus={handleOpenNexus}
               />
             )}
 
@@ -494,39 +588,48 @@ export function App() {
           currentAmbience={currentAmbience}
           onToggleAmbience={handleCycleAmbience}
           onOpenDriveMode={() => setIsDriveModeOpen(true)}
-          onOpenTour={() => setIsTourOpen(true)}
           streakCount={streakCount}
           xp={xp}
         />
       )}
 
       {/* MODALS */}
-      <AppTourModal 
-        isOpen={isTourOpen}
-        onClose={() => setIsTourOpen(false)}
-        onNavigateToTab={(tab) => {
-          soundEngine.stopSpeaking();
-          setCurrentTab(tab);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-        onOpenDriveMode={() => setIsDriveModeOpen(true)}
-      />
-
-      <TimelineModal 
-        isOpen={isTimelineOpen}
-        onClose={() => setIsTimelineOpen(false)}
-        onSelectEraQuest={handleSelectQuestById}
-      />
-
       <DossierModal
         isOpen={isDossierOpen}
         onClose={() => setIsDossierOpen(false)}
         onSelectCharacterQuest={handleSelectQuestById}
       />
 
-      <StreetTranslatorModal
-        isOpen={isStreetTranslatorOpen}
-        onClose={() => setIsStreetTranslatorOpen(false)}
+      <ProverbsCodexModal
+        isOpen={isProverbsOpen}
+        onClose={() => setIsProverbsOpen(false)}
+        onOpenWordForge={(verseId) => {
+          setIsProverbsOpen(false);
+          setTargetWordForgeVerseId(verseId);
+          setCurrentTab('wordforge');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+        onSetMemoryVerse={(verseId) => {
+          setActiveMemoryVerse(verseId);
+        }}
+        onRewardXP={handleRewardXP}
+      />
+
+      <PsalmsFieldMedicModal
+        isOpen={isPsalmsOpen}
+        onClose={() => setIsPsalmsOpen(false)}
+        onOpenWordForge={(verseId) => {
+          setIsPsalmsOpen(false);
+          setTargetWordForgeVerseId(verseId);
+          setCurrentTab('wordforge');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+        onSetMemoryVerse={(verseId) => {
+          setActiveMemoryVerse(verseId);
+        }}
+        currentAmbience={currentAmbience}
+        onToggleAmbience={handleToggleAmbience}
+        onRewardXP={handleRewardXP}
       />
 
       <DriveModePlayer
@@ -537,17 +640,16 @@ export function App() {
       />
 
       {/* Onboarding Battle Plan Calibration Modal */}
+      <WhatsNewModal
+        isOpen={isWhatsNewOpen}
+        onClose={() => setIsWhatsNewOpen(false)}
+      />
+
       <OnboardingModal
         isOpen={isOnboardingOpen}
         onComplete={handleCompleteOnboarding}
         onClose={() => setIsOnboardingOpen(false)}
         initialProfile={userProfile}
-      />
-
-      {/* In-App Release Notes Dispatcher */}
-      <WhatsNewModal
-        isOpen={isWhatsNewOpen}
-        onClose={() => setIsWhatsNewOpen(false)}
       />
 
       {/* PWA Home-Screen Install Prompt */}

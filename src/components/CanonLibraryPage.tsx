@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Search, 
   BookOpen, 
@@ -31,13 +31,17 @@ interface CanonLibraryPageProps {
   onOpenWordForge?: (verseId: string) => void;
   onSetMemoryVerse?: (verseId: string) => void;
   onSelectStoryQuest?: (questId: string) => void;
+  passageTarget?: { book: string; chapter: number; verseStart: number; verseEnd: number } | null;
+  onPassageOpened?: () => void;
 }
 
 export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
   onBackToDashboard,
   onOpenWordForge,
   onSetMemoryVerse,
-  onSelectStoryQuest
+  onSelectStoryQuest,
+  passageTarget,
+  onPassageOpened
 }) => {
   const [viewMode, setViewMode] = useState<'shelf' | 'grid'>('shelf');
   const [searchQuery, setSearchQuery] = useState('');
@@ -45,6 +49,26 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
   const [selectedDivision, setSelectedDivision] = useState<string>('All');
   const [selectedTheme, setSelectedTheme] = useState<string>('All Themes');
   const [activeBookForModal, setActiveBookForModal] = useState<CanonBook | null>(null);
+  const [readerLaunch, setReaderLaunch] = useState<{
+    token: number;
+    chapter: number;
+    verseStart: number;
+    verseEnd: number;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!passageTarget) return;
+    const book = CANON_BOOKS.find(b => b.name.toLowerCase() === passageTarget.book.toLowerCase());
+    if (book) {
+      setReaderLaunch({
+        token: Date.now(),
+        chapter: passageTarget.chapter,
+        verseStart: passageTarget.verseStart,
+        verseEnd: passageTarget.verseEnd,
+      });
+      setActiveBookForModal(book);
+    }
+  }, [passageTarget]);
 
   // For Grid View
   const [translationLenses, setTranslationLenses] = useState<Record<string, 'street' | 'canonical'>>({});
@@ -577,11 +601,23 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
         <OpenBookModal
           book={activeBookForModal}
           allBooks={filteredBooks}
-          onClose={() => setActiveBookForModal(null)}
-          onSelectBook={(b) => setActiveBookForModal(b)}
+          onClose={() => {
+            setActiveBookForModal(null);
+            setReaderLaunch(null);
+            onPassageOpened?.();
+          }}
+          onSelectBook={(b) => {
+            setReaderLaunch(null);
+            setActiveBookForModal(b);
+          }}
           onOpenWordForge={onOpenWordForge}
           onSetMemoryVerse={onSetMemoryVerse}
           onSelectStoryQuest={onSelectStoryQuest}
+          initialMode={readerLaunch ? 'reader' : 'briefing'}
+          initialChapter={readerLaunch?.chapter ?? 1}
+          launchToken={readerLaunch?.token ?? 0}
+          highlightVerseStart={readerLaunch?.verseStart}
+          highlightVerseEnd={readerLaunch?.verseEnd}
         />
 
         {/* Toast Popup */}
