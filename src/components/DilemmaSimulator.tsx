@@ -251,7 +251,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-8 pb-36 sm:pb-40 md:pb-48 text-left">
       {/* Header */}
       <div className="mb-6">
-        <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-1">
+        <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
           <ShieldAlert className="w-4 h-4" />
           <span>Real-Life Tactical Simulator</span>
         </div>
@@ -279,7 +279,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
           </div>
           <button
             onClick={() => setIsCampaignFocus(false)}
-            className="text-xs text-amber-700 hover:text-amber-600 dark:text-amber-400 dark:hover:text-amber-300 underline underline-offset-2 transition-colors font-semibold"
+            className="text-xs text-amber-800 hover:text-amber-600 dark:text-amber-400 dark:hover:text-amber-300 underline underline-offset-2 transition-colors font-semibold"
           >
             Browse All Scenarios (Free Roam)
           </button>
@@ -289,7 +289,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
             <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none" role="tablist" aria-label="Dilemma categories">
               <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400 flex items-center gap-1 pl-1">
-                <Filter className="w-3 h-3 text-amber-600 dark:text-amber-500" /> Category:
+                <Filter className="w-3 h-3 text-amber-800 dark:text-amber-500" /> Category:
               </span>
               {categories.map(cat => (
                 <button
@@ -318,7 +318,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                 handleSelectDilemma(dailyDilemma.id);
                 setIsCampaignFocus(true);
               }}
-              className="text-xs font-mono text-amber-700 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 font-bold shrink-0 ml-auto pb-2"
+              className="text-xs font-mono text-amber-800 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 font-bold shrink-0 ml-auto pb-2"
             >
               Focus on Daily Campaign (1 Dilemma)
             </button>
@@ -340,7 +340,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                   }`}
                 >
                   {isDone && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />}
-                  {d.id === dailyDilemma.id && <span className="text-amber-600 dark:text-amber-400 text-xs shrink-0" title="Today's Featured Scenario">★</span>}
+                  {d.id === dailyDilemma.id && <span className="text-amber-800 dark:text-amber-400 text-xs shrink-0" title="Today's Featured Scenario">★</span>}
                   <span>{d.title}</span>
                 </button>
               );
@@ -359,8 +359,8 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
               {dilemma.category}
             </span>
             {dilemma.id === getDailyDilemma().id && (
-              <span className="flex items-center gap-1 text-[10px] font-mono font-bold text-amber-800 dark:text-amber-300 bg-amber-500/15 px-2.5 py-0.5 rounded-full">
-                <Sparkles className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+              <span className="flex items-center gap-1 text-[11px] font-mono font-bold text-amber-800 dark:text-amber-300 bg-amber-500/15 px-2.5 py-0.5 rounded-full">
+                <Sparkles className="w-3 h-3 text-amber-800 dark:text-amber-400" />
                 <span>Today's Daily Dilemma</span>
               </span>
             )}
@@ -383,7 +383,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
 
         {/* The Situation */}
         <div className="p-4 rounded-xl bg-white/80 dark:bg-stone-950/70 text-sm text-stone-800 dark:text-stone-200 leading-relaxed font-reading mb-4">
-          <strong className="text-amber-700 dark:text-amber-400 block font-sans font-bold text-xs uppercase tracking-wider mb-1">
+          <strong className="text-amber-800 dark:text-amber-400 block font-sans font-bold text-xs uppercase tracking-wider mb-1">
             The Incident:
           </strong>
           {dilemma.situationSetup}
@@ -445,7 +445,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
           <form onSubmit={handleSubmitHeartCheck} className="p-5 sm:p-6 rounded-2xl bg-stone-100/70 dark:bg-stone-900/50 transition-colors">
             <div className="mb-4">
               <h3 className="text-base md:text-lg font-serif font-bold text-stone-900 dark:text-parchment-50 flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                <Sparkles className="w-4 h-4 text-amber-800 dark:text-amber-400" />
                 <span>What Would YOU Honestly Do?</span>
               </h3>
               <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">
@@ -525,7 +525,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
               {/* Stance Badge & Motivation */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[11px] font-mono text-amber-700 dark:text-amber-400 uppercase tracking-widest font-bold">
+                  <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 uppercase tracking-widest font-bold">
                     Diagnostic Heart Check
                   </span>
                   <span className={`text-xs px-3 py-1 rounded-full font-bold ${evaluationResult.badgeColor}`}>
@@ -546,17 +546,17 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                 <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/10 dark:bg-amber-950/30">
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2.5 border-b border-stone-200/60 dark:border-stone-800/60">
                     <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                      <Sparkles className="w-4 h-4 text-amber-800 dark:text-amber-400" />
                       <h4 className="text-xs sm:text-sm font-serif font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider">
                         Analysis of Your Proposed Play
                       </h4>
                     </div>
 
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 font-bold">
+                      <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 font-bold">
                         Tactic: {evaluationResult.userWordsAnalysis.primaryTactic}
                       </span>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-stone-200/60 dark:bg-stone-800 text-stone-600 dark:text-stone-400">
+                      <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-stone-200/60 dark:bg-stone-800 text-stone-600 dark:text-stone-400">
                         {evaluationResult.userWordsAnalysis.detectedTone}
                       </span>
                     </div>
@@ -564,7 +564,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
 
                   {evaluationResult.userWordsAnalysis.userQuoteSummary && (
                     <div className="mb-3 px-3 py-2 rounded-xl bg-white/80 dark:bg-black/30 text-xs text-stone-700 dark:text-stone-300">
-                      <span className="text-stone-500 dark:text-stone-400 text-[10px] font-mono uppercase tracking-wider block mb-0.5">Your Words:</span>
+                      <span className="text-stone-500 dark:text-stone-400 text-[11px] font-mono uppercase tracking-wider block mb-0.5">Your Words:</span>
                       <span className="text-amber-800 dark:text-amber-200 italic font-reading">{evaluationResult.userWordsAnalysis.userQuoteSummary}</span>
                     </div>
                   )}
@@ -577,13 +577,13 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                   {evaluationResult.tacticalProsCons && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-stone-200/60 dark:border-stone-800/60 text-xs">
                       <div className="p-3 rounded-xl bg-emerald-500/10 dark:bg-emerald-950/30">
-                        <strong className="text-emerald-700 dark:text-emerald-400 block mb-1 font-mono uppercase text-[10px] tracking-wider">
+                        <strong className="text-emerald-700 dark:text-emerald-400 block mb-1 font-mono uppercase text-[11px] tracking-wider">
                           ✓ Tactical Strength
                         </strong>
                         <span className="text-stone-700 dark:text-stone-300 leading-relaxed">{evaluationResult.tacticalProsCons.strength}</span>
                       </div>
                       <div className="p-3 rounded-xl bg-rose-500/10 dark:bg-rose-950/20">
-                        <strong className="text-rose-700 dark:text-rose-400 block mb-1 font-mono uppercase text-[10px] tracking-wider">
+                        <strong className="text-rose-700 dark:text-rose-400 block mb-1 font-mono uppercase text-[11px] tracking-wider">
                           ⚠️ Critical Vulnerability
                         </strong>
                         <span className="text-stone-700 dark:text-stone-300 leading-relaxed">{evaluationResult.tacticalProsCons.vulnerability}</span>
@@ -603,7 +603,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                         The Mentor's Socratic Counter-Challenge (Turn 2)
                       </h4>
                     </div>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/60 text-indigo-800 dark:text-indigo-200 font-bold">
+                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/60 text-indigo-800 dark:text-indigo-200 font-bold">
                       Discipleship Drill
                     </span>
                   </div>
@@ -651,7 +651,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                     <div className="p-4 rounded-xl bg-stone-100/70 dark:bg-black/50 mt-3 space-y-3">
                       <div className="flex items-center justify-between">
                         <div>
-                          <span className="text-[10px] font-mono text-amber-700 dark:text-amber-400 uppercase tracking-wider block font-bold">
+                          <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 uppercase tracking-wider block font-bold">
                             Biblical Tactical Temperament:
                           </span>
                           <span className="text-sm font-serif font-bold text-stone-900 dark:text-parchment-50">
@@ -698,7 +698,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                         <div>
                           <div className="flex justify-between text-stone-500 dark:text-stone-400 mb-1">
                             <span>Prudence / Strategy:</span>
-                            <span className="text-amber-700 dark:text-amber-400 font-bold">{temperamentProfile.prudenceScore}%</span>
+                            <span className="text-amber-800 dark:text-amber-400 font-bold">{temperamentProfile.prudenceScore}%</span>
                           </div>
                           <div className="w-full h-1.5 bg-stone-200 dark:bg-stone-900 rounded-full overflow-hidden">
                             <div className="h-full bg-amber-500 rounded-full" style={{ width: `${temperamentProfile.prudenceScore}%` }} />
@@ -724,7 +724,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Human Validation */}
                 <div className="p-4 rounded-xl bg-stone-100/70 dark:bg-stone-900/60 text-xs md:text-sm">
-                  <div className="flex items-center gap-1.5 text-amber-700 dark:text-amber-400 font-bold uppercase tracking-wider text-[11px] mb-2">
+                  <div className="flex items-center gap-1.5 text-amber-800 dark:text-amber-400 font-bold uppercase tracking-wider text-[11px] mb-2">
                     <Flame className="w-3.5 h-3.5" />
                     <span>Why This Reaction Is 100% Human:</span>
                   </div>
@@ -776,7 +776,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                   </p>
 
                   <p className="text-xs text-amber-800 dark:text-amber-300/90 font-sans">
-                    <strong className="text-amber-700 dark:text-amber-400">Street Meaning: </strong>
+                    <strong className="text-amber-800 dark:text-amber-400">Street Meaning: </strong>
                     {evaluationResult.scriptureStreetMeaning}
                   </p>
                 </div>
@@ -886,7 +886,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                         {play.playType}
                       </span>
                       {play.isRecommended && (
-                        <span className="text-[10px] bg-emerald-100 dark:bg-emerald-950/90 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 rounded-full font-bold">
+                        <span className="text-[11px] bg-emerald-100 dark:bg-emerald-950/90 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 rounded-full font-bold">
                           ★ Recommended
                         </span>
                       )}

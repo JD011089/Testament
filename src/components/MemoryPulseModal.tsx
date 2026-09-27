@@ -221,13 +221,13 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          className="relative w-full max-w-lg h-[100dvh] sm:h-auto sm:max-h-[92vh] bg-white dark:bg-[#0e1117] border-0 sm:border border-amber-400 dark:border-amber-500/40 rounded-none sm:rounded-3xl shadow-none sm:shadow-2xl overflow-hidden my-auto flex flex-col text-left text-stone-900 dark:text-parchment-100 outline-none"
+          className="relative w-full max-w-lg h-[100dvh] sm:h-auto sm:max-h-[92vh] bg-white dark:bg-ink-raised border-0 sm:border border-amber-400 dark:border-amber-500/40 rounded-none sm:rounded-3xl shadow-none sm:shadow-2xl overflow-hidden my-auto flex flex-col text-left text-stone-900 dark:text-parchment-100 outline-none"
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
           <div className="p-4 sm:p-6 border-b border-stone-200/60 dark:border-stone-800 bg-stone-50 dark:bg-gradient-to-r dark:from-stone-900 dark:via-[#131720] dark:to-stone-900 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400">
+              <div className="w-9 h-9 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-800 dark:text-amber-400">
                 <Bell className="w-5 h-5 animate-pulse" />
               </div>
               <div>
@@ -255,14 +255,14 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
           <div className="p-4 sm:p-6 overflow-y-auto space-y-5 text-stone-800 dark:text-parchment-100 scrollbar-none">
             
             {/* Target Verse Focus Card */}
-            <div className="p-4 rounded-2xl bg-stone-100/70 dark:bg-[#141822] relative overflow-hidden">
+            <div className="p-4 rounded-2xl bg-stone-100/70 dark:bg-ink-overlay relative overflow-hidden">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-mono uppercase tracking-widest font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300">
+                  <span className="text-[11px] font-mono uppercase tracking-widest font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300">
                     Active Memory Target
                   </span>
                   {activeVerse.heroName && (
-                    <span className="text-[10px] font-mono text-stone-500 dark:text-stone-400">
+                    <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400">
                       from {activeVerse.heroName}
                     </span>
                   )}
@@ -270,13 +270,13 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
 
                 <button
                   onClick={() => setShowVerseSelector(!showVerseSelector)}
-                  className="text-xs text-amber-700 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 font-semibold underline underline-offset-2"
+                  className="text-xs text-amber-800 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 font-semibold underline underline-offset-2"
                 >
                   {showVerseSelector ? 'Hide List' : 'Change Verse'}
                 </button>
               </div>
 
-              <h4 className="text-base sm:text-lg font-serif font-bold text-amber-700 dark:text-amber-300">
+              <h4 className="text-base sm:text-lg font-serif font-bold text-amber-800 dark:text-amber-300">
                 {activeVerse.reference}
               </h4>
               <p className="text-xs sm:text-sm text-stone-700 dark:text-stone-300 italic my-1.5 leading-relaxed">
@@ -286,7 +286,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
               {/* Verse Selector Dropdown */}
               {showVerseSelector && (
                 <div className="mt-3 pt-3 border-t border-stone-200/60 dark:border-stone-800 max-h-48 overflow-y-auto space-y-1.5 pr-1">
-                  <span className="text-[10px] uppercase font-mono font-bold text-stone-500 dark:text-stone-400 block mb-1">
+                  <span className="text-[11px] uppercase font-mono font-bold text-stone-500 dark:text-stone-400 block mb-1">
                     Select any verse from quests or arsenal:
                   </span>
                   {allVerses.map(v => (
@@ -306,7 +306,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
                       <span className="truncate mr-2">
                         {v.heroName ? `[${v.heroName}] ` : ''}{v.reference}
                       </span>
-                      <span className="text-[10px] opacity-75 shrink-0">{v.category}</span>
+                      <span className="text-[11px] opacity-75 shrink-0">{v.category}</span>
                     </button>
                   ))}
                 </div>
@@ -316,7 +316,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
             {/* Notification Permission Banner */}
             {permission !== 'granted' && (
               <div className="p-3.5 rounded-2xl bg-amber-500/10 dark:bg-amber-950/40 flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <AlertCircle className="w-5 h-5 text-amber-800 dark:text-amber-400 shrink-0 mt-0.5" />
                 <div className="text-xs space-y-1">
                   <p className="text-stone-900 dark:text-parchment-100 font-semibold">
                     Browser notification permission required
@@ -339,7 +339,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
             <div className="space-y-2">
               <label className="text-xs font-mono font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300 flex items-center justify-between">
                 <span>Reminders Per Day</span>
-                <span className="text-amber-700 dark:text-amber-400 font-bold">{settings.frequencyPerDay} times daily</span>
+                <span className="text-amber-800 dark:text-amber-400 font-bold">{settings.frequencyPerDay} times daily</span>
               </label>
 
               <div className="grid grid-cols-4 gap-2">
@@ -354,7 +354,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
                     }`}
                   >
                     <div className="text-sm font-black">{freq}x</div>
-                    <div className="text-[9px] font-normal opacity-80">
+                    <div className="text-[11px] font-normal opacity-80">
                       {freq === 2 ? 'Morning/Eve' : freq === 3 ? 'Spaced (Rec)' : freq === 4 ? 'Steady' : 'Sprint'}
                     </div>
                   </button>
@@ -366,14 +366,14 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs font-mono text-stone-700 dark:text-stone-300">
                 <span className="font-bold uppercase tracking-wider">Waking Hours Window</span>
-                <span className="text-amber-700 dark:text-amber-400 font-semibold">
+                <span className="text-amber-800 dark:text-amber-400 font-semibold">
                   {formatHour(settings.startHour)} – {formatHour(settings.endHour)}
                 </span>
               </div>
 
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="p-2.5 rounded-xl bg-stone-100/70 dark:bg-stone-900">
-                  <label className="text-[10px] text-stone-500 dark:text-stone-400 block mb-1">Start Time</label>
+                  <label className="text-[11px] text-stone-500 dark:text-stone-400 block mb-1">Start Time</label>
                   <select
                     value={settings.startHour}
                     onChange={(e) => {
@@ -390,7 +390,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
                 </div>
 
                 <div className="p-2.5 rounded-xl bg-stone-100/70 dark:bg-stone-900">
-                  <label className="text-[10px] text-stone-500 dark:text-stone-400 block mb-1">Quiet Cutoff (End)</label>
+                  <label className="text-[11px] text-stone-500 dark:text-stone-400 block mb-1">Quiet Cutoff (End)</label>
                   <select
                     value={settings.endHour}
                     onChange={(e) => {
@@ -409,9 +409,9 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
 
               {/* Real-time schedule badges */}
               <div className="pt-1 flex items-center gap-1.5 flex-wrap">
-                <span className="text-[10px] font-mono text-stone-500 dark:text-stone-400">Scheduled:</span>
+                <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400">Scheduled:</span>
                 {currentSlots.map((slot, idx) => (
-                  <span key={idx} className="text-[10px] font-mono px-2 py-0.5 rounded bg-stone-200/60 dark:bg-stone-850 text-amber-800 dark:text-amber-300">
+                  <span key={idx} className="text-[11px] font-mono px-2 py-0.5 rounded bg-stone-200/60 dark:bg-stone-850 text-amber-800 dark:text-amber-300">
                     {formatSlot12h(slot)}
                   </span>
                 ))}
@@ -419,7 +419,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
 
               {nextReminder && (
                 <div className="flex items-center gap-1.5 text-[11px] font-mono text-amber-900 dark:text-amber-300/90 bg-amber-500/10 dark:bg-amber-950/40 rounded-lg px-2.5 py-1.5 mt-2">
-                  <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                  <Clock className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 shrink-0" />
                   <span>Next scheduled pulse: <strong className="text-amber-800 dark:text-amber-200">{nextReminder.label}</strong> ({nextReminder.remainingFormatted})</span>
                 </div>
               )}
@@ -469,11 +469,11 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
             <div className="p-3.5 rounded-2xl bg-stone-100/70 dark:bg-stone-900/90 space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-bold text-stone-800 dark:text-stone-300 flex items-center gap-1.5">
-                  <Smartphone className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                  <Smartphone className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
                   <span>Verify on Your Device</span>
                 </span>
                 {testSentMessage && (
-                  <span className="text-[11px] font-mono text-amber-600 dark:text-amber-400 animate-pulse">
+                  <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 animate-pulse">
                     {testSentMessage}
                   </span>
                 )}
@@ -485,7 +485,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
                   disabled={isSendingTest}
                   className="p-2 rounded-xl bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5"
                 >
-                  <Send className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                  <Send className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
                   <span>Test Verse Now</span>
                 </button>
 
@@ -495,7 +495,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
                   title="Sends in 4 seconds so you can lock your screen or switch apps"
                   className="p-2 rounded-xl bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5"
                 >
-                  <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                  <Clock className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
                   <span>Lock Screen (4s)</span>
                 </button>
 
@@ -505,12 +505,12 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
                   title="Simulate the system push notification for new app updates"
                   className="p-2 rounded-xl bg-amber-500/20 hover:bg-amber-500 hover:text-stone-950 text-amber-800 dark:text-amber-300 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                  <Sparkles className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
                   <span>Test Update Push</span>
                 </button>
               </div>
 
-              <p className="text-[10px] text-stone-500 leading-normal">
+              <p className="text-[11px] text-stone-500 leading-normal">
                 Tip: On iPhone/iPad, add Testament to your Home Screen first to receive notifications on your lock screen just like native apps.
               </p>
             </div>
@@ -518,7 +518,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
           </div>
 
           {/* Footer Actions */}
-          <div className="p-4 sm:p-5 border-t border-stone-200/60 dark:border-stone-800 bg-stone-50 dark:bg-[#0b0e13] flex items-center justify-between gap-3 shrink-0">
+          <div className="p-4 sm:p-5 border-t border-stone-200/60 dark:border-stone-800 bg-stone-50 dark:bg-ink flex items-center justify-between gap-3 shrink-0">
             {onOpenWordForge ? (
               <button
                 onClick={() => {

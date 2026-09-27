@@ -1,13 +1,14 @@
 {
-  "name": "Testament - Interactive Bible Journey",
+  "id": "/",
+  "name": "Testament — The Living Word",
   "short_name": "Testament",
   "description": "An interactive graphic-novel Bible study experience for adults. Plain English, real history, actionable wisdom.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#090b0e",
-  "theme_color": "#0f1217",
+  "theme_color": "#090b0e",
   "lang": "en",
-  "scope": "/",
   "orientation": "portrait-primary",
   "icons": [
     {
@@ -23,10 +24,26 @@
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "/icons/maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/home-narrow.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Home"
+    },
+    {
+      "src": "/screenshots/home-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Home"
     }
   ]
 }

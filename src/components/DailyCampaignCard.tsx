@@ -98,8 +98,8 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap mb-1">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-amber-700 dark:text-amber-400 font-bold px-2 py-0.5 rounded-full bg-amber-500/10 flex items-center gap-1">
-                <Target className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+              <span className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold px-2 py-0.5 rounded-full bg-amber-500/10 flex items-center gap-1">
+                <Target className="w-3 h-3 text-amber-800 dark:text-amber-400" />
                 <span>Today's Tactical Campaign</span>
               </span>
               <span className="text-xs font-mono text-stone-500 dark:text-stone-400">
@@ -107,11 +107,11 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
               </span>
             </div>
 
-            <h3 className="text-lg sm:text-2xl font-serif font-black text-stone-900 dark:text-parchment-50 leading-tight">
+            <h2 className="text-lg sm:text-2xl font-serif font-black text-stone-900 dark:text-parchment-50 leading-tight">
               {activeCampaign.title}
-            </h3>
+            </h2>
 
-            <p className="text-xs sm:text-sm text-amber-700 dark:text-amber-300/90 font-medium italic mt-0.5">
+            <p className="text-xs sm:text-sm text-amber-800 dark:text-amber-300/90 font-medium italic mt-0.5">
               Virtue: {activeCampaign.virtueTheme}
             </p>
             <p className="text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 mt-1">
@@ -122,8 +122,8 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
 
         {/* Right Action: Track Selector & Reward Pill */}
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-300 text-xs font-mono font-bold">
-            <Award className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-800 dark:text-amber-300 text-xs font-mono font-bold">
+            <Award className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
             <span>+{activeCampaign.bonusXP} XP</span>
           </div>
         </div>
@@ -138,7 +138,7 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
       <div className="relative z-10 mb-5 sm:mb-6">
         <div className="flex items-center justify-between text-xs font-mono mb-2">
           <div className="flex items-center gap-2">
-            <span className="text-amber-700 dark:text-amber-400 font-bold uppercase tracking-wider text-[11px] sm:text-xs">
+            <span className="text-amber-800 dark:text-amber-400 font-bold uppercase tracking-wider text-[11px] sm:text-xs">
               Mission Progression
             </span>
             <span className="text-stone-500 dark:text-stone-400 text-[11px] sm:text-xs">
@@ -184,7 +184,7 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
                 }`}>
                   {isDone ? '✓' : step.stepNumber}
                 </div>
-                <span className="text-[10px] font-mono uppercase tracking-wider truncate w-full">
+                <span className="text-[11px] font-mono uppercase tracking-wider truncate w-full">
                   {step.type === 'quest' ? 'Story' : step.type === 'dilemma' ? 'Dilemma' : step.type === 'wordforge' ? 'Forge' : step.type === 'proverb' ? 'Proverb' : step.type === 'psalm' ? 'Psalm' : 'Library'}
                 </span>
               </button>
@@ -216,7 +216,7 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
                     isDone 
                       ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' 
                       : isCurrent 
-                      ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold' 
+                      ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300 font-bold' 
                       : 'bg-stone-200/80 dark:bg-stone-800 text-stone-500 dark:text-stone-400'
                   }`}>
                     {isDone ? '✓' : step.icon}
@@ -224,7 +224,7 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
 
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
-                      <span className={`text-[10px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.2 rounded ${
+                      <span className={`text-[11px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.2 rounded ${
                         isDone 
                           ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300' 
                           : isCurrent 
@@ -234,21 +234,21 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
                         {step.badge}
                       </span>
                       {isCurrent && (
-                        <span className="text-[10px] font-mono text-amber-700 dark:text-amber-400 font-bold flex items-center gap-1">
-                          <Flame className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400" />
+                        <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 font-bold flex items-center gap-1">
+                          <Flame className="w-2.5 h-2.5 text-amber-800 dark:text-amber-400" />
                           <span>Current Objective</span>
                         </span>
                       )}
                       {isDone && (
-                        <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-400 font-semibold">
+                        <span className="text-[11px] font-mono text-emerald-700 dark:text-emerald-400 font-semibold">
                           Completed (+30 XP)
                         </span>
                       )}
                     </div>
 
-                    <h4 className="text-sm font-serif font-bold text-stone-900 dark:text-parchment-50 truncate">
+                    <h3 className="text-sm font-serif font-bold text-stone-900 dark:text-parchment-50 truncate">
                       {step.subtitle}
-                    </h4>
+                    </h3>
 
                     <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5 leading-relaxed">
                       {step.intel}

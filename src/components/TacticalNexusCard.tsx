@@ -64,10 +64,10 @@ export const TacticalNexusCard: React.FC<TacticalNexusCardProps> = ({ entityId, 
               >
                 <div>
                   <div className="flex items-center justify-between gap-1 mb-1">
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-100 dark:bg-cyan-950/80 text-cyan-800 dark:text-cyan-300 font-bold">
+                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-cyan-100 dark:bg-cyan-950/80 text-cyan-800 dark:text-cyan-300 font-bold">
                       {connection.badgeLabel}
                     </span>
-                    <div className="flex items-center gap-1 text-[10px] text-stone-500 dark:text-stone-400 font-mono">
+                    <div className="flex items-center gap-1 text-[11px] text-stone-500 dark:text-stone-400 font-mono">
                       {getIconForType(target.type)}
                       <span>{target.label}</span>
                     </div>
@@ -82,7 +82,7 @@ export const TacticalNexusCard: React.FC<TacticalNexusCardProps> = ({ entityId, 
                   </p>
                 </div>
 
-                <div className="text-[10px] font-mono text-amber-700 dark:text-amber-400 flex items-center justify-between pt-1 border-t border-stone-100 dark:border-stone-900">
+                <div className="text-[11px] font-mono text-amber-800 dark:text-amber-400 flex items-center justify-between pt-1 border-t border-stone-100 dark:border-stone-900">
                   <span>{target.scriptureRef || target.label}</span>
                   {onOpenEntity && (
                     <button 

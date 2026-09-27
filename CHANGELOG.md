@@ -5,6 +5,28 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0] - 2026-09-27
+
+### Security
+- **Narration key stays on the server**: Drive Mode, Briefing, and scripture listen call `/api/tts`. The function reads `ELEVENLABS_API_KEY` from the environment, caps text length, and rate-limits requests. The app no longer keeps a key in source or local storage. If the function fails, the browser reads the passage.
+
+### Added
+- **Real tab addresses**: Home, Library, Memorize, Dilemmas, and Saved have their own paths. The back button stays inside the app, and direct links rewrite to the app shell.
+- **Install screen assets**: Opaque maskable and Apple touch icons, a real favicon, theme colors for light and dark, and Open Graph, Twitter, canonical, robots, and sitemap tags.
+
+### Changed
+- **Lighter scene art**: Story images are served as WebP and AVIF at 768 and 1376 pixels, with lazy loading except for the home hero.
+- **Long-lived static cache**: Hashed assets, images, audio, and icons cache for a year. `index.html` and the service worker stay revalidated.
+- **First visit**: The install card waits until Battle Plan Calibration is finished or skipped, and a dismissal is remembered.
+- **Mobile layout**: The home action row scrolls with a fade edge. The campaign completion card sits above the bottom nav.
+- **Offline copy and cache**: Scene images, self-hosted fonts, and opened Bible chapters cache at runtime. The install prompt says saved content works offline.
+- **Light mode**: Amber labels, nav text, and selection color meet contrast on the cream background. The app name is Testament — The Living Word throughout.
+- **Smaller install**: MP3s are no longer precached. Library, Word Forge, Dilemmas, and Drive Mode load when opened.
+
+### Fixed
+- **World English Bible label**: The reader translation is named World English Bible (WEB).
+- **Service worker updates**: Fetch no longer opens IndexedDB. Update prompts go through the in-app banner, which tells the waiting worker to activate.
+
 ## [1.10.0] - 2026-09-26
 
 ### Added

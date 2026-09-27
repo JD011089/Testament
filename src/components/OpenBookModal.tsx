@@ -325,10 +325,10 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.98, y: 10 }}
           transition={{ duration: 0.2, ease: 'easeOut' }}
-          className="relative z-10 w-full h-[100dvh] sm:h-auto sm:max-h-[94vh] max-w-5xl rounded-none sm:rounded-3xl bg-[#fcfbfa] dark:bg-[#12151d] border-0 sm:border border-amber-500/40 shadow-2xl dark:shadow-black/90 overflow-x-hidden flex flex-col focus:outline-none touch-pan-y"
+          className="relative z-10 w-full h-[100dvh] sm:h-auto sm:max-h-[94vh] max-w-5xl rounded-none sm:rounded-3xl bg-surface dark:bg-ink-raised border-0 sm:border border-amber-500/40 shadow-2xl dark:shadow-black/90 overflow-x-hidden flex flex-col focus:outline-none touch-pan-y"
         >
           {/* Top Header Bar */}
-          <div className="flex items-center justify-between px-3.5 sm:px-6 py-2.5 sm:py-3 bg-stone-50 dark:bg-[#0c0e14] border-b border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 shrink-0">
+          <div className="flex items-center justify-between px-3.5 sm:px-6 py-2.5 sm:py-3 bg-stone-50 dark:bg-ink border-b border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 shrink-0">
             <div className="flex items-center gap-2 min-w-0">
               {/* Mobile Back Button */}
               <button
@@ -343,8 +343,8 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                 <span>Books</span>
               </button>
 
-              <BookOpen className="w-4 h-4 text-amber-600 dark:text-amber-500 shrink-0 hidden sm:inline" />
-              <span className="text-xs font-mono uppercase tracking-widest text-amber-700 dark:text-amber-400 font-bold truncate">
+              <BookOpen className="w-4 h-4 text-amber-800 dark:text-amber-500 shrink-0 hidden sm:inline" />
+              <span className="text-xs font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold truncate">
                 {book.name} <span className="hidden sm:inline">• Volume #{String(book.order).padStart(2, '0')} of 66</span>
               </span>
             </div>
@@ -367,7 +367,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
           </div>
 
           {/* MODE SELECTOR BAR: TACTICAL BRIEFING vs READ FULL SCRIPTURE */}
-          <div className="flex items-center justify-between gap-2 px-3 sm:px-6 py-2 bg-stone-100/70 dark:bg-[#10131b] border-b border-stone-200 dark:border-stone-800/90 shrink-0">
+          <div className="flex items-center justify-between gap-2 px-3 sm:px-6 py-2 bg-stone-100/70 dark:bg-ink-raised border-b border-stone-200 dark:border-stone-800/90 shrink-0">
             <div className="grid grid-cols-2 p-1 rounded-xl bg-white dark:bg-stone-900 border border-stone-250 dark:border-stone-800 shadow-xs w-full sm:w-auto sm:inline-flex">
               <button
                 onClick={() => {
@@ -402,10 +402,10 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
 
             {/* Quick meta indicators (desktop only) */}
             <div className="hidden sm:flex items-center gap-2">
-              <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-stone-200/80 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-semibold">
+              <span className="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-stone-200/80 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-semibold">
                 {book.testament === 'OT' ? 'Old Testament' : 'New Testament'}
               </span>
-              <span className="text-[10px] font-mono text-amber-700 dark:text-amber-400 font-semibold">
+              <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 font-semibold">
                 {book.division}
               </span>
             </div>
@@ -419,13 +419,13 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                 <div>
                   {/* Meta badges */}
                   <div className="flex flex-wrap items-center gap-2 mb-3">
-                    <span className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 rounded-md bg-amber-500/15 text-amber-800 dark:text-amber-400 border border-amber-500/30 font-bold">
+                    <span className="text-[11px] font-mono uppercase tracking-widest px-2.5 py-1 rounded-md bg-amber-500/15 text-amber-800 dark:text-amber-400 border border-amber-500/30 font-bold">
                       {book.testament === 'OT' ? 'Old Testament' : 'New Testament'}
                     </span>
-                    <span className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 rounded-md bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
+                    <span className="text-[11px] font-mono uppercase tracking-widest px-2.5 py-1 rounded-md bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
                       {book.division}
                     </span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-red-100/80 dark:bg-red-950/60 text-red-800 dark:text-red-300 border border-red-300 dark:border-red-800/50 flex items-center gap-1">
+                    <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-red-100/80 dark:bg-red-950/60 text-red-800 dark:text-red-300 border border-red-300 dark:border-red-800/50 flex items-center gap-1">
                       <Flame className="w-3 h-3 text-red-600 dark:text-red-400" />
                       {book.lifeTheme}
                     </span>
@@ -435,7 +435,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                   <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black text-stone-900 dark:text-parchment-50 leading-tight">
                     {book.name}
                   </h2>
-                  <p className="text-amber-700 dark:text-amber-400 font-serif text-base sm:text-lg font-bold mt-1">
+                  <p className="text-amber-800 dark:text-amber-400 font-serif text-base sm:text-lg font-bold mt-1">
                     "{book.codename}"
                   </p>
                   <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 mt-1 italic leading-relaxed">
@@ -444,17 +444,17 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
 
                   {/* 30-Second Crisis SitRep */}
                   <div className="mt-6 rounded-2xl bg-white dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 p-4 space-y-3 shadow-xs">
-                    <div className="text-[11px] font-mono uppercase tracking-widest text-amber-700 dark:text-amber-500/90 font-bold">
+                    <div className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-500/90 font-bold">
                       ⚡ 30-Second Crisis SitRep
                     </div>
                     <div>
-                      <div className="text-[10px] font-mono uppercase text-stone-500 dark:text-stone-400 font-semibold">Author & Context</div>
+                      <div className="text-[11px] font-mono uppercase text-stone-500 dark:text-stone-400 font-semibold">Author & Context</div>
                       <p className="text-xs text-stone-700 dark:text-stone-200 mt-0.5 leading-relaxed font-sans">
                         {book.authorContext}
                       </p>
                     </div>
                     <div>
-                      <div className="text-[10px] font-mono uppercase text-red-600 dark:text-red-400/90 font-semibold">Historical Peril</div>
+                      <div className="text-[11px] font-mono uppercase text-red-600 dark:text-red-400/90 font-semibold">Historical Peril</div>
                       <p className="text-xs text-stone-700 dark:text-stone-200 mt-0.5 leading-relaxed font-sans">
                         {book.historicalPeril}
                       </p>
@@ -478,7 +478,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                     onClick={handleToggleBriefingAudio}
                     className={`w-full flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border text-xs font-semibold transition-all ${
                       isPlayingAudio
-                        ? 'bg-amber-500 text-stone-950 border-amber-400 shadow-glow-gold'
+                        ? 'bg-amber-500 text-stone-950 border-amber-400 shadow-glow'
                         : 'bg-white hover:bg-stone-100 dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700 hover:border-amber-500/50 shadow-xs'
                     }`}
                   >
@@ -489,7 +489,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                       </>
                     ) : (
                       <>
-                        <Volume2 className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                        <Volume2 className="w-4 h-4 text-amber-800 dark:text-amber-400" />
                         <span>Listen to Situational Voice Briefing</span>
                       </>
                     )}
@@ -498,7 +498,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
               </div>
 
               {/* RIGHT PAGE: Anchor Scripture & Action Launcher */}
-              <div className="p-5 sm:p-7 md:p-8 flex flex-col justify-between space-y-6 bg-stone-50/60 dark:bg-[#0f131a]">
+              <div className="p-5 sm:p-7 md:p-8 flex flex-col justify-between space-y-6 bg-stone-50/60 dark:bg-ink-raised">
                 <div>
                   {/* Jump Straight to Chapter Reader Banner */}
                   <div 
@@ -516,17 +516,17 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                         <div className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100">
                           Read All {totalChapters} Chapters & Verses
                         </div>
-                        <p className="text-[11px] text-amber-700 dark:text-amber-400">
+                        <p className="text-[11px] text-amber-800 dark:text-amber-400">
                           Jump straight into full scripture with zero railroading
                         </p>
                       </div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-amber-600 dark:text-amber-400 group-hover:translate-x-0.5 transition-transform" />
+                    <ChevronRight className="w-4 h-4 text-amber-800 dark:text-amber-400 group-hover:translate-x-0.5 transition-transform" />
                   </div>
 
                   {/* Dual-Lens Scripture Header */}
                   <div className="flex items-center justify-between mb-3">
-                    <div className="text-xs font-mono font-bold uppercase tracking-widest text-amber-700 dark:text-amber-400">
+                    <div className="text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400">
                       Anchor Scripture
                     </div>
                     <button
@@ -534,7 +534,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                         soundEngine.playSnap();
                         setLens(l => (l === 'street' ? 'canonical' : 'street'));
                       }}
-                      className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-white dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-800 border border-amber-400/60 dark:border-amber-500/40 text-amber-800 dark:text-amber-300 transition-colors shadow-xs"
+                      className="text-[11px] font-mono font-bold px-2.5 py-1 rounded-full bg-white dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-800 border border-amber-400/60 dark:border-amber-500/40 text-amber-800 dark:text-amber-300 transition-colors shadow-xs"
                     >
                       Lens: {lens === 'street' ? '⚡ Street Plain English' : '📜 Canonical Word-for-Word'}
                     </button>
@@ -543,8 +543,8 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                   {/* Scripture Text Box */}
                   <div className="rounded-2xl bg-white dark:bg-stone-950/90 border border-stone-200 dark:border-stone-800 p-5 shadow-xs dark:shadow-inner">
                     <div className="flex items-center justify-between text-xs font-mono text-stone-500 dark:text-stone-400 mb-2">
-                      <span className="text-amber-700 dark:text-amber-400 font-bold">{book.anchorScripture.reference}</span>
-                      <span className="text-[10px] uppercase text-stone-400 dark:text-stone-500 font-semibold">
+                      <span className="text-amber-800 dark:text-amber-400 font-bold">{book.anchorScripture.reference}</span>
+                      <span className="text-[11px] uppercase text-stone-400 dark:text-stone-500 font-semibold">
                         {lens === 'street' ? 'Modern Applied' : 'CSB / ESV'}
                       </span>
                     </div>
@@ -554,7 +554,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                     </blockquote>
 
                     <div className="mt-4 pt-3 border-t border-stone-200 dark:border-stone-800/80 flex items-start gap-2">
-                      <span className="text-[10px] font-mono text-amber-700 dark:text-amber-400 uppercase tracking-wider font-bold shrink-0 mt-0.5">
+                      <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 uppercase tracking-wider font-bold shrink-0 mt-0.5">
                         Ground Rule:
                       </span>
                       <p className="text-xs text-stone-700 dark:text-stone-300 leading-normal font-sans">
@@ -568,8 +568,8 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                     <div className="mt-5 rounded-2xl bg-gradient-to-r from-amber-100/80 via-white to-amber-50/60 dark:from-amber-950/40 dark:via-stone-900 dark:to-amber-950/20 border border-amber-300 dark:border-amber-500/50 p-4 shadow-xs">
                       <div className="flex items-center justify-between gap-3">
                         <div>
-                          <div className="text-[10px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold flex items-center gap-1.5">
-                            <Sparkles className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                          <div className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold flex items-center gap-1.5">
+                            <Sparkles className="w-3 h-3 text-amber-800 dark:text-amber-400" />
                             <span>Interactive Module Ready</span>
                           </div>
                           <p className="text-xs text-stone-600 dark:text-stone-300 mt-1">
@@ -602,7 +602,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                       }}
                       className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-white hover:bg-stone-100 dark:bg-stone-900 dark:hover:bg-stone-800 border border-stone-200 dark:border-stone-700 hover:border-amber-500 text-xs text-stone-700 dark:text-stone-200 font-semibold transition-all shadow-xs"
                     >
-                      <Brain className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                      <Brain className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
                       <span>Train Word Forge</span>
                     </button>
 
@@ -627,10 +627,10 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
             /* VIEW 2: FULL SCRIPTURE CHAPTER & VERSE READER */
             <div 
               ref={readerScrollRef}
-              className="flex-1 overflow-x-hidden overflow-y-auto flex flex-col bg-[#fcfbfa] dark:bg-[#0c0e14] w-full max-w-full touch-pan-y"
+              className="flex-1 overflow-x-hidden overflow-y-auto flex flex-col bg-surface dark:bg-ink w-full max-w-full touch-pan-y"
             >
               {/* READER CONTROLS TOOLBAR */}
-              <div className="sticky top-0 z-20 px-3 sm:px-6 py-2.5 bg-white/95 dark:bg-[#12161f]/95 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 flex flex-wrap items-center justify-between gap-2 sm:gap-3 shadow-xs w-full max-w-full overflow-x-hidden">
+              <div className="sticky top-0 z-20 px-3 sm:px-6 py-2.5 bg-white/95 dark:bg-ink-raised/95 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 flex flex-wrap items-center justify-between gap-2 sm:gap-3 shadow-xs w-full max-w-full overflow-x-hidden">
                 {/* Left: Chapter Selector Controls */}
                 <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                   <button
@@ -661,7 +661,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                         </option>
                       ))}
                     </select>
-                    <ChevronDown className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <ChevronDown className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
 
                   <button
@@ -735,7 +735,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                     onClick={handleToggleChapterAudio}
                     className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border text-[11px] sm:text-xs font-semibold transition-all ${
                       isPlayingChapterAudio
-                        ? 'bg-amber-500 text-stone-950 border-amber-600 shadow-glow-gold'
+                        ? 'bg-amber-500 text-stone-950 border-amber-600 shadow-glow'
                         : 'bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 text-stone-700 dark:text-stone-300 border-stone-250 dark:border-stone-800'
                     }`}
                     title="Listen to full chapter"
@@ -785,7 +785,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                   <div className="w-full max-w-full overflow-x-hidden">
                     {/* Chapter Header */}
                     <div className="text-center pb-5 sm:pb-8 mb-5 sm:mb-8 border-b border-stone-200 dark:border-stone-800">
-                      <span className="text-xs font-mono uppercase tracking-widest text-amber-700 dark:text-amber-400 font-bold block mb-1">
+                      <span className="text-xs font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold block mb-1">
                         {book.name}
                       </span>
                       <h2 className="text-2xl sm:text-4xl font-serif font-black text-stone-900 dark:text-parchment-50">
@@ -816,7 +816,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                                 : 'hover:bg-stone-100/70 dark:hover:bg-stone-900/50 text-stone-800 dark:text-stone-200'
                             }`}
                           >
-                            <span className="inline-block text-[11px] font-mono font-bold text-amber-700 dark:text-amber-400 mr-2 select-none align-baseline shrink-0">
+                            <span className="inline-block text-[11px] font-mono font-bold text-amber-800 dark:text-amber-400 mr-2 select-none align-baseline shrink-0">
                               {v.verse}
                             </span>
                             <span className="break-words">{v.text}</span>
@@ -884,7 +884,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                           soundEngine.playClick();
                           setActiveMode('briefing');
                         }}
-                        className="w-full sm:w-auto text-xs font-mono font-bold text-amber-700 dark:text-amber-400 hover:underline py-1 text-center order-first sm:order-none"
+                        className="w-full sm:w-auto text-xs font-mono font-bold text-amber-800 dark:text-amber-400 hover:underline py-1 text-center order-first sm:order-none"
                       >
                         View Tactical Briefing
                       </button>

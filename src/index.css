@@ -3,6 +3,15 @@
 @tailwind utilities;
 
 @layer base {
+  ::selection {
+    background: rgba(146, 64, 14, 0.28);
+    color: #78350f;
+  }
+  html.dark ::selection {
+    background: rgba(217, 119, 6, 0.35);
+    color: #fde68a;
+  }
+
   html {
     overflow-x: hidden;
     overflow-y: scroll;
@@ -12,7 +21,7 @@
   }
 
   body {
-    @apply bg-[#fcfbfa] text-stone-900 dark:bg-iron-950 dark:text-parchment-100 font-sans antialiased;
+    @apply bg-surface text-stone-900 dark:bg-ink dark:text-parchment-100 font-sans antialiased;
     overflow-x: hidden;
     overflow-y: visible;
     min-height: 100vh;
@@ -76,16 +85,21 @@
 
 @layer utilities {
   .text-glow {
-    text-shadow: 0 0 15px rgba(249, 115, 22, 0.4);
+    text-shadow: 0 0 15px rgba(180, 83, 9, 0.35);
   }
   .text-gold-glow {
-    text-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+    text-shadow: 0 0 15px rgba(180, 83, 9, 0.35);
   }
-  .border-glow-gold {
-    box-shadow: 0 0 20px -3px rgba(217, 119, 6, 0.25);
-  }
+  .border-glow-gold,
   .border-glow-ember {
-    box-shadow: 0 0 20px -3px rgba(234, 88, 12, 0.3);
+    box-shadow: 0 0 20px -3px rgba(180, 83, 9, 0.28);
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
   }
 
   /* Accessible focus indicator */

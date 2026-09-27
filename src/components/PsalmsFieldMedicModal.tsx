@@ -93,21 +93,21 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          className="relative w-full max-w-4xl h-[100dvh] sm:h-auto sm:max-h-[94vh] bg-white dark:bg-[#0b0e14] border-0 sm:border border-amber-500/30 dark:border-amber-500/40 rounded-none sm:rounded-3xl shadow-none sm:shadow-2xl overflow-hidden my-auto flex flex-col text-left transition-colors outline-none"
+          className="relative w-full max-w-4xl h-[100dvh] sm:h-auto sm:max-h-[94vh] bg-white dark:bg-ink border-0 sm:border border-amber-500/30 dark:border-amber-500/40 rounded-none sm:rounded-3xl shadow-none sm:shadow-2xl overflow-hidden my-auto flex flex-col text-left transition-colors outline-none"
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
           <div className="p-4 sm:p-5 border-b border-stone-200/60 dark:border-stone-800 bg-stone-50 dark:bg-gradient-to-r dark:from-stone-900 dark:via-[#141824] dark:to-stone-900 flex flex-wrap items-center justify-between gap-3 shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-500/20 border border-amber-300 dark:border-amber-500/40 flex items-center justify-center text-amber-700 dark:text-amber-400 shrink-0">
-                <HeartHandshake className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+              <div className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-500/20 border border-amber-300 dark:border-amber-500/40 flex items-center justify-center text-amber-800 dark:text-amber-400 shrink-0">
+                <HeartHandshake className="w-5 h-5 text-amber-800 dark:text-amber-400" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-base sm:text-lg font-serif font-black text-stone-900 dark:text-parchment-50 leading-tight">
                     Psalms Field Medic
                   </h3>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/60 text-amber-900 dark:text-amber-300 font-bold uppercase tracking-wider">
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/60 text-amber-900 dark:text-amber-300 font-bold uppercase tracking-wider">
                     Soul Under Fire
                   </span>
                 </div>
@@ -121,8 +121,8 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
             <div className="flex items-center gap-2">
               {onToggleAmbience && (
                 <div className="flex items-center gap-1 bg-stone-100 dark:bg-stone-950 p-1 rounded-xl border border-stone-250 dark:border-stone-800 text-xs">
-                  <span className="text-[10px] font-mono text-stone-500 dark:text-stone-400 px-1.5 flex items-center gap-1">
-                    <Volume2 className="w-3 h-3 text-amber-600 dark:text-amber-500" />
+                  <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400 px-1.5 flex items-center gap-1">
+                    <Volume2 className="w-3 h-3 text-amber-800 dark:text-amber-500" />
                     <span className="hidden sm:inline">Atmosphere:</span>
                   </span>
                   <button
@@ -179,7 +179,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
           {/* Crisis Mood Triage Selector */}
           <div className="px-4 py-3 border-b border-stone-200 dark:border-stone-800/80 bg-stone-50 dark:bg-stone-950/70 shrink-0">
             <div className="text-[11px] font-mono text-stone-500 dark:text-stone-400 mb-2 flex items-center gap-1.5">
-              <Compass className="w-3.5 h-3.5 text-amber-600 dark:text-amber-500" />
+              <Compass className="w-3.5 h-3.5 text-amber-800 dark:text-amber-500" />
               <span>TRIAGE: What is attacking your soul right now?</span>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
@@ -214,13 +214,13 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
             <div className="max-w-3xl mx-auto space-y-5">
               
               {/* Active Prescription Card */}
-              <div className="p-5 sm:p-6 rounded-2xl bg-stone-50 dark:bg-[#121622] border-2 border-amber-500/25 dark:border-amber-500/30 shadow-xl relative overflow-hidden">
+              <div className="p-5 sm:p-6 rounded-2xl bg-stone-50 dark:bg-ink-raised border-2 border-amber-500/25 dark:border-amber-500/30 shadow-xl relative overflow-hidden">
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400 flex items-center gap-1.5">
                     <span>{activeItem.moodIcon}</span>
                     <span>Emergency Prescription • {activeItem.moodLabel}</span>
                   </span>
-                  <span className="text-sm font-mono font-bold text-amber-700 dark:text-amber-500">
+                  <span className="text-sm font-mono font-bold text-amber-800 dark:text-amber-500">
                     {activeItem.reference}
                   </span>
                 </div>
@@ -231,9 +231,9 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
 
                 {/* Symptom Check */}
                 <div className="p-3 rounded-xl bg-white dark:bg-black/40 border border-stone-250 dark:border-stone-800 text-xs text-stone-700 dark:text-stone-300 leading-relaxed mb-4 flex items-start gap-2.5">
-                  <ShieldAlert className="w-4 h-4 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
+                  <ShieldAlert className="w-4 h-4 text-amber-800 dark:text-amber-500 shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-mono font-bold text-amber-700 dark:text-amber-400 uppercase text-[10px] block mb-0.5">
+                    <span className="font-mono font-bold text-amber-800 dark:text-amber-400 uppercase text-[11px] block mb-0.5">
                       Symptom Audit
                     </span>
                     <span>{activeItem.symptomCheck}</span>
@@ -244,7 +244,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
                 <div className="p-4 sm:p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/25 border border-amber-200 dark:border-amber-800/40 relative mb-4">
                   <div className="flex items-center justify-between text-xs font-mono text-amber-800 dark:text-amber-400 mb-2">
                     <span className="font-bold flex items-center gap-1">
-                      <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                      <Sparkles className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
                       <span>Scripture Under Heavy Fire</span>
                     </span>
                     <button
@@ -264,7 +264,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
 
                   {/* Cave Backstory */}
                   <div className="pt-3 border-t border-amber-200 dark:border-amber-900/40 flex items-start gap-2 text-xs text-stone-700 dark:text-amber-300/80">
-                    <MapPin className="w-3.5 h-3.5 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
+                    <MapPin className="w-3.5 h-3.5 text-amber-800 dark:text-amber-500 shrink-0 mt-0.5" />
                     <div>
                       <strong className="text-stone-900 dark:text-amber-300">Where David Screamed This: </strong>
                       <span>{activeItem.caveBackstory}</span>
@@ -274,7 +274,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
 
                 {/* The 3-Step Field Medic Protocol */}
                 <div className="space-y-3 pt-2">
-                  <div className="text-xs font-mono font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                  <div className="text-xs font-mono font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400">
                     The 3-Step Field Medic Protocol
                   </div>
 
@@ -313,7 +313,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
                         }}
                         className="px-3.5 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-amber-800 dark:text-amber-400 border border-stone-250 dark:border-stone-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
                       >
-                        <Brain className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                        <Brain className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
                         <span>Lock in Word Forge</span>
                       </button>
                     )}
@@ -327,7 +327,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
                         }}
                         className="px-3.5 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-amber-800 dark:text-amber-400 border border-stone-250 dark:border-stone-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
                       >
-                        <Bell className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                        <Bell className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
                         <span>Train with Daily Pulse</span>
                       </button>
                     )}
@@ -347,7 +347,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
           </div>
 
           {/* Footer */}
-          <div className="p-3.5 sm:p-4 border-t border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#090b10] flex items-center justify-between text-xs text-stone-600 dark:text-stone-400 shrink-0">
+          <div className="p-3.5 sm:p-4 border-t border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-ink flex items-center justify-between text-xs text-stone-600 dark:text-stone-400 shrink-0">
             <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400 flex items-center gap-1">
               <span>Field medic prescriptions are designed for raw combat against despair</span>
             </span>

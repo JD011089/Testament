@@ -4,6 +4,7 @@ import type { CharacterDossier } from '../data/dossiers';
 import { soundEngine } from '../utils/audio';
 import { X, ShieldAlert, Zap, Award, ArrowRight } from 'lucide-react';
 import { useModalLock } from '../utils/useModalLock';
+import { ArtImage } from './ArtImage';
 
 interface DossierModalProps {
   isOpen: boolean;
@@ -45,13 +46,13 @@ export const DossierModal: React.FC<DossierModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="dossier-modal-title"
-        className="max-w-4xl w-full h-[100dvh] sm:h-auto sm:max-h-[90vh] bg-white dark:bg-[#11141b] border-0 sm:border-2 border-amber-400 dark:border-amber-600/50 rounded-none sm:rounded-3xl shadow-none sm:shadow-2xl overflow-hidden flex flex-col my-auto outline-none"
+        className="max-w-4xl w-full h-[100dvh] sm:h-auto sm:max-h-[90vh] bg-white dark:bg-ink-raised border-0 sm:border-2 border-amber-400 dark:border-amber-600/50 rounded-none sm:rounded-3xl shadow-none sm:shadow-2xl overflow-hidden flex flex-col my-auto outline-none"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
         <div className="p-5 md:p-6 border-b border-stone-200/60 dark:border-stone-800 flex items-center justify-between bg-stone-50 dark:bg-stone-950/60">
           <div>
-            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-1">
+            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
               <Zap className="w-4 h-4" />
               <span>Character Dossiers • Flawed Men, Real Impact</span>
             </div>
@@ -94,16 +95,18 @@ export const DossierModal: React.FC<DossierModalProps> = ({
           <div className="flex flex-col md:flex-row gap-6 items-start">
             {/* Image Thumbnail */}
             <div className="w-full md:w-56 h-48 rounded-2xl overflow-hidden shrink-0 bg-stone-100 dark:bg-stone-950">
-              <img 
-                src={character.image} 
-                alt={character.name} 
+              <ArtImage
+                src={character.image}
+                alt={character.name}
+                width={1376}
+                height={768}
                 className="w-full h-full object-cover"
               />
             </div>
 
             {/* Profile Core */}
             <div className="space-y-2 flex-1">
-              <span className="text-xs font-mono text-amber-700 dark:text-amber-400 uppercase tracking-widest font-bold">
+              <span className="text-xs font-mono text-amber-800 dark:text-amber-400 uppercase tracking-widest font-bold">
                 {character.era}
               </span>
               <h3 className="text-2xl md:text-3xl font-serif font-black text-stone-900 dark:text-parchment-50">
@@ -120,7 +123,7 @@ export const DossierModal: React.FC<DossierModalProps> = ({
 
           {/* Superpower vs Major Flaws Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl bg-emerald-500/10 dark:bg-[#141d17]">
+            <div className="p-4 rounded-xl bg-emerald-500/10 dark:bg-ink-raised">
               <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider mb-1.5">
                 <Award className="w-4 h-4" />
                 <span>Superpower</span>
@@ -130,7 +133,7 @@ export const DossierModal: React.FC<DossierModalProps> = ({
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-red-500/10 dark:bg-[#201414]">
+            <div className="p-4 rounded-xl bg-red-500/10 dark:bg-ink-raised">
               <div className="flex items-center gap-1.5 text-xs font-bold text-red-700 dark:text-red-400 uppercase tracking-wider mb-1.5">
                 <ShieldAlert className="w-4 h-4" />
                 <span>Major Flaws & Screw-Ups</span>
@@ -145,7 +148,7 @@ export const DossierModal: React.FC<DossierModalProps> = ({
 
           {/* Defining Moment */}
           <div className="p-4 rounded-xl bg-stone-100/70 dark:bg-stone-900 text-xs md:text-sm text-stone-700 dark:text-stone-300">
-            <strong className="text-amber-700 dark:text-amber-400 block mb-1">Defining Moment: </strong>
+            <strong className="text-amber-800 dark:text-amber-400 block mb-1">Defining Moment: </strong>
             {character.definingMoment}
           </div>
 
@@ -167,7 +170,7 @@ export const DossierModal: React.FC<DossierModalProps> = ({
               }}
               className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center gap-2 shadow-sm transition-all"
             >
-              <span>Play {character.name}’s Journey</span>
+              <span>Play {character.name}'s Journey</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>

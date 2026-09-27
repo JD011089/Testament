@@ -132,9 +132,9 @@ export const BookSpine: React.FC<BookSpineProps> = ({
             transition={{ duration: 0.15 }}
             className="w-56 p-2.5 rounded-xl bg-white/95 dark:bg-stone-900/95 border border-amber-500/50 backdrop-blur-md shadow-2xl text-left relative"
           >
-            <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-widest text-amber-700 dark:text-amber-400 font-bold mb-0.5">
+            <div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold mb-0.5">
               <span>Vol #{String(book.order).padStart(2, '0')}</span>
-              <span className="px-1.5 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 text-[9px] text-amber-800 dark:text-amber-300">
+              <span className="px-1.5 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 text-[11px] text-amber-800 dark:text-amber-300">
                 {book.testament}
               </span>
             </div>
@@ -144,7 +144,7 @@ export const BookSpine: React.FC<BookSpineProps> = ({
             <p className="text-[11px] text-stone-600 dark:text-stone-300 line-clamp-1 italic mt-0.5">
               "{book.codename}"
             </p>
-            <div className="text-[10px] text-amber-700 dark:text-amber-300/80 font-mono mt-1 flex items-center gap-1 font-semibold">
+            <div className="text-[11px] text-amber-800 dark:text-amber-300/80 font-mono mt-1 flex items-center gap-1 font-semibold">
               <span>⚡ Click to pull & open codex</span>
             </div>
 
@@ -196,7 +196,7 @@ export const BookSpine: React.FC<BookSpineProps> = ({
         {/* TOP EMBOSSED SPINE BAND (Rib) */}
         <div className="w-full flex flex-col items-center gap-1 z-10 shrink-0">
           <div className={`w-[90%] h-[3px] rounded-full border-t border-b ${style.ribColor} shadow-inner`} />
-          <span className="text-[9px] font-mono font-black tracking-tighter text-amber-400/80">
+          <span className="text-[11px] font-mono font-black tracking-tighter text-amber-400/80">
             {String(book.order).padStart(2, '0')}
           </span>
         </div>
@@ -222,7 +222,7 @@ export const BookSpine: React.FC<BookSpineProps> = ({
 
         {/* BOTTOM EMBOSSED SPINE BAND (Rib) & TESTAMENT TAG */}
         <div className="w-full flex flex-col items-center gap-1 z-10 shrink-0">
-          <span className={`text-[8px] font-mono font-extrabold uppercase px-1 py-0.2 rounded border ${style.badgeBg}`}>
+          <span className={`text-[11px] font-mono font-extrabold uppercase px-1 py-0.2 rounded border ${style.badgeBg}`}>
             {book.testament}
           </span>
           <div className={`w-[90%] h-[3px] rounded-full border-t border-b ${style.ribColor} shadow-inner`} />

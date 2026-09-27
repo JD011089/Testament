@@ -4,12 +4,9 @@ import { getTodayDateKey } from './dailyEngine';
 
 const STORAGE_KEY = 'testament_notification_settings';
 
-// Public VAPID key for Web Push subscription
-export const VAPID_PUBLIC_KEY = 'BEfEgb6cK-WggWIf4URhfzgTsoqCSG4-sS1FsejQVPHPPVJKq9YRc36oZZSGJ2-Sdz5XCsvJgKpwpTTF_eHGpZM';
-
-// Supabase configuration for storing push subscription endpoints (Zero-cost tier)
-export const SUPABASE_URL = 'https://ofdlhnbpkzkbuqbzcysz.supabase.co';
-export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mZGxobmJwa3prYnVxYnpjeXN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyNTY1MTgsImV4cCI6MjEwNTgzMjUxOH0.5PPJUd1Yyqc5wsjYp4X4CwS_cibfIYNbmNB-Tnx3t-U';
+const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 /**
  * Utility to convert a base64 string to a Uint8Array for PushManager subscription
@@ -157,13 +154,14 @@ export const subscribeToPush = async (): Promise<PushSubscription | null> => {
     // Check existing subscription first
     let subscription = await reg.pushManager.getSubscription();
     if (!subscription) {
+      if (!VAPID_PUBLIC_KEY) return null;
       try {
         subscription = await reg.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as unknown as BufferSource
         });
       } catch (subErr) {
-        console.info('Push subscription using sample VAPID key skipped or unsupported:', subErr);
+        console.info('Push subscription skipped:', subErr);
       }
     }
 
@@ -185,6 +183,7 @@ export const subscribeToPush = async (): Promise<PushSubscription | null> => {
  * Saves or updates the push subscription endpoint in Supabase
  */
 export const syncSubscriptionToSupabase = async (subscription: PushSubscription): Promise<boolean> => {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return false;
   try {
     const raw = subscription.toJSON();
     if (!raw.endpoint || !raw.keys?.p256dh || !raw.keys?.auth) return false;

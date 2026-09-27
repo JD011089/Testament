@@ -164,9 +164,9 @@ function buildMission(): ComposedDailyMission {
   const questStep: DailyCampaignStep = {
     stepNumber: 1,
     type: 'quest',
-    title: `Step 1: Decide in ${quest.heroName}'s story`,
+    title: `Step 1 • Decide in ${quest.heroName}'s story`,
     badge: 'Story Quest',
-    subtitle: `Act ${act.actNumber}: ${act.actTitle}`,
+    subtitle: `Act ${act.actNumber} • ${act.actTitle}`,
     targetId: quest.id,
     targetSecondaryId: act.id,
     actionLabel: 'Make the call',
@@ -177,7 +177,7 @@ function buildMission(): ComposedDailyMission {
   const dilemmaStep: DailyCampaignStep = {
     stepNumber: 2,
     type: 'dilemma',
-    title: `Step 2: What's the play?`,
+    title: `Step 2 • What's the play?`,
     badge: 'Real-Life Dilemma',
     subtitle: dilemma.title,
     targetId: dilemma.id,
@@ -189,7 +189,7 @@ function buildMission(): ComposedDailyMission {
   const forgeStep: DailyCampaignStep = {
     stepNumber: 3,
     type: 'wordforge',
-    title: dueVerse ? 'Step 3: Review a due verse' : 'Step 3: Lock the story verse',
+    title: dueVerse ? 'Step 3 • Review a due verse' : 'Step 3 • Lock the story verse',
     badge: dueVerse ? 'FSRS Review' : 'Scripture Memory',
     subtitle: forgeVerse ? forgeVerse.reference : quest.heroName,
     targetId: forgeVerse?.id || `story-${quest.id}`,
@@ -205,7 +205,7 @@ function buildMission(): ComposedDailyMission {
     applyStep = {
       stepNumber: 4,
       type: 'proverb',
-      title: 'Step 4: Apply the proverb',
+      title: 'Step 4 • Apply the proverb',
       badge: 'Proverbs',
       subtitle: proverb.target.title,
       targetId: proverb.target.id,
@@ -217,7 +217,7 @@ function buildMission(): ComposedDailyMission {
     applyStep = {
       stepNumber: 4,
       type: 'psalm',
-      title: 'Step 4: Pray the psalm',
+      title: 'Step 4 • Pray the psalm',
       badge: 'Psalms',
       subtitle: psalm.target.title,
       targetId: psalm.target.id,
@@ -229,13 +229,13 @@ function buildMission(): ComposedDailyMission {
     applyStep = {
       stepNumber: 4,
       type: 'canon',
-      title: 'Step 4: Open the library',
+      title: 'Step 4 • Open the library',
       badge: 'Field Library',
       subtitle: 'One chapter, then close the loop',
       targetId: 'library',
       actionLabel: 'Open Library',
       icon: '📖',
-      intel: 'Read one short passage that belongs to today’s story.',
+      intel: "Read one short passage that belongs to today's story.",
     };
   }
 

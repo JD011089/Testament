@@ -72,10 +72,6 @@ function handleUpdateFound(registration: ServiceWorkerRegistration) {
     })
   );
 
-  // 2. Dispatch OS-level push notification if notifications are enabled
-  if ('Notification' in window && Notification.permission === 'granted') {
-    sendUpdatePushNotification(registration);
-  }
 }
 
 /**

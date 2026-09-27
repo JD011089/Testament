@@ -367,7 +367,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
         <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
           {/* Narrator Persona Picker */}
           <div className="flex items-center gap-1 p-1 bg-stone-100 dark:bg-stone-900/90 rounded-xl border border-stone-200 dark:border-stone-800">
-            <Mic className="w-3.5 h-3.5 text-amber-600 dark:text-amber-500 ml-1.5 hidden md:inline" />
+            <Mic className="w-3.5 h-3.5 text-amber-800 dark:text-amber-500 ml-1.5 hidden md:inline" />
             {[
               { id: 'cinematic', label: '🎬 Adam' },
               { id: 'brotherhood', label: '🤝 Antoni' },
@@ -393,16 +393,16 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             aria-label={isNarratingFullStory ? 'Pause Story Audio' : 'Listen to Full Story Audio'}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
               isNarratingFullStory
-                ? 'bg-amber-500 border-amber-600 text-stone-950 font-bold shadow-glow-gold'
+                ? 'bg-amber-500 border-amber-600 text-stone-950 font-bold shadow-glow'
                 : 'bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:text-stone-950 dark:hover:text-white hover:border-stone-300 dark:hover:border-stone-700'
             }`}
           >
-            {isNarratingFullStory ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-amber-600 dark:text-amber-500" />}
+            {isNarratingFullStory ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-amber-800 dark:text-amber-500" />}
             <span>{isNarratingFullStory ? 'Pause Story' : 'Listen to Full Story'}</span>
           </button>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs uppercase tracking-widest text-amber-600 dark:text-amber-500 font-mono hidden sm:inline">
+            <span className="text-xs uppercase tracking-widest text-amber-800 dark:text-amber-500 font-mono hidden sm:inline">
               Act {act.actNumber} of {quest.acts.length}
             </span>
             <div className="flex gap-1.5">
@@ -429,9 +429,9 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
         if (!ripple) return null;
         return (
           <div className="mb-4 p-3.5 rounded-2xl bg-gradient-to-r from-amber-50 dark:from-amber-950/40 via-stone-50 dark:via-stone-900 to-stone-100 dark:to-stone-950 border border-amber-300 dark:border-amber-500/40 flex items-start gap-3 text-xs shadow-sm">
-            <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+            <Sparkles className="w-4 h-4 text-amber-800 dark:text-amber-400 shrink-0 mt-0.5" />
             <div>
-              <span className="font-mono font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider block text-[10px]">
+              <span className="font-mono font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider block text-[11px]">
                 Consequence Ripple • {ripple.rippleTitle}
               </span>
               <span className="text-stone-700 dark:text-stone-300 leading-relaxed">{ripple.rippleDescription}</span>
@@ -465,12 +465,12 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             const aar = generateAfterActionReport(quest.title, quest.heroName, quest.acts.length);
             return (
               <div className="p-3.5 rounded-xl bg-white/80 dark:bg-black/50 border border-emerald-300 dark:border-emerald-800/40 text-xs space-y-1.5">
-                <div className="flex items-center justify-between text-[10px] font-mono text-amber-700 dark:text-amber-400 uppercase tracking-wider">
+                <div className="flex items-center justify-between text-[11px] font-mono text-amber-800 dark:text-amber-400 uppercase tracking-wider">
                   <span>After-Action Report (AAR)</span>
                   <span className="text-emerald-700 dark:text-emerald-300 font-bold">{aar.battlefieldHonor}</span>
                 </div>
                 <div className="text-sm font-serif font-bold text-stone-900 dark:text-stone-200">
-                  Tactical Path: <span className="text-amber-700 dark:text-amber-300">{aar.tacticalPath}</span>
+                  Tactical Path: <span className="text-amber-800 dark:text-amber-300">{aar.tacticalPath}</span>
                 </div>
                 <p className="text-stone-700 dark:text-stone-300 text-[11px] leading-relaxed">
                   {aar.afterActionSummary}
@@ -488,8 +488,8 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
         <div className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-6 space-y-5">
           
           {/* Act Badge & Era Card */}
-          <div className="p-4 rounded-2xl bg-white dark:bg-[#11141a] border border-stone-200 dark:border-stone-800 shadow-sm">
-            <div className="flex items-center justify-between gap-2 mb-1.5 text-[11px] font-mono font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-500">
+          <div className="p-4 rounded-2xl bg-white dark:bg-ink-raised border border-stone-200 dark:border-stone-800 shadow-sm">
+            <div className="flex items-center justify-between gap-2 mb-1.5 text-[11px] font-mono font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-500">
               <span>{quest.testament} • {quest.historicalPeriod}</span>
               <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-800/50 text-amber-800 dark:text-amber-300">
                 Act {act.actNumber}/{quest.acts.length}
@@ -506,16 +506,16 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
           {/* Scene Illustration Visual Artwork */}
           <div className="rounded-2xl overflow-hidden border border-stone-200 dark:border-stone-800 shadow-md bg-stone-100 dark:bg-stone-950">
             <SceneIllustration theme={act.visualTheme} />
-            <div className="p-3 text-xs text-stone-600 dark:text-stone-400 italic bg-stone-50 dark:bg-[#0f1217] flex items-center gap-2 border-t border-stone-200 dark:border-stone-850">
-              <Compass className="w-3.5 h-3.5 text-amber-600 dark:text-amber-500 shrink-0" />
+            <div className="p-3 text-xs text-stone-600 dark:text-stone-400 italic bg-stone-50 dark:bg-ink-raised flex items-center gap-2 border-t border-stone-200 dark:border-stone-850">
+              <Compass className="w-3.5 h-3.5 text-amber-800 dark:text-amber-500 shrink-0" />
               <span>{act.sceneAtmosphere}</span>
             </div>
           </div>
 
           {/* Historical Reality Intel Card */}
           <div className="p-4 rounded-2xl bg-white dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 shadow-sm">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 mb-1.5">
-              <ShieldAlert className="w-4 h-4 text-amber-600 dark:text-amber-500" />
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400 mb-1.5">
+              <ShieldAlert className="w-4 h-4 text-amber-800 dark:text-amber-500" />
               <span>The Historical Reality</span>
             </div>
             <p className="text-xs text-stone-700 dark:text-stone-300 leading-relaxed">
@@ -524,9 +524,9 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
           </div>
 
           {/* Guided Reading Roadmap (Milestone Tracker) */}
-          <div className="p-4 rounded-2xl bg-white dark:bg-[#12151b] border border-stone-200 dark:border-stone-800 shadow-sm">
+          <div className="p-4 rounded-2xl bg-white dark:bg-ink-raised border border-stone-200 dark:border-stone-800 shadow-sm">
             <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-stone-500 dark:text-stone-400 mb-3">
-              <ListOrdered className="w-3.5 h-3.5 text-amber-600 dark:text-amber-500" />
+              <ListOrdered className="w-3.5 h-3.5 text-amber-800 dark:text-amber-500" />
               <span>Reading Roadmap</span>
             </div>
             <nav className="space-y-1 text-xs">
@@ -534,7 +534,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                 onClick={() => scrollToSection('section-crossroads')}
                 className="w-full flex items-center gap-2 p-2 rounded-lg text-left text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-stone-100 dark:hover:bg-stone-850/60 transition-colors"
               >
-                <span className="w-5 h-5 rounded-full bg-stone-100 dark:bg-stone-800 text-[11px] font-mono flex items-center justify-center font-bold text-amber-700 dark:text-amber-400 shrink-0">1</span>
+                <span className="w-5 h-5 rounded-full bg-stone-100 dark:bg-stone-800 text-[11px] font-mono flex items-center justify-center font-bold text-amber-800 dark:text-amber-400 shrink-0">1</span>
                 <span>Decide First (What would you do?)</span>
               </button>
 
@@ -542,7 +542,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                 onClick={() => scrollToSection('section-narrative')}
                 className="w-full flex items-center gap-2 p-2 rounded-lg text-left text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-stone-100 dark:hover:bg-stone-850/60 transition-colors"
               >
-                <span className="w-5 h-5 rounded-full bg-stone-100 dark:bg-stone-800 text-[11px] font-mono flex items-center justify-center font-bold text-amber-700 dark:text-amber-400 shrink-0">2</span>
+                <span className="w-5 h-5 rounded-full bg-stone-100 dark:bg-stone-800 text-[11px] font-mono flex items-center justify-center font-bold text-amber-800 dark:text-amber-400 shrink-0">2</span>
                 <span>What Actually Unfolded</span>
               </button>
 
@@ -550,7 +550,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                 onClick={() => scrollToSection('section-scripture')}
                 className="w-full flex items-center gap-2 p-2 rounded-lg text-left text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-stone-100 dark:hover:bg-stone-850/60 transition-colors"
               >
-                <span className="w-5 h-5 rounded-full bg-stone-100 dark:bg-stone-800 text-[11px] font-mono flex items-center justify-center font-bold text-amber-700 dark:text-amber-400 shrink-0">3</span>
+                <span className="w-5 h-5 rounded-full bg-stone-100 dark:bg-stone-800 text-[11px] font-mono flex items-center justify-center font-bold text-amber-800 dark:text-amber-400 shrink-0">3</span>
                 <span>Scripture Unlocked</span>
               </button>
 
@@ -558,7 +558,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                 onClick={() => scrollToSection('section-realtalk')}
                 className="w-full flex items-center gap-2 p-2 rounded-lg text-left text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-stone-100 dark:hover:bg-stone-850/60 transition-colors"
               >
-                <span className="w-5 h-5 rounded-full bg-stone-100 dark:bg-stone-800 text-[11px] font-mono flex items-center justify-center font-bold text-amber-700 dark:text-amber-400 shrink-0">4</span>
+                <span className="w-5 h-5 rounded-full bg-stone-100 dark:bg-stone-800 text-[11px] font-mono flex items-center justify-center font-bold text-amber-800 dark:text-amber-400 shrink-0">4</span>
                 <span>Real Talk For Today</span>
               </button>
 
@@ -566,7 +566,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                 onClick={() => scrollToSection('section-quiz')}
                 className="w-full flex items-center gap-2 p-2 rounded-lg text-left text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-stone-100 dark:hover:bg-stone-850/60 transition-colors"
               >
-                <span className="w-5 h-5 rounded-full bg-stone-100 dark:bg-stone-800 text-[11px] font-mono flex items-center justify-center font-bold text-amber-700 dark:text-amber-400 shrink-0">5</span>
+                <span className="w-5 h-5 rounded-full bg-stone-100 dark:bg-stone-800 text-[11px] font-mono flex items-center justify-center font-bold text-amber-800 dark:text-amber-400 shrink-0">5</span>
                 <span>Wisdom Check Drill</span>
               </button>
             </nav>
@@ -579,7 +579,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
           
           {/* Main Story Header */}
           <div className="border-b border-stone-200 dark:border-stone-800/80 pb-4">
-            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-1.5">
+            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1.5">
               <span>Act {act.actNumber} of {quest.acts.length}</span>
               <span>•</span>
               <span>{quest.historicalPeriod}</span>
@@ -593,13 +593,13 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
           </div>
 
           {/* STEP 1: DECIDE FIRST (BEFORE THE LONG READ) */}
-          <section id="section-crossroads" className="p-5 md:p-6 rounded-2xl bg-stone-50 dark:bg-gradient-to-b dark:from-[#1c1612] dark:to-[#120f0d] border-2 border-amber-300 dark:border-amber-600/60 shadow-sm dark:shadow-glow-gold scroll-mt-6">
+          <section id="section-crossroads" className="p-5 md:p-6 rounded-2xl bg-stone-50 dark:bg-gradient-to-b dark:from-[#1c1612] dark:to-[#120f0d] border-2 border-amber-300 dark:border-amber-600/60 shadow-sm dark:shadow-glow scroll-mt-6">
             <div className="flex items-center justify-between gap-2 mb-2">
-              <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-700 dark:text-amber-400">
+              <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400">
                 <span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30">Step 1 of 5</span>
                 <span>Decide First</span>
               </div>
-              <Flame className="w-4 h-4 text-amber-600 dark:text-amber-500 animate-pulse" />
+              <Flame className="w-4 h-4 text-amber-800 dark:text-amber-500 animate-pulse" />
             </div>
 
             <h3 className="text-base md:text-xl font-serif font-bold text-stone-900 dark:text-parchment-50 mb-4 leading-snug">
@@ -616,7 +616,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                     onClick={() => handleSelectChoice(choice.id)}
                     className={`w-full text-left p-4 rounded-xl transition-all duration-200 border ${
                       isSelected 
-                        ? 'bg-amber-100/70 dark:bg-amber-600/25 border-amber-500 text-stone-950 dark:text-parchment-50 ring-1 ring-amber-500 shadow-sm dark:shadow-glow-ember' 
+                        ? 'bg-amber-100/70 dark:bg-amber-600/25 border-amber-500 text-stone-950 dark:text-parchment-50 ring-1 ring-amber-500 shadow-sm dark:shadow-glow' 
                         : 'bg-white dark:bg-stone-900/90 border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:border-amber-400 dark:hover:border-amber-500/50 hover:bg-stone-100 dark:hover:bg-stone-800/80'
                     }`}
                   >
@@ -660,7 +660,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
           <>
           {/* STEP 2: WHAT ACTUALLY UNFOLDED */}
           <section id="section-narrative" className="space-y-4 scroll-mt-6">
-            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-700 dark:text-amber-400">
+            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400">
               <span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30">Step 2 of 5</span>
               <span>What Actually Unfolded</span>
             </div>
@@ -673,7 +673,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.08 }}
-                  className="p-5 md:p-6 rounded-2xl bg-white dark:bg-[#13161c] border border-stone-200 dark:border-stone-800/90 shadow-sm hover:border-stone-300 dark:hover:border-stone-700 transition-colors"
+                  className="p-5 md:p-6 rounded-2xl bg-white dark:bg-ink-raised border border-stone-200 dark:border-stone-800/90 shadow-sm hover:border-stone-300 dark:hover:border-stone-700 transition-colors"
                 >
                   <p className="font-reading text-base md:text-lg text-stone-800 dark:text-parchment-100 leading-relaxed">
                     {paragraph}
@@ -686,7 +686,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             {act.glossary.length > 0 && (
               <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 mt-4">
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-3">
-                  <HelpCircle className="w-4 h-4 text-amber-600 dark:text-amber-500" />
+                  <HelpCircle className="w-4 h-4 text-amber-800 dark:text-amber-500" />
                   <span>Explain Like I'm 5: Tap Ancient Terms</span>
                 </div>
 
@@ -718,7 +718,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                       className="p-3.5 rounded-xl bg-stone-100 dark:bg-stone-950/90 border border-amber-300/40 dark:border-amber-900/30 text-xs text-stone-800 dark:text-stone-300 space-y-1.5"
                     >
                       <div>
-                        <strong className="text-amber-700 dark:text-amber-400">Ancient Context: </strong>
+                        <strong className="text-amber-800 dark:text-amber-400">Ancient Context: </strong>
                         {act.glossary[activeTermIndex].ancientMeaning}
                       </div>
                       <div className="text-stone-800 dark:text-parchment-200">
@@ -741,14 +741,14 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
           )}
 
           {/* STEP 3: UNLOCKED SCRIPTURE CARD (Requirement 1: 1 memory verse applies to the quest) */}
-          <section id="section-scripture" className="p-5 md:p-6 rounded-2xl bg-white dark:bg-[#151922] border-2 border-amber-300 dark:border-amber-500/50 shadow-sm dark:shadow-glow-gold relative overflow-hidden scroll-mt-6">
+          <section id="section-scripture" className="p-5 md:p-6 rounded-2xl bg-white dark:bg-ink-overlay border-2 border-amber-300 dark:border-amber-500/50 shadow-sm dark:shadow-glow relative overflow-hidden scroll-mt-6">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30 text-xs font-mono font-bold">
                   Step 3 of 5
                 </span>
-                <div className="flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-amber-700 dark:text-amber-400 font-bold">
-                  <BookOpen className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                <div className="flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold">
+                  <BookOpen className="w-4 h-4 text-amber-800 dark:text-amber-400" />
                   <span>
                     {act.actNumber === 1 
                       ? `Quest Anchor Scripture • 1 Memory Verse For This Quest`
@@ -764,21 +764,21 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
               >
                 {isSpeakingScripture ? (
                   <>
-                    <VolumeX className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 animate-pulse" />
+                    <VolumeX className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 animate-pulse" />
                     <span>Stop</span>
                   </>
                 ) : (
                   <>
-                    <Volume2 className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                    <Volume2 className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
                     <span>Listen</span>
                   </>
                 )}
               </button>
             </div>
 
-            <h4 className="text-base font-serif font-bold text-amber-700 dark:text-amber-300 mb-2">
+            <h3 className="text-base font-serif font-bold text-amber-800 dark:text-amber-300 mb-2">
               {act.unlockedScripture.reference}
-            </h4>
+            </h3>
 
             {!selectedChoiceId ? (
               <p className="text-sm text-stone-600 dark:text-stone-400 italic">
@@ -799,7 +799,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                           : 'text-stone-500 dark:text-stone-400'
                       }`}
                     >
-                      <span className="text-[11px] font-mono font-bold text-amber-700 dark:text-amber-400 mr-2">{v.verse}</span>
+                      <span className="text-[11px] font-mono font-bold text-amber-800 dark:text-amber-400 mr-2">{v.verse}</span>
                       {v.text}
                     </p>
                   );
@@ -827,7 +827,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
 
             {selectedChoiceId && (
               <p className="text-xs md:text-sm text-stone-700 dark:text-stone-300 mt-4 pt-3 border-t border-stone-200 dark:border-stone-800 leading-relaxed">
-                <strong className="text-amber-700 dark:text-amber-400">Context: </strong>
+                <strong className="text-amber-800 dark:text-amber-400">Context: </strong>
                 {act.unlockedScripture.deepDive}
               </p>
             )}
@@ -835,7 +835,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             {/* Memory Pulse Reminders Call to Action */}
             <div className="mt-4 pt-3 border-t border-amber-200 dark:border-amber-900/30 flex flex-wrap items-center justify-between gap-2.5">
               <div className="flex items-center gap-1.5 text-xs text-stone-600 dark:text-stone-400">
-                <Bell className="w-3.5 h-3.5 text-amber-600 dark:text-amber-500 animate-pulse" />
+                <Bell className="w-3.5 h-3.5 text-amber-800 dark:text-amber-500 animate-pulse" />
                 <span>
                   {act.actNumber === 1
                     ? "Lock this quest's definitive memory verse into your daily recall:"
@@ -860,15 +860,15 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
 
           {/* STEP 4: REAL TALK FOR TODAY (TAKEAWAY FOR ADULTS) */}
           <section id="section-realtalk" className="p-5 md:p-6 rounded-2xl bg-white dark:bg-gradient-to-br dark:from-[#17191e] dark:to-[#0e1014] border border-stone-200 dark:border-stone-700 shadow-sm scroll-mt-6">
-            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-700 dark:text-amber-400 mb-2">
+            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400 mb-2">
               <span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30">Step 4 of 5</span>
-              <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-500" />
+              <Sparkles className="w-4 h-4 text-amber-800 dark:text-amber-500" />
               <span>Real Talk For Today</span>
             </div>
             
-            <h4 className="text-lg md:text-xl font-serif font-bold text-stone-900 dark:text-parchment-100 mb-2">
+            <h3 className="text-lg md:text-xl font-serif font-bold text-stone-900 dark:text-parchment-100 mb-2">
               Dealing With: {act.realTalkTakeaway.coreChallenge}
-            </h4>
+            </h3>
 
             <p className="text-sm md:text-base text-stone-700 dark:text-stone-300 leading-relaxed mb-4">
               {act.realTalkTakeaway.practicalLesson}
@@ -886,7 +886,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   onClick={() => setShowNoteInput(true)}
                   className="text-xs text-stone-600 dark:text-stone-400 hover:text-amber-700 dark:hover:text-amber-400 flex items-center gap-1.5 transition-colors font-medium"
                 >
-                  <Edit3 className="w-3.5 h-3.5 text-amber-600 dark:text-amber-500" />
+                  <Edit3 className="w-3.5 h-3.5 text-amber-800 dark:text-amber-500" />
                   <span>Jot a personal takeaway or battle reflection</span>
                 </button>
               ) : (
@@ -920,16 +920,16 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
 
           {/* STEP 5: INTERACTIVE WISDOM CHECK DRILL */}
           {act.wisdomQuiz && (
-            <section id="section-quiz" className="p-5 md:p-6 rounded-2xl bg-white dark:bg-[#141822] border-2 border-stone-200 dark:border-stone-700 shadow-sm scroll-mt-6">
-              <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-700 dark:text-amber-400 mb-2">
+            <section id="section-quiz" className="p-5 md:p-6 rounded-2xl bg-white dark:bg-ink-overlay border-2 border-stone-200 dark:border-stone-700 shadow-sm scroll-mt-6">
+              <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400 mb-2">
                 <span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30">Step 5 of 5</span>
-                <Award className="w-4 h-4 text-amber-600 dark:text-amber-500" />
+                <Award className="w-4 h-4 text-amber-800 dark:text-amber-500" />
                 <span>Wisdom Check Drill (+30 XP)</span>
               </div>
 
-              <h4 className="text-base md:text-lg font-serif font-bold text-stone-900 dark:text-parchment-50 mb-3">
+              <h3 className="text-base md:text-lg font-serif font-bold text-stone-900 dark:text-parchment-50 mb-3">
                 {act.wisdomQuiz.question}
-              </h4>
+              </h3>
 
               <div className="space-y-2.5">
                 {act.wisdomQuiz.options.map((option, idx) => {
@@ -964,7 +964,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   animate={{ opacity: 1, y: 0 }}
                   className="mt-3 p-3.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs md:text-sm text-stone-700 dark:text-stone-300 leading-relaxed"
                 >
-                  <strong className={act.wisdomQuiz.options[selectedQuizOption].isCorrect ? "text-emerald-700 dark:text-emerald-400" : "text-amber-700 dark:text-amber-400"}>
+                  <strong className={act.wisdomQuiz.options[selectedQuizOption].isCorrect ? "text-emerald-700 dark:text-emerald-400" : "text-amber-800 dark:text-amber-400"}>
                     {act.wisdomQuiz.options[selectedQuizOption].isCorrect ? "Spot on! " : "Good try! "}
                   </strong>
                   {act.wisdomQuiz.options[selectedQuizOption].explanation}

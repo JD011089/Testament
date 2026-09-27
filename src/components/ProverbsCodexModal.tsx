@@ -125,13 +125,13 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          className="relative w-full max-w-4xl h-[100dvh] sm:h-auto sm:max-h-[94vh] bg-white dark:bg-[#0b0e14] border-0 sm:border border-amber-500/30 dark:border-amber-500/40 rounded-none sm:rounded-3xl shadow-none sm:shadow-2xl overflow-hidden my-auto flex flex-col text-left transition-colors outline-none"
+          className="relative w-full max-w-4xl h-[100dvh] sm:h-auto sm:max-h-[94vh] bg-white dark:bg-ink border-0 sm:border border-amber-500/30 dark:border-amber-500/40 rounded-none sm:rounded-3xl shadow-none sm:shadow-2xl overflow-hidden my-auto flex flex-col text-left transition-colors outline-none"
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
           <div className="p-4 sm:p-5 border-b border-stone-200/60 dark:border-stone-800 bg-stone-50 dark:bg-gradient-to-r dark:from-stone-900 dark:via-[#121620] dark:to-stone-900 flex flex-wrap items-center justify-between gap-3 shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-500/20 border border-amber-300 dark:border-amber-500/40 flex items-center justify-center text-amber-700 dark:text-amber-400 shrink-0">
+              <div className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-500/20 border border-amber-300 dark:border-amber-500/40 flex items-center justify-center text-amber-800 dark:text-amber-400 shrink-0">
                 <Shield className="w-5 h-5" />
               </div>
               <div>
@@ -139,7 +139,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                   <h3 className="text-base sm:text-lg font-serif font-black text-stone-900 dark:text-parchment-50 leading-tight">
                     Proverbs Tactical Codex
                   </h3>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/60 text-amber-900 dark:text-amber-300 font-bold uppercase tracking-wider">
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/60 text-amber-900 dark:text-amber-300 font-bold uppercase tracking-wider">
                     Solomon's Playbook
                   </span>
                 </div>
@@ -248,7 +248,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                 {/* Scenario Navigation Header */}
                 <div className="flex items-center justify-between text-xs font-mono text-stone-500 dark:text-stone-400 border-b border-stone-200 dark:border-stone-800/80 pb-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-amber-700 dark:text-amber-400 font-bold">
+                    <span className="text-amber-800 dark:text-amber-400 font-bold">
                       Case #{currentScenarioIndex + 1} of {scenarios.length}
                     </span>
                     <span>•</span>
@@ -265,9 +265,9 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                 </div>
 
                 {/* Scenario Card */}
-                <div className="p-5 rounded-2xl bg-stone-50 dark:bg-[#121620] border border-amber-500/25 dark:border-amber-500/30 shadow-md relative overflow-hidden">
+                <div className="p-5 rounded-2xl bg-stone-50 dark:bg-ink-raised border border-amber-500/25 dark:border-amber-500/30 shadow-md relative overflow-hidden">
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="text-xs font-mono uppercase tracking-wider text-amber-700 dark:text-amber-500 font-bold">
+                    <span className="text-xs font-mono uppercase tracking-wider text-amber-800 dark:text-amber-500 font-bold">
                       Real-World Battlefield Situation
                     </span>
                     <span className="text-xs font-serif font-bold text-amber-800 dark:text-amber-300">
@@ -283,8 +283,8 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                     "{currentScenario.dilemma.situation}"
                   </p>
 
-                  <div className="text-xs font-mono font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 flex items-center gap-1.5 mb-3">
-                    <HelpCircle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  <div className="text-xs font-mono font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400 flex items-center gap-1.5 mb-3">
+                    <HelpCircle className="w-4 h-4 text-amber-800 dark:text-amber-400" />
                     <span>{currentScenario.dilemma.question}</span>
                   </div>
 
@@ -346,7 +346,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                         <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 text-left space-y-2">
                           <div className="flex items-center justify-between text-xs font-mono text-amber-800 dark:text-amber-400">
                             <span className="font-bold flex items-center gap-1.5">
-                              <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                              <Sparkles className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
                               <span>Solomon’s Intelligence Briefing</span>
                             </span>
                             <span className="text-[11px] underline cursor-pointer" onClick={() => toggleTranslation(currentScenario.id)}>
@@ -379,7 +379,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                                 }}
                                 className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-amber-800 dark:text-amber-400 border border-stone-250 dark:border-stone-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
                               >
-                                <Brain className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                                <Brain className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
                                 <span>Lock in Word Forge</span>
                               </button>
                             )}
@@ -393,7 +393,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                                 }}
                                 className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-amber-800 dark:text-amber-400 border border-stone-250 dark:border-stone-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
                               >
-                                <Bell className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                                <Bell className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
                                 <span>Train with Daily Pulse</span>
                               </button>
                             )}
@@ -449,14 +449,14 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                     return (
                       <div
                         key={item.id}
-                        className="p-4 rounded-2xl bg-stone-50 dark:bg-[#121620] border border-stone-200 dark:border-stone-800 hover:border-amber-400 dark:hover:border-amber-500/40 transition-all flex flex-col justify-between text-left space-y-3"
+                        className="p-4 rounded-2xl bg-stone-50 dark:bg-ink-raised border border-stone-200 dark:border-stone-800 hover:border-amber-400 dark:hover:border-amber-500/40 transition-all flex flex-col justify-between text-left space-y-3"
                       >
                         <div>
                           <div className="flex items-center justify-between gap-2 mb-1.5">
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-900 text-amber-800 dark:text-amber-400 border border-stone-250 dark:border-stone-800 font-bold">
+                            <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-900 text-amber-800 dark:text-amber-400 border border-stone-250 dark:border-stone-800 font-bold">
                               {PROVERB_CATEGORIES[item.category]?.icon} {PROVERB_CATEGORIES[item.category]?.label}
                             </span>
-                            <span className="text-xs font-mono font-bold text-amber-700 dark:text-amber-500">
+                            <span className="text-xs font-mono font-bold text-amber-800 dark:text-amber-500">
                               {item.reference}
                             </span>
                           </div>
@@ -477,7 +477,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                         <div className="pt-2 border-t border-stone-200 dark:border-stone-850 flex flex-wrap items-center justify-between gap-2">
                           <button
                             onClick={() => toggleTranslation(item.id)}
-                            className="text-[10px] font-mono text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 underline"
+                            className="text-[11px] font-mono text-amber-800 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 underline"
                           >
                             {isFormal ? '⚡ Street Translation' : '📖 Formal Text'}
                           </button>
@@ -535,7 +535,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
           </div>
 
           {/* Footer */}
-          <div className="p-3.5 sm:p-4 border-t border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#090b10] flex items-center justify-between text-xs text-stone-600 dark:text-stone-400 shrink-0">
+          <div className="p-3.5 sm:p-4 border-t border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-ink flex items-center justify-between text-xs text-stone-600 dark:text-stone-400 shrink-0">
             <span className="flex items-center gap-1 text-[11px] font-mono">
               <Flame className="w-3.5 h-3.5 text-amber-500" />
               <span>Ancient wisdom stress-tested for modern high stakes</span>

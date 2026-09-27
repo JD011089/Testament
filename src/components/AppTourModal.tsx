@@ -329,12 +329,12 @@ export const AppTourModal: React.FC<AppTourModalProps> = ({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.2 }}
-        className="w-full max-w-2xl bg-white dark:bg-[#12151c] text-stone-900 dark:text-parchment-100 border border-stone-200 dark:border-amber-600/60 rounded-3xl shadow-2xl overflow-hidden flex flex-col my-auto max-h-[92vh] transition-colors outline-none"
+        className="w-full max-w-2xl bg-white dark:bg-ink-raised text-stone-900 dark:text-parchment-100 border border-stone-200 dark:border-amber-600/60 rounded-3xl shadow-2xl overflow-hidden flex flex-col my-auto max-h-[92vh] transition-colors outline-none"
       >
         {/* TOP HEADER */}
-        <div className="p-4 sm:p-5 border-b border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#161a24] flex items-center justify-between gap-3 shrink-0">
+        <div className="p-4 sm:p-5 border-b border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-ink-overlay flex items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/40 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-800 dark:text-amber-400 border border-amber-500/40 flex items-center justify-center">
               <HelpCircle className="w-4 h-4" />
             </div>
             <div>
@@ -342,7 +342,7 @@ export const AppTourModal: React.FC<AppTourModalProps> = ({
                 <h3 id="app-tour-title" className="text-sm sm:text-base font-serif font-bold text-stone-900 dark:text-parchment-50">
                   How To Get Around Testament
                 </h3>
-                <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 font-semibold">
+                <span className="text-[11px] uppercase font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 font-semibold">
                   Auntie-Approved Guide
                 </span>
               </div>
@@ -415,7 +415,7 @@ export const AppTourModal: React.FC<AppTourModalProps> = ({
                     {currentStep.icon}
                   </div>
                   <div className="min-w-0">
-                    <span className="text-[10px] font-mono uppercase tracking-wider font-bold text-amber-700 dark:text-amber-400">
+                    <span className="text-[11px] font-mono uppercase tracking-wider font-bold text-amber-800 dark:text-amber-400">
                       {currentStep.badge}
                     </span>
                     <h4 className="text-base sm:text-lg font-serif font-bold text-stone-900 dark:text-parchment-50 leading-snug">
@@ -432,7 +432,7 @@ export const AppTourModal: React.FC<AppTourModalProps> = ({
                   {currentStep.bulletPoints.map((point, idx) => (
                     <div 
                       key={idx}
-                      className="p-3 sm:p-3.5 rounded-xl bg-stone-50 dark:bg-[#161a22] border border-stone-200/90 dark:border-stone-800 flex items-start gap-3 transition-colors"
+                      className="p-3 sm:p-3.5 rounded-xl bg-stone-50 dark:bg-ink-overlay border border-stone-200/90 dark:border-stone-800 flex items-start gap-3 transition-colors"
                     >
                       <span className="text-xl shrink-0 mt-0.5">{point.icon}</span>
                       <div className="min-w-0">
@@ -448,7 +448,7 @@ export const AppTourModal: React.FC<AppTourModalProps> = ({
                 </div>
 
                 {/* Auntie Quick Tip */}
-                <div className="p-3 rounded-xl bg-amber-100/60 dark:bg-[#1a1f2c] border border-amber-300/70 dark:border-amber-600/40 text-xs text-stone-800 dark:text-amber-200/90 flex items-start gap-2.5">
+                <div className="p-3 rounded-xl bg-amber-100/60 dark:bg-ink-overlay border border-amber-300/70 dark:border-amber-600/40 text-xs text-stone-800 dark:text-amber-200/90 flex items-start gap-2.5">
                   <span className="text-base">💡</span>
                   <div className="leading-relaxed">
                     <strong>Rule of thumb:</strong> {currentStep.quickTip}
@@ -463,7 +463,7 @@ export const AppTourModal: React.FC<AppTourModalProps> = ({
                     </span>
                     <button
                       onClick={() => handleJumpToSection(currentStep)}
-                      className="text-xs font-bold text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-all"
+                      className="text-xs font-bold text-amber-800 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-all"
                     >
                       <span>{currentStep.primaryActionLabel || 'Open Section'}</span>
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -484,7 +484,7 @@ export const AppTourModal: React.FC<AppTourModalProps> = ({
                   <div
                     key={step.id}
                     onClick={() => handleJumpToSection(step)}
-                    className="p-3 rounded-xl bg-stone-50 dark:bg-[#161a22] border border-stone-200 dark:border-stone-800 hover:border-amber-500/70 hover:bg-amber-50/50 dark:hover:bg-[#1a202c] transition-all cursor-pointer group text-left shadow-sm"
+                    className="p-3 rounded-xl bg-stone-50 dark:bg-ink-overlay border border-stone-200 dark:border-stone-800 hover:border-amber-500/70 hover:bg-amber-50/50 dark:hover:bg-ink-overlay transition-all cursor-pointer group text-left shadow-sm"
                   >
                     <div className="flex items-center gap-2.5 mb-1.5">
                       <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700/60 flex items-center justify-center shrink-0">
@@ -494,7 +494,7 @@ export const AppTourModal: React.FC<AppTourModalProps> = ({
                         <div className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100 group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors truncate">
                           {step.title}
                         </div>
-                        <div className="text-[10px] text-amber-700 dark:text-amber-400 font-mono">
+                        <div className="text-[11px] text-amber-800 dark:text-amber-400 font-mono">
                           {step.badge}
                         </div>
                       </div>
@@ -511,7 +511,7 @@ export const AppTourModal: React.FC<AppTourModalProps> = ({
         </div>
 
         {/* BOTTOM CONTROLS & PROGRESS */}
-        <div className="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#161a24] flex items-center justify-between gap-3 shrink-0">
+        <div className="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-ink-overlay flex items-center justify-between gap-3 shrink-0">
           {activeViewMode === 'walkthrough' ? (
             <>
               {/* Back / Skip */}

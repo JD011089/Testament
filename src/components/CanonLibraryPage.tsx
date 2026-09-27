@@ -153,7 +153,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#fcfbfa] dark:bg-[#0a0c10] text-stone-900 dark:text-parchment-100 transition-colors pb-36 pt-4 sm:pt-6 overflow-x-hidden w-full max-w-full">
+    <div className="min-h-screen bg-surface dark:bg-ink text-stone-900 dark:text-parchment-100 transition-colors pb-36 pt-4 sm:pt-6 overflow-x-hidden w-full max-w-full">
       <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 overflow-x-hidden w-full">
         
         {/* TOP NAVIGATION / BREADCRUMB HEADER */}
@@ -172,7 +172,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
 
             <div className="h-4 w-px bg-stone-200 dark:bg-stone-800 hidden sm:block" />
 
-            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-amber-600 dark:text-amber-500 font-bold">
+            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-amber-800 dark:text-amber-500 font-bold">
               <BookOpen className="w-4 h-4" />
               <span>The Scriptorium</span>
             </div>
@@ -214,7 +214,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
 
         {/* HERO TITLE BANNER */}
         <div className="pt-6 pb-6 text-left">
-          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-amber-600 dark:text-amber-400 font-bold mb-1">
+          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold mb-1">
             <Sparkles className="w-3.5 h-3.5 text-amber-500" />
             <span>Complete 66-Book Field Library</span>
           </div>
@@ -291,7 +291,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                 }`}
               >
                 <span>{div.label}</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                <span className={`text-[11px] px-1.5 py-0.2 rounded-full ${
                   selectedDivision === div.id ? 'bg-black/20 text-stone-950 font-extrabold' : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400'
                 }`}>
                   {div.count}
@@ -302,7 +302,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
 
           {/* Life Situation Chips */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-            <span className="text-[10px] font-mono uppercase text-stone-500 shrink-0 mr-1">
+            <span className="text-[11px] font-mono uppercase text-stone-500 shrink-0 mr-1">
               Filter by Life Battle:
             </span>
             <button
@@ -312,7 +312,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
               }}
               className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all whitespace-nowrap ${
                 selectedTheme === 'All Themes'
-                  ? 'border-amber-500/60 bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold shadow-xs'
+                  ? 'border-amber-500/60 bg-amber-500/10 text-amber-800 dark:text-amber-300 font-bold shadow-xs'
                   : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
               }`}
             >
@@ -327,11 +327,11 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                 }}
                 className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all whitespace-nowrap flex items-center gap-1 ${
                   selectedTheme === theme
-                    ? 'border-amber-500/60 bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold shadow-xs'
+                    ? 'border-amber-500/60 bg-amber-500/10 text-amber-800 dark:text-amber-300 font-bold shadow-xs'
                     : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                 }`}
               >
-                <Flame className={`w-2.5 h-2.5 ${selectedTheme === theme ? 'text-amber-600 dark:text-amber-400' : 'text-stone-400'}`} />
+                <Flame className={`w-2.5 h-2.5 ${selectedTheme === theme ? 'text-amber-800 dark:text-amber-400' : 'text-stone-400'}`} />
                 <span>{theme}</span>
               </button>
             ))}
@@ -357,7 +357,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                     <div>
                       <h3 className="text-base sm:text-lg font-serif font-black text-stone-900 dark:text-amber-200 tracking-wide uppercase flex items-center gap-2">
                         <span>{shelfGroup.division.label}</span>
-                        <span className="text-xs font-mono font-normal text-amber-700 dark:text-amber-400/70">
+                        <span className="text-xs font-mono font-normal text-amber-800 dark:text-amber-400/70">
                           ({shelfGroup.books.length} Volumes)
                         </span>
                       </h3>
@@ -367,7 +367,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                     </div>
                   </div>
 
-                  <span className="text-[10px] font-mono text-amber-700 dark:text-amber-500/80 uppercase tracking-widest hidden sm:inline">
+                  <span className="text-[11px] font-mono text-amber-800 dark:text-amber-500/80 uppercase tracking-widest hidden sm:inline">
                     Hover & pull volumes to open codex
                   </span>
                 </div>
@@ -375,7 +375,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                 {/* THE SHELF RACK CONTAINER */}
                 <div className="relative pb-2">
                   {/* Books Row with generous top headroom for pull-out physics and floating preview card */}
-                  <div className="flex items-end justify-start sm:justify-center gap-1.5 sm:gap-2.5 overflow-x-auto pt-32 sm:pt-36 pb-2 px-6 sm:px-10 scrollbar-none min-h-[350px]">
+                  <div className="flex items-start justify-start gap-1.5 sm:gap-2.5 overflow-x-auto pt-6 pb-3 px-2 sm:px-4 scrollbar-none">
                     {shelfGroup.books.map((book, bookIdx) => {
                       const total = shelfGroup.books.length;
                       const tooltipAlign = total <= 1 
@@ -442,10 +442,10 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                   {/* Card Header */}
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-2">
-                      <span className="text-[10px] font-mono uppercase tracking-widest text-amber-700 dark:text-amber-400 font-bold">
+                      <span className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
                         #{String(book.order).padStart(2, '0')} • {book.testament} • {book.division}
                       </span>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-stone-200/60 dark:bg-stone-800 text-stone-700 dark:text-stone-300">
+                      <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-stone-200/60 dark:bg-stone-800 text-stone-700 dark:text-stone-300">
                         {book.lifeTheme}
                       </span>
                     </div>
@@ -460,7 +460,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                       <h3 className="text-xl font-serif font-black text-stone-900 dark:text-parchment-100 group-hover/title:text-amber-600 dark:group-hover/title:text-amber-300 transition-colors">
                         {book.name}
                       </h3>
-                      <div className="text-xs font-serif italic text-amber-700 dark:text-amber-400/90 font-semibold mt-0.5">
+                      <div className="text-xs font-serif italic text-amber-800 dark:text-amber-400/90 font-semibold mt-0.5">
                         "{book.codename}"
                       </div>
                       <p className="text-xs text-stone-600 dark:text-stone-400 mt-1 line-clamp-2">
@@ -471,10 +471,10 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                     {/* Dual-Lens Scripture Box */}
                     <div className="mt-4 rounded-xl bg-white/80 dark:bg-stone-950/70 p-3.5 space-y-2">
                       <div className="flex items-center justify-between text-[11px] font-mono">
-                        <span className="text-amber-700 dark:text-amber-400 font-bold">{book.anchorScripture.reference}</span>
+                        <span className="text-amber-800 dark:text-amber-400 font-bold">{book.anchorScripture.reference}</span>
                         <button
                           onClick={() => handleToggleLens(book.id)}
-                          className="text-[10px] px-2 py-0.5 rounded bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 text-amber-800 dark:text-amber-300 transition-colors"
+                          className="text-[11px] px-2 py-0.5 rounded bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 text-amber-800 dark:text-amber-300 transition-colors"
                         >
                           {lens === 'street' ? '⚡ Street Plain' : '📜 Canonical'}
                         </button>
@@ -497,19 +497,19 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                     {isExpanded && (
                       <div className="mt-2 space-y-3 pt-2 border-t border-stone-200/60 dark:border-stone-850 text-xs text-stone-700 dark:text-stone-300">
                         <div>
-                          <div className="text-[10px] font-mono uppercase text-amber-700 dark:text-amber-500/90 font-bold">Author & Context</div>
+                          <div className="text-[11px] font-mono uppercase text-amber-800 dark:text-amber-500/90 font-bold">Author & Context</div>
                           <p className="text-[11px] text-stone-600 dark:text-stone-400 mt-0.5 leading-normal">
                             {book.authorContext}
                           </p>
                         </div>
                         <div>
-                          <div className="text-[10px] font-mono uppercase text-red-600 dark:text-red-400 font-bold">Historical Peril</div>
+                          <div className="text-[11px] font-mono uppercase text-red-600 dark:text-red-400 font-bold">Historical Peril</div>
                           <p className="text-[11px] text-stone-600 dark:text-stone-400 mt-0.5 leading-normal">
                             {book.historicalPeril}
                           </p>
                         </div>
                         <div className="rounded-lg bg-amber-500/10 p-2.5">
-                          <div className="text-[10px] font-mono uppercase text-amber-900 dark:text-amber-300 font-bold">Why It Matters Monday</div>
+                          <div className="text-[11px] font-mono uppercase text-amber-900 dark:text-amber-300 font-bold">Why It Matters Monday</div>
                           <p className="text-[11px] text-stone-800 dark:text-parchment-200 mt-0.5 leading-normal">
                             {book.whyItMattersMonday}
                           </p>
@@ -529,7 +529,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                             : 'bg-stone-200/60 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 text-stone-700 dark:text-stone-300 hover:text-stone-950 dark:hover:text-white'
                         }`}
                       >
-                        {isPlaying ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />}
+                        {isPlaying ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />}
                         <span>{isPlaying ? 'Pause Voice' : 'Listen SitRep'}</span>
                       </button>
 
@@ -553,7 +553,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                         }}
                         className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 text-[11px] text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
                       >
-                        <Brain className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                        <Brain className="w-3 h-3 text-amber-800 dark:text-amber-400" />
                         <span>Word Forge</span>
                       </button>
 
@@ -567,7 +567,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                         }}
                         className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 text-[11px] text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
                       >
-                        <Bell className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                        <Bell className="w-3 h-3 text-amber-800 dark:text-amber-400" />
                         <span>Memory Pulse</span>
                       </button>
                     </div>

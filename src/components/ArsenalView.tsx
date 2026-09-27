@@ -103,7 +103,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-8 pb-36 sm:pb-40 md:pb-48 text-left">
       <div className="mb-6">
-        <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-1">
+        <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
           <Shield className="w-4 h-4" />
           <span>Saved • Mastered & Bookmarked</span>
         </div>
@@ -171,16 +171,16 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-lg font-serif font-bold text-amber-700 dark:text-amber-400">
+                      <span className="text-lg font-serif font-bold text-amber-800 dark:text-amber-400">
                         {verse.reference}
                       </span>
                       {isMastered && (
-                        <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-full">
+                        <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-full">
                           ✓ Mastered
                         </span>
                       )}
                       {isBookmarked && (
-                        <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-full">
+                        <span className="text-[11px] font-semibold text-amber-800 dark:text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-full">
                           Bookmarked
                         </span>
                       )}
@@ -221,7 +221,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
                   </blockquote>
 
                   <div className="my-3 p-3.5 rounded-xl bg-white/80 dark:bg-stone-950/70 text-xs md:text-sm text-stone-700 dark:text-stone-300">
-                    <div className="flex items-center gap-1.5 text-amber-700 dark:text-amber-400 font-semibold mb-1">
+                    <div className="flex items-center gap-1.5 text-amber-800 dark:text-amber-400 font-semibold mb-1">
                       <Sparkles className="w-3.5 h-3.5" />
                       <span>Plain English Real Talk</span>
                     </div>
@@ -252,7 +252,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
                         soundEngine.playClick();
                         onPracticeVerse(verse.id);
                       }}
-                      className="flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 transition-colors py-1.5 px-3 rounded-lg hover:bg-amber-500/10"
+                      className="flex items-center gap-1.5 text-xs font-semibold text-amber-800 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 transition-colors py-1.5 px-3 rounded-lg hover:bg-amber-500/10"
                     >
                       <Brain className="w-3.5 h-3.5" />
                       <span>Practice →</span>
@@ -267,7 +267,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
 
       {Object.keys(notes).length > 0 && (
         <div className="mt-12 pt-8 border-t border-stone-200/60 dark:border-stone-800/60">
-          <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-3">
+          <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-3">
             <FileText className="w-4 h-4" />
             <span>Your Personal Reflections & Journal</span>
           </div>
@@ -275,7 +275,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Object.entries(notes).map(([actId, noteText]) => (
               <div key={actId} className="p-4 rounded-xl bg-stone-100/60 dark:bg-stone-900/40 text-xs">
-                <div className="text-amber-700 dark:text-amber-400 font-serif font-bold text-sm mb-1">{getActTitle(actId)}</div>
+                <div className="text-amber-800 dark:text-amber-400 font-serif font-bold text-sm mb-1">{getActTitle(actId)}</div>
                 <p className="text-stone-700 dark:text-stone-300 italic">&ldquo;{noteText}&rdquo;</p>
               </div>
             ))}

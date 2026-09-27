@@ -46,13 +46,13 @@ export const TimelineModal: React.FC<TimelineModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="timeline-modal-title"
-        className="max-w-4xl w-full h-[100dvh] sm:h-auto sm:max-h-[90vh] bg-white dark:bg-[#11141b] border-0 sm:border-2 border-amber-400 dark:border-amber-600/50 rounded-none sm:rounded-3xl shadow-none sm:shadow-2xl overflow-hidden flex flex-col my-auto outline-none"
+        className="max-w-4xl w-full h-[100dvh] sm:h-auto sm:max-h-[90vh] bg-white dark:bg-ink-raised border-0 sm:border-2 border-amber-400 dark:border-amber-600/50 rounded-none sm:rounded-3xl shadow-none sm:shadow-2xl overflow-hidden flex flex-col my-auto outline-none"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
         <div className="p-5 md:p-6 border-b border-stone-200/60 dark:border-stone-800 flex items-center justify-between bg-stone-50 dark:bg-stone-950/60">
           <div>
-            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-1">
+            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
               <Clock className="w-4 h-4" />
               <span>The 60-Second Big Picture Mental Map</span>
             </div>
@@ -84,7 +84,7 @@ export const TimelineModal: React.FC<TimelineModalProps> = ({
                   : 'bg-stone-200/60 dark:bg-stone-950/60 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-800'
               }`}
             >
-              <div className="text-[10px] font-mono uppercase tracking-wider opacity-80">
+              <div className="text-[11px] font-mono uppercase tracking-wider opacity-80">
                 Era {era.eraNumber}
               </div>
               <div className="text-xs font-semibold whitespace-nowrap">
@@ -98,7 +98,7 @@ export const TimelineModal: React.FC<TimelineModalProps> = ({
         <div className="flex-1 min-h-0 p-5 md:p-8 overflow-y-auto space-y-6 text-left pb-12">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <span className="text-xs font-mono font-bold text-amber-700 dark:text-amber-400 uppercase tracking-widest">
+              <span className="text-xs font-mono font-bold text-amber-800 dark:text-amber-400 uppercase tracking-widest">
                 Era {currentEra.eraNumber} • {currentEra.timeframe}
               </span>
               <h3 className="text-2xl md:text-3xl font-serif font-black text-stone-900 dark:text-parchment-50 mt-1">
@@ -170,7 +170,7 @@ export const TimelineModal: React.FC<TimelineModalProps> = ({
                           {characterTitle}
                         </div>
                       </div>
-                      <div className="w-7 h-7 rounded-lg bg-amber-500/10 group-hover:bg-amber-500 group-hover:text-stone-950 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 transition-all">
+                      <div className="w-7 h-7 rounded-lg bg-amber-500/10 group-hover:bg-amber-500 group-hover:text-stone-950 text-amber-800 dark:text-amber-400 flex items-center justify-center shrink-0 transition-all">
                         <ArrowRight className="w-3.5 h-3.5" />
                       </div>
                     </button>

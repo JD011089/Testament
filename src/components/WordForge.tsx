@@ -190,7 +190,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
         <div className="p-5 md:p-6 rounded-2xl bg-stone-100/70 dark:bg-stone-900/50 transition-colors">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <span className="text-lg font-serif font-bold text-amber-700 dark:text-amber-400">
+              <span className="text-lg font-serif font-bold text-amber-800 dark:text-amber-400">
                 {verse.reference}
               </span>
               <span className="text-xs px-2 py-0.5 rounded bg-stone-200/70 dark:bg-stone-800 text-stone-600 dark:text-stone-400 font-mono">
@@ -203,8 +203,8 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                 </span>
               )}
               {verse.id === getDailyVerse().id && (
-                <span className="flex items-center gap-1 text-[10px] font-mono font-bold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/70 px-2 py-0.5 rounded-full">
-                  <Sparkles className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                <span className="flex items-center gap-1 text-[11px] font-mono font-bold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/70 px-2 py-0.5 rounded-full">
+                  <Sparkles className="w-3 h-3 text-amber-800 dark:text-amber-400" />
                   <span>Daily Truth</span>
                 </span>
               )}
@@ -217,7 +217,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                 aria-label={isSpeaking ? "Stop speech" : "Listen to verse"}
                 className="p-2 rounded-lg bg-stone-200/70 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-amber-600 text-stone-700 dark:text-stone-300 hover:text-stone-950 dark:hover:text-black transition-colors focus-visible:ring-2 focus-visible:ring-amber-500"
               >
-                {isSpeaking ? <VolumeX className="w-4 h-4 text-amber-600 dark:text-amber-400 animate-pulse" /> : <Volume2 className="w-4 h-4" />}
+                {isSpeaking ? <VolumeX className="w-4 h-4 text-amber-800 dark:text-amber-400 animate-pulse" /> : <Volume2 className="w-4 h-4" />}
               </button>
               <button
                 onClick={handleHint}
@@ -284,7 +284,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
             )}
           </div>
 
-          <div className="min-h-[140px] md:min-h-[160px] p-4 md:p-5 rounded-2xl bg-stone-100/50 dark:bg-[#0b0e12] border border-dashed border-stone-300/70 dark:border-stone-800/70 flex flex-wrap items-center content-start gap-2.5 transition-colors">
+          <div className="min-h-[140px] md:min-h-[160px] p-4 md:p-5 rounded-2xl bg-stone-100/50 dark:bg-ink border border-dashed border-stone-300/70 dark:border-stone-800/70 flex flex-wrap items-center content-start gap-2.5 transition-colors">
             {isPeeking ? (
               <div className="w-full rounded-xl bg-stone-900 text-white p-4 md:p-5">
                 <p className="text-[11px] font-mono uppercase tracking-widest text-amber-300 mb-2">Showing the verse · this counts as Again</p>
@@ -331,7 +331,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                 layout
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleSelectWord(item)}
-                className="px-4 py-2.5 rounded-xl text-sm md:text-base font-reading font-medium bg-white dark:bg-[#1a1f29] text-stone-900 dark:text-parchment-200 hover:bg-amber-100 dark:hover:bg-stone-800 active:bg-amber-600 active:text-stone-950 focus-visible:ring-2 focus-visible:ring-amber-500 transition-colors"
+                className="px-4 py-2.5 rounded-xl text-sm md:text-base font-reading font-medium bg-white dark:bg-ink-overlay text-stone-900 dark:text-parchment-200 hover:bg-amber-100 dark:hover:bg-stone-800 active:bg-amber-600 active:text-stone-950 focus-visible:ring-2 focus-visible:ring-amber-500 transition-colors"
               >
                 {useFirstLetters ? getGhostDisplay(item.word) : item.word}
               </motion.button>
@@ -382,7 +382,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                 <div className="text-xs font-mono font-medium text-emerald-800 dark:text-emerald-300 mb-2 flex items-center justify-between">
                   <span>How easily did you recall this verse? {fsrsRated && <strong className="text-emerald-600 dark:text-emerald-400">✓ Retention Logged</strong>}</span>
                   {scheduledNextDays && (
-                    <span className="text-amber-700 dark:text-amber-400 font-bold">Scheduled in {scheduledNextDays} days</span>
+                    <span className="text-amber-800 dark:text-amber-400 font-bold">Scheduled in {scheduledNextDays} days</span>
                   )}
                 </div>
                 <div className="grid grid-cols-4 gap-2">
@@ -391,28 +391,28 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                     className="p-2 rounded-lg bg-stone-100 dark:bg-stone-900 hover:bg-red-500/20 text-[11px] font-medium text-red-700 dark:text-red-300 text-center transition-all"
                   >
                     <div className="font-bold">Again</div>
-                    <div className="text-[10px] text-stone-500 dark:text-stone-400">1 day</div>
+                    <div className="text-[11px] text-stone-500 dark:text-stone-400">1 day</div>
                   </button>
                   <button
                     onClick={() => handleRateFSRS(2)}
                     className="p-2 rounded-lg bg-stone-100 dark:bg-stone-900 hover:bg-amber-500/20 text-[11px] font-medium text-amber-800 dark:text-amber-300 text-center transition-all"
                   >
                     <div className="font-bold">Hard</div>
-                    <div className="text-[10px] text-stone-500 dark:text-stone-400">2-3 days</div>
+                    <div className="text-[11px] text-stone-500 dark:text-stone-400">2-3 days</div>
                   </button>
                   <button
                     onClick={() => handleRateFSRS(3)}
                     className="p-2 rounded-lg bg-stone-100 dark:bg-stone-900 hover:bg-emerald-500/20 text-[11px] font-medium text-emerald-700 dark:text-emerald-300 text-center transition-all"
                   >
                     <div className="font-bold">Good</div>
-                    <div className="text-[10px] text-stone-500 dark:text-stone-400">4-7 days</div>
+                    <div className="text-[11px] text-stone-500 dark:text-stone-400">4-7 days</div>
                   </button>
                   <button
                     onClick={() => handleRateFSRS(4)}
                     className="p-2 rounded-lg bg-stone-100 dark:bg-stone-900 hover:bg-cyan-500/20 text-[11px] font-medium text-cyan-800 dark:text-cyan-300 text-center transition-all"
                   >
                     <div className="font-bold">Easy</div>
-                    <div className="text-[10px] text-stone-500 dark:text-stone-400">14+ days</div>
+                    <div className="text-[11px] text-stone-500 dark:text-stone-400">14+ days</div>
                   </button>
                 </div>
               </div>
@@ -513,7 +513,7 @@ export const WordForge: React.FC<WordForgeProps> = ({
       {/* Header */}
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-1">
+          <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
             <Flame className="w-4 h-4" />
             <span>The Word Forge • Scripture Retention</span>
           </div>
@@ -533,7 +533,7 @@ export const WordForge: React.FC<WordForgeProps> = ({
           className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-500/15 text-amber-800 dark:text-amber-300 text-xs font-semibold hover:bg-amber-500 hover:text-stone-950 transition-all"
           title="Set this verse as your daily memory challenge"
         >
-          <Bell className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 animate-pulse" />
+          <Bell className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 animate-pulse" />
           <span>Train This Verse (Reminders)</span>
         </button>
       </div>

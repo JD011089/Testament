@@ -1,21 +1,17 @@
-import { useState, useEffect } from 'react';
+import { lazy, Suspense, useState, useEffect } from 'react';
 import type { StoryQuest } from './types';
 import { STORY_QUESTS } from './data/stories';
 import { Dashboard } from './components/Dashboard';
 import { StoryViewer } from './components/StoryViewer';
-import { WordForge } from './components/WordForge';
 import { ArsenalView } from './components/ArsenalView';
-import { DilemmaSimulator } from './components/DilemmaSimulator';
 import { Navigation } from './components/Navigation';
 import type { NavTab } from './components/Navigation';
 import { DossierModal } from './components/DossierModal';
 import { ProverbsCodexModal } from './components/ProverbsCodexModal';
 import { PsalmsFieldMedicModal } from './components/PsalmsFieldMedicModal';
-import { DriveModePlayer } from './components/DriveModePlayer';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { OnboardingModal, type UserCalibrationProfile } from './components/OnboardingModal';
 import { WhatsNewModal } from './components/WhatsNewModal';
-import { CanonLibraryPage } from './components/CanonLibraryPage';
 import { UpdateNotificationBanner } from './components/UpdateNotificationBanner';
 import { CampaignNextTaskPrompt } from './components/CampaignNextTaskPrompt';
 import { soundEngine } from './utils/audio';
@@ -24,16 +20,33 @@ import { initNotificationScheduler, setActiveMemoryVerse } from './utils/notific
 import { markCampaignStepCompleted } from './data/dailyCampaigns';
 import type { DailyCampaignStep } from './data/dailyCampaigns';
 import { getComposedDailyMission } from './utils/missionComposer';
+import { pathForTab, tabFromPath } from './utils/routes';
+
+const WordForge = lazy(() => import('./components/WordForge').then((m) => ({ default: m.WordForge })));
+const DilemmaSimulator = lazy(() => import('./components/DilemmaSimulator').then((m) => ({ default: m.DilemmaSimulator })));
+const CanonLibraryPage = lazy(() => import('./components/CanonLibraryPage').then((m) => ({ default: m.CanonLibraryPage })));
+const DriveModePlayer = lazy(() => import('./components/DriveModePlayer').then((m) => ({ default: m.DriveModePlayer })));
+
+function ViewFallback() {
+  return <div className="max-w-7xl mx-auto px-6 py-16 text-sm text-stone-500">Loading...</div>;
+}
 
 export function App() {
-  const [currentTab, setCurrentTab] = useState<NavTab>(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('action') === 'wordforge') return 'wordforge';
-      if (params.get('action') === 'library' || params.get('tab') === 'library') return 'library';
-    }
-    return 'dashboard';
+  const [currentTab, setCurrentTabState] = useState<NavTab>(() => {
+    if (typeof window === 'undefined') return 'dashboard';
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('action') === 'wordforge' || params.get('verseId')) return 'wordforge';
+    if (params.get('action') === 'library' || params.get('tab') === 'library') return 'library';
+    return tabFromPath(window.location.pathname);
   });
+
+  const setCurrentTab = (tab: NavTab) => {
+    setCurrentTabState(tab);
+    const next = pathForTab(tab);
+    if (window.location.pathname !== next) {
+      window.history.pushState({ tab }, '', next);
+    }
+  };
   const [activeQuest, setActiveQuest] = useState<StoryQuest | null>(null);
   const [libraryPassage, setLibraryPassage] = useState<{
     book: string;
@@ -108,11 +121,10 @@ export function App() {
   });
 
   const [targetWordForgeVerseId, setTargetWordForgeVerseId] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('action') === 'wordforge' && params.get('verseId')) {
-        return params.get('verseId');
-      }
+    if (typeof window === 'undefined') return null;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('verseId') && (params.get('action') === 'wordforge' || window.location.pathname.startsWith('/memorize'))) {
+      return params.get('verseId');
     }
     return null;
   });
@@ -153,9 +165,13 @@ export function App() {
 
   // Handle URL deep links cleanup and listen for Service Worker messages
   useEffect(() => {
+    const onPop = () => setCurrentTabState(tabFromPath(window.location.pathname));
+    window.addEventListener('popstate', onPop);
+
     const params = new URLSearchParams(window.location.search);
-    if (params.get('action') === 'wordforge') {
-      window.history.replaceState({}, '', window.location.pathname);
+    const next = pathForTab(currentTab);
+    if (params.get('action') || params.get('verseId') || window.location.pathname !== next) {
+      window.history.replaceState({ tab: currentTab }, '', next);
     }
 
     const handleSwMessage = (event: MessageEvent) => {
@@ -168,10 +184,14 @@ export function App() {
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.addEventListener('message', handleSwMessage);
-      return () => {
-        navigator.serviceWorker.removeEventListener('message', handleSwMessage);
-      };
     }
+
+    return () => {
+      window.removeEventListener('popstate', onPop);
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.removeEventListener('message', handleSwMessage);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -384,6 +404,7 @@ export function App() {
   ) => {
     setUserProfile(profile);
     setIsOnboardingOpen(false);
+    window.dispatchEvent(new Event('testament-onboarding-settled'));
 
     // Wire calibration into real session behavior
     try {
@@ -461,7 +482,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fcfbfa] dark:bg-iron-950 text-stone-900 dark:text-parchment-100 transition-colors duration-200 w-full relative">
+    <div className="min-h-screen bg-surface dark:bg-iron-950 text-stone-900 dark:text-parchment-100 transition-colors duration-200 w-full relative">
       <main className="w-full pt-3 sm:pt-4 md:pt-16 pb-28 sm:pb-32 md:pb-12">
         {activeQuest ? (
           <StoryViewer 
@@ -523,6 +544,7 @@ export function App() {
             )}
 
             {currentTab === 'library' && (
+              <Suspense fallback={<ViewFallback />}>
               <CanonLibraryPage 
                 onBackToDashboard={() => {
                   soundEngine.playClick();
@@ -544,24 +566,29 @@ export function App() {
                 passageTarget={libraryPassage}
                 onPassageOpened={() => setLibraryPassage(null)}
               />
+              </Suspense>
             )}
 
             {currentTab === 'wordforge' && (
+              <Suspense fallback={<ViewFallback />}>
               <WordForge 
                 memorizedVerses={memorizedVerses}
                 onVerseMastered={handleVerseMastered}
                 targetVerseId={targetWordForgeVerseId}
                 onClearTargetVerse={() => setTargetWordForgeVerseId(null)}
               />
+              </Suspense>
             )}
 
             {currentTab === 'dilemmas' && (
+              <Suspense fallback={<ViewFallback />}>
               <DilemmaSimulator 
                 onRewardXP={handleRewardXP}
                 targetDilemmaId={targetDilemmaId}
                 onClearTargetDilemma={() => setTargetDilemmaId(null)}
                 onOpenNexus={handleOpenNexus}
               />
+              </Suspense>
             )}
 
             {currentTab === 'arsenal' && (
@@ -632,12 +659,16 @@ export function App() {
         onRewardXP={handleRewardXP}
       />
 
-      <DriveModePlayer
-        isOpen={isDriveModeOpen}
-        onClose={() => setIsDriveModeOpen(false)}
-        currentAmbience={currentAmbience}
-        onToggleAmbience={handleToggleAmbience}
-      />
+      {isDriveModeOpen && (
+        <Suspense fallback={null}>
+          <DriveModePlayer
+            isOpen={isDriveModeOpen}
+            onClose={() => setIsDriveModeOpen(false)}
+            currentAmbience={currentAmbience}
+            onToggleAmbience={handleToggleAmbience}
+          />
+        </Suspense>
+      )}
 
       {/* Onboarding Battle Plan Calibration Modal */}
       <WhatsNewModal
@@ -648,7 +679,10 @@ export function App() {
       <OnboardingModal
         isOpen={isOnboardingOpen}
         onComplete={handleCompleteOnboarding}
-        onClose={() => setIsOnboardingOpen(false)}
+        onClose={() => {
+          setIsOnboardingOpen(false);
+          window.dispatchEvent(new Event('testament-onboarding-settled'));
+        }}
         initialProfile={userProfile}
       />
 

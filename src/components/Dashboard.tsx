@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { StoryQuest } from '../types';
 import { STORY_QUESTS } from '../data/stories';
 import { soundEngine, type NarratorProfile, NARRATOR_VOICES } from '../utils/audio';
+import { ArtImage } from './ArtImage';
 import { 
   Flame, 
   Award, 
@@ -287,19 +288,22 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div className="flex items-center justify-between gap-3 w-full">
           {/* Left: Emblem, Title & Subtle Version Pill */}
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl overflow-hidden border border-amber-500/50 shadow-xs bg-stone-100 dark:bg-stone-950 shrink-0">
-              <img 
-                src="/icons/icon-192.png" 
-                alt="Testament Emblem" 
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl overflow-hidden border border-amber-700/40 dark:border-amber-500/50 shadow-xs bg-stone-100 dark:bg-ink shrink-0">
+              <img
+                src="/icons/icon-64.webp"
+                srcSet="/icons/icon-64.webp 64w, /icons/icon-128.webp 128w"
+                width={44}
+                height={44}
+                alt=""
                 className="w-full h-full object-cover"
               />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <h2 className="text-base sm:text-lg font-serif font-bold text-stone-900 dark:text-parchment-100 tracking-wide">
+                <h1 className="text-base sm:text-lg font-serif font-bold text-stone-900 dark:text-parchment-100 tracking-wide">
                   Testament
-                </h2>
-                <span className="text-[10px] font-mono px-2 py-0.2 rounded-full bg-amber-100/70 dark:bg-amber-950/80 border border-amber-300/60 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 font-bold">
+                </h1>
+                <span className="text-[11px] font-mono px-2 py-0.2 rounded-full bg-amber-100/70 dark:bg-amber-950/80 border border-amber-300/60 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 font-bold">
                   {getRankTitle(xp)}
                 </span>
                 <button
@@ -308,14 +312,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     soundEngine.playClick();
                     onOpenWhatsNew?.();
                   }}
-                  className="text-[10px] font-mono px-2 py-0.2 rounded-full bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-600 hover:text-stone-950 dark:text-stone-400 dark:hover:text-amber-300 border border-stone-250 dark:border-stone-750 transition-colors"
-                  title="What changed in v1.10.0"
+                  className="text-[11px] font-mono px-2 py-0.2 rounded-full bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-600 hover:text-stone-950 dark:text-stone-400 dark:hover:text-amber-300 border border-stone-250 dark:border-stone-750 transition-colors"
+                  title="What changed in v1.11.0"
                 >
-                  v1.10.0
+                  v1.11.0
                 </button>
               </div>
               <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
-                <span className="text-amber-700 dark:text-amber-400 font-medium">{todayFormatted}</span> • The Living Word
+                <span className="text-amber-800 dark:text-amber-400 font-medium">{todayFormatted}</span> • The Living Word
               </p>
             </div>
           </div>
@@ -324,12 +328,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <ThemeToggle compact />
 
-            <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/50 dark:bg-stone-800 text-xs font-mono font-bold text-orange-600 dark:text-orange-400" title="Daily streak">
+            <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/80 dark:bg-stone-800 text-xs font-mono font-bold text-orange-800 dark:text-orange-300" title="Daily streak">
               <Flame className="w-3.5 h-3.5 fill-orange-500/20 text-orange-500" />
               <span>{streakCount}d</span>
             </div>
 
-            <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/50 dark:bg-stone-800 text-xs font-mono font-bold text-amber-700 dark:text-amber-300" title="Scripture XP">
+            <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/50 dark:bg-stone-800 text-xs font-mono font-bold text-amber-800 dark:text-amber-300" title="Scripture XP">
               <Award className="w-3.5 h-3.5 text-amber-500" />
               <span>{xp}</span>
             </div>
@@ -337,16 +341,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
         {/* Row 2: Streamlined action bar — one briefing, due reviews, calibrate */}
-        <div className="flex items-center gap-2 pt-3 mt-3 border-t border-stone-200/60 dark:border-stone-800/60 overflow-x-auto scrollbar-none w-full">
+        <div className="relative pt-3 mt-3 border-t border-stone-200/60 dark:border-stone-800/60">
+          <div className="flex items-center gap-2 overflow-x-auto snap-x snap-mandatory scroll-px-1 scrollbar-none w-full">
           <button
             onClick={() => {
               soundEngine.playClick();
               setIsBattlefieldModalOpen(true);
             }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+            className={`snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
               activeBattlefield
                 ? 'bg-cyan-500/15 text-cyan-800 dark:text-cyan-200'
-                : 'bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-cyan-700 dark:text-cyan-400'
+                : 'bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-cyan-800 dark:text-cyan-300'
             }`}
             title="Declare today's trial"
           >
@@ -356,10 +361,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           <button
             onClick={handlePlayMorningTacticalAudio}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+            className={`snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
               isPlayingMorningTacticalAudio
                 ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
-                : 'bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-amber-700 dark:text-amber-300'
+                : 'bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-amber-800 dark:text-amber-300'
             }`}
             title="Listen to 45s audio briefing"
           >
@@ -374,10 +379,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {dueFSRSCount > 0 && (
             <button
               onClick={() => onOpenWordForge()}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 text-amber-800 dark:text-amber-300 text-xs font-bold whitespace-nowrap"
+              className="snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 text-amber-800 dark:text-amber-300 text-xs font-bold whitespace-nowrap"
               title="Scriptures due for memory review"
             >
-              <Brain className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 animate-pulse" />
+              <Brain className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 animate-pulse" />
               <span>{dueFSRSCount} Due</span>
             </button>
           )}
@@ -387,7 +392,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               soundEngine.playClick();
               setIsMemoryPulseModalOpen(true);
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs font-medium whitespace-nowrap transition-colors"
+            className="snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-xs font-medium whitespace-nowrap transition-colors"
             title="Memory reminder settings"
           >
             <Bell className="w-3.5 h-3.5 text-amber-500" />
@@ -396,13 +401,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           <button
             onClick={() => setShowMorningBriefing(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs font-medium whitespace-nowrap transition-colors"
+            className="snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-xs font-medium whitespace-nowrap transition-colors"
             title="Optional deeper written briefing"
           >
             <Coffee className="w-3.5 h-3.5 text-amber-500" />
             <span>Go Deeper</span>
             {!isBriefingBonusClaimed && (
-              <span className="text-[9px] bg-amber-500 text-stone-950 font-extrabold px-1 py-0.2 rounded-full">
+              <span className="text-[11px] bg-amber-500 text-stone-950 font-extrabold px-1 py-0.2 rounded-full">
                 +50 XP
               </span>
             )}
@@ -414,13 +419,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 soundEngine.playClick();
                 onOpenOnboarding();
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs font-medium whitespace-nowrap transition-colors"
+              className="snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-xs font-medium whitespace-nowrap transition-colors"
               title="Calibrate your battle plan"
             >
               <SlidersHorizontal className="w-3.5 h-3.5 text-amber-500" />
               <span>{userProfile ? 'My Plan' : 'Calibrate'}</span>
             </button>
           )}
+          </div>
+          <div className="pointer-events-none absolute right-0 top-3 bottom-0 w-10 bg-gradient-to-l from-surface dark:from-ink to-transparent md:hidden" aria-hidden="true" />
         </div>
       </div>
 
@@ -476,11 +483,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {/* MAIN STAGE (65-70% on Desktop) */}
           <div className="lg:col-span-8 space-y-8">
             {/* Cinematic Hero Study Table Banner */}
-          <div className="rounded-2xl overflow-hidden relative bg-stone-100 dark:bg-[#0e1117] transition-colors">
+          <div className="rounded-2xl overflow-hidden relative bg-stone-100 dark:bg-ink-raised transition-colors">
             <div className="relative h-44 sm:h-64 w-full overflow-hidden bg-stone-950">
-              <img 
-                src="/images/hero_banner.jpg" 
-                alt="Ancient study table with scripture and shield" 
+              <ArtImage
+                src="/images/hero_banner.jpg"
+                alt="Ancient study table with scripture and shield"
+                width={1376}
+                height={768}
+                loading="eager"
+                fetchPriority="high"
                 className="w-full h-full object-cover object-center"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 dark:from-[#0e1117] via-stone-950/40 to-transparent" />
@@ -488,11 +499,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             <div className="p-4 sm:p-6 relative">
               <div className="flex items-center justify-between gap-2 mb-1.5">
-                <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">
+                <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400">
                   <Sparkles className="w-4 h-4 text-amber-500" />
                   <span>Daily Truth For The Trenches</span>
                 </div>
-                <span className="text-[10px] font-mono text-amber-700 dark:text-amber-400/90 px-2.5 py-0.5 rounded bg-amber-500/10">
+                <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400/90 px-2.5 py-0.5 rounded bg-amber-500/10">
                   {todayFormatted}
                 </span>
               </div>
@@ -507,14 +518,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
               <div className="flex items-center justify-between pt-3 border-t border-stone-200/60 dark:border-stone-800/60">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono text-amber-600 dark:text-amber-500 font-semibold">{dailyVerse.reference}</span>
-                  <span className="text-[10px] font-mono text-stone-500 dark:text-stone-400 px-2 py-0.5 rounded bg-stone-200/60 dark:bg-stone-900 hidden sm:inline-block">
+                  <span className="text-xs font-mono text-amber-800 dark:text-amber-500 font-semibold">{dailyVerse.reference}</span>
+                  <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400 px-2 py-0.5 rounded bg-stone-200/60 dark:bg-stone-900 hidden sm:inline-block">
                     {dailyVerse.category}
                   </span>
                 </div>
                 <button
                   onClick={() => onOpenWordForge(dailyVerse.id)}
-                  className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 flex items-center gap-1 transition-colors focus-visible:ring-2 focus-visible:ring-amber-500 rounded px-1"
+                  className="text-xs font-semibold text-amber-800 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 flex items-center gap-1 transition-colors focus-visible:ring-2 focus-visible:ring-amber-500 rounded px-1"
                 >
                   <span>Lock into memory</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -532,16 +543,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     🎯
                   </div>
                   <div>
-                    <div className="text-[10px] font-mono uppercase tracking-widest text-amber-700 dark:text-amber-400 font-bold">
+                    <div className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
                       Your Calibrated Battle Plan
                     </div>
                     <div className="text-xs sm:text-sm font-serif font-bold text-stone-900 dark:text-parchment-100">
                       Targeting: {userProfile.battleTitle}
                     </div>
                     <div className="text-[11px] text-stone-500 dark:text-stone-400 flex items-center gap-2 mt-0.5">
-                      <span>Mode: <strong className="text-amber-700 dark:text-amber-300 uppercase">{userProfile.learningStyle}</strong></span>
+                      <span>Mode: <strong className="text-amber-800 dark:text-amber-300 uppercase">{userProfile.learningStyle}</strong></span>
                       <span>•</span>
-                      <span>Cadence: <strong className="text-amber-700 dark:text-amber-300">{userProfile.dailyCadence === '3min' ? '3 Min/Day' : userProfile.dailyCadence === '10min' ? '7-10 Min/Day' : 'Deep Study'}</strong></span>
+                      <span>Cadence: <strong className="text-amber-800 dark:text-amber-300">{userProfile.dailyCadence === '3min' ? '3 Min/Day' : userProfile.dailyCadence === '10min' ? '7-10 Min/Day' : 'Deep Study'}</strong></span>
                     </div>
                   </div>
                 </div>
@@ -562,7 +573,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
               <div>
-                <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-1">
+                <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
                   <Compass className="w-4 h-4" />
                   <span>Curated Paths & Deep Dives</span>
                 </div>
@@ -610,32 +621,34 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   >
                     {/* Visual Illustration Thumbnail */}
                     <div className="relative h-44 w-full shrink-0 overflow-hidden bg-stone-950">
-                      <img 
-                        src={questImage} 
-                        alt={quest.title} 
+                      <ArtImage
+                        src={questImage}
+                        alt={quest.title}
+                        width={1376}
+                        height={768}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 dark:from-[#12151b] via-transparent to-transparent" />
-                      <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded bg-black/80 backdrop-blur-md text-[10px] font-mono text-amber-400 uppercase">
+                      <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded bg-black/80 backdrop-blur-md text-[11px] font-mono text-amber-400 uppercase">
                         {quest.heroName}
                       </div>
 
                       {isFullyComplete ? (
-                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-emerald-950/90 backdrop-blur-md text-emerald-300 text-[10px] font-mono font-bold uppercase tracking-wider flex items-center gap-1">
+                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-emerald-950/90 backdrop-blur-md text-emerald-300 text-[11px] font-mono font-bold uppercase tracking-wider flex items-center gap-1">
                           <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                           <span>Completed</span>
                         </div>
                       ) : userProfile?.recommendedQuestId === quest.id ? (
-                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 text-stone-950 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 text-stone-950 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1">
                           <span>🎯</span>
                           <span>Your Battle Plan</span>
                         </div>
                       ) : !userProfile && quest.id === 'david-journey' && completedCount === 0 ? (
-                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-amber-500 text-stone-950 text-[10px] font-bold uppercase tracking-wider">
+                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-amber-500 text-stone-950 text-[11px] font-bold uppercase tracking-wider">
                           Recommended First
                         </div>
                       ) : quest.starterTrack ? (
-                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded bg-amber-950/80 backdrop-blur-md text-[9px] font-mono text-amber-300 uppercase">
+                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded bg-amber-950/80 backdrop-blur-md text-[11px] font-mono text-amber-300 uppercase">
                           {quest.starterTrack}
                         </div>
                       ) : null}
@@ -644,15 +657,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     {/* Quest Card Body */}
                     <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
                       <div>
-                        <div className="flex items-center gap-2 text-xs font-semibold text-amber-600 dark:text-amber-500 uppercase tracking-wider mb-1">
+                        <div className="flex items-center gap-2 text-xs font-semibold text-amber-800 dark:text-amber-500 uppercase tracking-wider mb-1">
                           <span>{quest.testament}</span>
                           <span>•</span>
                           <span>{quest.historicalPeriod}</span>
                         </div>
 
-                        <h4 className="text-lg font-serif font-bold text-stone-900 dark:text-parchment-50 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                        <h2 className="text-lg font-serif font-bold text-stone-900 dark:text-parchment-50 group-hover:text-amber-800 dark:group-hover:text-amber-400 transition-colors">
                           {quest.title}
-                        </h4>
+                        </h2>
 
                         <p className="text-xs text-stone-500 dark:text-stone-400 font-medium">
                           {quest.subtitle}
@@ -710,9 +723,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-amber-500" />
-                <h4 className="text-sm font-serif font-bold text-stone-900 dark:text-parchment-50">
+                <h2 className="text-sm font-serif font-bold text-stone-900 dark:text-parchment-50">
                   Field Tools
-                </h4>
+                </h2>
               </div>
             </div>
             <p className="text-[11px] text-stone-500 dark:text-stone-400 mb-3">
@@ -725,11 +738,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   soundEngine.playSnap();
                   onOpenDilemmas();
                 }}
-                className="p-2.5 rounded-xl bg-white/80 dark:bg-stone-900/80 hover:bg-white dark:hover:bg-[#181d2a] transition-all text-left group"
+                className="p-2.5 rounded-xl bg-white/80 dark:bg-stone-900/80 hover:bg-white dark:hover:bg-ink-overlay transition-all text-left group"
               >
                 <ShieldAlert className="w-4 h-4 text-amber-500 mb-1 group-hover:scale-110 transition-transform" />
-                <div className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100">"What’s the Play?"</div>
-                <div className="text-[10px] text-stone-500 dark:text-stone-400 truncate">Life simulator</div>
+                <div className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100">"What's the Play?"</div>
+                <div className="text-[11px] text-stone-500 dark:text-stone-400 truncate">Life simulator</div>
               </button>
 
               <button
@@ -737,11 +750,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   soundEngine.playSnap();
                   onOpenProverbs();
                 }}
-                className="p-2.5 rounded-xl bg-white/80 dark:bg-stone-900/80 hover:bg-white dark:hover:bg-[#181d2a] transition-all text-left group"
+                className="p-2.5 rounded-xl bg-white/80 dark:bg-stone-900/80 hover:bg-white dark:hover:bg-ink-overlay transition-all text-left group"
               >
                 <Shield className="w-4 h-4 text-amber-500 mb-1 group-hover:scale-110 transition-transform" />
                 <div className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100">Proverbs Codex</div>
-                <div className="text-[10px] text-stone-500 dark:text-stone-400 truncate">Solomon's playbook</div>
+                <div className="text-[11px] text-stone-500 dark:text-stone-400 truncate">Solomon's playbook</div>
               </button>
 
               <button
@@ -749,11 +762,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   soundEngine.playSnap();
                   onOpenPsalms();
                 }}
-                className="p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/15 dark:bg-stone-900/80 dark:hover:bg-[#181d2a] transition-all text-left group"
+                className="p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/15 dark:bg-stone-900/80 dark:hover:bg-ink-overlay transition-all text-left group"
               >
                 <HeartHandshake className="w-4 h-4 text-rose-500 mb-1 group-hover:scale-110 transition-transform" />
                 <div className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100">Psalms Medic</div>
-                <div className="text-[10px] text-stone-500 dark:text-stone-400 truncate">Emergency triage</div>
+                <div className="text-[11px] text-stone-500 dark:text-stone-400 truncate">Emergency triage</div>
               </button>
             </div>
           </div>
@@ -762,14 +775,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="p-4 sm:p-5 rounded-2xl bg-stone-100/60 dark:bg-stone-900/40 relative overflow-hidden text-left">
             <div className="flex items-center justify-between gap-2 mb-2.5">
               <div className="flex items-center gap-2">
-                <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400">
+                <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-amber-500/20 text-amber-800 dark:text-amber-400">
                   <Bell className="w-3.5 h-3.5" />
                 </span>
                 <div>
-                  <div className="text-xs font-mono font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                  <div className="text-xs font-mono font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400">
                     Memory Reminders
                   </div>
-                  <div className="text-[10px] text-stone-500 dark:text-stone-400">
+                  <div className="text-[11px] text-stone-500 dark:text-stone-400">
                     {notificationSettings.enabled
                       ? `${notificationSettings.notificationsSentToday} of ${notificationSettings.frequencyPerDay} today`
                       : 'Off — tap to configure'}
@@ -781,13 +794,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   soundEngine.playClick();
                   setIsMemoryPulseModalOpen(true);
                 }}
-                className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 hover:underline underline-offset-2"
+                className="text-[11px] font-semibold text-amber-800 dark:text-amber-400 hover:underline underline-offset-2"
               >
                 Settings
               </button>
             </div>
             <div className="bg-white/80 dark:bg-black/30 p-3 rounded-xl mb-3">
-              <span className="text-xs font-serif font-bold text-amber-700 dark:text-amber-300">
+              <span className="text-xs font-serif font-bold text-amber-800 dark:text-amber-300">
                 {activeMemoryVerse.reference}
               </span>
               <p className="text-xs text-stone-800 dark:text-parchment-100 italic line-clamp-2 leading-relaxed mt-1">
@@ -795,8 +808,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </p>
             </div>
             {nextReminder && notificationSettings.enabled && (
-              <div className="text-[10px] font-mono text-amber-800 dark:text-amber-300/90 mb-3 flex items-center gap-1.5 bg-amber-500/10 px-2.5 py-1 rounded-lg">
-                <Clock className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
+              <div className="text-[11px] font-mono text-amber-800 dark:text-amber-300/90 mb-3 flex items-center gap-1.5 bg-amber-500/10 px-2.5 py-1 rounded-lg">
+                <Clock className="w-3 h-3 text-amber-800 dark:text-amber-400 shrink-0" />
                 <span>Next: {nextReminder.label} ({nextReminder.remainingFormatted})</span>
               </div>
             )}
@@ -818,12 +831,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 📜
               </div>
               <div>
-                <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 px-1.5 py-0.2 rounded bg-amber-500/10 inline-block mb-0.5">
+                <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400 px-1.5 py-0.2 rounded bg-amber-500/10 inline-block mb-0.5">
                   Complete Canon • 66 Books
                 </span>
-                <h4 className="text-xs sm:text-sm font-serif font-bold text-stone-900 dark:text-parchment-50">
+                <h2 className="text-xs sm:text-sm font-serif font-bold text-stone-900 dark:text-parchment-50">
                   Scripture Field Library
-                </h4>
+                </h2>
               </div>
             </div>
             <p className="text-[11px] text-stone-500 dark:text-stone-400 mb-3">
@@ -859,11 +872,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="flex items-center justify-between mb-2.5">
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4 text-amber-500" />
-                <h4 className="text-sm font-serif font-bold text-stone-900 dark:text-parchment-50">
+                <h2 className="text-sm font-serif font-bold text-stone-900 dark:text-parchment-50">
                   The Armory • Relics of Faith
-                </h4>
+                </h2>
               </div>
-              <span className="text-xs font-mono text-amber-600 dark:text-amber-400 font-bold">
+              <span className="text-xs font-mono text-amber-800 dark:text-amber-400 font-bold">
                 {unlockedRelics.length}/{ALL_RELICS.length} Unlocked
               </span>
             </div>
@@ -888,7 +901,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     <div className="text-xs font-bold truncate text-stone-900 dark:text-parchment-100">
                       {isUnlocked ? relic.name : '??? Locked'}
                     </div>
-                    <div className="text-[10px] text-stone-500 dark:text-stone-400 truncate">
+                    <div className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
                       {relic.character}
                     </div>
                   </div>
@@ -905,7 +918,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <span>Ambient Soundscape</span>
               </div>
               {currentAmbience !== 'none' && (
-                <span className="text-[10px] font-mono text-amber-600 dark:text-amber-400 uppercase">
+                <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 uppercase">
                   Playing: {currentAmbience}
                 </span>
               )}
@@ -956,7 +969,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <Mic className="w-3 h-3 text-amber-500" />
                   ElevenLabs Voice
                 </span>
-                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-mono">
+                <span className="text-[11px] text-amber-800 dark:text-amber-400 font-mono">
                   {NARRATOR_VOICES[narratorProfile]?.actor || 'Adam (ElevenLabs)'}
                 </span>
               </div>
@@ -981,7 +994,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     }`}
                   >
                     <span>{p.label}</span>
-                    <span className="text-[9px] opacity-80 font-normal">{p.sub}</span>
+                    <span className="text-[11px] opacity-80 font-normal">{p.sub}</span>
                   </button>
                 ))}
               </div>
@@ -1007,17 +1020,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div 
             ref={briefingModalRef}
             tabIndex={-1}
-            className="max-w-lg w-full p-6 rounded-2xl bg-white dark:bg-[#141820] border-2 border-amber-500 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto my-auto text-stone-900 dark:text-parchment-100 focus:outline-none"
+            className="max-w-lg w-full p-6 rounded-2xl bg-white dark:bg-ink-raised border-2 border-amber-500 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto my-auto text-stone-900 dark:text-parchment-100 focus:outline-none"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between pb-2 border-b border-stone-200 dark:border-stone-800">
               <div>
-                <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-serif font-bold text-lg">
+                <div className="flex items-center gap-2 text-amber-800 dark:text-amber-400 font-serif font-bold text-lg">
                   <Coffee className="w-5 h-5" />
                   <span id="morning-briefing-title">{dailyBriefing.title}</span>
                 </div>
                 <div className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-                  {dailyBriefing.hero} • <span className="text-amber-600 dark:text-amber-500/90">{dailyBriefing.themeTag}</span>
+                  {dailyBriefing.hero} • <span className="text-amber-800 dark:text-amber-500/90">{dailyBriefing.themeTag}</span>
                 </div>
               </div>
               <button 
@@ -1035,7 +1048,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             <div className="space-y-3 text-xs md:text-sm">
               <div className="p-3 bg-stone-50 dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800">
-                <strong className="text-amber-700 dark:text-amber-400">1. Real Moment: </strong>
+                <strong className="text-amber-800 dark:text-amber-400">1. Real Moment: </strong>
                 {dailyBriefing.moment}
               </div>
 
@@ -1045,7 +1058,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
 
               <div className="p-3 bg-stone-50 dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800">
-                <strong className="text-amber-700 dark:text-amber-400">3. Your Call Today: </strong>
+                <strong className="text-amber-800 dark:text-amber-400">3. Your Call Today: </strong>
                 {dailyBriefing.dailyCall}
               </div>
             </div>
