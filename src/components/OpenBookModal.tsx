@@ -7,14 +7,11 @@ import {
   Volume2, 
   VolumeX, 
   Brain, 
-  ExternalLink, 
   Sparkles,
   Flame,
   CheckCircle2,
   BookOpen,
   Shield,
-  Bookmark,
-  Copy,
   Loader2,
   ChevronDown,
   Mic
@@ -31,6 +28,15 @@ import {
   type TranslationId 
 } from '../utils/bibleService';
 import { registerDynamicBibleVerse } from '../utils/verseRegistry';
+import {
+  loadReadingPlace,
+  loadReadingPrefs,
+  saveReadingPlace,
+  saveReadingPrefs,
+  type ReadingFontSize,
+  type ReadingLayout,
+} from '../utils/readingPlace';
+import { BookConnections } from './BookConnections';
 
 interface OpenBookModalProps {
   book: CanonBook | null;
@@ -40,6 +46,8 @@ interface OpenBookModalProps {
   onOpenWordForge?: (verseId: string) => void;
   onSetMemoryVerse?: (verseId: string) => void;
   onSelectStoryQuest?: (questId: string) => void;
+  onSaveBookmark?: (verseId: string) => boolean;
+  onOpenDilemma?: (dilemmaId: string) => void;
   initialMode?: 'briefing' | 'reader';
   initialChapter?: number;
   launchToken?: number;
@@ -55,6 +63,8 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
   onOpenWordForge,
   onSetMemoryVerse,
   onSelectStoryQuest,
+  onSaveBookmark,
+  onOpenDilemma,
   initialMode = 'briefing',
   initialChapter = 1,
   launchToken = 0,
@@ -69,12 +79,16 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
 
   // Full Scripture Reader State
   const [selectedChapter, setSelectedChapter] = useState<number>(initialChapter);
-  const [selectedTranslation, setSelectedTranslation] = useState<TranslationId>('web');
+  const [selectedTranslation, setSelectedTranslation] = useState<TranslationId>(
+    () => loadReadingPlace()?.translation ?? 'web'
+  );
   const [chapterData, setChapterData] = useState<BibleChapterData | null>(null);
   const [isLoadingChapter, setIsLoadingChapter] = useState(false);
   const [chapterError, setChapterError] = useState<string | null>(null);
   const [retryNonce, setRetryNonce] = useState(0);
-  const [readingFontSize, setReadingFontSize] = useState<'sm' | 'base' | 'lg'>('base');
+  const [readingFontSize, setReadingFontSize] = useState<ReadingFontSize>(() => loadReadingPrefs().fontSize);
+  const [readingLayout, setReadingLayout] = useState<ReadingLayout>(() => loadReadingPrefs().layout);
+  const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
   const [isPlayingChapterAudio, setIsPlayingChapterAudio] = useState(false);
   const [activeReadingVerse, setActiveReadingVerse] = useState<number | null>(null);
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
@@ -101,20 +115,20 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
     };
   }, [book]);
 
-  // Reset chapter to 1 when book changes
+  // Briefing opens clean. A launch token lands on the cited chapter in the reader.
   useEffect(() => {
-    setSelectedChapter(1);
-    setActiveMode('briefing');
+    if (!book) return;
     setIsPlayingChapterAudio(false);
+    setSelectedVerse(null);
     soundEngine.stopSpeaking();
-  }, [book?.id]);
-
-  // Quest "Read this chapter" lands on the cited chapter in reader mode
-  useEffect(() => {
-    if (!launchToken) return;
-    setSelectedChapter(initialChapter);
-    setActiveMode('reader');
-  }, [launchToken, initialChapter]);
+    if (launchToken) {
+      setSelectedChapter(initialChapter);
+      setActiveMode('reader');
+    } else {
+      setSelectedChapter(1);
+      setActiveMode('briefing');
+    }
+  }, [book?.id, launchToken, initialChapter]);
 
   // Smooth scroll reader to top on chapter change, or to the cited verse
   useEffect(() => {
@@ -159,6 +173,20 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
       isMounted = false;
     };
   }, [book?.name, selectedChapter, selectedTranslation, activeMode, retryNonce]);
+
+  useEffect(() => {
+    if (!book || activeMode !== 'reader') return;
+    saveReadingPlace({
+      bookId: book.id,
+      bookName: book.name,
+      chapter: selectedChapter,
+      translation: selectedTranslation,
+    });
+  }, [book?.id, book?.name, selectedChapter, selectedTranslation, activeMode]);
+
+  useEffect(() => {
+    setSelectedVerse(null);
+  }, [selectedChapter, book?.id]);
 
   const currentIndex = book ? allBooks.findIndex(b => b.id === book.id) : -1;
   const prevBook = currentIndex > 0 ? allBooks[currentIndex - 1] : null;
@@ -259,7 +287,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
   const handleSendVerseToForge = (verseNum: number, text: string) => {
     soundEngine.playVictory();
     const reference = `${book.name} ${selectedChapter}:${verseNum}`;
-    const dynamicVerse = registerDynamicBibleVerse(reference, text, 'CSB');
+    const dynamicVerse = registerDynamicBibleVerse(reference, text, chapterData?.translation || 'WEB');
 
     showToast(`"${reference}" loaded into Word Forge!`);
 
@@ -274,22 +302,9 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
   const handleSaveVerseToArsenal = (verseNum: number, text: string) => {
     soundEngine.playSnap();
     const reference = `${book.name} ${selectedChapter}:${verseNum}`;
-    const dynamicVerse = registerDynamicBibleVerse(reference, text, 'CSB');
-
-    try {
-      const stored = localStorage.getItem('testament_bookmarked_verses');
-      const bookmarks: string[] = stored ? JSON.parse(stored) : [];
-      if (!bookmarks.includes(dynamicVerse.id)) {
-        bookmarks.push(dynamicVerse.id);
-        localStorage.setItem('testament_bookmarked_verses', JSON.stringify(bookmarks));
-        window.dispatchEvent(new CustomEvent('testament-verse-bookmarked', { detail: dynamicVerse.id }));
-        showToast(`Saved ${reference} to your Tactical Arsenal!`);
-      } else {
-        showToast(`${reference} is already in your Arsenal.`);
-      }
-    } catch {
-      showToast(`Saved ${reference} to Arsenal!`);
-    }
+    const dynamicVerse = registerDynamicBibleVerse(reference, text, chapterData?.translation || 'WEB');
+    const added = onSaveBookmark ? onSaveBookmark(dynamicVerse.id) : true;
+    showToast(added ? `Saved ${reference} to your Arsenal.` : `${reference} is already in your Arsenal.`);
   };
 
   const handleCopyVerse = (verseNum: number, text: string) => {
@@ -313,6 +328,34 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
       onClose();
     }
   };
+
+  const chooseFontSize = (size: ReadingFontSize) => {
+    setReadingFontSize(size);
+    saveReadingPrefs({ fontSize: size });
+  };
+
+  const chooseLayout = (layout: ReadingLayout) => {
+    setReadingLayout(layout);
+    saveReadingPrefs({ layout });
+    setSelectedVerse(null);
+  };
+
+  const verseActions = (verseNum: number, text: string) => (
+    <div className="mt-2 flex flex-wrap gap-1.5" onClick={(event) => event.stopPropagation()}>
+      <button type="button" onClick={() => handleSendVerseToForge(verseNum, text)} className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold text-stone-700 dark:text-stone-200">Memorize</button>
+      <button type="button" onClick={() => handleSaveVerseToArsenal(verseNum, text)} className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold text-stone-700 dark:text-stone-200">Save</button>
+      <button type="button" onClick={() => handleSpeakSingleVerse(verseNum, text)} className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold text-stone-700 dark:text-stone-200">Listen</button>
+      <button type="button" onClick={() => handleCopyVerse(verseNum, text)} className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold text-stone-700 dark:text-stone-200">Copy</button>
+    </div>
+  );
+
+  const fontClass = readingFontSize === 'sm'
+    ? 'text-sm'
+    : readingFontSize === 'lg'
+      ? 'text-lg sm:text-xl'
+      : readingFontSize === 'xl'
+        ? 'text-xl sm:text-2xl'
+        : 'text-base sm:text-lg';
 
   return (
     <AnimatePresence>
@@ -569,30 +612,15 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Interactive Launch Deep-Link (If Quest / Proverbs / Psalms available) */}
-                  {book.deepLinkId && (
-                    <div className="mt-5 rounded-2xl bg-gradient-to-r from-amber-100/80 via-white to-amber-50/60 dark:from-amber-950/40 dark:via-stone-900 dark:to-amber-950/20 border border-amber-300 dark:border-amber-500/50 p-4 shadow-xs">
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
-                          <div className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold flex items-center gap-1.5">
-                            <Sparkles className="w-3 h-3 text-amber-800 dark:text-amber-400" />
-                            <span>Interactive Module Ready</span>
-                          </div>
-                          <p className="text-xs text-stone-600 dark:text-stone-300 mt-1">
-                            Experience {book.name}'s dilemmas through experiential simulation.
-                          </p>
-                        </div>
-
-                        <button
-                          onClick={handleLaunchDeepLink}
-                          className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs font-sans tracking-wide flex items-center gap-1.5 shrink-0 shadow-sm transition-all"
-                        >
-                          <span>Launch Journey</span>
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                  <BookConnections
+                    book={book}
+                    onOpenModule={handleLaunchDeepLink}
+                    onOpenDilemma={(dilemmaId) => {
+                      soundEngine.playClick();
+                      onOpenDilemma?.(dilemmaId);
+                      onClose();
+                    }}
+                  />
                 </div>
 
                 {/* Action Buttons: Word Forge & Pin Daily */}
@@ -636,7 +664,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
               className="flex-1 overflow-x-hidden overflow-y-auto flex flex-col bg-surface dark:bg-ink w-full max-w-full touch-pan-y"
             >
               {/* READER CONTROLS TOOLBAR */}
-              <div className="sticky top-0 z-20 px-3 sm:px-6 py-2.5 bg-white/95 dark:bg-ink-raised/95 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 flex flex-wrap items-center justify-between gap-2 sm:gap-3 shadow-xs w-full max-w-full overflow-x-hidden">
+              <div className="sticky top-0 z-20 px-3 sm:px-6 py-2.5 bg-white/95 dark:bg-ink-raised/95 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 flex flex-wrap items-center justify-between gap-2 shadow-xs w-full max-w-full">
                 {/* Left: Chapter Selector Controls */}
                 <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                   <button
@@ -683,8 +711,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                   </button>
                 </div>
 
-                {/* Right: Translation, Font Size & Audio */}
-                <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
                   {/* Translation Switcher */}
                   <select
                     value={selectedTranslation}
@@ -692,11 +719,13 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                       soundEngine.playClick();
                       setSelectedTranslation(e.target.value as TranslationId);
                     }}
-                    className="px-2 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-250 dark:border-stone-800 text-[11px] sm:text-xs font-mono font-medium text-stone-700 dark:text-stone-300 cursor-pointer focus:outline-none"
+                    title={BIBLE_TRANSLATIONS.find((item) => item.id === selectedTranslation)?.label}
+                    aria-label="Bible translation"
+                    className="max-w-[5.5rem] px-2 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-250 dark:border-stone-800 text-[11px] sm:text-xs font-mono font-medium text-stone-700 dark:text-stone-300 cursor-pointer focus:outline-none"
                   >
                     {BIBLE_TRANSLATIONS.map(t => (
                       <option key={t.id} value={t.id} className="bg-white dark:bg-stone-900">
-                        {t.label}
+                        {t.id.toUpperCase()}
                       </option>
                     ))}
                   </select>
@@ -714,25 +743,39 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                     <span className="font-bold">{NARRATOR_VOICES[currentVoice]?.name.split(' ')[0] || 'Adam'}</span>
                   </button>
 
-                  {/* Font Size Selector */}
-                  <div className="hidden sm:inline-flex items-center p-0.5 rounded-lg bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800">
+                  <div className="inline-flex items-center p-0.5 rounded-lg bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800">
+                    {([
+                      ['sm', 'A-'],
+                      ['base', 'A'],
+                      ['lg', 'A+'],
+                      ['xl', 'A++'],
+                    ] as const).map(([size, label]) => (
+                      <button
+                        key={size}
+                        type="button"
+                        onClick={() => chooseFontSize(size)}
+                        className={`px-2 py-1 rounded text-[11px] font-mono ${readingFontSize === size ? 'bg-white dark:bg-stone-800 font-bold text-stone-900 dark:text-stone-100' : 'text-stone-500'}`}
+                        aria-label={`Text size ${label}`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="inline-flex items-center p-0.5 rounded-lg bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800">
                     <button
-                      onClick={() => setReadingFontSize('sm')}
-                      className={`px-2 py-0.5 rounded text-[11px] font-mono ${readingFontSize === 'sm' ? 'bg-white dark:bg-stone-800 font-bold' : 'text-stone-500'}`}
+                      type="button"
+                      onClick={() => chooseLayout('verses')}
+                      className={`px-2 py-1 rounded text-[11px] font-semibold ${readingLayout === 'verses' ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100' : 'text-stone-500'}`}
                     >
-                      A-
+                      Verses
                     </button>
                     <button
-                      onClick={() => setReadingFontSize('base')}
-                      className={`px-2 py-0.5 rounded text-[11px] font-mono ${readingFontSize === 'base' ? 'bg-white dark:bg-stone-800 font-bold' : 'text-stone-500'}`}
+                      type="button"
+                      onClick={() => chooseLayout('flow')}
+                      className={`px-2 py-1 rounded text-[11px] font-semibold ${readingLayout === 'flow' ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100' : 'text-stone-500'}`}
                     >
-                      A
-                    </button>
-                    <button
-                      onClick={() => setReadingFontSize('lg')}
-                      className={`px-2 py-0.5 rounded text-[11px] font-mono ${readingFontSize === 'lg' ? 'bg-white dark:bg-stone-800 font-bold' : 'text-stone-500'}`}
-                    >
-                      A+
+                      Flow
                     </button>
                   </div>
 
@@ -759,6 +802,14 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                     )}
                   </button>
                 </div>
+                {readingLayout === 'flow' && selectedVerse != null && chapterData?.verses.some((verse) => verse.verse === selectedVerse) && (
+                  <div className="w-full pt-1 border-t border-stone-200 dark:border-stone-800">
+                    <p className="text-xs font-semibold text-amber-800 dark:text-amber-400 mb-1.5">
+                      {book.name} {selectedChapter}:{selectedVerse}
+                    </p>
+                    {verseActions(selectedVerse, chapterData.verses.find((verse) => verse.verse === selectedVerse)?.text || '')}
+                  </div>
+                )}
               </div>
 
               {/* SCRIPTURE TEXT CANVAS */}
@@ -788,84 +839,82 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                 ) : chapterData ? (
                   <div className="w-full max-w-full overflow-x-hidden">
                     {/* Chapter Header */}
-                    <div className="text-center pb-5 sm:pb-8 mb-5 sm:mb-8 border-b border-stone-200 dark:border-stone-800">
+                    <div className="text-center pb-5 sm:pb-8 mb-5 sm:mb-8 border-b border-stone-200 dark:border-stone-800 max-w-[65ch] mx-auto">
                       <span className="text-xs font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold block mb-1">
                         {book.name}
                       </span>
                       <h2 className="text-2xl sm:text-4xl font-serif font-black text-stone-900 dark:text-parchment-50">
                         Chapter {selectedChapter}
                       </h2>
-                      <p className="text-xs font-mono text-stone-500 dark:text-stone-400 mt-1">
-                        {chapterData.verses.length} Verses • {chapterData.translation}
+                      <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
+                        {chapterData.verses.length} verses · {chapterData.translation}
                       </p>
+                      <p className="text-xs text-stone-500 dark:text-stone-400 mt-2">
+                        Tap a verse to memorize, save, or hear it.
+                      </p>
+                      <BookConnections
+                        book={book}
+                        compact
+                        onOpenModule={handleLaunchDeepLink}
+                        onOpenDilemma={(dilemmaId) => {
+                          soundEngine.playClick();
+                          onOpenDilemma?.(dilemmaId);
+                          onClose();
+                        }}
+                      />
                     </div>
 
-                    {/* Verses Container */}
-                    <div className={`space-y-3.5 font-reading leading-relaxed w-full max-w-full overflow-x-hidden ${
-                      readingFontSize === 'sm' ? 'text-sm' : readingFontSize === 'lg' ? 'text-lg sm:text-xl' : 'text-base sm:text-lg'
-                    }`}>
-                      {chapterData.verses.map((v) => {
-                        const isSpeakingThis = activeReadingVerse === v.verse;
-                        const citeActive = launchToken > 0 && selectedChapter === initialChapter;
-                        const isCited = citeActive && highlightVerseStart != null && highlightVerseEnd != null
-                          && v.verse >= highlightVerseStart && v.verse <= highlightVerseEnd;
+                    <div className={`font-reading leading-[1.75] w-full max-w-[65ch] mx-auto overflow-x-hidden text-stone-800 dark:text-stone-200 ${fontClass} ${readingLayout === 'verses' ? 'space-y-4' : ''}`}>
+                      {readingLayout === 'flow' ? (
+                        <div>
+                          <p>
+                            {chapterData.verses.map((v) => {
+                              const citeActive = launchToken > 0 && selectedChapter === initialChapter;
+                              const isCited = citeActive && (highlightVerseStart ?? 0) > 0 && highlightVerseEnd != null
+                                && v.verse >= highlightVerseStart! && v.verse <= highlightVerseEnd;
+                              const isActive = selectedVerse === v.verse || activeReadingVerse === v.verse || isCited;
+                              return (
+                                <span
+                                  key={v.verse}
+                                  data-verse={v.verse}
+                                  onClick={() => setSelectedVerse(v.verse)}
+                                  className={`cursor-pointer rounded-sm ${isActive ? 'bg-amber-100/80 dark:bg-amber-950/50' : ''}`}
+                                >
+                                  <sup className="text-[0.65em] font-mono font-bold text-amber-800 dark:text-amber-400 mr-0.5 select-none">{v.verse}</sup>
+                                  {v.text}{' '}
+                                </span>
+                              );
+                            })}
+                          </p>
+                        </div>
+                      ) : (
+                        chapterData.verses.map((v) => {
+                          const isSpeakingThis = activeReadingVerse === v.verse;
+                          const citeActive = launchToken > 0 && selectedChapter === initialChapter;
+                          const isCited = citeActive && (highlightVerseStart ?? 0) > 0 && highlightVerseEnd != null
+                            && v.verse >= highlightVerseStart! && v.verse <= highlightVerseEnd;
+                          const isOpen = selectedVerse === v.verse;
 
-                        return (
-                          <div
-                            key={v.verse}
-                            data-verse={v.verse}
-                            className={`group relative p-2 rounded-xl transition-colors ${
-                              isSpeakingThis || isCited
-                                ? 'bg-amber-100/60 dark:bg-amber-950/40 text-stone-950 dark:text-white' 
-                                : 'hover:bg-stone-100/70 dark:hover:bg-stone-900/50 text-stone-800 dark:text-stone-200'
-                            }`}
-                          >
-                            <span className="inline-block text-[11px] font-mono font-bold text-amber-800 dark:text-amber-400 mr-2 select-none align-baseline shrink-0">
-                              {v.verse}
-                            </span>
-                            <span className="break-words">{v.text}</span>
-
-                            {/* Tactical Quick Action Icons on hover / focus */}
-                            <div className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 flex sm:inline-flex items-center gap-1.5 mt-1.5 sm:mt-0 sm:ml-2 align-middle transition-opacity">
-                              {/* Train in Word Forge */}
-                              <button
-                                onClick={() => handleSendVerseToForge(v.verse, v.text)}
-                                className="p-1 rounded-md bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-black text-stone-600 dark:text-stone-300 transition-colors shadow-xs"
-                                title="Memorize in Word Forge"
-                              >
-                                <Brain className="w-3.5 h-3.5" />
-                              </button>
-
-                              {/* Save to Arsenal */}
-                              <button
-                                onClick={() => handleSaveVerseToArsenal(v.verse, v.text)}
-                                className="p-1 rounded-md bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-black text-stone-600 dark:text-stone-300 transition-colors shadow-xs"
-                                title="Save to Arsenal"
-                              >
-                                <Bookmark className="w-3.5 h-3.5" />
-                              </button>
-
-                              {/* Read / Listen to Verse */}
-                              <button
-                                onClick={() => handleSpeakSingleVerse(v.verse, v.text)}
-                                className="p-1 rounded-md bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-black text-stone-600 dark:text-stone-300 transition-colors shadow-xs"
-                                title="Speak this verse"
-                              >
-                                <Volume2 className="w-3.5 h-3.5" />
-                              </button>
-
-                              {/* Copy Citation */}
-                              <button
-                                onClick={() => handleCopyVerse(v.verse, v.text)}
-                                className="p-1 rounded-md bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-black text-stone-600 dark:text-stone-300 transition-colors shadow-xs"
-                                title="Copy verse"
-                              >
-                                <Copy className="w-3.5 h-3.5" />
-                              </button>
+                          return (
+                            <div
+                              key={v.verse}
+                              data-verse={v.verse}
+                              onClick={() => setSelectedVerse(isOpen ? null : v.verse)}
+                              className={`p-2 rounded-xl transition-colors cursor-pointer ${
+                                isSpeakingThis || isCited || isOpen
+                                  ? 'bg-amber-100/60 dark:bg-amber-950/40 text-stone-950 dark:text-white'
+                                  : 'hover:bg-stone-100/70 dark:hover:bg-stone-900/50'
+                              }`}
+                            >
+                              <span className="inline-block text-[0.7em] font-mono font-bold text-amber-800 dark:text-amber-400 mr-2 select-none align-baseline">
+                                {v.verse}
+                              </span>
+                              <span className="break-words">{v.text}</span>
+                              {isOpen && verseActions(v.verse, v.text)}
                             </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })
+                      )}
                     </div>
 
                     {/* Bottom Chapter Navigation & Quick Jump */}

@@ -21,6 +21,7 @@ import { markCampaignStepCompleted } from './data/dailyCampaigns';
 import type { DailyCampaignStep } from './data/dailyCampaigns';
 import { getComposedDailyMission } from './utils/missionComposer';
 import { pathForTab, tabFromPath } from './utils/routes';
+import { loadReadingPlace } from './utils/readingPlace';
 
 const WordForge = lazy(() => import('./components/WordForge').then((m) => ({ default: m.WordForge })));
 const DilemmaSimulator = lazy(() => import('./components/DilemmaSimulator').then((m) => ({ default: m.DilemmaSimulator })));
@@ -412,6 +413,18 @@ export function App() {
     localStorage.setItem('testament_bookmarked_verses', JSON.stringify(updated));
   };
 
+  const handleSaveBookmark = (verseId: string) => {
+    if (bookmarkedVerses.includes(verseId)) return false;
+    const updated = [...bookmarkedVerses, verseId];
+    setBookmarkedVerses(updated);
+    try {
+      localStorage.setItem('testament_bookmarked_verses', JSON.stringify(updated));
+    } catch {
+      // ignore quota failures
+    }
+    return true;
+  };
+
   const handleCompleteOnboarding = (
     profile: UserCalibrationProfile, 
     startRecommendedQuest?: boolean
@@ -544,6 +557,20 @@ export function App() {
                   setCurrentTab('library');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
+                onContinueReading={() => {
+                  const place = loadReadingPlace();
+                  soundEngine.stopSpeaking();
+                  if (place) {
+                    setLibraryPassage({
+                      book: place.bookName,
+                      chapter: place.chapter,
+                      verseStart: 0,
+                      verseEnd: 0,
+                    });
+                  }
+                  setCurrentTab('library');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
                 completedActs={completedActs}
                 memorizedVerses={memorizedVerses}
                 unlockedRelics={unlockedRelics}
@@ -578,6 +605,13 @@ export function App() {
                 }}
                 onSelectStoryQuest={(questId) => {
                   handleSelectQuestById(questId);
+                }}
+                onSaveBookmark={handleSaveBookmark}
+                onOpenDilemma={(dilemmaId) => {
+                  soundEngine.stopSpeaking();
+                  setTargetDilemmaId(dilemmaId);
+                  setCurrentTab('dilemmas');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 passageTarget={libraryPassage}
                 onPassageOpened={() => setLibraryPassage(null)}

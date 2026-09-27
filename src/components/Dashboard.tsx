@@ -51,6 +51,7 @@ import {
   setTodayBattlefieldId,
 } from '../utils/dailyEngine';
 import { getDueFSRSCards, getDueFSRSCount } from '../utils/fsrsEngine';
+import { loadReadingPlace } from '../utils/readingPlace';
 
 interface DashboardProps {
   onSelectQuest: (quest: StoryQuest) => void;
@@ -60,6 +61,7 @@ interface DashboardProps {
   onOpenProverbs?: () => void;
   onOpenPsalms?: () => void;
   onOpenLibrary?: () => void;
+  onContinueReading?: () => void;
   completedActs: string[];
   memorizedVerses: string[];
   unlockedRelics?: string[];
@@ -123,6 +125,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenProverbs = () => {},
   onOpenPsalms = () => {},
   onOpenLibrary = () => {},
+  onContinueReading,
   completedActs,
   unlockedRelics = [],
   streakCount,
@@ -135,6 +138,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onRewardXP,
   onLaunchCampaignStep
 }) => {
+  const [readingPlace, setReadingPlace] = useState(() => loadReadingPlace());
+  useEffect(() => {
+    const refresh = () => setReadingPlace(loadReadingPlace());
+    window.addEventListener('testament-reading-place', refresh);
+    refresh();
+    return () => window.removeEventListener('testament-reading-place', refresh);
+  }, []);
   const [dashboardMode, setDashboardMode] = useState<'guided' | 'freeroam'>(() => {
     try {
       return (localStorage.getItem('testament_dashboard_mode') as 'guided' | 'freeroam') || 'guided';
@@ -313,9 +323,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     onOpenWhatsNew?.();
                   }}
                   className="text-[11px] font-mono px-2 py-0.2 rounded-full bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-600 hover:text-stone-950 dark:text-stone-400 dark:hover:text-amber-300 border border-stone-250 dark:border-stone-750 transition-colors"
-                  title="What changed in v1.11.0"
+                  title="What changed in v1.12.0"
                 >
-                  v1.11.0
+                  v1.12.0
                 </button>
               </div>
               <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
@@ -475,6 +485,27 @@ export const Dashboard: React.FC<DashboardProps> = ({
             onLaunchStep={onLaunchCampaignStep || (() => {})} 
             onRewardXP={onRewardXP || (() => {})} 
           />
+          {readingPlace && (
+            <button
+              type="button"
+              onClick={() => {
+                soundEngine.playSnap();
+                if (onContinueReading) onContinueReading();
+                else onOpenLibrary();
+              }}
+              className="w-full flex items-center justify-between gap-3 rounded-2xl bg-stone-100/60 dark:bg-stone-900/40 px-4 py-3 text-left hover:bg-stone-100 dark:hover:bg-stone-900/70 transition-colors"
+            >
+              <div>
+                <div className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
+                  Continue reading
+                </div>
+                <div className="font-serif text-base font-bold text-stone-900 dark:text-parchment-50">
+                  {readingPlace.bookName} {readingPlace.chapter}
+                </div>
+              </div>
+              <BookOpen className="w-5 h-5 text-amber-700 dark:text-amber-400 shrink-0" />
+            </button>
+          )}
         </div>
       ) : (
         /* WIDESCREEN DESKTOP GRID: MAIN STAGE (col 8) + SIDEBAR (col 4) (FREE ROAM / SANDBOX MODE) */
@@ -840,18 +871,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
             </div>
             <p className="text-[11px] text-stone-500 dark:text-stone-400 mb-3">
-              Every book from Genesis to Revelation translated into Monday morning tactical intelligence.
+              {readingPlace
+                ? `Pick up ${readingPlace.bookName} ${readingPlace.chapter}, or browse the rest of the canon.`
+                : 'Every book from Genesis to Revelation, ready to read.'}
             </p>
             <div className="flex gap-2">
               <button
                 onClick={() => {
                   soundEngine.playSnap();
-                  onOpenLibrary();
+                  if (readingPlace && onContinueReading) onContinueReading();
+                  else onOpenLibrary();
                 }}
                 className="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all"
               >
                 <BookOpen className="w-3.5 h-3.5" />
-                <span>Open Library</span>
+                <span>{readingPlace ? `Continue ${readingPlace.bookName} ${readingPlace.chapter}` : 'Open Library'}</span>
               </button>
               <button
                 onClick={() => {

@@ -1,20 +1,12 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   Search, 
   BookOpen, 
   ArrowLeft, 
   Layers, 
-  LayoutGrid, 
+  List, 
   Sparkles, 
-  Flame,
-  Volume2,
-  VolumeX,
-  ExternalLink,
-  ChevronDown,
-  ChevronUp,
-  Brain,
-  Bell,
-  CheckCircle2
+  Flame
 } from 'lucide-react';
 import { 
   CANON_BOOKS, 
@@ -25,12 +17,18 @@ import {
 import { BookSpine } from './BookSpine';
 import { OpenBookModal } from './OpenBookModal';
 import { soundEngine } from '../utils/audio';
+import { parseScriptureReference } from '../utils/scriptureRef';
+import { findCanonBookByName } from '../utils/bookLinks';
+import { getBookChapterCount } from '../utils/bibleService';
+import { loadReadingPlace, loadVisitedChapters, type ReadingPlace } from '../utils/readingPlace';
 
 interface CanonLibraryPageProps {
   onBackToDashboard: () => void;
   onOpenWordForge?: (verseId: string) => void;
   onSetMemoryVerse?: (verseId: string) => void;
   onSelectStoryQuest?: (questId: string) => void;
+  onSaveBookmark?: (verseId: string) => boolean;
+  onOpenDilemma?: (dilemmaId: string) => void;
   passageTarget?: { book: string; chapter: number; verseStart: number; verseEnd: number } | null;
   onPassageOpened?: () => void;
 }
@@ -40,10 +38,12 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
   onOpenWordForge,
   onSetMemoryVerse,
   onSelectStoryQuest,
+  onSaveBookmark,
+  onOpenDilemma,
   passageTarget,
   onPassageOpened
 }) => {
-  const [viewMode, setViewMode] = useState<'shelf' | 'grid'>('shelf');
+  const [viewMode, setViewMode] = useState<'list' | 'shelf'>('list');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTestament, setSelectedTestament] = useState<'All' | 'OT' | 'NT'>('All');
   const [selectedDivision, setSelectedDivision] = useState<string>('All');
@@ -55,31 +55,41 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
     verseStart: number;
     verseEnd: number;
   } | null>(null);
+  const [readingPlace, setReadingPlace] = useState<ReadingPlace | null>(() => loadReadingPlace());
+  const [visited, setVisited] = useState<Record<string, number>>(() => loadVisitedChapters());
+  const launchSeq = useRef(0);
+
+  useEffect(() => {
+    const refresh = () => {
+      setReadingPlace(loadReadingPlace());
+      setVisited(loadVisitedChapters());
+    };
+    window.addEventListener('testament-reading-place', refresh);
+    return () => window.removeEventListener('testament-reading-place', refresh);
+  }, []);
+
+  const openReader = (book: CanonBook, chapter?: number, verseStart = 0, verseEnd = 0) => {
+    const saved = loadVisitedChapters()[book.id];
+    launchSeq.current += 1;
+    setReaderLaunch({
+      token: launchSeq.current,
+      chapter: chapter ?? saved ?? 1,
+      verseStart,
+      verseEnd,
+    });
+    setActiveBookForModal(book);
+  };
+
+  const openBriefing = (book: CanonBook) => {
+    setReaderLaunch(null);
+    setActiveBookForModal(book);
+  };
 
   useEffect(() => {
     if (!passageTarget) return;
-    const book = CANON_BOOKS.find(b => b.name.toLowerCase() === passageTarget.book.toLowerCase());
-    if (book) {
-      setReaderLaunch({
-        token: Date.now(),
-        chapter: passageTarget.chapter,
-        verseStart: passageTarget.verseStart,
-        verseEnd: passageTarget.verseEnd,
-      });
-      setActiveBookForModal(book);
-    }
+    const book = findCanonBookByName(passageTarget.book);
+    if (book) openReader(book, passageTarget.chapter, passageTarget.verseStart, passageTarget.verseEnd);
   }, [passageTarget]);
-
-  // For Grid View
-  const [translationLenses, setTranslationLenses] = useState<Record<string, 'street' | 'canonical'>>({});
-  const [expandedSitReps, setExpandedSitReps] = useState<Record<string, boolean>>({});
-  const [playingBookId, setPlayingBookId] = useState<string | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3500);
-  };
 
   const filteredBooks = useMemo(() => {
     return CANON_BOOKS.filter((b) => {
@@ -91,6 +101,11 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
       if (selectedTheme !== 'All Themes' && b.lifeTheme !== selectedTheme) return false;
       // Search query
       if (searchQuery.trim()) {
+        const parsed = parseScriptureReference(searchQuery.trim());
+        if (parsed) {
+          const jump = findCanonBookByName(parsed.book);
+          if (jump) return b.id === jump.id;
+        }
         const q = searchQuery.toLowerCase();
         const matchesName = b.name.toLowerCase().includes(q);
         const matchesCodename = b.codename.toLowerCase().includes(q);
@@ -116,41 +131,20 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
     }).filter(group => group.books.length > 0);
   }, [filteredBooks]);
 
-  const handleToggleLens = (bookId: string) => {
-    soundEngine.playSnap();
-    setTranslationLenses(prev => ({
-      ...prev,
-      [bookId]: prev[bookId] === 'canonical' ? 'street' : 'canonical'
-    }));
-  };
+  const passageQuery = useMemo(() => {
+    const parsed = parseScriptureReference(searchQuery.trim());
+    if (!parsed) return null;
+    const book = findCanonBookByName(parsed.book);
+    if (!book) return null;
+    const chapters = getBookChapterCount(book.name);
+    if (parsed.chapter < 1 || parsed.chapter > chapters) return null;
+    return { book, chapter: parsed.chapter, verseStart: parsed.verseStart, verseEnd: parsed.verseEnd };
+  }, [searchQuery]);
 
-  const handleToggleSitRep = (bookId: string) => {
-    soundEngine.playClick();
-    setExpandedSitReps(prev => ({
-      ...prev,
-      [bookId]: !prev[bookId]
-    }));
-  };
-
-  const handleToggleAudio = (book: CanonBook) => {
-    if (playingBookId === book.id) {
-      soundEngine.stopSpeaking();
-      setPlayingBookId(null);
-    } else {
-      soundEngine.stopSpeaking();
-      soundEngine.playClick();
-      setPlayingBookId(book.id);
-
-      const lens = translationLenses[book.id] || 'street';
-      const scriptureText = lens === 'street'
-        ? book.anchorScripture.streetTranslation
-        : book.anchorScripture.canonicalText;
-
-      const narrationText = `${book.name}. Tactical Codename: ${book.codename}. ${book.subtitle}. Why this matters on Monday: ${book.whyItMattersMonday}. Scripture anchor, ${book.anchorScripture.reference}: ${scriptureText}`;
-
-      soundEngine.speakVerse(narrationText, () => setPlayingBookId(null));
-    }
-  };
+  const browsingAll = !searchQuery.trim()
+    && selectedTestament === 'All'
+    && selectedDivision === 'All'
+    && selectedTheme === 'All Themes';
 
   return (
     <div className="min-h-screen bg-surface dark:bg-ink text-stone-900 dark:text-parchment-100 transition-colors pb-36 pt-4 sm:pt-6 overflow-x-hidden w-full max-w-full">
@@ -183,6 +177,21 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
             <button
               onClick={() => {
                 soundEngine.playSnap();
+                setViewMode('list');
+              }}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                viewMode === 'list'
+                  ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+              }`}
+            >
+              <List className="w-3.5 h-3.5" />
+              <span>Book list</span>
+            </button>
+
+            <button
+              onClick={() => {
+                soundEngine.playSnap();
                 setViewMode('shelf');
               }}
               className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
@@ -192,22 +201,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              <span>Bookshelf View</span>
-            </button>
-
-            <button
-              onClick={() => {
-                soundEngine.playSnap();
-                setViewMode('grid');
-              }}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                viewMode === 'grid'
-                  ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
-                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
-              }`}
-            >
-              <LayoutGrid className="w-3.5 h-3.5" />
-              <span>Tactical Grid View</span>
+              <span>Shelf</span>
             </button>
           </div>
         </div>
@@ -222,9 +216,32 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
             The Living Word Library
           </h1>
           <p className="text-sm sm:text-base text-stone-600 dark:text-stone-300 max-w-3xl mt-2 leading-relaxed font-sans">
-            Every book of the Bible crafted as a physical volume on the shelf. Pull any book from its wooden perch to inspect its crisis sitrep, street translation, and practical battle takeaways.
+            Continue a chapter, browse the 66 books, or jump to a verse such as John 3:16.
           </p>
         </div>
+
+        {readingPlace && (
+          <button
+            type="button"
+            onClick={() => {
+              const book = CANON_BOOKS.find((item) => item.id === readingPlace.bookId);
+              if (!book) return;
+              soundEngine.playClick();
+              openReader(book, readingPlace.chapter);
+            }}
+            className="w-full mb-5 flex items-center justify-between gap-3 rounded-2xl bg-amber-500/10 border border-amber-500/40 px-4 py-3 text-left hover:bg-amber-500/15 transition-colors"
+          >
+            <div>
+              <div className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
+                Continue reading
+              </div>
+              <div className="font-serif text-lg font-bold text-stone-900 dark:text-parchment-50">
+                {readingPlace.bookName} {readingPlace.chapter}
+              </div>
+            </div>
+            <BookOpen className="w-5 h-5 text-amber-700 dark:text-amber-400 shrink-0" />
+          </button>
+        )}
 
         {/* SEARCH & FILTER CONTROLS BAR */}
         <div className="space-y-3 pb-8">
@@ -234,9 +251,15 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
               <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input 
                 type="text"
-                placeholder="Search across all 66 books, codenames, themes, or scripture references..."
+                placeholder="Search books, or jump to a verse like John 3:16"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && passageQuery) {
+                    soundEngine.playClick();
+                    openReader(passageQuery.book, passageQuery.chapter, passageQuery.verseStart, passageQuery.verseEnd);
+                  }
+                }}
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-stone-900/90 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-500 text-xs focus:outline-none focus:border-amber-500 transition-colors font-sans shadow-xs"
               />
             </div>
@@ -261,6 +284,26 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
               ))}
             </div>
           </div>
+
+          {passageQuery && (
+            <button
+              type="button"
+              onClick={() => {
+                soundEngine.playClick();
+                openReader(passageQuery.book, passageQuery.chapter, passageQuery.verseStart, passageQuery.verseEnd);
+              }}
+              className="w-full flex items-center justify-between gap-3 rounded-xl bg-white dark:bg-stone-900 border border-amber-500/50 px-4 py-3 text-left hover:border-amber-500 transition-colors"
+            >
+              <div>
+                <div className="text-xs font-semibold text-amber-800 dark:text-amber-300">Open this passage</div>
+                <div className="font-serif text-base font-bold text-stone-900 dark:text-parchment-50">
+                  {passageQuery.book.name} {passageQuery.chapter}:{passageQuery.verseStart}
+                  {passageQuery.verseEnd !== passageQuery.verseStart ? `–${passageQuery.verseEnd}` : ''}
+                </div>
+              </div>
+              <BookOpen className="w-4 h-4 text-amber-700 dark:text-amber-400" />
+            </button>
+          )}
 
           {/* Division Pill Buttons */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
@@ -318,7 +361,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
             >
               All
             </button>
-            {CANON_LIFE_THEMES.map((theme) => (
+            {CANON_LIFE_THEMES.filter((theme) => theme !== 'All Themes').map((theme) => (
               <button
                 key={theme}
                 onClick={() => {
@@ -368,7 +411,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                   </div>
 
                   <span className="text-[11px] font-mono text-amber-800 dark:text-amber-500/80 uppercase tracking-widest hidden sm:inline">
-                    Hover & pull volumes to open codex
+                    Tap a volume to read
                   </span>
                 </div>
 
@@ -391,7 +434,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                           book={book}
                           tooltipAlign={tooltipAlign}
                           isSelected={activeBookForModal?.id === book.id}
-                          onSelect={() => setActiveBookForModal(book)}
+                          onSelect={() => openReader(book, visited[book.id])}
                         />
                       );
                     })}
@@ -424,209 +467,101 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
           </div>
         )}
 
-        {/* ============================================================ */}
-        {/* MODE B: THE TACTICAL GRID VIEW (Searchable Cards)             */}
-        {/* ============================================================ */}
-        {viewMode === 'grid' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pb-16">
-            {filteredBooks.map((book) => {
-              const lens = translationLenses[book.id] || 'street';
-              const isExpanded = !!expandedSitReps[book.id];
-              const isPlaying = playingBookId === book.id;
-
-              return (
-                <div
-                  key={book.id}
-                  className="flex flex-col justify-between rounded-2xl bg-stone-100/70 hover:bg-stone-100 dark:bg-stone-900/60 dark:hover:bg-stone-850 transition-all p-5 group text-left"
-                >
-                  {/* Card Header */}
-                  <div>
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <span className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
-                        #{String(book.order).padStart(2, '0')} • {book.testament} • {book.division}
-                      </span>
-                      <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-stone-200/60 dark:bg-stone-800 text-stone-700 dark:text-stone-300">
-                        {book.lifeTheme}
-                      </span>
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        soundEngine.playClick();
-                        setActiveBookForModal(book);
-                      }}
-                      className="text-left w-full group/title cursor-pointer focus:outline-none"
-                    >
-                      <h3 className="text-xl font-serif font-black text-stone-900 dark:text-parchment-100 group-hover/title:text-amber-600 dark:group-hover/title:text-amber-300 transition-colors">
-                        {book.name}
-                      </h3>
-                      <div className="text-xs font-serif italic text-amber-800 dark:text-amber-400/90 font-semibold mt-0.5">
-                        "{book.codename}"
-                      </div>
-                      <p className="text-xs text-stone-600 dark:text-stone-400 mt-1 line-clamp-2">
-                        {book.subtitle}
-                      </p>
-                    </button>
-
-                    {/* Dual-Lens Scripture Box */}
-                    <div className="mt-4 rounded-xl bg-white/80 dark:bg-stone-950/70 p-3.5 space-y-2">
-                      <div className="flex items-center justify-between text-[11px] font-mono">
-                        <span className="text-amber-800 dark:text-amber-400 font-bold">{book.anchorScripture.reference}</span>
-                        <button
-                          onClick={() => handleToggleLens(book.id)}
-                          className="text-[11px] px-2 py-0.5 rounded bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 text-amber-800 dark:text-amber-300 transition-colors"
-                        >
-                          {lens === 'street' ? '⚡ Street Plain' : '📜 Canonical'}
-                        </button>
-                      </div>
-
-                      <blockquote className="text-xs font-serif italic text-stone-800 dark:text-parchment-200 leading-relaxed">
-                        "{lens === 'street' ? book.anchorScripture.streetTranslation : book.anchorScripture.canonicalText}"
-                      </blockquote>
-                    </div>
-
-                    {/* Expandable SitRep */}
-                    <button
-                      onClick={() => handleToggleSitRep(book.id)}
-                      className="mt-3 w-full flex items-center justify-between text-[11px] font-mono text-stone-600 dark:text-stone-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors py-1"
-                    >
-                      <span>Full Crisis SitRep & Application</span>
-                      {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                    </button>
-
-                    {isExpanded && (
-                      <div className="mt-2 space-y-3 pt-2 border-t border-stone-200/60 dark:border-stone-850 text-xs text-stone-700 dark:text-stone-300">
-                        <div>
-                          <div className="text-[11px] font-mono uppercase text-amber-800 dark:text-amber-500/90 font-bold">Author & Context</div>
-                          <p className="text-[11px] text-stone-600 dark:text-stone-400 mt-0.5 leading-normal">
-                            {book.authorContext}
-                          </p>
-                        </div>
-                        <div>
-                          <div className="text-[11px] font-mono uppercase text-red-600 dark:text-red-400 font-bold">Historical Peril</div>
-                          <p className="text-[11px] text-stone-600 dark:text-stone-400 mt-0.5 leading-normal">
-                            {book.historicalPeril}
-                          </p>
-                        </div>
-                        <div className="rounded-lg bg-amber-500/10 p-2.5">
-                          <div className="text-[11px] font-mono uppercase text-amber-900 dark:text-amber-300 font-bold">Why It Matters Monday</div>
-                          <p className="text-[11px] text-stone-800 dark:text-parchment-200 mt-0.5 leading-normal">
+        {viewMode === 'list' && (
+          <div className="space-y-8 pb-16">
+            {shelvedDivisions.map((shelfGroup) => (
+              <section key={shelfGroup.division.id}>
+                <div className="mb-3">
+                  <h3 className="text-base sm:text-lg font-serif font-bold text-stone-900 dark:text-parchment-50">
+                    {shelfGroup.division.label}
+                  </h3>
+                  <p className="text-sm text-stone-600 dark:text-stone-400 mt-0.5">
+                    {shelfGroup.division.description}
+                  </p>
+                </div>
+                <ul className="divide-y divide-stone-200 dark:divide-stone-800 border-y border-stone-200 dark:border-stone-800">
+                  {shelfGroup.books.map((book) => {
+                    const lastChapter = visited[book.id];
+                    return (
+                      <li key={book.id} className="py-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h4 className="font-serif text-lg font-bold text-stone-900 dark:text-parchment-50">
+                              {book.name}
+                            </h4>
+                            <span className="text-xs font-semibold text-stone-500 dark:text-stone-400">
+                              {book.testament === 'OT' ? 'Old Testament' : 'New Testament'}
+                            </span>
+                            {lastChapter ? (
+                              <span className="text-xs font-semibold text-amber-800 dark:text-amber-300">
+                                Last read ch. {lastChapter}
+                              </span>
+                            ) : null}
+                          </div>
+                          <p className="text-sm text-stone-600 dark:text-stone-300 mt-1 leading-relaxed line-clamp-2">
                             {book.whyItMattersMonday}
                           </p>
+                          <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">{book.lifeTheme}</p>
                         </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Actions Bar */}
-                  <div className="pt-4 mt-4 border-t border-stone-200/60 dark:border-stone-850/80 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleToggleAudio(book)}
-                        className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-medium transition-all ${
-                          isPlaying
-                            ? 'bg-amber-500 text-stone-950 font-bold'
-                            : 'bg-stone-200/60 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 text-stone-700 dark:text-stone-300 hover:text-stone-950 dark:hover:text-white'
-                        }`}
-                      >
-                        {isPlaying ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />}
-                        <span>{isPlaying ? 'Pause Voice' : 'Listen SitRep'}</span>
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          soundEngine.playClick();
-                          setActiveBookForModal(book);
-                        }}
-                        className="px-3.5 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500 text-amber-800 hover:text-stone-950 dark:text-amber-300 dark:hover:text-black text-xs font-bold transition-all flex items-center gap-1.5"
-                      >
-                        <BookOpen className="w-3.5 h-3.5" />
-                        <span>Read Book</span>
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        onClick={() => {
-                          soundEngine.playClick();
-                          if (onOpenWordForge) onOpenWordForge(book.id);
-                        }}
-                        className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 text-[11px] text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
-                      >
-                        <Brain className="w-3 h-3 text-amber-800 dark:text-amber-400" />
-                        <span>Word Forge</span>
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          soundEngine.playClick();
-                          if (onSetMemoryVerse) {
-                            onSetMemoryVerse(book.id);
-                            showToast(`Anchored ${book.anchorScripture.reference} to Memory Pulse!`);
-                          }
-                        }}
-                        className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 text-[11px] text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
-                      >
-                        <Bell className="w-3 h-3 text-amber-800 dark:text-amber-400" />
-                        <span>Memory Pulse</span>
-                      </button>
-                    </div>
-
-                    {book.deepLinkId && (
-                      <button
-                        onClick={() => {
-                          soundEngine.playVictory();
-                          if (book.deepLinkType === 'story' && book.deepLinkId && onSelectStoryQuest) {
-                            onSelectStoryQuest(book.deepLinkId);
-                          } else if (book.deepLinkType === 'proverbs') {
-                            window.dispatchEvent(new CustomEvent('open-proverbs-codex'));
-                          } else if (book.deepLinkType === 'psalms') {
-                            window.dispatchEvent(new CustomEvent('open-psalms-medic'));
-                          }
-                        }}
-                        className="w-full py-1.5 px-3 rounded-lg bg-amber-500/15 hover:bg-amber-500 text-amber-800 hover:text-stone-950 dark:text-amber-300 dark:hover:text-black border border-amber-500/40 text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs"
-                      >
-                        <span>Launch Journey Module</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              soundEngine.playClick();
+                              openReader(book, lastChapter);
+                            }}
+                            className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-bold"
+                          >
+                            {lastChapter ? `Continue ch. ${lastChapter}` : 'Read'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              soundEngine.playClick();
+                              openBriefing(book);
+                            }}
+                            className="px-3.5 py-2 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-xs font-semibold text-stone-700 dark:text-stone-200"
+                          >
+                            About
+                          </button>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            ))}
+            {shelvedDivisions.length === 0 && (
+              <div className="py-20 text-center">
+                <BookOpen className="w-12 h-12 text-stone-400 dark:text-stone-600 mx-auto mb-3" />
+                <h3 className="text-lg font-serif font-bold text-stone-900 dark:text-stone-300">No books match your search</h3>
+                <p className="text-sm text-stone-600 dark:text-stone-400 mt-1">Try a book name, a theme, or a verse such as John 3:16.</p>
+              </div>
+            )}
           </div>
         )}
 
-        {/* OPEN BOOK CODEX MODAL */}
         <OpenBookModal
+          key={activeBookForModal ? `${activeBookForModal.id}-${readerLaunch?.token ?? 'brief'}` : 'closed'}
           book={activeBookForModal}
-          allBooks={filteredBooks}
+          allBooks={browsingAll ? CANON_BOOKS : filteredBooks}
           onClose={() => {
             setActiveBookForModal(null);
             setReaderLaunch(null);
             onPassageOpened?.();
           }}
-          onSelectBook={(b) => {
-            setReaderLaunch(null);
-            setActiveBookForModal(b);
-          }}
+          onSelectBook={(b) => openReader(b, visited[b.id])}
           onOpenWordForge={onOpenWordForge}
           onSetMemoryVerse={onSetMemoryVerse}
           onSelectStoryQuest={onSelectStoryQuest}
+          onSaveBookmark={onSaveBookmark}
+          onOpenDilemma={onOpenDilemma}
           initialMode={readerLaunch ? 'reader' : 'briefing'}
           initialChapter={readerLaunch?.chapter ?? 1}
           launchToken={readerLaunch?.token ?? 0}
-          highlightVerseStart={readerLaunch?.verseStart}
-          highlightVerseEnd={readerLaunch?.verseEnd}
+          highlightVerseStart={readerLaunch && readerLaunch.verseStart > 0 ? readerLaunch.verseStart : undefined}
+          highlightVerseEnd={readerLaunch && readerLaunch.verseEnd > 0 ? readerLaunch.verseEnd : undefined}
         />
-
-        {/* Toast Popup */}
-        {toastMessage && (
-          <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl bg-amber-500 text-black font-bold text-xs shadow-2xl flex items-center gap-2 animate-bounce">
-            <CheckCircle2 className="w-4 h-4" />
-            <span>{toastMessage}</span>
-          </div>
-        )}
 
       </div>
     </div>
