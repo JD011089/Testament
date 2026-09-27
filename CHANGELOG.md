@@ -5,6 +5,17 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.0] - 2026-09-27
+
+### Added
+- **Readable book list**: The Library opens as a list with each book's name and why it matters. The shelf remains as a second view.
+- **Continue reading**: Home and the Library resume the last book and chapter. Type size and the verse or flow layout are remembered.
+- **Verse jump**: Search accepts a reference such as John 3:16 or Psalm 23:1 and opens that passage.
+- **Book connections**: A book's briefing offers its story, Proverbs, or Psalms module, plus dilemmas that cite that book.
+
+### Changed
+- **Chapter reader**: Opening a book lands on the chapter. Tap a verse to memorize, save, listen, or copy it. In flow layout those actions stay under the reader controls. Saved verses update the Arsenal list.
+
 ## [1.11.0] - 2026-09-27
 
 ### Security

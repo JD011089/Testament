@@ -40,10 +40,33 @@ interface ReleaseMilestone {
 
 const RELEASES: ReleaseMilestone[] = [
   {
-    version: 'v1.11.0',
-    tagline: 'Faster Pages, Real Links, and Safer Narration',
+    version: 'v1.12.0',
+    tagline: 'A Library You Can Keep Reading',
     dateBadge: 'Current Release',
     isLatest: true,
+    highlights: [
+      {
+        icon: <BookOpen className="w-4 h-4 text-amber-400" />,
+        title: 'A Book List You Can Scan',
+        description: 'The Library opens as a list with why each book matters. Continue reading picks up your last chapter, and the shelf is still there when you want it.'
+      },
+      {
+        icon: <Compass className="w-4 h-4 text-amber-400" />,
+        title: 'Jump to a Verse',
+        description: 'Search John 3:16 or Psalm 23:1 and the reader opens that passage. Type size and verse or flow layout stay as you left them.'
+      },
+      {
+        icon: <Swords className="w-4 h-4 text-amber-400" />,
+        title: 'From the Chapter into the Rest of the App',
+        description: 'Tap a verse to memorize, save, listen, or copy it. A book also offers its story, Proverbs, or Psalms, and any dilemma that cites it.'
+      }
+    ]
+  },
+  {
+    version: 'v1.11.0',
+    tagline: 'Faster Pages, Real Links, and Safer Narration',
+    dateBadge: 'Previous Release',
+    isLatest: false,
     highlights: [
       {
         icon: <Volume2 className="w-4 h-4 text-amber-400" />,
@@ -371,12 +394,12 @@ const RELEASES: ReleaseMilestone[] = [
 
 export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose }) => {
   const modalRef = useModalLock(isOpen);
-  const [activeTab, setActiveTab] = useState<string>('v1.11.0');
+  const [activeTab, setActiveTab] = useState<string>('v1.12.0');
 
   const handleDismiss = () => {
     soundEngine.playClick();
     try {
-      localStorage.setItem('testament_last_seen_version', '1.11.0');
+      localStorage.setItem('testament_last_seen_version', '1.12.0');
     } catch {
       // ignore
     }
@@ -419,7 +442,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
                   Field Update Dispatches
                 </h2>
                 <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 font-bold">
-                  v1.11.0 Live
+                  v1.12.0 Live
                 </span>
               </div>
               <p className="text-xs text-stone-500 dark:text-stone-400">
@@ -509,7 +532,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
         {/* MODAL FOOTER */}
         <div className="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800/90 bg-stone-50 dark:bg-black/40 flex items-center justify-between gap-3 relative z-10">
           <div className="text-[11px] font-mono text-stone-500 dark:text-stone-400 hidden sm:block">
-            Testament v1.11.0 • The Living Word
+            Testament v1.12.0 • The Living Word
           </div>
 
           <button
