@@ -136,8 +136,43 @@ export const ALL_AVAILABLE_VERSES: MemoryVerse[] = [
  * Returns all verses combined
  */
 export const getAllVerses = (): MemoryVerse[] => {
+  hydrateCustomVerses();
   return ALL_AVAILABLE_VERSES;
 };
+
+const CUSTOM_VERSES_KEY = 'testament_custom_verses';
+
+function hydrateCustomVerses(): void {
+  try {
+    const raw = localStorage.getItem(CUSTOM_VERSES_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return;
+    for (const verse of parsed) {
+      if (!verse || typeof verse !== 'object' || typeof (verse as MemoryVerse).id !== 'string') continue;
+      const candidate = verse as MemoryVerse;
+      if (!ALL_AVAILABLE_VERSES.some((item) => item.id === candidate.id)) {
+        ALL_AVAILABLE_VERSES.push(candidate);
+      }
+    }
+  } catch {
+    // ignore corrupt custom verse lists
+  }
+}
+
+function persistCustomVerse(verse: MemoryVerse): void {
+  try {
+    const raw = localStorage.getItem(CUSTOM_VERSES_KEY);
+    const parsed = raw ? JSON.parse(raw) as unknown : [];
+    const list = Array.isArray(parsed) ? parsed as MemoryVerse[] : [];
+    if (!list.some((item) => item.id === verse.id)) {
+      list.push(verse);
+      localStorage.setItem(CUSTOM_VERSES_KEY, JSON.stringify(list));
+    }
+  } catch {
+    // ignore quota failures
+  }
+}
 
 /**
  * Returns core verses
@@ -158,6 +193,7 @@ export const getStoryVerses = (): MemoryVerse[] => {
  */
 export const getVerseById = (id?: string | null): MemoryVerse | null => {
   if (!id) return null;
+  hydrateCustomVerses();
   
   // Exact match
   const match = ALL_AVAILABLE_VERSES.find(v => v.id === id);
@@ -224,5 +260,6 @@ export const registerDynamicBibleVerse = (reference: string, text: string, trans
   };
 
   ALL_AVAILABLE_VERSES.push(newVerse);
+  persistCustomVerse(newVerse);
   return newVerse;
 };

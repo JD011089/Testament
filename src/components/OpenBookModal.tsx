@@ -73,6 +73,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
   const [chapterData, setChapterData] = useState<BibleChapterData | null>(null);
   const [isLoadingChapter, setIsLoadingChapter] = useState(false);
   const [chapterError, setChapterError] = useState<string | null>(null);
+  const [retryNonce, setRetryNonce] = useState(0);
   const [readingFontSize, setReadingFontSize] = useState<'sm' | 'base' | 'lg'>('base');
   const [isPlayingChapterAudio, setIsPlayingChapterAudio] = useState(false);
   const [activeReadingVerse, setActiveReadingVerse] = useState<number | null>(null);
@@ -140,11 +141,16 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
         if (isMounted) {
           setChapterData(data);
           setIsLoadingChapter(false);
+          window.dispatchEvent(new CustomEvent('testament-scripture-read'));
         }
       })
       .catch((err) => {
         if (isMounted) {
-          setChapterError(err.message || 'Unable to load scripture chapter');
+          const raw = err?.message || 'Unable to load scripture chapter';
+          const friendly = /fetch|network|offline|failed/i.test(raw)
+            ? 'This chapter needs a connection. Chapters you already opened still work offline.'
+            : raw;
+          setChapterError(friendly);
           setIsLoadingChapter(false);
         }
       });
@@ -152,7 +158,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [book?.name, selectedChapter, selectedTranslation, activeMode]);
+  }, [book?.name, selectedChapter, selectedTranslation, activeMode, retryNonce]);
 
   const currentIndex = book ? allBooks.findIndex(b => b.id === book.id) : -1;
   const prevBook = currentIndex > 0 ? allBooks[currentIndex - 1] : null;
@@ -596,7 +602,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                       onClick={() => {
                         soundEngine.playClick();
                         if (onOpenWordForge) {
-                          onOpenWordForge(`canon-${book.id}`);
+                          onOpenWordForge(book.id);
                           onClose();
                         }
                       }}
@@ -610,7 +616,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                       onClick={() => {
                         soundEngine.playClick();
                         if (onSetMemoryVerse) {
-                          onSetMemoryVerse(`canon-${book.id}`);
+                          onSetMemoryVerse(book.id);
                           showToast(`Anchor scripture pinned to daily practice!`);
                         }
                       }}
@@ -773,9 +779,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                       {chapterError}
                     </p>
                     <button
-                      onClick={() => {
-                        setSelectedChapter(selectedChapter);
-                      }}
+                      onClick={() => setRetryNonce((value) => value + 1)}
                       className="px-4 py-2 rounded-xl bg-amber-500 text-stone-950 text-xs font-bold"
                     >
                       Retry Loading Chapter

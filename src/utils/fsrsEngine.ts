@@ -25,19 +25,31 @@ const getTodayKey = (): string => {
   return `${y}-${m}-${d}`;
 };
 
+const parseLocalDate = (dateStr: string): Date => {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year || 1970, (month || 1) - 1, day || 1);
+};
+
+const formatLocalDate = (date: Date): string => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
 const addDaysToDate = (dateStr: string, days: number): string => {
-  const d = new Date(dateStr);
-  d.setDate(d.getDate() + Math.max(1, Math.round(days)));
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
+  const date = parseLocalDate(dateStr);
+  date.setDate(date.getDate() + Math.max(1, Math.round(days)));
+  return formatLocalDate(date);
 };
 
 export const loadFSRSCards = (): Record<string, FSRSCard> => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : {};
+    if (!raw || raw === 'null') return {};
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+    return parsed as Record<string, FSRSCard>;
   } catch {
     return {};
   }
@@ -56,8 +68,8 @@ export const getFSRSCard = (verseId: string): FSRSCard => {
   if (cards[verseId]) {
     const card = cards[verseId];
     // Calculate current decay / retrievability
-    const today = new Date(getTodayKey()).getTime();
-    const lastRev = new Date(card.lastReviewDate).getTime();
+    const today = parseLocalDate(getTodayKey()).getTime();
+    const lastRev = parseLocalDate(card.lastReviewDate).getTime();
     const daysElapsed = Math.max(0, (today - lastRev) / (1000 * 60 * 60 * 24));
     // R = (1 + factor * t / S)^-1 approximation
     const retrievability = Math.max(0.05, Math.min(1.0, Math.exp(-daysElapsed / (card.stability || 1))));
@@ -78,6 +90,52 @@ export const getFSRSCard = (verseId: string): FSRSCard => {
   };
 };
 
+const nextStability = (
+  current: FSRSCard,
+  rating: 1 | 2 | 3 | 4
+): { stability: number; difficulty: number; lapses: number; state: FSRSCard['state'] } => {
+  if (rating === 1) {
+    return {
+      stability: Math.max(0.5, current.stability * 0.3),
+      difficulty: Math.min(10.0, current.difficulty + 1.2),
+      lapses: current.lapses + 1,
+      state: 'relearning',
+    };
+  }
+  if (rating === 2) {
+    return {
+      stability: Math.max(1.2, current.stability * 1.25),
+      difficulty: Math.min(10.0, current.difficulty + 0.4),
+      lapses: current.lapses,
+      state: 'review',
+    };
+  }
+  if (rating === 3) {
+    const factor = Math.max(1.8, 3.0 - (current.difficulty * 0.15));
+    return {
+      stability: Math.max(2.0, (current.stability || 1) * factor),
+      difficulty: Math.max(1.0, current.difficulty - 0.1),
+      lapses: current.lapses,
+      state: 'review',
+    };
+  }
+  const factor = Math.max(2.5, 4.2 - (current.difficulty * 0.15));
+  return {
+    stability: Math.max(4.0, (current.stability || 1) * factor * 1.3),
+    difficulty: Math.max(1.0, current.difficulty - 0.4),
+    lapses: current.lapses,
+    state: 'review',
+  };
+};
+
+/**
+ * Days until the next review if this rating were saved now.
+ */
+export const previewFSRSDays = (verseId: string, rating: 1 | 2 | 3 | 4): number => {
+  const current = getFSRSCard(verseId);
+  return Math.max(1, Math.round(nextStability(current, rating).stability));
+};
+
 /**
  * Record a spaced repetition review rating:
  * 1: Again (Complete lapse, forgotten)
@@ -89,44 +147,16 @@ export const recordFSRSReview = (verseId: string, rating: 1 | 2 | 3 | 4): FSRSCa
   const cards = loadFSRSCards();
   const current = getFSRSCard(verseId);
   const today = getTodayKey();
-
-  let newStability: number;
-  let newDifficulty: number;
-  let newLapses = current.lapses;
-  let newReps = current.reps + 1;
-  let newState: FSRSCard['state'] = 'review';
-
-  if (rating === 1) {
-    // Again / Lapse
-    newLapses += 1;
-    newStability = Math.max(0.5, current.stability * 0.3);
-    newDifficulty = Math.min(10.0, current.difficulty + 1.2);
-    newState = 'relearning';
-  } else if (rating === 2) {
-    // Hard
-    newStability = Math.max(1.2, current.stability * 1.25);
-    newDifficulty = Math.min(10.0, current.difficulty + 0.4);
-  } else if (rating === 3) {
-    // Good
-    const factor = Math.max(1.8, 3.0 - (current.difficulty * 0.15));
-    newStability = Math.max(2.0, (current.stability || 1) * factor);
-    newDifficulty = Math.max(1.0, current.difficulty - 0.1);
-  } else {
-    // Easy
-    const factor = Math.max(2.5, 4.2 - (current.difficulty * 0.15));
-    newStability = Math.max(4.0, (current.stability || 1) * factor * 1.3);
-    newDifficulty = Math.max(1.0, current.difficulty - 0.4);
-  }
-
-  const nextReviewDate = addDaysToDate(today, newStability);
+  const next = nextStability(current, rating);
+  const nextReviewDate = addDaysToDate(today, next.stability);
 
   const updated: FSRSCard = {
     verseId,
-    stability: Math.round(newStability * 10) / 10,
-    difficulty: Math.round(newDifficulty * 10) / 10,
-    reps: newReps,
-    lapses: newLapses,
-    state: newState,
+    stability: Math.round(next.stability * 10) / 10,
+    difficulty: Math.round(next.difficulty * 10) / 10,
+    reps: current.reps + 1,
+    lapses: next.lapses,
+    state: next.state,
     lastReviewDate: today,
     nextReviewDate,
     retrievability: 1.0

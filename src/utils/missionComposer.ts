@@ -11,6 +11,7 @@ import {
 import { getConnectedNexusItems } from '../data/nexusGraph';
 import { getStoryVerseForQuest, getVerseById } from './verseRegistry';
 import { getDueFSRSCards } from './fsrsEngine';
+import { getTodayBattlefieldId } from './battlefield';
 import { getQuestAttributes } from './narrativeMomentum';
 import type { StoryQuest, StoryAct } from '../types';
 
@@ -46,11 +47,7 @@ function readJson<T>(key: string): T | null {
 }
 
 function readBattlefieldId(): string | null {
-  try {
-    return localStorage.getItem('testament_todays_battlefield');
-  } catch {
-    return null;
-  }
+  return getTodayBattlefieldId();
 }
 
 function readCadence(): ComposedDailyMission['cadence'] {
@@ -64,7 +61,8 @@ function readCadence(): ComposedDailyMission['cadence'] {
 }
 
 function readCompletedActs(): string[] {
-  return readJson<string[]>('testament_completed_acts') || [];
+  const parsed = readJson<unknown>('testament_completed_acts');
+  return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === 'string') : [];
 }
 
 function readRecommendedQuestId(): string | null {
@@ -279,8 +277,12 @@ export const getComposedDailyMission = (): ComposedDailyMission => {
     const stored = localStorage.getItem(snapshotKey);
     if (stored) {
       const snap = JSON.parse(stored) as ComposedDailyMission;
-      const sameSignals = snap.battlefieldId === battlefieldId && snap.cadence === cadence;
-      if (started || sameSignals) return snap;
+      if (!snap || !Array.isArray(snap.steps) || snap.steps.length === 0) {
+        localStorage.removeItem(snapshotKey);
+      } else {
+        const sameSignals = snap.battlefieldId === battlefieldId && snap.cadence === cadence;
+        if (started || sameSignals) return snap;
+      }
     }
   } catch {
     // recompute below

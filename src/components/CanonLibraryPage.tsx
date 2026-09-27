@@ -549,7 +549,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                       <button
                         onClick={() => {
                           soundEngine.playClick();
-                          if (onOpenWordForge) onOpenWordForge(`canon-${book.id}`);
+                          if (onOpenWordForge) onOpenWordForge(book.id);
                         }}
                         className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 text-[11px] text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
                       >
@@ -561,7 +561,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                         onClick={() => {
                           soundEngine.playClick();
                           if (onSetMemoryVerse) {
-                            onSetMemoryVerse(`canon-${book.id}`);
+                            onSetMemoryVerse(book.id);
                             showToast(`Anchored ${book.anchorScripture.reference} to Memory Pulse!`);
                           }
                         }}

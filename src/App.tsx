@@ -31,6 +31,25 @@ function ViewFallback() {
   return <div className="max-w-7xl mx-auto px-6 py-16 text-sm text-stone-500">Loading...</div>;
 }
 
+function readStringArray(key: string): string[] {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw || raw === 'null') return [];
+    const parsed = JSON.parse(raw) as unknown;
+    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+function persistNumber(key: string, value: number) {
+  try {
+    localStorage.setItem(key, String(value));
+  } catch {
+    // ignore quota failures
+  }
+}
+
 export function App() {
   const [currentTab, setCurrentTabState] = useState<NavTab>(() => {
     if (typeof window === 'undefined') return 'dashboard';
@@ -64,6 +83,7 @@ export function App() {
   const [isWhatsNewOpen, setIsWhatsNewOpen] = useState<boolean>(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState<boolean>(() => {
     try {
+      if (sessionStorage.getItem('testament_onboarding_snoozed')) return false;
       return !localStorage.getItem('testament_onboarding_completed');
     } catch {
       return false;
@@ -80,41 +100,13 @@ export function App() {
   });
 
   // Persistence for user progress
-  const [completedActs, setCompletedActs] = useState<string[]>(() => {
-    try {
-      const stored = localStorage.getItem('testament_completed_acts');
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [completedActs, setCompletedActs] = useState<string[]>(() => readStringArray('testament_completed_acts'));
 
-  const [memorizedVerses, setMemorizedVerses] = useState<string[]>(() => {
-    try {
-      const stored = localStorage.getItem('testament_memorized_verses');
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [memorizedVerses, setMemorizedVerses] = useState<string[]>(() => readStringArray('testament_memorized_verses'));
 
-  const [unlockedRelics, setUnlockedRelics] = useState<string[]>(() => {
-    try {
-      const stored = localStorage.getItem('testament_unlocked_relics');
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [unlockedRelics, setUnlockedRelics] = useState<string[]>(() => readStringArray('testament_unlocked_relics'));
 
-  const [bookmarkedVerses, setBookmarkedVerses] = useState<string[]>(() => {
-    try {
-      const stored = localStorage.getItem('testament_bookmarked_verses');
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [bookmarkedVerses, setBookmarkedVerses] = useState<string[]>(() => readStringArray('testament_bookmarked_verses'));
 
   const [xp, setXp] = useState<number>(() => {
     return Number(localStorage.getItem('testament_xp')) || 0;
@@ -132,30 +124,28 @@ export function App() {
   const [targetDilemmaId, setTargetDilemmaId] = useState<string | null>(null);
   const [campaignPrompt, setCampaignPrompt] = useState<{ completedStep: number; nextStep: DailyCampaignStep } | null>(null);
 
-  const [streakCount] = useState<number>(() => {
-    const storedStreak = Number(localStorage.getItem('testament_streak')) || 1;
-    const today = new Date().toDateString();
-    const lastActive = localStorage.getItem('testament_last_active');
-
-    if (lastActive) {
-      const lastDate = new Date(lastActive);
-      const diffTime = Math.abs(new Date(today).getTime() - lastDate.getTime());
-      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
-      if (diffDays === 1) {
-        const newStreak = storedStreak + 1;
-        localStorage.setItem('testament_streak', String(newStreak));
-        localStorage.setItem('testament_last_active', today);
-        return newStreak;
-      } else if (diffDays > 1) {
-        localStorage.setItem('testament_streak', '1');
-        localStorage.setItem('testament_last_active', today);
-        return 1;
-      }
-    }
-    localStorage.setItem('testament_last_active', today);
-    return storedStreak;
+  const [streakCount, setStreakCount] = useState<number>(() => {
+    const stored = Number(localStorage.getItem('testament_streak'));
+    return Number.isFinite(stored) && stored > 0 ? stored : 0;
   });
+
+  const recordActivityStreak = () => {
+    try {
+      const today = new Date().toDateString();
+      const lastActive = localStorage.getItem('testament_last_active');
+      if (lastActive === today) return;
+      const stored = Number(localStorage.getItem('testament_streak')) || 0;
+      const diffDays = lastActive
+        ? Math.round((new Date(today).getTime() - new Date(lastActive).getTime()) / (1000 * 60 * 60 * 24))
+        : 0;
+      const next = lastActive && diffDays === 1 ? stored + 1 : 1;
+      localStorage.setItem('testament_streak', String(next));
+      localStorage.setItem('testament_last_active', today);
+      setStreakCount(next);
+    } catch {
+      // ignore
+    }
+  };
 
   // Initialize client-side notification scheduler
   useEffect(() => {
@@ -195,19 +185,21 @@ export function App() {
   }, []);
 
   useEffect(() => {
+    const onBookmark = (event: Event) => {
+      const id = (event as CustomEvent<string>).detail;
+      if (typeof id !== 'string') return;
+      setBookmarkedVerses((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    };
+    window.addEventListener('testament-verse-bookmarked', onBookmark);
+    return () => window.removeEventListener('testament-verse-bookmarked', onBookmark);
+  }, []);
+
+  useEffect(() => {
     const handleOpenLibrary = () => {
       soundEngine.stopSpeaking();
       setActiveQuest(null);
       setCurrentTab('library');
       window.scrollTo({ top: 0, behavior: 'smooth' });
-
-      // Mark the library step only when today's mission actually closes in the library
-      const todayCampaign = getComposedDailyMission();
-      const canonStep = todayCampaign.steps.find(step => step.type === 'canon');
-      if (canonStep) {
-        markCampaignStepCompleted(todayCampaign.id, canonStep.stepNumber, undefined, todayCampaign.steps.length);
-        window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
-      }
     };
 
     const handleOpenProverbs = () => setIsProverbsOpen(true);
@@ -232,6 +224,7 @@ export function App() {
       const todayCampaign = getComposedDailyMission();
       const dilemmaStep = todayCampaign.steps.find(step => step.type === 'dilemma');
       if (dilemmaStep && dilemmaStep.targetId === customEvent.detail?.dilemmaId) {
+        recordActivityStreak();
         markCampaignStepCompleted(todayCampaign.id, dilemmaStep.stepNumber, undefined, todayCampaign.steps.length);
         window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
         const nextStep = todayCampaign.steps.find(step => step.stepNumber === dilemmaStep.stepNumber + 1);
@@ -241,6 +234,27 @@ export function App() {
 
     window.addEventListener('testament-dilemma-completed', handleDilemmaCompleted);
     return () => window.removeEventListener('testament-dilemma-completed', handleDilemmaCompleted);
+  }, []);
+
+  useEffect(() => {
+    const markStep = (type: DailyCampaignStep['type']) => {
+      const todayCampaign = getComposedDailyMission();
+      const step = todayCampaign.steps.find((item) => item.type === type);
+      if (!step) return;
+      markCampaignStepCompleted(todayCampaign.id, step.stepNumber, undefined, todayCampaign.steps.length);
+      window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
+    };
+    const onChapter = () => markStep('canon');
+    const onProverb = () => markStep('proverb');
+    const onPsalm = () => markStep('psalm');
+    window.addEventListener('testament-scripture-read', onChapter);
+    window.addEventListener('testament-proverb-applied', onProverb);
+    window.addEventListener('testament-psalm-applied', onPsalm);
+    return () => {
+      window.removeEventListener('testament-scripture-read', onChapter);
+      window.removeEventListener('testament-proverb-applied', onProverb);
+      window.removeEventListener('testament-psalm-applied', onPsalm);
+    };
   }, []);
 
   const handleLaunchCampaignStep = (step: DailyCampaignStep) => {
@@ -268,19 +282,10 @@ export function App() {
       setActiveQuest(null);
       setCurrentTab('library');
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      const todayCampaign = getComposedDailyMission();
-      markCampaignStepCompleted(todayCampaign.id, step.stepNumber, undefined, todayCampaign.steps.length);
-      window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
     } else if (step.type === 'proverb') {
       setIsProverbsOpen(true);
-      const todayCampaign = getComposedDailyMission();
-      markCampaignStepCompleted(todayCampaign.id, step.stepNumber, undefined, todayCampaign.steps.length);
-      window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
     } else if (step.type === 'psalm') {
       setIsPsalmsOpen(true);
-      const todayCampaign = getComposedDailyMission();
-      markCampaignStepCompleted(todayCampaign.id, step.stepNumber, undefined, todayCampaign.steps.length);
-      window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
     }
   };
 
@@ -349,7 +354,8 @@ export function App() {
 
       const newXp = xp + bonusXp;
       setXp(newXp);
-      localStorage.setItem('testament_xp', String(newXp));
+      persistNumber('testament_xp', newXp);
+      recordActivityStreak();
 
       const todayCampaign = getComposedDailyMission();
       const questStep = todayCampaign.steps.find(step => step.type === 'quest');
@@ -364,15 +370,8 @@ export function App() {
 
   const handleVerseMastered = (verseId: string) => {
     recordVerseMasteryDate(verseId);
-    if (!memorizedVerses.includes(verseId)) {
-      const updated = [...memorizedVerses, verseId];
-      setMemorizedVerses(updated);
-      localStorage.setItem('testament_memorized_verses', JSON.stringify(updated));
-
-      const newXp = xp + 40;
-      setXp(newXp);
-      localStorage.setItem('testament_xp', String(newXp));
-
+    recordActivityStreak();
+    const creditForgeStep = () => {
       const todayCampaign = getComposedDailyMission();
       const forgeStep = todayCampaign.steps.find(step => step.type === 'wordforge');
       if (forgeStep && (forgeStep.targetId === verseId || verseId.includes(forgeStep.targetId.replace('story-', '')))) {
@@ -381,13 +380,28 @@ export function App() {
         const nextStep = todayCampaign.steps.find(step => step.stepNumber === forgeStep.stepNumber + 1);
         if (nextStep) setCampaignPrompt({ completedStep: forgeStep.stepNumber, nextStep });
       }
+    };
+
+    if (!memorizedVerses.includes(verseId)) {
+      const updated = [...memorizedVerses, verseId];
+      setMemorizedVerses(updated);
+      try {
+        localStorage.setItem('testament_memorized_verses', JSON.stringify(updated));
+      } catch {
+        // ignore
+      }
+
+      const newXp = xp + 40;
+      setXp(newXp);
+      persistNumber('testament_xp', newXp);
     }
+    creditForgeStep();
   };
 
   const handleRewardXP = (amount: number) => {
     const newXp = xp + amount;
     setXp(newXp);
-    localStorage.setItem('testament_xp', String(newXp));
+    persistNumber('testament_xp', newXp);
   };
 
   const handleToggleBookmark = (verseId: string) => {
@@ -437,7 +451,7 @@ export function App() {
     if (!onboardingXpAwarded) {
       const newXp = xp + 50;
       setXp(newXp);
-      localStorage.setItem('testament_xp', String(newXp));
+      persistNumber('testament_xp', newXp);
       localStorage.setItem('testament_onboarding_xp_awarded', 'true');
     }
 
@@ -486,10 +500,12 @@ export function App() {
       <main className="w-full pt-3 sm:pt-4 md:pt-16 pb-28 sm:pb-32 md:pb-12">
         {activeQuest ? (
           <StoryViewer 
+            key={activeQuest.id}
             quest={activeQuest}
             onBack={handleBackFromQuest}
             onCompleteAct={handleCompleteAct}
             completedActs={completedActs}
+            onRewardXP={handleRewardXP}
             onOpenWordForge={handlePracticeVerseFromArsenal}
             onOpenNexus={handleOpenNexus}
             onOpenBibleChapter={(target) => {
@@ -558,7 +574,7 @@ export function App() {
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 onSetMemoryVerse={(verseId) => {
-                  handleVerseMastered(verseId);
+                  setActiveMemoryVerse(verseId);
                 }}
                 onSelectStoryQuest={(questId) => {
                   handleSelectQuestById(questId);
@@ -680,6 +696,11 @@ export function App() {
         isOpen={isOnboardingOpen}
         onComplete={handleCompleteOnboarding}
         onClose={() => {
+          try {
+            sessionStorage.setItem('testament_onboarding_snoozed', '1');
+          } catch {
+            // ignore
+          }
           setIsOnboardingOpen(false);
           window.dispatchEvent(new Event('testament-onboarding-settled'));
         }}

@@ -186,6 +186,16 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
     setTurn2Feedback(followUpFeedback);
     setTemperamentProfile(temperament);
 
+    const alreadyRewarded = (() => {
+      try {
+        const stored = localStorage.getItem('testament_dilemma_answers');
+        const answers = stored ? JSON.parse(stored) : {};
+        return Boolean(answers[dilemma.id]?.turn2Rewarded);
+      } catch {
+        return false;
+      }
+    })();
+
     try {
       const stored = localStorage.getItem('testament_dilemma_answers');
       const answers = stored ? JSON.parse(stored) : {};
@@ -196,7 +206,8 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
         evaluationResult,
         turn2Text,
         turn2Feedback: followUpFeedback,
-        temperamentProfile: temperament
+        temperamentProfile: temperament,
+        turn2Rewarded: true
       };
       localStorage.setItem('testament_dilemma_answers', JSON.stringify(answers));
     } catch (err) {
@@ -204,13 +215,15 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
     }
 
     soundEngine.playVictory();
-    confetti({
-      particleCount: 50,
-      spread: 60,
-      origin: { y: 0.6 },
-      colors: ['#38bdf8', '#fbbf24', '#34d399']
-    });
-    onRewardXP(40);
+    if (!alreadyRewarded) {
+      confetti({
+        particleCount: 50,
+        spread: 60,
+        origin: { y: 0.6 },
+        colors: ['#38bdf8', '#fbbf24', '#34d399']
+      });
+      onRewardXP(40);
+    }
   };
 
   const handleSpeakScripture = () => {

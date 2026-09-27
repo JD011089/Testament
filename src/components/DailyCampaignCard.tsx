@@ -2,7 +2,6 @@
 import { motion } from 'framer-motion';
 import { 
   getDailyCampaignProgress,
-  markCampaignStepCompleted,
   claimCampaignCompletionBonus
 } from '../data/dailyCampaigns';
 import type { DailyCampaignStep, DailyCampaignProgress } from '../data/dailyCampaigns';
@@ -12,7 +11,6 @@ import { soundEngine } from '../utils/audio';
 import confetti from 'canvas-confetti';
 import { 
   Target, 
-  CheckCircle2, 
   ArrowRight, 
   Award, 
   Flame
@@ -77,15 +75,6 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
   const handleStepClick = (step: DailyCampaignStep) => {
     soundEngine.playClick();
     onLaunchStep(step);
-  };
-
-  const handleManualMarkStep = (stepNumber: number, e: React.MouseEvent) => {
-    e.stopPropagation();
-    soundEngine.playSnap();
-    const updated = markCampaignStepCompleted(composedMission.id, stepNumber, undefined, stepTotal);
-    setProgress(updated);
-    onRewardXP(30);
-    window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
   };
 
   return (
@@ -241,7 +230,7 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
                       )}
                       {isDone && (
                         <span className="text-[11px] font-mono text-emerald-700 dark:text-emerald-400 font-semibold">
-                          Completed (+30 XP)
+                          Completed
                         </span>
                       )}
                     </div>
@@ -271,16 +260,6 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
                     <span>{isDone ? 'Review' : step.actionLabel}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
-
-                  {!isDone && (
-                    <button
-                      onClick={(e) => handleManualMarkStep(step.stepNumber, e)}
-                      className="p-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-500 hover:text-emerald-600 dark:text-stone-400 dark:hover:text-emerald-400 transition-colors"
-                      title="Mark as completed"
-                    >
-                      <CheckCircle2 className="w-4 h-4" />
-                    </button>
-                  )}
                 </div>
               </div>
             </div>

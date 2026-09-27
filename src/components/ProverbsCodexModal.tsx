@@ -45,7 +45,15 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<ProverbCategory | 'all'>('all');
   const [currentScenarioIndex, setCurrentScenarioIndex] = useState(0);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
-  const [completedScenarios, setCompletedScenarios] = useState<Record<string, boolean>>({});
+  const [completedScenarios, setCompletedScenarios] = useState<Record<string, boolean>>(() => {
+    try {
+      const raw = localStorage.getItem('testament_proverb_completed');
+      const parsed = raw ? JSON.parse(raw) : {};
+      return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+    } catch {
+      return {};
+    }
+  });
   const [translationMode, setTranslationMode] = useState<Record<string, 'street' | 'formal'>>({});
 
   const scenarios = selectedCategory === 'all' 
@@ -68,8 +76,15 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
         origin: { y: 0.6 }
       });
       if (!completedScenarios[currentScenario.id]) {
-        setCompletedScenarios(prev => ({ ...prev, [currentScenario.id]: true }));
+        const next = { ...completedScenarios, [currentScenario.id]: true };
+        setCompletedScenarios(next);
+        try {
+          localStorage.setItem('testament_proverb_completed', JSON.stringify(next));
+        } catch {
+          // ignore
+        }
         onRewardXP?.(currentScenario.xpReward);
+        window.dispatchEvent(new CustomEvent('testament-proverb-applied'));
       }
     } else {
       soundEngine.playSnap();

@@ -223,7 +223,6 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="onboarding-modal-title"
-      onClick={onClose}
     >
       <motion.div 
         ref={modalRef}
@@ -261,7 +260,14 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => handleFinishCalibration(false)}
+              onClick={() => {
+                try {
+                  localStorage.setItem('testament_onboarding_completed', 'true');
+                } catch {
+                  // ignore
+                }
+                onClose();
+              }}
               className="text-xs text-stone-500 dark:text-stone-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors px-2.5 py-1 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 focus-visible:ring-2 focus-visible:ring-amber-500"
             >
               Skip
