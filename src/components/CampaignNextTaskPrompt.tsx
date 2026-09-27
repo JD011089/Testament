@@ -21,7 +21,7 @@ export const CampaignNextTaskPrompt: React.FC<CampaignNextTaskPromptProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-x-0 bottom-6 z-50 flex justify-center px-4 pointer-events-none">
+      <div className="fixed inset-x-0 z-50 flex justify-center px-4 pointer-events-none bottom-[calc(5.75rem+env(safe-area-inset-bottom))] md:bottom-6">
         <motion.div
           initial={{ opacity: 0, y: 50, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -38,8 +38,8 @@ export const CampaignNextTaskPrompt: React.FC<CampaignNextTaskPromptProps> = ({
               <span className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-300 dark:border-emerald-500/50 flex items-center justify-center text-emerald-700 dark:text-emerald-400 shrink-0">
                 <CheckCircle2 className="w-4 h-4" />
               </span>
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
                 <span>Tactical Campaign • Step {completedStepNumber} Completed!</span>
               </span>
             </div>
@@ -64,7 +64,7 @@ export const CampaignNextTaskPrompt: React.FC<CampaignNextTaskPromptProps> = ({
 
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-800/60 text-amber-800 dark:text-amber-300">
+                <span className="text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-800/60 text-amber-800 dark:text-amber-300">
                   {nextStep.badge}
                 </span>
                 <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400">
@@ -72,9 +72,9 @@ export const CampaignNextTaskPrompt: React.FC<CampaignNextTaskPromptProps> = ({
                 </span>
               </div>
 
-              <h4 className="text-sm sm:text-base font-serif font-bold text-stone-900 dark:text-parchment-50 truncate">
+              <p className="text-sm sm:text-base font-serif font-bold text-stone-900 dark:text-parchment-50 truncate">
                 {nextStep.title}
-              </h4>
+              </p>
               <p className="text-xs text-stone-600 dark:text-stone-300 truncate mt-0.5">
                 {nextStep.subtitle}
               </p>

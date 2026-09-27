@@ -2,7 +2,11 @@ import { MsEdgeTTS, OUTPUT_FORMAT } from 'msedge-tts';
 import fs from 'fs';
 import path from 'path';
 
-const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY || 'sk_b2c386ca902d917f5618a6a3c012dc885c8b3ef55c61e41e';
+const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
+if (!ELEVENLABS_API_KEY) {
+  console.error('Set ELEVENLABS_API_KEY in the environment. Do not hardcode it.');
+  process.exit(1);
+}
 const ELEVENLABS_ADAM_VOICE_ID = 'pNInz6obpgDQGcFmaJgB'; // Adam: Cinematic Baritone
 
 function normalizeScriptureForSpeech(text) {

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Maximize2, X } from 'lucide-react';
 import { useModalLock } from '../utils/useModalLock';
+import { ArtImage } from './ArtImage';
 
 interface SceneIllustrationProps {
   theme: 'valley_battlefield' | 'cave_refuge' | 'desert_canyon' | 'courtyard_fire' | 'prison_cell' | 'sea_storm' | 'palace_hall' | 'red_sea' | 'mount_carmel';
@@ -83,16 +84,18 @@ export const SceneIllustration: React.FC<SceneIllustrationProps> = ({ theme, cla
           </div>
         )}
 
-        <img
+        <ArtImage
           src={scene.src}
           alt={scene.location}
-          onLoad={() => setIsLoaded(true)}
+          width={1376}
+          height={768}
           className={`w-full h-full object-cover object-center transform transition-transform duration-700 ease-out group-hover:scale-105 ${
             isLoaded ? 'opacity-100' : 'opacity-0'
           }`}
+          onLoad={() => setIsLoaded(true)}
         />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-[#090b0e] via-transparent to-black/30 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-black/30 pointer-events-none" />
 
         <div className="absolute top-3 left-3 px-3 py-1 bg-black/80 backdrop-blur-md rounded-lg border border-amber-600/40 text-[11px] font-mono tracking-wider uppercase text-amber-300 shadow-md">
           {scene.location}
@@ -129,10 +132,12 @@ export const SceneIllustration: React.FC<SceneIllustrationProps> = ({ theme, cla
             className="max-w-5xl w-full flex flex-col items-center gap-3 focus:outline-none"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-full rounded-2xl overflow-hidden border-2 border-amber-600/40 shadow-glow-gold">
-              <img
+            <div className="w-full rounded-2xl overflow-hidden border-2 border-amber-600/40 shadow-glow">
+              <ArtImage
                 src={scene.src}
                 alt={scene.location}
+                width={1376}
+                height={768}
                 className="w-full max-h-[80vh] object-contain bg-black"
               />
             </div>

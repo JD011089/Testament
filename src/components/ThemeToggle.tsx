@@ -52,7 +52,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '', compac
         </>
       ) : (
         <>
-          <Moon className="w-4 h-4 text-amber-600 animate-fadeIn" />
+          <Moon className="w-4 h-4 text-amber-800 animate-fadeIn" />
           {!compact && <span className="hidden sm:inline">Dark</span>}
         </>
       )}

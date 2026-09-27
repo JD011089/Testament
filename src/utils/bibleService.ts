@@ -101,7 +101,7 @@ export const getBookChapterCount = (bookName: string): number => {
 
 // Available translations supported by the engine
 export const BIBLE_TRANSLATIONS = [
-  { id: 'web', label: 'CSB / Modern Reader (WEB)', note: 'Clear, modern standard English' },
+  { id: 'web', label: 'World English Bible (WEB)', note: 'Clear, modern standard English' },
   { id: 'kjv', label: 'Classic King James (KJV)', note: 'Traditional poetic phrasing' },
   { id: 'bbe', label: 'Basic Bible English (BBE)', note: 'Simplified direct English' }
 ] as const;

@@ -68,33 +68,62 @@ const iconSvg = `
 
 async function run() {
   const iconsDir = path.resolve('public/icons');
+  const publicDir = path.resolve('public');
   if (!fs.existsSync(iconsDir)) {
     fs.mkdirSync(iconsDir, { recursive: true });
   }
 
   const svgBuffer = Buffer.from(iconSvg);
+  const crest = iconSvg
+    .replace('<rect width="512" height="512" rx="112" fill="url(#bgGlow)" />', '')
+    .replace('<rect x="12" y="12" width="488" height="488" rx="100" stroke="#3c3127" stroke-width="4" stroke-opacity="0.6" />', '');
+  const maskableSvg = crest
+    .replace(
+      '<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">',
+      '<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">\n  <rect width="512" height="512" fill="#090b0e" />\n  <g transform="translate(51.2 51.2) scale(0.8)">'
+    )
+    .replace('</svg>', '</g>\n</svg>');
 
-  await sharp(svgBuffer)
-    .resize(512, 512)
-    .png()
-    .toFile(path.join(iconsDir, 'icon-512.png'));
+  await sharp(svgBuffer).resize(512, 512).png().toFile(path.join(iconsDir, 'icon-512.png'));
+  await sharp(svgBuffer).resize(192, 192).png().toFile(path.join(iconsDir, 'icon-192.png'));
+  await sharp(Buffer.from(maskableSvg)).resize(512, 512).png().toFile(path.join(iconsDir, 'maskable-512.png'));
 
-  await sharp(svgBuffer)
-    .resize(192, 192)
-    .png()
-    .toFile(path.join(iconsDir, 'icon-192.png'));
+  const apple = await sharp(Buffer.from(maskableSvg)).resize(180, 180).png().toBuffer();
+  await sharp(apple).toFile(path.resolve('public/apple-touch-icon.png'));
 
-  await sharp(svgBuffer)
-    .resize(180, 180)
-    .png()
-    .toFile(path.resolve('public/apple-touch-icon.png'));
+  await sharp(svgBuffer).resize(128, 128).webp({ quality: 80 }).toFile(path.join(iconsDir, 'icon-128.webp'));
+  await sharp(svgBuffer).resize(64, 64).webp({ quality: 80 }).toFile(path.join(iconsDir, 'icon-64.webp'));
 
-  await sharp(svgBuffer)
-    .resize(64, 64)
-    .png()
-    .toFile(path.resolve('public/favicon.ico'));
+  const pngSizes = [16, 32, 48];
+  const pngs = [];
+  for (const size of pngSizes) {
+    const png = await sharp(svgBuffer).resize(size, size).png().toBuffer();
+    pngs.push({ png, size });
+  }
+  fs.writeFileSync(path.join(publicDir, 'favicon.ico'), pngIco(pngs));
 
-  console.log('Successfully generated PWA icons!');
+  console.log('Successfully generated PWA icons.');
+}
+
+function pngIco(images) {
+  const count = images.length;
+  const header = Buffer.alloc(6);
+  header.writeUInt16LE(0, 0);
+  header.writeUInt16LE(1, 2);
+  header.writeUInt16LE(count, 4);
+  let offset = 6 + count * 16;
+  const entries = images.map((img) => {
+    const entry = Buffer.alloc(16);
+    entry.writeUInt8(img.size >= 256 ? 0 : img.size, 0);
+    entry.writeUInt8(img.size >= 256 ? 0 : img.size, 1);
+    entry.writeUInt16LE(1, 4);
+    entry.writeUInt16LE(32, 6);
+    entry.writeUInt32LE(img.png.length, 8);
+    entry.writeUInt32LE(offset, 12);
+    offset += img.png.length;
+    return entry;
+  });
+  return Buffer.concat([header, ...entries, ...images.map((img) => img.png)]);
 }
 
 run().catch(console.error);

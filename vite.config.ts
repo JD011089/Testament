@@ -89,6 +89,18 @@ function normalizeScriptureForSpeech(text: string): string {
     .trim();
 }
 
+function stripConsolePlugin(): Plugin {
+  return {
+    name: 'strip-console',
+    apply: 'build',
+    transform(code, id) {
+      if (!/[/\\]src[/\\]/.test(id) || id.includes('node_modules')) return null;
+      const next = code.replace(/^[ \t]*console\.(?:log|debug|info|warn|error|trace)\(.*\);?[ \t]*$/gm, '');
+      return next === code ? null : next;
+    },
+  };
+}
+
 function neuralTtsPlugin(env: Record<string, string>): Plugin {
   const diskCacheDir = path.resolve('.cache/audio-tts');
   try {
@@ -99,7 +111,7 @@ function neuralTtsPlugin(env: Record<string, string>): Plugin {
     /* ignore */
   }
 
-  const apiKey = env.ELEVENLABS_API_KEY || process.env.ELEVENLABS_API_KEY || 'sk_b2c386ca902d917f5618a6a3c012dc885c8b3ef55c61e41e';
+  const apiKey = env.ELEVENLABS_API_KEY || process.env.ELEVENLABS_API_KEY || '';
 
   return {
     name: 'vite-neural-tts-middleware',
@@ -256,43 +268,97 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       react(),
+      mode === 'production' ? stripConsolePlugin() : null,
       neuralTtsPlugin(env),
       VitePWA({
         registerType: 'prompt',
+        injectRegister: false,
         devOptions: {
           enabled: false
         },
-        includeAssets: ['favicon.ico', 'favicon.png', 'apple-touch-icon.png', 'icons/*.png', 'audio/**/*.mp3'],
+        includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icons/*.png', 'icons/*.webp'],
         manifest: {
-          name: 'Testament - Interactive Bible Journey',
+          id: '/',
+          name: 'Testament — The Living Word',
           short_name: 'Testament',
           description: 'An interactive graphic-novel Bible study experience for adults. Plain English, real history, actionable wisdom.',
-          theme_color: '#0f1217',
+          theme_color: '#090b0e',
           background_color: '#090b0e',
           display: 'standalone',
           orientation: 'portrait-primary',
+          start_url: '/',
+          scope: '/',
+          lang: 'en',
           icons: [
             {
               src: '/icons/icon-192.png',
               sizes: '192x192',
-              type: 'image/png'
-            },
-            {
-              src: '/icons/icon-512.png',
-              sizes: '512x512',
-              type: 'image/png'
+              type: 'image/png',
+              purpose: 'any'
             },
             {
               src: '/icons/icon-512.png',
               sizes: '512x512',
               type: 'image/png',
-              purpose: 'any maskable'
+              purpose: 'any'
+            },
+            {
+              src: '/icons/maskable-512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'maskable'
+            }
+          ],
+          screenshots: [
+            {
+              src: '/screenshots/home-narrow.png',
+              sizes: '390x844',
+              type: 'image/png',
+              form_factor: 'narrow',
+              label: 'Home'
+            },
+            {
+              src: '/screenshots/home-wide.png',
+              sizes: '1280x720',
+              type: 'image/png',
+              form_factor: 'wide',
+              label: 'Home'
             }
           ]
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,mp3}'],
-          importScripts: ['/sw-notifications.js']
+          globPatterns: ['**/*.{js,css,html,svg,woff2}'],
+          navigateFallback: '/index.html',
+          navigateFallbackDenylist: [/^\/api\//],
+          importScripts: ['/sw-notifications.js'],
+          runtimeCaching: [
+            {
+              urlPattern: /\/images\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'testament-images',
+                expiration: { maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 * 30 }
+              }
+            },
+            {
+              urlPattern: /\/audio\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'testament-audio',
+                rangeRequests: true,
+                expiration: { maxEntries: 40, maxAgeSeconds: 60 * 60 * 24 * 365 }
+              }
+            },
+            {
+              urlPattern: /^https:\/\/bible-api\.com\/.*/i,
+              handler: 'NetworkFirst',
+              options: {
+                cacheName: 'testament-bible-api',
+                networkTimeoutSeconds: 4,
+                expiration: { maxEntries: 80, maxAgeSeconds: 60 * 60 * 24 * 30 }
+              }
+            }
+          ]
         }
       })
     ]

@@ -25,6 +25,16 @@ export default {
           900: '#0f1217',
           950: '#090b0e',
         },
+        surface: {
+          DEFAULT: '#fcfbfa',
+          raised: '#ffffff',
+          overlay: '#f4f0e8',
+        },
+        ink: {
+          DEFAULT: '#090b0e',
+          raised: '#12151a',
+          overlay: '#1a1f28',
+        },
         ember: {
           400: '#fb923c',
           500: '#f97316',
@@ -46,9 +56,10 @@ export default {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },
       boxShadow: {
-        'glow-ember': '0 0 25px -5px rgba(234, 88, 12, 0.3)',
-        'glow-gold': '0 0 25px -5px rgba(217, 119, 6, 0.25)',
-        'glow-amber': '0 0 25px -5px rgba(245, 158, 11, 0.35)',
+        glow: '0 0 25px -5px rgba(180, 83, 9, 0.28)',
+        'glow-ember': '0 0 25px -5px rgba(180, 83, 9, 0.28)',
+        'glow-gold': '0 0 25px -5px rgba(180, 83, 9, 0.28)',
+        'glow-amber': '0 0 25px -5px rgba(180, 83, 9, 0.28)',
       }
     },
   },

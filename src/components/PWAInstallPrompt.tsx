@@ -62,10 +62,6 @@ export const PWAInstallPrompt: React.FC = () => {
     const promptHandler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      // ONLY show floating banner if user has NOT already installed the app
-      if (!checkIsPWAInstalled()) {
-        setIsVisible(true);
-      }
     };
     window.addEventListener('beforeinstallprompt', promptHandler);
 
@@ -76,16 +72,34 @@ export const PWAInstallPrompt: React.FC = () => {
     };
     window.addEventListener('open-pwa-install', openHandler);
 
-    // Auto-show banner after 2s ONLY if never dismissed in this session AND NOT installed
-    const dismissed = sessionStorage.getItem('testament_pwa_dismissed_session');
+    const onboardingDone = () => {
+      try {
+        return localStorage.getItem('testament_onboarding_completed') === 'true';
+      } catch {
+        return true;
+      }
+    };
+    const installDismissed = () => {
+      try {
+        return localStorage.getItem('testament_pwa_dismissed') === 'true';
+      } catch {
+        return false;
+      }
+    };
+
     let timer: ReturnType<typeof setTimeout> | undefined;
-    if (!dismissed && !checkIsPWAInstalled()) {
+    const queueBanner = () => {
+      if (timer) clearTimeout(timer);
+      if (installDismissed() || checkIsPWAInstalled()) return;
+      if (!onboardingDone()) return;
       timer = setTimeout(() => {
-        if (!checkIsPWAInstalled()) {
-          setIsVisible(true);
-        }
-      }, 2000);
-    }
+        if (!checkIsPWAInstalled() && !installDismissed()) setIsVisible(true);
+      }, 800);
+    };
+
+    const onSettled = () => queueBanner();
+    window.addEventListener('testament-onboarding-settled', onSettled);
+    if (onboardingDone()) queueBanner();
 
     return () => {
       if (timer) clearTimeout(timer);
@@ -93,6 +107,7 @@ export const PWAInstallPrompt: React.FC = () => {
       window.removeEventListener('appinstalled', installedHandler);
       window.removeEventListener('beforeinstallprompt', promptHandler);
       window.removeEventListener('open-pwa-install', openHandler);
+      window.removeEventListener('testament-onboarding-settled', onSettled);
     };
   }, []);
 
@@ -132,7 +147,7 @@ export const PWAInstallPrompt: React.FC = () => {
     soundEngine.playClick();
     setIsVisible(false);
     setIsModalMode(false);
-    sessionStorage.setItem('testament_pwa_dismissed_session', 'true');
+    localStorage.setItem('testament_pwa_dismissed', 'true');
   };
 
   useEffect(() => {
@@ -153,14 +168,17 @@ export const PWAInstallPrompt: React.FC = () => {
 
   // Render content
   const cardContent = (
-    <div className={`w-full bg-white dark:bg-[#141820] border-2 border-amber-500/70 rounded-2xl sm:rounded-3xl shadow-2xl backdrop-blur-xl ${isModalMode ? 'p-5 md:p-6 gap-4' : 'p-3.5 sm:p-5 gap-3'} text-left flex flex-col transition-colors`}>
+    <div className={`w-full bg-white dark:bg-ink-raised border-2 border-amber-500/70 rounded-2xl sm:rounded-3xl shadow-2xl backdrop-blur-xl ${isModalMode ? 'p-5 md:p-6 gap-4' : 'p-3.5 sm:p-5 gap-3'} text-left flex flex-col transition-colors`}>
       {/* Header with App Icon */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl overflow-hidden border-2 border-amber-500/70 shadow-glow-gold bg-stone-100 dark:bg-stone-950 shrink-0">
-            <img 
-              src="/icons/icon-192.png" 
-              alt="Testament App Icon" 
+          <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl overflow-hidden border-2 border-amber-500/70 shadow-glow bg-stone-100 dark:bg-stone-950 shrink-0">
+            <img
+              src="/icons/icon-64.webp"
+              srcSet="/icons/icon-64.webp 64w, /icons/icon-128.webp 128w"
+              width={56}
+              height={56}
+              alt=""
               className="w-full h-full object-cover"
             />
           </div>
@@ -169,12 +187,12 @@ export const PWAInstallPrompt: React.FC = () => {
               <h3 className="text-sm sm:text-lg font-serif font-bold text-stone-900 dark:text-parchment-50 leading-tight">
                 Install Testament
               </h3>
-              <span className="text-[9px] sm:text-[10px] uppercase tracking-wider px-1.5 sm:px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 font-mono font-bold border border-amber-300 dark:border-amber-500/30">
+              <span className="text-[11px] sm:text-[11px] uppercase tracking-wider px-1.5 sm:px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 font-mono font-bold border border-amber-300 dark:border-amber-500/30">
                 PWA
               </span>
             </div>
             <p className="text-[11px] sm:text-xs text-stone-600 dark:text-stone-400 mt-0.5 line-clamp-1 sm:line-clamp-none">
-              100% offline access, audio narration & home screen launch
+              Works offline for saved content, audio narration, and home screen launch
             </p>
           </div>
         </div>
@@ -191,19 +209,19 @@ export const PWAInstallPrompt: React.FC = () => {
       {/* Feature Bullets - compact when floating banner on mobile */}
       <div className={`${isModalMode ? 'grid' : 'hidden sm:grid'} grid-cols-2 gap-2 py-1 text-[11px] text-stone-600 dark:text-stone-300`}>
         <div className="flex items-center gap-1.5">
-          <CheckCircle2 className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
-          <span>Full Offline Mode</span>
+          <CheckCircle2 className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 shrink-0" />
+          <span>Saved content offline</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <CheckCircle2 className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+          <CheckCircle2 className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 shrink-0" />
           <span>Cinematic Voice Audio</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <CheckCircle2 className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+          <CheckCircle2 className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 shrink-0" />
           <span>Zero App Store Delay</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <CheckCircle2 className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+          <CheckCircle2 className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 shrink-0" />
           <span>Desktop & Mobile Icon</span>
         </div>
       </div>
@@ -212,7 +230,7 @@ export const PWAInstallPrompt: React.FC = () => {
       <div className="space-y-2 pt-1">
         <button
           onClick={handleInstallClick}
-          className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 transition-all shadow-glow-gold cursor-pointer active:scale-[0.98]"
+          className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 transition-all shadow-glow cursor-pointer active:scale-[0.98]"
         >
           <Download className="w-5 h-5 text-stone-950 stroke-[2.5]" />
           <span>Install Testament App Now</span>
@@ -223,8 +241,8 @@ export const PWAInstallPrompt: React.FC = () => {
           <div className="mt-3 p-3.5 rounded-xl bg-stone-50 dark:bg-stone-900/90 border border-amber-500/40 text-xs text-stone-700 dark:text-stone-200 space-y-2 animate-fadeIn">
             {isIOS ? (
               <>
-                <div className="text-amber-700 dark:text-amber-400 font-bold flex items-center gap-1.5 text-xs">
-                  <Smartphone className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                <div className="text-amber-800 dark:text-amber-400 font-bold flex items-center gap-1.5 text-xs">
+                  <Smartphone className="w-4 h-4 text-amber-800 dark:text-amber-400" />
                   <span>Installing on iPhone / iPad (Safari):</span>
                 </div>
                 <div className="text-stone-600 dark:text-stone-300 space-y-1 pl-1 text-[11px] leading-relaxed">
@@ -235,8 +253,8 @@ export const PWAInstallPrompt: React.FC = () => {
               </>
             ) : (
               <>
-                <div className="text-amber-700 dark:text-amber-400 font-bold flex items-center gap-1.5 text-xs">
-                  <Monitor className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                <div className="text-amber-800 dark:text-amber-400 font-bold flex items-center gap-1.5 text-xs">
+                  <Monitor className="w-4 h-4 text-amber-800 dark:text-amber-400" />
                   <span>Installing on Computer / Chrome / Edge:</span>
                 </div>
                 <div className="text-stone-600 dark:text-stone-300 space-y-1.5 pl-1 text-[11px] leading-relaxed">
@@ -267,7 +285,7 @@ export const PWAInstallPrompt: React.FC = () => {
       <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-stone-200 dark:border-stone-800/80 text-xs text-stone-500 dark:text-stone-400">
         <button
           onClick={() => setInstallState(installState === 'manual_needed' ? 'ready' : 'manual_needed')}
-          className="text-amber-700 dark:text-amber-400/90 hover:text-amber-800 dark:hover:text-amber-300 underline text-[11px]"
+          className="text-amber-800 dark:text-amber-400/90 hover:text-amber-800 dark:hover:text-amber-300 underline text-[11px]"
         >
           {installState === 'manual_needed' ? 'Hide device tips' : 'Need help installing?'}
         </button>
@@ -315,7 +333,7 @@ export const PWAInstallPrompt: React.FC = () => {
 
   // Floating banner mode (positioned cleanly above bottom nav bar)
   return (
-    <div className="fixed bottom-24 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-22 sm:w-96 z-50 animate-bounce-short">
+    <div className="fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] left-4 right-4 md:left-auto md:right-6 md:bottom-6 md:w-96 z-50 animate-bounce-short">
       {cardContent}
     </div>
   );

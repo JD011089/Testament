@@ -702,45 +702,7 @@ class SoundEngine {
 
         playBlob(blob);
       })
-      .catch(async (_err) => {
-        if (controller.signal.aborted) return;
-
-        // Secondary fallback: Direct ElevenLabs API call (for static production / offline-to-online PWA)
-        const clientApiKey = (
-          (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ELEVENLABS_API_KEY) ||
-          (typeof window !== 'undefined' ? localStorage.getItem('elevenlabs_api_key') : null) ||
-          'sk_b2c386ca902d917f5618a6a3c012dc885c8b3ef55c61e41e'
-        );
-
-        if (clientApiKey) {
-          try {
-            const voiceMeta = NARRATOR_VOICES[this.currentNarratorProfile] || NARRATOR_VOICES.cinematic;
-            const directRes = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceMeta.elevenVoiceId}`, {
-              method: 'POST',
-              headers: {
-                'xi-api-key': clientApiKey,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                text: cleanText,
-                model_id: 'eleven_turbo_v2_5',
-                voice_settings: voiceMeta.settings
-              }),
-              signal: controller.signal
-            });
-
-            if (directRes.ok) {
-              const blob = await directRes.blob();
-              if (!controller.signal.aborted && blob.size > 100) {
-                playBlob(blob);
-                return;
-              }
-            }
-          } catch {
-            /* ignore direct fetch failure */
-          }
-        }
-
+      .catch(() => {
         if (controller.signal.aborted) return;
         this.fallbackWithAssetOrSpeech(cleanText, onFinished, audioAssetUrl);
       });

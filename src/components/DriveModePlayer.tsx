@@ -3,6 +3,7 @@ import { STORY_QUESTS } from '../data/stories';
 import { soundEngine, NARRATOR_VOICES } from '../utils/audio';
 import type { NarratorProfile } from '../utils/audio';
 import { useModalLock } from '../utils/useModalLock';
+import { ArtImage } from './ArtImage';
 import { 
   X, 
   Play, 
@@ -151,12 +152,12 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
       <div 
         ref={modalRef}
         tabIndex={-1}
-        className="max-w-2xl w-full mx-auto my-auto flex flex-col justify-between max-h-[90vh] bg-white dark:bg-[#11141b] border-2 border-amber-400 dark:border-amber-600/40 rounded-3xl p-5 sm:p-8 shadow-2xl overflow-y-auto space-y-6 outline-none"
+        className="max-w-2xl w-full mx-auto my-auto flex flex-col justify-between max-h-[90vh] bg-white dark:bg-ink-raised border-2 border-amber-400 dark:border-amber-600/40 rounded-3xl p-5 sm:p-8 shadow-2xl overflow-y-auto space-y-6 outline-none"
         onClick={e => e.stopPropagation()}
       >
         {/* Top Header */}
         <div className="flex items-center justify-between pb-4 border-b border-stone-200 dark:border-stone-800">
-          <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-700 dark:text-amber-400">
+          <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400">
             <Car className="w-4 h-4" />
             <span id="drive-mode-title">Hands-Free Drive & Commute Mode</span>
           </div>
@@ -174,16 +175,18 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
 
         {/* Center Artwork / Visual */}
         <div className="my-auto space-y-5 text-center">
-          <div className="w-36 h-36 sm:w-48 sm:h-48 mx-auto rounded-3xl overflow-hidden border-2 border-amber-400 dark:border-amber-500/40 shadow-md dark:shadow-glow-gold bg-stone-100 dark:bg-stone-950">
-            <img 
+          <div className="w-36 h-36 sm:w-48 sm:h-48 mx-auto rounded-3xl overflow-hidden border-2 border-amber-400 dark:border-amber-500/40 shadow-md dark:shadow-glow bg-stone-100 dark:bg-stone-950">
+            <ArtImage
               src={getThemeImage(act.visualTheme)}
               alt={quest.title}
+              width={1376}
+              height={768}
               className="w-full h-full object-cover"
             />
           </div>
 
           <div className="space-y-1">
-            <span className="text-xs font-mono text-amber-700 dark:text-amber-500 uppercase tracking-widest font-bold">
+            <span className="text-xs font-mono text-amber-800 dark:text-amber-500 uppercase tracking-widest font-bold">
               {quest.heroName} • Act {act.actNumber} of {quest.acts.length}
             </span>
             <h3 className="text-2xl sm:text-3xl font-serif font-black text-stone-900 dark:text-parchment-50">
@@ -226,8 +229,8 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
 
             <button
               onClick={handleNext}
-              title="Next Act"
-              aria-label="Next Act"
+              title="Next act"
+              aria-label="Next act"
               className="p-4 rounded-2xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-800 dark:text-stone-300 transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-500 shadow-sm"
             >
               <SkipForward className="w-6 h-6" />
@@ -237,8 +240,8 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
           {/* Dramatized Voice Style Selector */}
           <div className="flex items-center justify-between gap-2 p-3 bg-stone-50 dark:bg-stone-950/70 rounded-2xl border border-stone-200 dark:border-stone-800">
             <div className="flex items-center gap-2 text-xs font-mono text-stone-600 dark:text-stone-400">
-              <Mic className="w-4 h-4 text-amber-600 dark:text-amber-500" />
-              <span>ElevenLabs Voice:</span>
+              <Mic className="w-4 h-4 text-amber-800 dark:text-amber-500" />
+              <span>Narrator:</span>
             </div>
 
             <div className="flex items-center gap-1.5">
@@ -272,7 +275,7 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
           {/* Background Ambience Quick Selector */}
           <div className="flex items-center justify-between gap-2 p-3 bg-stone-50 dark:bg-stone-950/70 rounded-2xl border border-stone-200 dark:border-stone-800">
             <div className="flex items-center gap-2 text-xs font-mono text-stone-600 dark:text-stone-400">
-              <Volume2 className="w-4 h-4 text-amber-600 dark:text-amber-500" />
+              <Volume2 className="w-4 h-4 text-amber-800 dark:text-amber-500" />
               <span>Background Soundscape:</span>
             </div>
 

@@ -142,7 +142,7 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="w-full max-w-xl h-[100dvh] sm:h-auto sm:max-h-[90vh] bg-white dark:bg-[#11141c] border-0 sm:border-2 border-amber-400 dark:border-amber-500/50 rounded-none sm:rounded-3xl p-5 sm:p-6 md:p-8 shadow-none sm:shadow-2xl relative text-left overflow-y-auto outline-none"
+          className="w-full max-w-xl h-[100dvh] sm:h-auto sm:max-h-[90vh] bg-white dark:bg-ink-raised border-0 sm:border-2 border-amber-400 dark:border-amber-500/50 rounded-none sm:rounded-3xl p-5 sm:p-6 md:p-8 shadow-none sm:shadow-2xl relative text-left overflow-y-auto outline-none"
         >
           {/* Close button */}
           <button
@@ -155,7 +155,7 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
 
           {/* Header */}
           <div className="mb-6">
-            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-700 dark:text-amber-400 mb-1.5">
+            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400 mb-1.5">
               <Swords className="w-4 h-4" />
               <span>5-Second Battlefield Check-In</span>
             </div>
@@ -200,8 +200,8 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
                     <p className="text-xs text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">
                       {opt.subtitle}
                     </p>
-                    <div className="text-[10px] font-mono text-amber-800 dark:text-amber-300/80 mt-1.5 flex items-center gap-1">
-                      <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                    <div className="text-[11px] font-mono text-amber-800 dark:text-amber-300/80 mt-1.5 flex items-center gap-1">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
                       <span>Field Armor: {opt.psalmReference}</span>
                     </div>
                   </div>

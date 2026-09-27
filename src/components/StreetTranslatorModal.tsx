@@ -53,13 +53,13 @@ export const StreetTranslatorModal: React.FC<StreetTranslatorModalProps> = ({
       <div 
         ref={modalRef}
         tabIndex={-1}
-        className="max-w-4xl w-full h-[100dvh] sm:h-auto sm:max-h-[90vh] bg-white dark:bg-[#11141b] border-0 sm:border-2 border-amber-400 dark:border-amber-600/50 rounded-none sm:rounded-3xl shadow-none sm:shadow-2xl overflow-hidden flex flex-col my-auto outline-none"
+        className="max-w-4xl w-full h-[100dvh] sm:h-auto sm:max-h-[90vh] bg-white dark:bg-ink-raised border-0 sm:border-2 border-amber-400 dark:border-amber-600/50 rounded-none sm:rounded-3xl shadow-none sm:shadow-2xl overflow-hidden flex flex-col my-auto outline-none"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
         <div className="p-5 md:p-6 border-b border-stone-200/60 dark:border-stone-800 flex items-center justify-between bg-stone-50 dark:bg-stone-950/60">
           <div>
-            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-1">
+            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
               <BookA className="w-4 h-4" />
               <span>Street Translator • No Religious Jargon</span>
             </div>
@@ -116,14 +116,14 @@ export const StreetTranslatorModal: React.FC<StreetTranslatorModalProps> = ({
             {filtered.map(item => (
               <div 
                 key={item.id}
-                className="p-4 md:p-5 rounded-2xl bg-stone-100/70 dark:bg-[#141822] transition-all flex flex-col justify-between"
+                className="p-4 md:p-5 rounded-2xl bg-stone-100/70 dark:bg-ink-overlay transition-all flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-base font-serif font-bold text-amber-700 dark:text-amber-400">
+                    <span className="text-base font-serif font-bold text-amber-800 dark:text-amber-400">
                       "{item.ancientPhrase}"
                     </span>
-                    <span className="text-[10px] font-mono text-stone-600 dark:text-stone-400 px-2 py-0.5 rounded bg-stone-200/70 dark:bg-stone-900">
+                    <span className="text-[11px] font-mono text-stone-600 dark:text-stone-400 px-2 py-0.5 rounded bg-stone-200/70 dark:bg-stone-900">
                       {item.category}
                     </span>
                   </div>

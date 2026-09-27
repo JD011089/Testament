@@ -40,9 +40,9 @@ export const UpdateNotificationBanner: React.FC = () => {
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           className="fixed top-4 left-4 right-4 z-50 max-w-xl mx-auto"
         >
-          <div className="p-3 sm:p-3.5 rounded-2xl bg-white dark:bg-[#141822] border border-amber-500/70 shadow-xl dark:shadow-2xl flex items-center justify-between gap-3 text-left transition-colors">
+          <div className="p-3 sm:p-3.5 rounded-2xl bg-white dark:bg-ink-overlay border border-amber-500/70 shadow-xl dark:shadow-2xl flex items-center justify-between gap-3 text-left transition-colors">
             <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-100 dark:bg-amber-500/20 border border-amber-300 dark:border-amber-500/40 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-100 dark:bg-amber-500/20 border border-amber-300 dark:border-amber-500/40 flex items-center justify-center text-amber-800 dark:text-amber-400 shrink-0">
                 <Sparkles className="w-4 h-4 animate-pulse" />
               </div>
               <div className="min-w-0">
@@ -50,7 +50,7 @@ export const UpdateNotificationBanner: React.FC = () => {
                   <span className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-50">
                     Update Ready
                   </span>
-                  <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 rounded bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 font-bold hidden sm:inline-block">
+                  <span className="text-[11px] font-mono uppercase px-1.5 py-0.2 rounded bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 font-bold hidden sm:inline-block">
                     New Version
                   </span>
                 </div>
