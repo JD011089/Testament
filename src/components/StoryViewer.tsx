@@ -40,6 +40,7 @@ interface StoryViewerProps {
   onOpenWordForge?: (verseId: string) => void;
   onOpenNexus?: (type: string, id: string) => void;
   onOpenBibleChapter?: (target: { book: string; chapter: number; verseStart: number; verseEnd: number }) => void;
+  onRewardXP?: (amount: number) => void;
 }
 
 export const StoryViewer: React.FC<StoryViewerProps> = ({ 
@@ -49,9 +50,13 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
   completedActs,
   onOpenWordForge,
   onOpenNexus,
-  onOpenBibleChapter
+  onOpenBibleChapter,
+  onRewardXP
 }) => {
-  const [currentActIndex, setCurrentActIndex] = useState(0);
+  const [currentActIndex, setCurrentActIndex] = useState(() => {
+    const nextIndex = quest.acts.findIndex((item) => !completedActs.includes(item.id));
+    return nextIndex === -1 ? 0 : nextIndex;
+  });
   const [selectedChoiceId, setSelectedChoiceId] = useState<string | null>(null);
   const [activeTermIndex, setActiveTermIndex] = useState<number | null>(null);
   const [isSpeakingScripture, setIsSpeakingScripture] = useState(false);
@@ -236,6 +241,17 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     setHasSubmittedQuiz(true);
     if (act.wisdomQuiz?.options[optionIndex].isCorrect) {
       soundEngine.playVictory();
+      try {
+        const stored = localStorage.getItem('testament_quiz_rewards');
+        const rewarded: string[] = stored ? JSON.parse(stored) : [];
+        if (Array.isArray(rewarded) && !rewarded.includes(act.id)) {
+          rewarded.push(act.id);
+          localStorage.setItem('testament_quiz_rewards', JSON.stringify(rewarded));
+          onRewardXP?.(30);
+        }
+      } catch {
+        // ignore
+      }
     }
     try {
       const stored = localStorage.getItem('testament_act_quizzes');
@@ -249,6 +265,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
 
   // Requirement 2: Auto-scroll all the way to top on Act and Quest completion
   const handleFinishAct = () => {
+    if (!selectedChoiceId) return;
     soundEngine.playVictory();
     confetti({
       particleCount: 60,
@@ -1002,10 +1019,15 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
               {!isActFinished ? (
                 <button
                   onClick={handleFinishAct}
-                  className="w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-bold bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-md transition-all transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                  disabled={!selectedChoiceId}
+                  className={`w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-bold shadow-md transition-all transform active:scale-95 flex items-center justify-center gap-2 ${
+                    selectedChoiceId
+                      ? 'bg-amber-500 hover:bg-amber-400 text-stone-950 cursor-pointer'
+                      : 'bg-stone-200 text-stone-500 cursor-not-allowed'
+                  }`}
                 >
                   <CheckCircle2 className="w-4 h-4" />
-                  <span>Complete Act (+50 XP)</span>
+                  <span>{selectedChoiceId ? 'Complete Act (+50 XP)' : 'Choose a response first'}</span>
                 </button>
               ) : currentActIndex < quest.acts.length - 1 ? (
                 <button

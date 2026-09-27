@@ -6,7 +6,7 @@ import { soundEngine } from '../utils/audio';
 import { getDailyVerse } from '../utils/dailyEngine';
 import { MemoryPulseModal } from './MemoryPulseModal';
 import confetti from 'canvas-confetti';
-import { recordFSRSReview, getFSRSCard } from '../utils/fsrsEngine';
+import { recordFSRSReview, getFSRSCard, previewFSRSDays } from '../utils/fsrsEngine';
 import { 
   RotateCcw, 
   Eye, 
@@ -82,6 +82,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
   };
 
   const handleRateFSRS = (rating: 1 | 2 | 3 | 4) => {
+    if (fsrsRated) return;
     soundEngine.playSnap();
     const updated = recordFSRSReview(verse.id, rating);
     setScheduledNextDays(updated.stability);
@@ -152,7 +153,14 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
           origin: { y: 0.75 },
           colors: ['#ea580c', '#f59e0b', '#10b981', '#fbbf24']
         });
-        onVerseMastered(verse.id);
+        if (!hasPeeked) {
+          if (!fsrsRated) {
+            const updated = recordFSRSReview(verse.id, 3);
+            setFsrsRated(true);
+            setScheduledNextDays(updated.stability);
+          }
+          onVerseMastered(verse.id);
+        }
       }
     }
   };
@@ -354,7 +362,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
             >
               <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-400 font-bold text-sm mb-2">
                 <CheckCircle className="w-5 h-5" />
-                <span>Scripture Locked in Memory! (+40 XP)</span>
+                <span>{hasPeeked || isMastered ? 'Verse assembled' : 'Scripture locked in memory (+40 XP)'}</span>
               </div>
               <p className="text-base md:text-lg font-reading text-stone-900 dark:text-emerald-100 italic mb-3">
                 "{verse.text}"
@@ -388,31 +396,35 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                 <div className="grid grid-cols-4 gap-2">
                   <button
                     onClick={() => handleRateFSRS(1)}
-                    className="p-2 rounded-lg bg-stone-100 dark:bg-stone-900 hover:bg-red-500/20 text-[11px] font-medium text-red-700 dark:text-red-300 text-center transition-all"
+                    disabled={fsrsRated}
+                    className="p-2 rounded-lg bg-stone-100 dark:bg-stone-900 hover:bg-red-500/20 text-[11px] font-medium text-red-700 dark:text-red-300 text-center transition-all disabled:opacity-50"
                   >
                     <div className="font-bold">Again</div>
-                    <div className="text-[11px] text-stone-500 dark:text-stone-400">1 day</div>
+                    <div className="text-[11px] text-stone-500 dark:text-stone-400">{previewFSRSDays(verse.id, 1)}d</div>
                   </button>
                   <button
                     onClick={() => handleRateFSRS(2)}
-                    className="p-2 rounded-lg bg-stone-100 dark:bg-stone-900 hover:bg-amber-500/20 text-[11px] font-medium text-amber-800 dark:text-amber-300 text-center transition-all"
+                    disabled={fsrsRated}
+                    className="p-2 rounded-lg bg-stone-100 dark:bg-stone-900 hover:bg-amber-500/20 text-[11px] font-medium text-amber-800 dark:text-amber-300 text-center transition-all disabled:opacity-50"
                   >
                     <div className="font-bold">Hard</div>
-                    <div className="text-[11px] text-stone-500 dark:text-stone-400">2-3 days</div>
+                    <div className="text-[11px] text-stone-500 dark:text-stone-400">{previewFSRSDays(verse.id, 2)}d</div>
                   </button>
                   <button
                     onClick={() => handleRateFSRS(3)}
-                    className="p-2 rounded-lg bg-stone-100 dark:bg-stone-900 hover:bg-emerald-500/20 text-[11px] font-medium text-emerald-700 dark:text-emerald-300 text-center transition-all"
+                    disabled={fsrsRated}
+                    className="p-2 rounded-lg bg-stone-100 dark:bg-stone-900 hover:bg-emerald-500/20 text-[11px] font-medium text-emerald-700 dark:text-emerald-300 text-center transition-all disabled:opacity-50"
                   >
                     <div className="font-bold">Good</div>
-                    <div className="text-[11px] text-stone-500 dark:text-stone-400">4-7 days</div>
+                    <div className="text-[11px] text-stone-500 dark:text-stone-400">{previewFSRSDays(verse.id, 3)}d</div>
                   </button>
                   <button
                     onClick={() => handleRateFSRS(4)}
-                    className="p-2 rounded-lg bg-stone-100 dark:bg-stone-900 hover:bg-cyan-500/20 text-[11px] font-medium text-cyan-800 dark:text-cyan-300 text-center transition-all"
+                    disabled={fsrsRated}
+                    className="p-2 rounded-lg bg-stone-100 dark:bg-stone-900 hover:bg-cyan-500/20 text-[11px] font-medium text-cyan-800 dark:text-cyan-300 text-center transition-all disabled:opacity-50"
                   >
                     <div className="font-bold">Easy</div>
-                    <div className="text-[11px] text-stone-500 dark:text-stone-400">14+ days</div>
+                    <div className="text-[11px] text-stone-500 dark:text-stone-400">{previewFSRSDays(verse.id, 4)}d</div>
                   </button>
                 </div>
               </div>
@@ -461,6 +473,7 @@ export const WordForge: React.FC<WordForgeProps> = ({
     }
     return 0;
   });
+  const [verseNotice, setVerseNotice] = useState<string | null>(null);
 
   const categories = [
     'All',
@@ -478,7 +491,7 @@ export const WordForge: React.FC<WordForgeProps> = ({
   const safeIndex = activeVerseIndex >= filteredVerses.length ? 0 : activeVerseIndex;
   const currentVerse: MemoryVerse = filteredVerses[safeIndex] || allVerses[0];
 
-  const [prevTargetId, setPrevTargetId] = useState<string | null | undefined>(targetVerseId);
+  const [prevTargetId, setPrevTargetId] = useState<string | null | undefined>(null);
 
   if (targetVerseId && targetVerseId !== prevTargetId) {
     setPrevTargetId(targetVerseId);
@@ -491,6 +504,10 @@ export const WordForge: React.FC<WordForgeProps> = ({
       if (allIdx !== -1) {
         setSelectedCategory('All');
         setActiveVerseIndex(allIdx);
+        if (onClearTargetVerse) onClearTargetVerse();
+      } else {
+        setVerseNotice('That verse is not available. Showing the first verse instead.');
+        setActiveVerseIndex(0);
         if (onClearTargetVerse) onClearTargetVerse();
       }
     }
@@ -523,6 +540,9 @@ export const WordForge: React.FC<WordForgeProps> = ({
           <p className="text-xs md:text-sm text-stone-600 dark:text-stone-400 mt-1">
             Tactile word assembly designed for adult retention. Assemble the verse by tapping words in sequence.
           </p>
+          {verseNotice && (
+            <p className="text-xs text-amber-800 dark:text-amber-300 mt-2">{verseNotice}</p>
+          )}
         </div>
 
         <button

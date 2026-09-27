@@ -3,11 +3,14 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import './fonts.css'
 import App from './App.tsx'
+import { AppErrorBoundary } from './components/AppErrorBoundary'
 import { initPwaUpdateEngine } from './utils/pwaUpdateEngine'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <AppErrorBoundary>
+      <App />
+    </AppErrorBoundary>
   </StrictMode>,
 )
 

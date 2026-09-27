@@ -10,6 +10,8 @@ import { getComposedDailyMission } from './missionComposer';
 import type { StoryQuest, StoryAct } from '../types';
 import type { UserCalibrationProfile } from '../components/OnboardingModal';
 import { getDueFSRSCards } from './fsrsEngine';
+import { getTodayBattlefieldId, setTodayBattlefieldId } from './battlefield';
+export { getTodayBattlefieldId, setTodayBattlefieldId };
 
 export interface AdaptiveObjective {
   type: 'next_act' | 'retention_drill' | 'all_completed';
@@ -70,26 +72,6 @@ export const getDailyBriefing = (): MorningBriefing => {
   return MORNING_BRIEFINGS[dayOfWeek] || MORNING_BRIEFINGS[0];
 };
 
-export const getTodayBattlefieldId = (): string | null => {
-  try {
-    return localStorage.getItem('testament_todays_battlefield');
-  } catch {
-    return null;
-  }
-};
-
-export const setTodayBattlefieldId = (id: string | null): void => {
-  try {
-    if (id) {
-      localStorage.setItem('testament_todays_battlefield', id);
-    } else {
-      localStorage.removeItem('testament_todays_battlefield');
-    }
-    window.dispatchEvent(new CustomEvent('testament-battlefield-changed', { detail: { battlefieldId: id } }));
-  } catch {
-    // ignore
-  }
-};
 
 /**
  * Deterministically aligns today's featured tactical dilemma with the 1 dilemma of today's Daily Campaign

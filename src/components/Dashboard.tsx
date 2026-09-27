@@ -50,7 +50,7 @@ import {
   getTodayBattlefieldId,
   setTodayBattlefieldId,
 } from '../utils/dailyEngine';
-import { getDueFSRSCount } from '../utils/fsrsEngine';
+import { getDueFSRSCards, getDueFSRSCount } from '../utils/fsrsEngine';
 
 interface DashboardProps {
   onSelectQuest: (quest: StoryQuest) => void;
@@ -378,7 +378,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           {dueFSRSCount > 0 && (
             <button
-              onClick={() => onOpenWordForge()}
+              onClick={() => onOpenWordForge(getDueFSRSCards()[0]?.verseId)}
               className="snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 text-amber-800 dark:text-amber-300 text-xs font-bold whitespace-nowrap"
               title="Scriptures due for memory review"
             >
@@ -815,7 +815,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             )}
             {dueFSRSCount > 0 && (
               <button
-                onClick={() => onOpenWordForge()}
+                onClick={() => onOpenWordForge(getDueFSRSCards()[0]?.verseId)}
                 className="w-full py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all"
               >
                 <Brain className="w-3.5 h-3.5" />

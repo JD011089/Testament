@@ -45,7 +45,15 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
 }) => {
   const modalRef = useModalLock(isOpen);
   const [selectedMood, setSelectedMood] = useState<PsalmCrisisMood>('panic-fear');
-  const [completedPrescriptions, setCompletedPrescriptions] = useState<Record<string, boolean>>({});
+  const [completedPrescriptions, setCompletedPrescriptions] = useState<Record<string, boolean>>(() => {
+    try {
+      const raw = localStorage.getItem('testament_psalm_completed');
+      const parsed = raw ? JSON.parse(raw) : {};
+      return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+    } catch {
+      return {};
+    }
+  });
   const [isFormalMode, setIsFormalMode] = useState<boolean>(false);
 
   const activePrescriptions = PSALM_PRESCRIPTIONS.filter(p => p.moodId === selectedMood);
@@ -54,8 +62,15 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
   const handleApplyPrescription = () => {
     soundEngine.playVictory();
     if (!completedPrescriptions[activeItem.id]) {
-      setCompletedPrescriptions(prev => ({ ...prev, [activeItem.id]: true }));
+      const next = { ...completedPrescriptions, [activeItem.id]: true };
+      setCompletedPrescriptions(next);
+      try {
+        localStorage.setItem('testament_psalm_completed', JSON.stringify(next));
+      } catch {
+        // ignore
+      }
       onRewardXP?.(activeItem.xpReward);
+      window.dispatchEvent(new CustomEvent('testament-psalm-applied'));
     }
   };
 
