@@ -1118,7 +1118,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
               <div className="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-900/40">
                 <strong className="text-amber-800 dark:text-amber-300">{t('dashboard.briefingTruth')}</strong>
-                "{dailyBriefing.scriptureText}" — {dailyBriefing.scriptureReference}
+                "{(() => {
+                  const lv = getVerseById(dailyBriefing.associatedVerseId, language);
+                  return lv ? lv.text : dailyBriefing.scriptureText;
+                })()}" — {(() => {
+                  const lv = getVerseById(dailyBriefing.associatedVerseId, language);
+                  return lv ? lv.reference : dailyBriefing.scriptureReference;
+                })()}
               </div>
 
               <div className="p-3 bg-stone-50 dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800">

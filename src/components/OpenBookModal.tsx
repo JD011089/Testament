@@ -29,7 +29,7 @@ import {
   type TranslationId 
 } from '../utils/bibleService';
 import { useLanguage } from '../context/LanguageContext';
-import { registerDynamicBibleVerse } from '../utils/verseRegistry';
+import { registerDynamicBibleVerse, getVerseById } from '../utils/verseRegistry';
 import {
   loadReadingPlace,
   loadReadingPrefs,
@@ -612,14 +612,23 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                   {/* Scripture Text Box */}
                   <div className="rounded-2xl bg-white dark:bg-stone-950/90 border border-stone-200 dark:border-stone-800 p-5 shadow-xs dark:shadow-inner">
                     <div className="flex items-center justify-between text-xs font-mono text-stone-500 dark:text-stone-400 mb-2">
-                      <span className="text-amber-800 dark:text-amber-400 font-bold">{book.anchorScripture.reference}</span>
+                      <span className="text-amber-800 dark:text-amber-400 font-bold">
+                        {(() => {
+                          const lv = getVerseById(book.id, language);
+                          return lv ? lv.reference : book.anchorScripture.reference;
+                        })()}
+                      </span>
                       <span className="text-[11px] uppercase text-stone-400 dark:text-stone-500 font-semibold">
-                        {lens === 'street' ? 'Modern Applied' : 'CSB / ESV'}
+                        {lens === 'street' ? 'Modern Applied' : (getVerseById(book.id, language)?.translation || 'CSB / ESV')}
                       </span>
                     </div>
 
                     <blockquote className="text-sm sm:text-base font-serif italic text-stone-900 dark:text-parchment-100 leading-relaxed">
-                      "{lens === 'street' ? book.anchorScripture.streetTranslation : book.anchorScripture.canonicalText}"
+                      "{(() => {
+                        const lv = getVerseById(book.id, language);
+                        if (lv) return lens === 'street' ? lv.plainEnglishSummary : lv.text;
+                        return lens === 'street' ? book.anchorScripture.streetTranslation : book.anchorScripture.canonicalText;
+                      })()}"
                     </blockquote>
 
                     <div className="mt-4 pt-3 border-t border-stone-200 dark:border-stone-800/80 flex items-start gap-2">
@@ -627,7 +636,10 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                         Ground Rule:
                       </span>
                       <p className="text-xs text-stone-700 dark:text-stone-300 leading-normal font-sans">
-                        {book.anchorScripture.takeaway}
+                        {(() => {
+                          const lv = getVerseById(book.id, language);
+                          return lv ? lv.keyTakeaway : book.anchorScripture.takeaway;
+                        })()}
                       </p>
                     </div>
                   </div>

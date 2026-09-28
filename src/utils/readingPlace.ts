@@ -26,7 +26,7 @@ interface StoredReading {
 
 const FONT_SIZES: ReadingFontSize[] = ['sm', 'base', 'lg', 'xl'];
 const LAYOUTS: ReadingLayout[] = ['verses', 'flow'];
-const TRANSLATIONS: TranslationId[] = ['web', 'kjv', 'bbe'];
+const TRANSLATIONS: TranslationId[] = ['web', 'kjv', 'bbe', 'rvr', 'rv2004', 'ls1910', 'bds', 'valera', 'rv1960', 'lsg', 'frlsg'];
 
 function isFontSize(value: unknown): value is ReadingFontSize {
   return FONT_SIZES.includes(value as ReadingFontSize);
