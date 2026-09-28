@@ -52,7 +52,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.rankStoryExplorer': 'Story Explorer',
     'dashboard.rankMightyMan': 'Mighty Man of Adullam',
     'dashboard.rankIronPillar': 'Iron Pillar',
-    'dashboard.versionTooltip': 'What changed in v1.13.0',
+    'dashboard.versionTooltip': 'What changed in v1.14.0',
     'dashboard.declareBattlefield': 'Declare Battlefield',
     'dashboard.battlefieldPrefix': 'Battlefield: {name}',
     'dashboard.declareBattlefieldTooltip': "Declare today's trial",
@@ -85,6 +85,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // Daily Campaign Card
     'campaign.title': "Today's Tactical Campaign",
+    'campaign.heroMission': "{hero}: Today's Mission",
     'campaign.trackSuffix': '• {hero} Track',
     'campaign.currentObjective': 'Current Objective',
     'campaign.completed': 'Completed',
@@ -505,6 +506,35 @@ export const translations: Record<Language, Record<string, string>> = {
     'category.anger': 'Anger & Self-Control',
     'category.restoration': 'Restoration After Failure',
     'category.endurance': 'Endurance & Brotherhood',
+
+    // Canon Division Descriptions
+    'division.torah': 'Foundations of humanity, covenant, and the wilderness survival code.',
+    'division.war': 'Military campaigns, palace coups, espionage, and exile resistance.',
+    'division.wisdom': 'High-stakes dilemma tactics, emergency soul triage, and burnout antidotes.',
+    'division.prophet': 'Geopolitical whistleblowers, imperial infiltrators, and moral warnings.',
+    'division.kingsManifesto': 'The counter-cultural revolution of Jesus and the explosive early church.',
+    'division.fieldDispatches': 'Tactical letters to underground cells on freedom, integrity, and action.',
+    'division.cosmicEndgame': 'Cosmic warfare, the fall of empire, and unshakeable hope in victory.',
+
+    // Canon Division Labels
+    'divisionLabel.torah': 'Torah & Origins',
+    'divisionLabel.war': 'War & Chronicles',
+    'divisionLabel.wisdom': 'Wisdom & Triage',
+    'divisionLabel.prophet': 'Prophet Intelligence',
+    'divisionLabel.kingsManifesto': "The King's Manifesto",
+    'divisionLabel.fieldDispatches': 'Field Dispatches',
+    'divisionLabel.cosmicEndgame': 'The Cosmic Endgame',
+
+    // Life Theme Labels
+    'lifeTheme.all': 'All Themes',
+    'lifeTheme.burnout': 'Burnout & Meaning',
+    'lifeTheme.workplace': 'Workplace & Career Pressure',
+    'lifeTheme.anxiety': 'Anxiety & Fear',
+    'lifeTheme.pain': 'Unfair Pain & Betrayal',
+    'lifeTheme.action': 'Action Over Cheap Talk',
+    'lifeTheme.integrity': 'Integrity in Toxic Cultures',
+    'lifeTheme.family': 'Family & Conflict Resolution',
+    'lifeTheme.courage': 'Courage Under Fire',
   },
   es: {
     // Navigation
@@ -548,7 +578,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.rankStoryExplorer': 'Explorador de Historias',
     'dashboard.rankMightyMan': 'Valiente de Adulam',
     'dashboard.rankIronPillar': 'Columna de Hierro',
-    'dashboard.versionTooltip': 'Novedades en v1.13.0',
+    'dashboard.versionTooltip': 'Novedades en v1.14.0',
     'dashboard.declareBattlefield': 'Declarar Campo de Batalla',
     'dashboard.battlefieldPrefix': 'Campo: {name}',
     'dashboard.declareBattlefieldTooltip': 'Declara la prueba de hoy',
@@ -581,6 +611,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // Daily Campaign Card
     'campaign.title': 'Campaña Táctica de Hoy',
+    'campaign.heroMission': '{hero}: Misión de Hoy',
     'campaign.trackSuffix': '• Ruta de {hero}',
     'campaign.currentObjective': 'Objetivo Actual',
     'campaign.completed': 'Completado',
@@ -1000,6 +1031,35 @@ export const translations: Record<Language, Record<string, string>> = {
     'category.anger': 'Ira y Dominio Propio',
     'category.restoration': 'Restauración tras el Fracaso',
     'category.endurance': 'Resistencia y Hermandad',
+
+    // Canon Division Descriptions
+    'division.torah': 'Fundamentos de la humanidad, el pacto y el código de supervivencia en el desierto.',
+    'division.war': 'Campañas militares, golpes de palacio, espionaje y resistencia en el exilio.',
+    'division.wisdom': 'Tácticas para dilemas de alto riesgo, triage del alma y antídotos contra el agotamiento.',
+    'division.prophet': 'Denunciantes geopolíticos, infiltrados imperiales y advertencias morales.',
+    'division.kingsManifesto': 'La revolución contracultural de Jesús y la iglesia primitiva explosiva.',
+    'division.fieldDispatches': 'Cartas tácticas a células clandestinas sobre libertad, integridad y acción.',
+    'division.cosmicEndgame': 'Guerra cósmica, la caída del imperio y esperanza inquebrantable en la victoria.',
+
+    // Canon Division Labels
+    'divisionLabel.torah': 'Torá y Orígenes',
+    'divisionLabel.war': 'Guerra y Crónicas',
+    'divisionLabel.wisdom': 'Sabiduría y Triage',
+    'divisionLabel.prophet': 'Inteligencia Profética',
+    'divisionLabel.kingsManifesto': 'El Manifiesto del Rey',
+    'divisionLabel.fieldDispatches': 'Despachos de Campo',
+    'divisionLabel.cosmicEndgame': 'El Desenlace Cósmico',
+
+    // Life Theme Labels
+    'lifeTheme.all': 'Todos los Temas',
+    'lifeTheme.burnout': 'Agotamiento y Significado',
+    'lifeTheme.workplace': 'Trabajo y Presión Laboral',
+    'lifeTheme.anxiety': 'Ansiedad y Miedo',
+    'lifeTheme.pain': 'Dolor Injusto y Traición',
+    'lifeTheme.action': 'Acción sobre Palabras Vacías',
+    'lifeTheme.integrity': 'Integridad en Culturas Tóxicas',
+    'lifeTheme.family': 'Familia y Resolución de Conflictos',
+    'lifeTheme.courage': 'Valentía Bajo Fuego',
   },
   fr: {
     // Navigation
@@ -1043,7 +1103,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.rankStoryExplorer': 'Explorateur de Récits',
     'dashboard.rankMightyMan': 'Vaillant d\'Adullam',
     'dashboard.rankIronPillar': 'Pilier de Fer',
-    'dashboard.versionTooltip': 'Nouveautés de la v1.13.0',
+    'dashboard.versionTooltip': 'Nouveautés de la v1.14.0',
     'dashboard.declareBattlefield': 'Déclarer le Champ de Bataille',
     'dashboard.battlefieldPrefix': 'Bataille : {name}',
     'dashboard.declareBattlefieldTooltip': 'Déclarez votre épreuve du jour',
@@ -1076,6 +1136,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // Daily Campaign Card
     'campaign.title': 'Campagne Tactique du Jour',
+    'campaign.heroMission': '{hero} : Mission du Jour',
     'campaign.trackSuffix': '• Voie de {hero}',
     'campaign.currentObjective': 'Objectif Actuel',
     'campaign.completed': 'Terminé',
@@ -1495,6 +1556,35 @@ export const translations: Record<Language, Record<string, string>> = {
     'category.anger': 'Colère & Maîtrise de Soi',
     'category.restoration': 'Restauration Après l’Échec',
     'category.endurance': 'Endurance & Fraternité',
+
+    // Canon Division Descriptions
+    'division.torah': 'Fondements de lu2019humanitu00e9, de lu2019alliance et du code de survie dans le du00e9sert.',
+    'division.war': 'Campagnes militaires, coups de palais, espionnage et ru00e9sistance en exil.',
+    'division.wisdom': 'Tactiques pour dilemmes u00e0 enjeux u00e9levu00e9s, triage du2019urgence de lu2019u00e2me et antidotes u00e0 lu2019u00e9puisement.',
+    'division.prophet': 'Lanceurs du2019alerte gu00e9opolitiques, infiltru00e9s impu00e9riaux et avertissements moraux.',
+    'division.kingsManifesto': 'La ru00e9volution contre-culturelle de Ju00e9sus et lu2019u00c9glise primitive explosive.',
+    'division.fieldDispatches': 'Lettres tactiques u00e0 des cellules clandestines sur la libertu00e9, lu2019intu00e9gritu00e9 et lu2019action.',
+    'division.cosmicEndgame': 'Guerre cosmique, chute de lu2019empire et espoir inu00e9branlable dans la victoire.',
+
+    // Canon Division Labels
+    'divisionLabel.torah': 'Torah & Origines',
+    'divisionLabel.war': 'Guerre & Chroniques',
+    'divisionLabel.wisdom': 'Sagesse & Triage',
+    'divisionLabel.prophet': 'Renseignement Prophu00e9tique',
+    'divisionLabel.kingsManifesto': 'Le Manifeste du Roi',
+    'divisionLabel.fieldDispatches': 'Du00e9pu00eaches de Terrain',
+    'divisionLabel.cosmicEndgame': 'Le Du00e9nouement Cosmique',
+
+    // Life Theme Labels
+    'lifeTheme.all': 'Tous les Thu00e8mes',
+    'lifeTheme.burnout': 'u00c9puisement & Sens',
+    'lifeTheme.workplace': 'Travail & Pression Professionnelle',
+    'lifeTheme.anxiety': 'Anxiu00e9tu00e9 & Peur',
+    'lifeTheme.pain': 'Douleur Injuste & Trahison',
+    'lifeTheme.action': 'Action sur les Discours Creux',
+    'lifeTheme.integrity': 'Intu00e9gritu00e9 dans les Cultures Toxiques',
+    'lifeTheme.family': 'Famille & Ru00e9solution de Conflits',
+    'lifeTheme.courage': 'Courage Sous le Feu',
   }
 };
 

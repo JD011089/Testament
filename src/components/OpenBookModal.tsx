@@ -29,6 +29,10 @@ import {
   type TranslationId 
 } from '../utils/bibleService';
 import { useLanguage } from '../context/LanguageContext';
+import { 
+  CANON_DIVISION_I18N_KEYS, 
+  CANON_LIFE_THEME_I18N_KEYS 
+} from '../utils/localizedScripture';
 import { registerDynamicBibleVerse, getVerseById } from '../utils/verseRegistry';
 import {
   loadReadingPlace,
@@ -75,6 +79,16 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
 }) => {
   const { t, language } = useLanguage();
 
+  const getDivisionLabel = (id: string, fallback: string) => {
+    const k = CANON_DIVISION_I18N_KEYS[id];
+    return k ? t(k.label) : fallback;
+  };
+
+  const getThemeLabel = (theme: string) => {
+    const k = CANON_LIFE_THEME_I18N_KEYS[theme];
+    return k ? t(k) : theme;
+  };
+
   // Navigation & View Mode
   const [activeMode, setActiveMode] = useState<'briefing' | 'reader'>(initialMode);
   const [lens, setLens] = useState<'street' | 'canonical'>('street');
@@ -112,7 +126,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
     if (!curTrans || curTrans.language !== language) {
       setSelectedTranslation(getDefaultTranslationForLanguage(language));
     }
-  }, [language]);
+  }, [language, selectedTranslation]);
 
   const totalChapters = book ? getBookChapterCount(book.name) : 1;
 
@@ -145,7 +159,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
       setSelectedChapter(1);
       setActiveMode('briefing');
     }
-  }, [book?.id, launchToken, initialChapter]);
+  }, [book, book?.id, launchToken, initialChapter]);
 
   // Smooth scroll reader to top on chapter change, or to the cited verse
   useEffect(() => {
@@ -157,7 +171,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
       }
     }
     readerScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [selectedChapter, chapterData, highlightVerseStart]);
+  }, [selectedChapter, chapterData, highlightVerseStart, initialChapter]);
 
   // Fetch chapter data when in reader mode or when book/chapter/translation changes
   useEffect(() => {
@@ -189,7 +203,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [book?.name, selectedChapter, selectedTranslation, activeMode, retryNonce]);
+  }, [book, book?.name, selectedChapter, selectedTranslation, activeMode, retryNonce]);
 
   useEffect(() => {
     if (!book || activeMode !== 'reader') return;
@@ -199,7 +213,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
       chapter: selectedChapter,
       translation: selectedTranslation,
     });
-  }, [book?.id, book?.name, selectedChapter, selectedTranslation, activeMode]);
+  }, [book, book?.id, book?.name, selectedChapter, selectedTranslation, activeMode]);
 
   useEffect(() => {
     setSelectedVerse(null);
@@ -475,7 +489,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                 {book.testament === 'OT' ? t('reader.oldTestament') : t('reader.newTestament')}
               </span>
               <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 font-semibold">
-                {book.division}
+                {book.localizedDivision || getDivisionLabel(book.division, book.division)}
               </span>
             </div>
           </div>
@@ -489,14 +503,14 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                   {/* Meta badges */}
                   <div className="flex flex-wrap items-center gap-2 mb-3">
                     <span className="text-[11px] font-mono uppercase tracking-widest px-2.5 py-1 rounded-md bg-amber-500/15 text-amber-800 dark:text-amber-400 border border-amber-500/30 font-bold">
-                      {book.testament === 'OT' ? 'Old Testament' : 'New Testament'}
+                      {book.testament === 'OT' ? t('reader.oldTestament') : t('reader.newTestament')}
                     </span>
                     <span className="text-[11px] font-mono uppercase tracking-widest px-2.5 py-1 rounded-md bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
-                      {book.division}
+                      {book.localizedDivision || getDivisionLabel(book.division, book.division)}
                     </span>
                     <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-red-100/80 dark:bg-red-950/60 text-red-800 dark:text-red-300 border border-red-300 dark:border-red-800/50 flex items-center gap-1">
                       <Flame className="w-3 h-3 text-red-600 dark:text-red-400" />
-                      {book.lifeTheme}
+                      {getThemeLabel(book.lifeTheme)}
                     </span>
                   </div>
 
@@ -514,16 +528,16 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                   {/* 30-Second Crisis SitRep */}
                   <div className="mt-6 rounded-2xl bg-white dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 p-4 space-y-3 shadow-xs">
                     <div className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-500/90 font-bold">
-                      ⚡ 30-Second Crisis SitRep
+                      {t('reader.crisisSitrep')}
                     </div>
                     <div>
-                      <div className="text-[11px] font-mono uppercase text-stone-500 dark:text-stone-400 font-semibold">Author & Context</div>
+                      <div className="text-[11px] font-mono uppercase text-stone-500 dark:text-stone-400 font-semibold">{t('reader.authorContext')}</div>
                       <p className="text-xs text-stone-700 dark:text-stone-200 mt-0.5 leading-relaxed font-sans">
                         {book.authorContext}
                       </p>
                     </div>
                     <div>
-                      <div className="text-[11px] font-mono uppercase text-red-600 dark:text-red-400/90 font-semibold">Historical Peril</div>
+                      <div className="text-[11px] font-mono uppercase text-red-600 dark:text-red-400/90 font-semibold">{t('reader.historicalPeril')}</div>
                       <p className="text-xs text-stone-700 dark:text-stone-200 mt-0.5 leading-relaxed font-sans">
                         {book.historicalPeril}
                       </p>
@@ -533,7 +547,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                   {/* Why This Matters on Monday Morning */}
                   <div className="mt-5 rounded-2xl bg-gradient-to-r from-amber-100/70 to-amber-50/50 dark:from-amber-950/30 dark:to-amber-900/10 border border-amber-300 dark:border-amber-600/30 p-4">
                     <div className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-300 font-bold mb-1">
-                      🎯 Why This Matters on Monday Morning
+                      {t('reader.whyItMatters')}
                     </div>
                     <p className="text-xs sm:text-sm text-stone-800 dark:text-parchment-200 leading-relaxed font-sans">
                       {book.whyItMattersMonday}
@@ -596,7 +610,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                   {/* Dual-Lens Scripture Header */}
                   <div className="flex items-center justify-between mb-3">
                     <div className="text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400">
-                      Anchor Scripture
+                      {t('reader.keyAnchor')}
                     </div>
                     <button
                       onClick={() => {
@@ -605,7 +619,11 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                       }}
                       className="text-[11px] font-mono font-bold px-2.5 py-1 rounded-full bg-white dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-800 border border-amber-400/60 dark:border-amber-500/40 text-amber-800 dark:text-amber-300 transition-colors shadow-xs"
                     >
-                      Lens: {lens === 'street' ? '⚡ Street Plain English' : '📜 Canonical Word-for-Word'}
+                      {language === 'fr' 
+                        ? (lens === 'street' ? '⚡ Langage Direct Appliqué' : '📜 Texte Canonique')
+                        : language === 'es'
+                          ? (lens === 'street' ? '⚡ Lenguaje Directo Aplicado' : '📜 Texto Canónico')
+                          : (lens === 'street' ? '⚡ Street Plain English' : '📜 Canonical Word-for-Word')}
                     </button>
                   </div>
 
@@ -619,7 +637,9 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                         })()}
                       </span>
                       <span className="text-[11px] uppercase text-stone-400 dark:text-stone-500 font-semibold">
-                        {lens === 'street' ? 'Modern Applied' : (getVerseById(book.id, language)?.translation || 'CSB / ESV')}
+                        {lens === 'street' 
+                          ? (language === 'fr' ? 'Appliqué Moderne' : language === 'es' ? 'Aplicado Moderno' : 'Modern Applied') 
+                          : (getVerseById(book.id, language)?.translation || (language === 'fr' ? 'LSG 1910' : language === 'es' ? 'RVR 1960' : 'CSB / ESV'))}
                       </span>
                     </div>
 
@@ -633,7 +653,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
 
                     <div className="mt-4 pt-3 border-t border-stone-200 dark:border-stone-800/80 flex items-start gap-2">
                       <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 uppercase tracking-wider font-bold shrink-0 mt-0.5">
-                        Ground Rule:
+                        {language === 'fr' ? 'Règle de Base:' : language === 'es' ? 'Regla Fundamental:' : 'Ground Rule:'}
                       </span>
                       <p className="text-xs text-stone-700 dark:text-stone-300 leading-normal font-sans">
                         {(() => {

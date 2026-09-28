@@ -5,6 +5,19 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.14.0] - 2026-09-28
+
+### Added
+- **Full Daily Mission localization**: The Home/Daily Mission screen dynamically adapts to French and Spanish, translating biblical hero tracks (e.g. *Voie de Moïse*), mission titles (*Moïse : Mission du Jour*), virtue themes (*Outsider & Courage*), reasons, and narrative atmospheres.
+- **Localized step cards & action triggers**: Story quests, real-life dilemmas, and scripture memory steps feature localized badges (*Quête Narrative*, *Dilemme du Monde Réel*, *Mémorisation d’Écriture*), translated titles, intros, and action buttons (*Prendre la décision*, *Lancer la simulation*, *Forger le verset*).
+- **Localized canon divisions & life themes**: Library shelf brass headers, list view division intros, and life theme filter chips (*Famille & Résolution de Conflits*, *Courage Sous le Feu*, etc.) are translated across English, Spanish, and French.
+- **Localized book briefings**: Open book modals render localized SitRep sections, author context, historical peril, Monday application, dual-lens headers, and ground rule badges.
+- **Language-aware date formatting**: Top header dates format according to the active language locale (*lun. 28 sept.*).
+
+### Fixed
+- **Canon book & verse key resolution**: Resolved ID prefix mismatch (`canon-*` vs `ot-*`/`nt-*`) in `getLocalizedCanonBook` and `getLocalizedVerse`, enabling Louis Segond (LSG) and Reina-Valera (RVR1960) text to display reliably across all 66 canon books.
+- **Division style preservation**: Preserved typed canonical division identifiers while storing localized labels, preventing broken CSS shelf styles and filter mismatches.
+
 ## [1.13.0] - 2026-09-28
 
 ### Added

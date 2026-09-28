@@ -20,6 +20,7 @@ export interface CanonBook {
   order: number;
   testament: 'OT' | 'NT';
   division: CanonDivision;
+  localizedDivision?: string;
   codename: string;
   subtitle: string;
   lifeTheme: string;
