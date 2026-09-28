@@ -333,62 +333,28 @@ export async function fetchBibleChapter(
     }
   }
 
-  // 3. Fetch English translations from bible-api.com
-  try {
-    const queryParam = `${encodeURIComponent(englishBookName)}+${chapter}?translation=${normTrans}`;
-    const response = await fetch(`https://bible-api.com/${queryParam}`);
+  // 3. Fetch English translations from bible-api.com (only if not a Spanish/French translation)
+  if (normTrans !== 'rvr' && normTrans !== 'rv2004' && normTrans !== 'ls1910' && normTrans !== 'bds') {
+    try {
+      const queryParam = `${encodeURIComponent(englishBookName)}+${chapter}?translation=${normTrans}`;
+      const response = await fetch(`https://bible-api.com/${queryParam}`);
 
-    if (response.ok) {
-      const data = await response.json();
-      const formattedVerses: BibleVerse[] = (data.verses || []).map((v: any) => ({
-        book_id: v.book_id,
-        book_name: v.book_name || bookName,
-        chapter: v.chapter || chapter,
-        verse: v.verse,
-        text: cleanVerseText(v.text || '')
-      }));
-
-      const chapterData: BibleChapterData = {
-        reference: data.reference || `${bookName} ${chapter}`,
-        bookName,
-        chapter,
-        verses: formattedVerses,
-        translation: data.translation_name || normTrans.toUpperCase(),
-        totalChapters
-      };
-
-      try {
-        if (typeof localStorage !== 'undefined') {
-          localStorage.setItem(cacheKey, JSON.stringify(chapterData));
-        }
-      } catch {}
-      return chapterData;
-    }
-  } catch (apiErr) {
-    console.warn('bible-api.com request failed, trying secondary fallback:', apiErr);
-  }
-
-  // 4. English fallback to bolls.life WEB/KJV
-  try {
-    const fallbackCode = normTrans === 'kjv' ? 'KJV' : 'WEB';
-    const fallbackResp = await fetch(`https://bolls.life/get-chapter/${fallbackCode}/${bookNumber}/${chapter}/`);
-    if (fallbackResp.ok) {
-      const rawVerses: Array<{ pk?: number; verse: number; text: string }> = await fallbackResp.json();
-      if (Array.isArray(rawVerses) && rawVerses.length > 0) {
-        const formattedVerses: BibleVerse[] = rawVerses.map(v => ({
-          book_id: bookName.toLowerCase().replace(/\s+/g, '_'),
-          book_name: bookName,
-          chapter,
+      if (response.ok) {
+        const data = await response.json();
+        const formattedVerses: BibleVerse[] = (data.verses || []).map((v: any) => ({
+          book_id: v.book_id,
+          book_name: v.book_name || bookName,
+          chapter: v.chapter || chapter,
           verse: v.verse,
-          text: cleanVerseText(v.text)
+          text: cleanVerseText(v.text || '')
         }));
 
         const chapterData: BibleChapterData = {
-          reference: `${bookName} ${chapter}`,
+          reference: data.reference || `${bookName} ${chapter}`,
           bookName,
           chapter,
           verses: formattedVerses,
-          translation: fallbackCode,
+          translation: data.translation_name || normTrans.toUpperCase(),
           totalChapters
         };
 
@@ -399,9 +365,47 @@ export async function fetchBibleChapter(
         } catch {}
         return chapterData;
       }
+    } catch (apiErr) {
+      console.warn('bible-api.com request failed, trying secondary fallback:', apiErr);
     }
-  } catch (err) {
-    console.warn('Secondary fallback failed:', err);
+  }
+
+  // 4. English fallback to bolls.life WEB/KJV (only for English translations)
+  if (normTrans !== 'rvr' && normTrans !== 'rv2004' && normTrans !== 'ls1910' && normTrans !== 'bds') {
+    try {
+      const fallbackCode = normTrans === 'kjv' ? 'KJV' : 'WEB';
+      const fallbackResp = await fetch(`https://bolls.life/get-chapter/${fallbackCode}/${bookNumber}/${chapter}/`);
+      if (fallbackResp.ok) {
+        const rawVerses: Array<{ pk?: number; verse: number; text: string }> = await fallbackResp.json();
+        if (Array.isArray(rawVerses) && rawVerses.length > 0) {
+          const formattedVerses: BibleVerse[] = rawVerses.map(v => ({
+            book_id: bookName.toLowerCase().replace(/\s+/g, '_'),
+            book_name: bookName,
+            chapter,
+            verse: v.verse,
+            text: cleanVerseText(v.text)
+          }));
+
+          const chapterData: BibleChapterData = {
+            reference: `${bookName} ${chapter}`,
+            bookName,
+            chapter,
+            verses: formattedVerses,
+            translation: fallbackCode,
+            totalChapters
+          };
+
+          try {
+            if (typeof localStorage !== 'undefined') {
+              localStorage.setItem(cacheKey, JSON.stringify(chapterData));
+            }
+          } catch {}
+          return chapterData;
+        }
+      }
+    } catch (err) {
+      console.warn('Secondary fallback failed:', err);
+    }
   }
 
   throw new Error(`Failed to load ${bookName} Chapter ${chapter} (${normTrans.toUpperCase()}). Please check your connection.`);
