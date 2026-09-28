@@ -24,9 +24,11 @@ import {
   fetchBibleChapter, 
   getBookChapterCount, 
   BIBLE_TRANSLATIONS, 
+  getDefaultTranslationForLanguage,
   type BibleChapterData, 
   type TranslationId 
 } from '../utils/bibleService';
+import { useLanguage } from '../context/LanguageContext';
 import { registerDynamicBibleVerse } from '../utils/verseRegistry';
 import {
   loadReadingPlace,
@@ -71,6 +73,8 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
   highlightVerseStart,
   highlightVerseEnd
 }) => {
+  const { t, language } = useLanguage();
+
   // Navigation & View Mode
   const [activeMode, setActiveMode] = useState<'briefing' | 'reader'>(initialMode);
   const [lens, setLens] = useState<'street' | 'canonical'>('street');
@@ -79,9 +83,10 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
 
   // Full Scripture Reader State
   const [selectedChapter, setSelectedChapter] = useState<number>(initialChapter);
-  const [selectedTranslation, setSelectedTranslation] = useState<TranslationId>(
-    () => loadReadingPlace()?.translation ?? 'web'
-  );
+  const [selectedTranslation, setSelectedTranslation] = useState<TranslationId>(() => {
+    const saved = loadReadingPlace()?.translation as TranslationId | undefined;
+    return saved || getDefaultTranslationForLanguage(language);
+  });
   const [chapterData, setChapterData] = useState<BibleChapterData | null>(null);
   const [isLoadingChapter, setIsLoadingChapter] = useState(false);
   const [chapterError, setChapterError] = useState<string | null>(null);
@@ -96,6 +101,14 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
 
   const modalRef = useModalLock(book !== null);
   const readerScrollRef = useRef<HTMLDivElement | null>(null);
+
+  // Default the active scripture translation to the matching language when app language changes
+  useEffect(() => {
+    const curTrans = BIBLE_TRANSLATIONS.find(tr => tr.id === selectedTranslation);
+    if (!curTrans || curTrans.language !== language) {
+      setSelectedTranslation(getDefaultTranslationForLanguage(language));
+    }
+  }, [language]);
 
   const totalChapters = book ? getBookChapterCount(book.name) : 1;
 
@@ -400,14 +413,15 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
 
             <div className="flex items-center gap-2 shrink-0">
               <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400 hidden sm:inline">
-                Use ← / → to flip volumes
+                {t('reader.flipVolumes')}
               </span>
               <button
                 onClick={() => {
                   soundEngine.playClick();
                   onClose();
                 }}
-                aria-label="Close book"
+                aria-label={t('reader.closeBook')}
+                title={t('reader.closeBook')}
                 className="w-8 h-8 rounded-full bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 flex items-center justify-center text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors shadow-xs"
               >
                 <X className="w-4 h-4" />
@@ -430,7 +444,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                 }`}
               >
                 <Shield className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">Briefing</span>
+                <span className="truncate">{t('reader.briefing')}</span>
               </button>
 
               <button
@@ -445,14 +459,16 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                 }`}
               >
                 <BookOpen className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">Read ({totalChapters} Ch{totalChapters > 1 ? 's' : ''})</span>
+                <span className="truncate">
+                  {totalChapters > 1 ? t('reader.readCount', { count: totalChapters }) : t('reader.readCountSingle')}
+                </span>
               </button>
             </div>
 
             {/* Quick meta indicators (desktop only) */}
             <div className="hidden sm:flex items-center gap-2">
               <span className="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-stone-200/80 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-semibold">
-                {book.testament === 'OT' ? 'Old Testament' : 'New Testament'}
+                {book.testament === 'OT' ? t('reader.oldTestament') : t('reader.newTestament')}
               </span>
               <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 font-semibold">
                 {book.division}
@@ -674,7 +690,8 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                       setSelectedChapter(c => Math.max(1, c - 1));
                     }}
                     className="p-1.5 sm:p-2 rounded-xl bg-stone-100 dark:bg-stone-850 hover:bg-stone-200 dark:hover:bg-stone-800 disabled:opacity-30 disabled:pointer-events-none text-stone-700 dark:text-stone-300 transition-colors"
-                    title="Previous chapter"
+                    title={t('reader.prevChapter')}
+                    aria-label={t('reader.prevChapter')}
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
@@ -691,7 +708,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                     >
                       {Array.from({ length: totalChapters }, (_, idx) => idx + 1).map((ch) => (
                         <option key={ch} value={ch} className="bg-white dark:bg-stone-900 text-stone-900 dark:text-parchment-100">
-                          Ch {ch} of {totalChapters}
+                          {t('reader.chOf', { current: ch, total: totalChapters })}
                         </option>
                       ))}
                     </select>
@@ -705,7 +722,8 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                       setSelectedChapter(c => Math.min(totalChapters, c + 1));
                     }}
                     className="p-1.5 sm:p-2 rounded-xl bg-stone-100 dark:bg-stone-850 hover:bg-stone-200 dark:hover:bg-stone-800 disabled:opacity-30 disabled:pointer-events-none text-stone-700 dark:text-stone-300 transition-colors"
-                    title="Next chapter"
+                    title={t('reader.nextChapter')}
+                    aria-label={t('reader.nextChapter')}
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -721,11 +739,11 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                     }}
                     title={BIBLE_TRANSLATIONS.find((item) => item.id === selectedTranslation)?.label}
                     aria-label="Bible translation"
-                    className="max-w-[5.5rem] px-2 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-250 dark:border-stone-800 text-[11px] sm:text-xs font-mono font-medium text-stone-700 dark:text-stone-300 cursor-pointer focus:outline-none"
+                    className="max-w-[7.5rem] px-2 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-250 dark:border-stone-800 text-[11px] sm:text-xs font-mono font-medium text-stone-700 dark:text-stone-300 cursor-pointer focus:outline-none"
                   >
                     {BIBLE_TRANSLATIONS.map(t => (
                       <option key={t.id} value={t.id} className="bg-white dark:bg-stone-900">
-                        {t.id.toUpperCase()}
+                        {t.id.toUpperCase()} ({t.language.toUpperCase()})
                       </option>
                     ))}
                   </select>
@@ -821,7 +839,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                       Opening {book.name} Chapter {selectedChapter}...
                     </p>
                     <span className="text-[11px] font-mono text-stone-400">
-                      Loading scripture verses
+                      {t('reader.loadingChapter')}
                     </span>
                   </div>
                 ) : chapterError ? (
@@ -833,7 +851,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                       onClick={() => setRetryNonce((value) => value + 1)}
                       className="px-4 py-2 rounded-xl bg-amber-500 text-stone-950 text-xs font-bold"
                     >
-                      Retry Loading Chapter
+                      {t('reader.retry')}
                     </button>
                   </div>
                 ) : chapterData ? (

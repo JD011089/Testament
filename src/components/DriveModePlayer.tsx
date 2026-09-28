@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { STORY_QUESTS } from '../data/stories';
+import { getStoryVerseForQuest } from '../utils/verseRegistry';
 import { soundEngine, NARRATOR_VOICES } from '../utils/audio';
 import type { NarratorProfile } from '../utils/audio';
 import { useModalLock } from '../utils/useModalLock';
@@ -17,6 +18,7 @@ import {
   Sparkles,
   Mic
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface DriveModePlayerProps {
   isOpen: boolean;
@@ -31,6 +33,7 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
   currentAmbience,
   onToggleAmbience
 }) => {
+  const { t, language } = useLanguage();
   const modalRef = useModalLock(isOpen);
   const [currentQuestIndex, setCurrentQuestIndex] = useState(0);
   const [currentActIndex, setCurrentActIndex] = useState(0);
@@ -85,8 +88,12 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
     setCurrentQuestIndex(qIdx);
     setCurrentActIndex(aIdx);
 
-    const narrationText = `${targetQuest.title}. Act ${targetAct.actNumber}: ${targetAct.actTitle}. ${targetAct.historicalContext}. ${targetAct.narrativeParagraphs.join(' ')}. Scripture: ${targetAct.unlockedScripture.reference}: ${targetAct.unlockedScripture.text}. Life application: ${targetAct.realTalkTakeaway.practicalLesson}`;
-    const studioAssetUrl = `/audio/stories/${targetQuest.id}_${targetAct.id}.mp3`;
+    const storyVerse = getStoryVerseForQuest(targetQuest.id, language);
+    const scriptureText = storyVerse ? `${storyVerse.reference}: ${storyVerse.text}` : `${targetAct.unlockedScripture.reference}: ${targetAct.unlockedScripture.text}`;
+    const narrationText = language === 'en'
+      ? `${targetQuest.title}. Act ${targetAct.actNumber}: ${targetAct.actTitle}. ${targetAct.historicalContext}. ${targetAct.narrativeParagraphs.join(' ')}. Scripture: ${targetAct.unlockedScripture.reference}: ${targetAct.unlockedScripture.text}. Life application: ${targetAct.realTalkTakeaway.practicalLesson}`
+      : `${targetQuest.title}. ${targetAct.actTitle}. ${scriptureText}`;
+    const studioAssetUrl = language === 'en' ? `/audio/stories/${targetQuest.id}_${targetAct.id}.mp3` : undefined;
     soundEngine.speakVerse(narrationText, () => {
       // Auto-advance to next act or next quest seamlessly
       if (aIdx < targetQuest.acts.length - 1) {
@@ -159,7 +166,7 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
         <div className="flex items-center justify-between pb-4 border-b border-stone-200 dark:border-stone-800">
           <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400">
             <Car className="w-4 h-4" />
-            <span id="drive-mode-title">Hands-Free Drive & Commute Mode</span>
+            <span id="drive-mode-title">{t('drive.title')}</span>
           </div>
           <button 
             onClick={() => {
@@ -208,8 +215,8 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
           <div className="flex items-center justify-center gap-6">
             <button
               onClick={handlePrev}
-              title="Previous Act"
-              aria-label="Previous Act"
+              title={t('drive.prevAct')}
+              aria-label={t('drive.prevAct')}
               className="p-4 rounded-2xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-800 dark:text-stone-300 transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-500 shadow-sm"
             >
               <SkipBack className="w-6 h-6" />
@@ -217,7 +224,7 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
 
             <button
               onClick={handleTogglePlay}
-              aria-label={isPlaying ? 'Pause narration' : 'Play narration'}
+              aria-label={isPlaying ? t('drive.pause') : t('drive.play')}
               className={`p-6 rounded-3xl transition-all shadow-md active:scale-95 flex items-center justify-center focus-visible:ring-2 focus-visible:ring-amber-500 ${
                 isPlaying 
                   ? 'bg-amber-500 text-stone-950 animate-pulse' 
@@ -229,8 +236,8 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
 
             <button
               onClick={handleNext}
-              title="Next act"
-              aria-label="Next act"
+              title={t('drive.nextAct')}
+              aria-label={t('drive.nextAct')}
               className="p-4 rounded-2xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-800 dark:text-stone-300 transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-500 shadow-sm"
             >
               <SkipForward className="w-6 h-6" />
@@ -241,7 +248,7 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
           <div className="flex items-center justify-between gap-2 p-3 bg-stone-50 dark:bg-stone-950/70 rounded-2xl border border-stone-200 dark:border-stone-800">
             <div className="flex items-center gap-2 text-xs font-mono text-stone-600 dark:text-stone-400">
               <Mic className="w-4 h-4 text-amber-800 dark:text-amber-500" />
-              <span>Narrator:</span>
+              <span>{t('drive.narrator')}</span>
             </div>
 
             <div className="flex items-center gap-1.5">
@@ -276,7 +283,7 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
           <div className="flex items-center justify-between gap-2 p-3 bg-stone-50 dark:bg-stone-950/70 rounded-2xl border border-stone-200 dark:border-stone-800">
             <div className="flex items-center gap-2 text-xs font-mono text-stone-600 dark:text-stone-400">
               <Volume2 className="w-4 h-4 text-amber-800 dark:text-amber-500" />
-              <span>Background Soundscape:</span>
+              <span>{t('drive.soundscape')}</span>
             </div>
 
             <div className="flex items-center gap-2">
@@ -289,7 +296,7 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
                 }`}
               >
                 <Flame className="w-3 h-3" />
-                <span>Campfire</span>
+                <span>{t('drive.campfire')}</span>
               </button>
 
               <button
@@ -301,7 +308,7 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
                 }`}
               >
                 <Wind className="w-3 h-3" />
-                <span>Wind</span>
+                <span>{t('drive.wind')}</span>
               </button>
 
               <button
@@ -313,7 +320,7 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
                 }`}
               >
                 <Sparkles className="w-3 h-3" />
-                <span>Sanctuary</span>
+                <span>{t('drive.sanctuary')}</span>
               </button>
             </div>
           </div>

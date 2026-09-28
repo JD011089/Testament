@@ -34,6 +34,8 @@ import { DailyCampaignCard } from './DailyCampaignCard';
 import { BattlefieldCheckInModal, BATTLEFIELD_OPTIONS } from './BattlefieldCheckInModal';
 import { VoiceSelectorModal } from './VoiceSelectorModal';
 import { ThemeToggle } from './ThemeToggle';
+import { LanguageToggle } from './LanguageToggle';
+import { useLanguage } from '../context/LanguageContext';
 import { useModalLock } from '../utils/useModalLock';
 import type { DailyCampaignStep } from '../data/dailyCampaigns';
 import { 
@@ -138,6 +140,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onRewardXP,
   onLaunchCampaignStep
 }) => {
+  const { t, language } = useLanguage();
   const [readingPlace, setReadingPlace] = useState(() => loadReadingPlace());
   useEffect(() => {
     const refresh = () => setReadingPlace(loadReadingPlace());
@@ -213,11 +216,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const nextReminder = getNextScheduledReminder();
 
-  const dailyVerse = getDailyVerse();
+  const dailyVerse = getDailyVerse(0, language);
   const dailyBriefing = getDailyBriefing();
   const todayFormatted = getTodayFormatted();
   const isBriefingBonusClaimed = isDailyBonusClaimed('briefing');
-  const activeMemoryVerse = getVerseById(notificationSettings.activeVerseId) || getAllVerses()[0];
+  const activeMemoryVerse = getVerseById(notificationSettings.activeVerseId, language) || getAllVerses(language)[0];
   const activeBattlefield = BATTLEFIELD_OPTIONS.find(b => b.id === activeBattlefieldId);
   const dueFSRSCount = getDueFSRSCount();
 
@@ -232,7 +235,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       title: dailyBriefing.title,
       battlefieldFocus: activeBattlefield ? activeBattlefield.title : 'Daily Focus & Spiritual Resilience',
       memoryVerse: `${dailyVerse.reference}: ${dailyVerse.text}`,
-      proverb: 'Proverbs 15:1: A gentle answer turns away wrath.'
+      proverb: language === 'es' ? 'Proverbios 15:1: La blanda respuesta quita la ira.' : language === 'fr' ? 'Proverbes 15:1: Une réponse douce calme la fureur.' : 'Proverbs 15:1: A gentle answer turns away wrath.'
     }, () => {
       setIsPlayingMorningTacticalAudio(false);
     });
@@ -248,8 +251,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
         soundEngine.playMorningTacticalBriefing({
           title: getDailyBriefing().title,
           battlefieldFocus: 'Daily Focus & Spiritual Resilience',
-          memoryVerse: `${getDailyVerse().reference}: ${getDailyVerse().text}`,
-          proverb: 'Proverbs 15:1: A gentle answer turns away wrath.'
+          memoryVerse: `${getDailyVerse(0, language).reference}: ${getDailyVerse(0, language).text}`,
+          proverb: language === 'es' ? 'Proverbios 15:1: La blanda respuesta quita la ira.' : language === 'fr' ? 'Proverbes 15:1: Une réponse douce calme la fureur.' : 'Proverbs 15:1: A gentle answer turns away wrath.'
         }, () => setIsPlayingMorningTacticalAudio(false));
       }, 600);
       return () => clearTimeout(t);
@@ -278,10 +281,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
   }, []);
 
   const getRankTitle = (points: number) => {
-    if (points >= 500) return 'Iron Pillar';
-    if (points >= 300) return 'Mighty Man of Adullam';
-    if (points >= 150) return 'Story Explorer';
-    return 'Seeker';
+    if (points >= 500) return t('dashboard.rankIronPillar');
+    if (points >= 300) return t('dashboard.rankMightyMan');
+    if (points >= 150) return t('dashboard.rankStoryExplorer');
+    return t('dashboard.rankSeeker');
   };
 
   const tracks = ['All', 'Underdog & Courage', 'Career & High Stakes', 'Burnout & Pressure', 'Restoration & Brotherhood'];
@@ -323,27 +326,28 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     onOpenWhatsNew?.();
                   }}
                   className="text-[11px] font-mono px-2 py-0.2 rounded-full bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-600 hover:text-stone-950 dark:text-stone-400 dark:hover:text-amber-300 border border-stone-250 dark:border-stone-750 transition-colors"
-                  title="What changed in v1.12.0"
+                  title={t('dashboard.versionTooltip')}
                 >
-                  v1.12.0
+                  v1.13.0
                 </button>
               </div>
               <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
-                <span className="text-amber-800 dark:text-amber-400 font-medium">{todayFormatted}</span> • The Living Word
+                <span className="text-amber-800 dark:text-amber-400 font-medium">{todayFormatted}</span> • {t('dashboard.livingWord')}
               </p>
             </div>
           </div>
 
-          {/* Right: Guide & Theme Toggle + Universal Streak / XP */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Right: Language Toggle, Theme Toggle + Universal Streak / XP */}
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+            <LanguageToggle compact />
             <ThemeToggle compact />
 
-            <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/80 dark:bg-stone-800 text-xs font-mono font-bold text-orange-800 dark:text-orange-300" title="Daily streak">
+            <div className="flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl bg-stone-200/80 dark:bg-stone-800 text-xs font-mono font-bold text-orange-800 dark:text-orange-300" title={t('nav.dailyStreak')}>
               <Flame className="w-3.5 h-3.5 fill-orange-500/20 text-orange-500" />
               <span>{streakCount}d</span>
             </div>
 
-            <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/50 dark:bg-stone-800 text-xs font-mono font-bold text-amber-800 dark:text-amber-300" title="Scripture XP">
+            <div className="flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl bg-stone-200/50 dark:bg-stone-800 text-xs font-mono font-bold text-amber-800 dark:text-amber-300" title={t('nav.scriptureXp')}>
               <Award className="w-3.5 h-3.5 text-amber-500" />
               <span>{xp}</span>
             </div>
@@ -352,7 +356,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         {/* Row 2: Streamlined action bar — one briefing, due reviews, calibrate */}
         <div className="relative pt-3 mt-3 border-t border-stone-200/60 dark:border-stone-800/60">
-          <div className="flex items-center gap-2 overflow-x-auto snap-x snap-mandatory scroll-px-1 scrollbar-none w-full">
+          <div className="flex items-center gap-2 overflow-x-auto snap-x snap-mandatory scroll-px-1 scrollbar-none w-full pr-12">
           <button
             onClick={() => {
               soundEngine.playClick();
@@ -363,10 +367,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 ? 'bg-cyan-500/15 text-cyan-800 dark:text-cyan-200'
                 : 'bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-cyan-800 dark:text-cyan-300'
             }`}
-            title="Declare today's trial"
+            title={t('dashboard.declareBattlefieldTooltip')}
           >
             <Swords className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
-            <span>{activeBattlefield ? `Battlefield: ${activeBattlefield.title.split('&')[0].trim()}` : 'Declare Battlefield'}</span>
+            <span>{activeBattlefield ? t('dashboard.battlefieldPrefix', { name: activeBattlefield.title.split('&')[0].trim() }) : t('dashboard.declareBattlefield')}</span>
           </button>
 
           <button
@@ -376,24 +380,24 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
                 : 'bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-amber-800 dark:text-amber-300'
             }`}
-            title="Listen to 45s audio briefing"
+            title={t('dashboard.briefingAudio')}
           >
             {isPlayingMorningTacticalAudio ? (
               <Pause className="w-3.5 h-3.5 animate-pulse" />
             ) : (
               <Play className="w-3.5 h-3.5 text-amber-500" />
             )}
-            <span>Briefing</span>
+            <span>{isPlayingMorningTacticalAudio ? t('dashboard.briefingPlaying') : t('dashboard.briefingBtn')}</span>
           </button>
 
           {dueFSRSCount > 0 && (
             <button
               onClick={() => onOpenWordForge(getDueFSRSCards()[0]?.verseId)}
               className="snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 text-amber-800 dark:text-amber-300 text-xs font-bold whitespace-nowrap"
-              title="Scriptures due for memory review"
+              title={t('dashboard.dueTooltip')}
             >
               <Brain className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 animate-pulse" />
-              <span>{dueFSRSCount} Due</span>
+              <span>{dueFSRSCount} {t('dashboard.due')}</span>
             </button>
           )}
 
@@ -403,19 +407,19 @@ export const Dashboard: React.FC<DashboardProps> = ({
               setIsMemoryPulseModalOpen(true);
             }}
             className="snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-xs font-medium whitespace-nowrap transition-colors"
-            title="Memory reminder settings"
+            title={t('dashboard.remindersTooltip')}
           >
             <Bell className="w-3.5 h-3.5 text-amber-500" />
-            <span>Reminders</span>
+            <span>{t('dashboard.remindersBtn')}</span>
           </button>
 
           <button
             onClick={() => setShowMorningBriefing(true)}
             className="snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-xs font-medium whitespace-nowrap transition-colors"
-            title="Optional deeper written briefing"
+            title={t('dashboard.goDeeperTooltip')}
           >
             <Coffee className="w-3.5 h-3.5 text-amber-500" />
-            <span>Go Deeper</span>
+            <span>{t('dashboard.goDeeper')}</span>
             {!isBriefingBonusClaimed && (
               <span className="text-[11px] bg-amber-500 text-stone-950 font-extrabold px-1 py-0.2 rounded-full">
                 +50 XP
@@ -430,12 +434,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 onOpenOnboarding();
               }}
               className="snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-xs font-medium whitespace-nowrap transition-colors"
-              title="Calibrate your battle plan"
+              title={t('dashboard.calibrateTooltip')}
             >
               <SlidersHorizontal className="w-3.5 h-3.5 text-amber-500" />
-              <span>{userProfile ? 'My Plan' : 'Calibrate'}</span>
+              <span>{userProfile ? t('dashboard.myPlan') : t('dashboard.calibrate')}</span>
             </button>
           )}
+          <div className="shrink-0 w-8 h-1" aria-hidden="true" />
           </div>
           <div className="pointer-events-none absolute right-0 top-3 bottom-0 w-10 bg-gradient-to-l from-surface dark:from-ink to-transparent md:hidden" aria-hidden="true" />
         </div>
@@ -455,7 +460,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             }`}
           >
             <Target className="w-3.5 h-3.5" />
-            <span>Daily Mission</span>
+            <span>{t('dashboard.dailyMission')}</span>
           </button>
 
           <button
@@ -467,14 +472,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
             }`}
           >
             <Compass className="w-3.5 h-3.5" />
-            <span>Explore</span>
+            <span>{t('dashboard.explore')}</span>
           </button>
         </div>
 
         <div className="text-xs text-stone-500 dark:text-stone-400 italic hidden md:block">
           {dashboardMode === 'guided'
-            ? 'One path today, shaped by your check-in and what is due'
-            : 'Browse all stories and field tools'}
+            ? t('dashboard.guidedSubtitle')
+            : t('dashboard.exploreSubtitle')}
         </div>
       </div>
 
@@ -497,7 +502,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             >
               <div>
                 <div className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
-                  Continue reading
+                  {t('dashboard.continueReading')}
                 </div>
                 <div className="font-serif text-base font-bold text-stone-900 dark:text-parchment-50">
                   {readingPlace.bookName} {readingPlace.chapter}
@@ -532,7 +537,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="flex items-center justify-between gap-2 mb-1.5">
                 <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400">
                   <Sparkles className="w-4 h-4 text-amber-500" />
-                  <span>Daily Truth For The Trenches</span>
+                  <span>{t('dashboard.dailyTruthTitle')}</span>
                 </div>
                 <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400/90 px-2.5 py-0.5 rounded bg-amber-500/10">
                   {todayFormatted}
@@ -558,7 +563,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   onClick={() => onOpenWordForge(dailyVerse.id)}
                   className="text-xs font-semibold text-amber-800 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 flex items-center gap-1 transition-colors focus-visible:ring-2 focus-visible:ring-amber-500 rounded px-1"
                 >
-                  <span>Lock into memory</span>
+                  <span>{t('dashboard.lockIntoMemory')}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -575,15 +580,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   </div>
                   <div>
                     <div className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
-                      Your Calibrated Battle Plan
+                      {t('dashboard.calibratedPlan')}
                     </div>
                     <div className="text-xs sm:text-sm font-serif font-bold text-stone-900 dark:text-parchment-100">
-                      Targeting: {userProfile.battleTitle}
+                      {t('dashboard.targeting', { battle: userProfile.battleTitle })}
                     </div>
                     <div className="text-[11px] text-stone-500 dark:text-stone-400 flex items-center gap-2 mt-0.5">
-                      <span>Mode: <strong className="text-amber-800 dark:text-amber-300 uppercase">{userProfile.learningStyle}</strong></span>
+                      <span>{t('dashboard.mode')} <strong className="text-amber-800 dark:text-amber-300 uppercase">{userProfile.learningStyle}</strong></span>
                       <span>•</span>
-                      <span>Cadence: <strong className="text-amber-800 dark:text-amber-300">{userProfile.dailyCadence === '3min' ? '3 Min/Day' : userProfile.dailyCadence === '10min' ? '7-10 Min/Day' : 'Deep Study'}</strong></span>
+                      <span>{t('dashboard.cadence')} <strong className="text-amber-800 dark:text-amber-300">{userProfile.dailyCadence === '3min' ? t('dashboard.cadence3min') : userProfile.dailyCadence === '10min' ? t('dashboard.cadence10min') : t('dashboard.cadenceDeep')}</strong></span>
                     </div>
                   </div>
                 </div>
@@ -596,7 +601,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     }}
                     className="self-start sm:self-auto text-xs font-semibold px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-300 transition-colors whitespace-nowrap"
                   >
-                    Re-Calibrate
+                    {t('dashboard.recalibrate')}
                   </button>
                 )}
               </div>
@@ -606,31 +611,45 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div>
                 <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
                   <Compass className="w-4 h-4" />
-                  <span>Curated Paths & Deep Dives</span>
+                  <span>{t('dashboard.curatedPaths')}</span>
                 </div>
                 <h3 className="text-xl md:text-2xl font-serif font-black text-stone-900 dark:text-parchment-50">
-                  Choose Your Journey
+                  {t('dashboard.chooseJourney')}
                 </h3>
               </div>
 
               {/* Filter Pills */}
               <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-                {tracks.map(track => (
-                  <button
-                    key={track}
-                    onClick={() => {
-                      soundEngine.playClick();
-                      setActiveTrack(track);
-                    }}
-                    className={`text-xs px-3.5 py-1.5 rounded-full font-medium whitespace-nowrap transition-all ${
-                      activeTrack === track
-                        ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
-                        : 'bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
-                    }`}
-                  >
-                    {track}
-                  </button>
-                ))}
+                {tracks.map(track => {
+                  const label = track === 'All'
+                    ? t('dashboard.trackAll')
+                    : track === 'Underdog & Courage'
+                    ? t('dashboard.trackUnderdog')
+                    : track === 'Career & High Stakes'
+                    ? t('dashboard.trackCareer')
+                    : track === 'Burnout & Pressure'
+                    ? t('dashboard.trackBurnout')
+                    : track === 'Restoration & Brotherhood'
+                    ? t('dashboard.trackRestoration')
+                    : track;
+
+                  return (
+                    <button
+                      key={track}
+                      onClick={() => {
+                        soundEngine.playClick();
+                        setActiveTrack(track);
+                      }}
+                      className={`text-xs px-3.5 py-1.5 rounded-full font-medium whitespace-nowrap transition-all ${
+                        activeTrack === track
+                          ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                          : 'bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -667,16 +686,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       {isFullyComplete ? (
                         <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-emerald-950/90 backdrop-blur-md text-emerald-300 text-[11px] font-mono font-bold uppercase tracking-wider flex items-center gap-1">
                           <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                          <span>Completed</span>
+                          <span>{t('dashboard.completed')}</span>
                         </div>
                       ) : userProfile?.recommendedQuestId === quest.id ? (
                         <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 text-stone-950 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1">
                           <span>🎯</span>
-                          <span>Your Battle Plan</span>
+                          <span>{t('dashboard.battlePlanBadge')}</span>
                         </div>
                       ) : !userProfile && quest.id === 'david-journey' && completedCount === 0 ? (
                         <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-amber-500 text-stone-950 text-[11px] font-bold uppercase tracking-wider">
-                          Recommended First
+                          {t('dashboard.recommendedFirst')}
                         </div>
                       ) : quest.starterTrack ? (
                         <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded bg-amber-950/80 backdrop-blur-md text-[11px] font-mono text-amber-300 uppercase">
@@ -712,7 +731,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                           <Clock className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500" />
                           <span>{quest.estimatedMinutes} min</span>
                           <span>•</span>
-                          <span>{completedCount}/{quest.acts.length} Acts</span>
+                          <span>{t('dashboard.actsCount', { completed: completedCount, total: quest.acts.length })}</span>
                         </div>
 
                         <button
@@ -722,7 +741,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                           }}
                           className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center gap-1 transition-all shadow-sm"
                         >
-                          <span>{completedCount === 0 ? 'Start' : isFullyComplete ? 'Review' : 'Continue'}</span>
+                          <span>{completedCount === 0 ? t('dashboard.start') : isFullyComplete ? t('dashboard.review') : t('dashboard.continue')}</span>
                           <ArrowRight className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -755,12 +774,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-amber-500" />
                 <h2 className="text-sm font-serif font-bold text-stone-900 dark:text-parchment-50">
-                  Field Tools
+                  {t('dashboard.fieldTools')}
                 </h2>
               </div>
             </div>
             <p className="text-[11px] text-stone-500 dark:text-stone-400 mb-3">
-              Quick clarity — not textbooks.
+              {t('dashboard.fieldToolsSubtitle')}
             </p>
 
             <div className="grid grid-cols-2 gap-2">
@@ -772,8 +791,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 className="p-2.5 rounded-xl bg-white/80 dark:bg-stone-900/80 hover:bg-white dark:hover:bg-ink-overlay transition-all text-left group"
               >
                 <ShieldAlert className="w-4 h-4 text-amber-500 mb-1 group-hover:scale-110 transition-transform" />
-                <div className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100">"What's the Play?"</div>
-                <div className="text-[11px] text-stone-500 dark:text-stone-400 truncate">Life simulator</div>
+                <div className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100">{t('dashboard.whatsThePlay')}</div>
+                <div className="text-[11px] text-stone-500 dark:text-stone-400 truncate">{t('dashboard.whatsThePlayDesc')}</div>
               </button>
 
               <button
@@ -784,8 +803,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 className="p-2.5 rounded-xl bg-white/80 dark:bg-stone-900/80 hover:bg-white dark:hover:bg-ink-overlay transition-all text-left group"
               >
                 <Shield className="w-4 h-4 text-amber-500 mb-1 group-hover:scale-110 transition-transform" />
-                <div className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100">Proverbs Codex</div>
-                <div className="text-[11px] text-stone-500 dark:text-stone-400 truncate">Solomon's playbook</div>
+                <div className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100">{t('dashboard.proverbsCodex')}</div>
+                <div className="text-[11px] text-stone-500 dark:text-stone-400 truncate">{t('dashboard.proverbsCodexDesc')}</div>
               </button>
 
               <button
@@ -796,8 +815,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 className="p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/15 dark:bg-stone-900/80 dark:hover:bg-ink-overlay transition-all text-left group"
               >
                 <HeartHandshake className="w-4 h-4 text-rose-500 mb-1 group-hover:scale-110 transition-transform" />
-                <div className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100">Psalms Medic</div>
-                <div className="text-[11px] text-stone-500 dark:text-stone-400 truncate">Emergency triage</div>
+                <div className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100">{t('dashboard.psalmsMedic')}</div>
+                <div className="text-[11px] text-stone-500 dark:text-stone-400 truncate">{t('dashboard.psalmsMedicDesc')}</div>
               </button>
             </div>
           </div>
@@ -811,12 +830,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </span>
                 <div>
                   <div className="text-xs font-mono font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400">
-                    Memory Reminders
+                    {t('dashboard.memoryReminders')}
                   </div>
                   <div className="text-[11px] text-stone-500 dark:text-stone-400">
                     {notificationSettings.enabled
-                      ? `${notificationSettings.notificationsSentToday} of ${notificationSettings.frequencyPerDay} today`
-                      : 'Off — tap to configure'}
+                      ? t('dashboard.remindersCount', { sent: notificationSettings.notificationsSentToday, total: notificationSettings.frequencyPerDay })
+                      : t('dashboard.remindersOff')}
                   </div>
                 </div>
               </div>
@@ -827,7 +846,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 }}
                 className="text-[11px] font-semibold text-amber-800 dark:text-amber-400 hover:underline underline-offset-2"
               >
-                Settings
+                {t('dashboard.settings')}
               </button>
             </div>
             <div className="bg-white/80 dark:bg-black/30 p-3 rounded-xl mb-3">
@@ -850,7 +869,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 className="w-full py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all"
               >
                 <Brain className="w-3.5 h-3.5" />
-                <span>Review {dueFSRSCount} due in Word Forge</span>
+                <span>{t('dashboard.dueReview', { count: dueFSRSCount })}</span>
               </button>
             )}
           </div>
@@ -863,17 +882,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
               <div>
                 <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400 px-1.5 py-0.2 rounded bg-amber-500/10 inline-block mb-0.5">
-                  Complete Canon • 66 Books
+                  {t('dashboard.completeCanon')}
                 </span>
                 <h2 className="text-xs sm:text-sm font-serif font-bold text-stone-900 dark:text-parchment-50">
-                  Scripture Field Library
+                  {t('dashboard.scriptureLibrary')}
                 </h2>
               </div>
             </div>
             <p className="text-[11px] text-stone-500 dark:text-stone-400 mb-3">
               {readingPlace
-                ? `Pick up ${readingPlace.bookName} ${readingPlace.chapter}, or browse the rest of the canon.`
-                : 'Every book from Genesis to Revelation, ready to read.'}
+                ? t('dashboard.pickUp', { book: readingPlace.bookName, chapter: readingPlace.chapter })
+                : t('dashboard.everyBook')}
             </p>
             <div className="flex gap-2">
               <button
@@ -885,7 +904,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 className="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all"
               >
                 <BookOpen className="w-3.5 h-3.5" />
-                <span>{readingPlace ? `Continue ${readingPlace.bookName} ${readingPlace.chapter}` : 'Open Library'}</span>
+                <span>{readingPlace ? t('dashboard.continueBook', { book: readingPlace.bookName, chapter: readingPlace.chapter }) : t('dashboard.openLibrary')}</span>
               </button>
               <button
                 onClick={() => {
@@ -893,9 +912,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   onOpenArsenal();
                 }}
                 className="py-2 px-3 rounded-xl bg-stone-200/60 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-300 text-xs font-semibold flex items-center justify-center gap-1 transition-all"
-                title="Open Scripture Arsenal Journal"
+                title={t('dashboard.openArsenalTooltip')}
               >
-                <span>Arsenal</span>
+                <span>{t('dashboard.arsenalBtn')}</span>
                 <ArrowRight className="w-3 h-3" />
               </button>
             </div>
@@ -907,15 +926,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4 text-amber-500" />
                 <h2 className="text-sm font-serif font-bold text-stone-900 dark:text-parchment-50">
-                  The Armory • Relics of Faith
+                  {t('dashboard.armoryTitle')}
                 </h2>
               </div>
               <span className="text-xs font-mono text-amber-800 dark:text-amber-400 font-bold">
-                {unlockedRelics.length}/{ALL_RELICS.length} Unlocked
+                {t('dashboard.unlockedCount', { unlocked: unlockedRelics.length, total: ALL_RELICS.length })}
               </span>
             </div>
             <p className="text-[11px] text-stone-500 dark:text-stone-400 mb-3">
-              Tangible trophies earned by completing the legendary trials.
+              {t('dashboard.armorySubtitle')}
             </p>
 
             <div className="grid grid-cols-2 gap-2">
@@ -933,7 +952,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   >
                     <div className="text-lg mb-0.5">{relic.icon}</div>
                     <div className="text-xs font-bold truncate text-stone-900 dark:text-parchment-100">
-                      {isUnlocked ? relic.name : '??? Locked'}
+                      {isUnlocked ? relic.name : t('dashboard.lockedRelic')}
                     </div>
                     <div className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
                       {relic.character}
@@ -949,11 +968,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2 text-xs font-medium text-stone-700 dark:text-stone-300">
                 <Music className="w-4 h-4 text-amber-500" />
-                <span>Ambient Soundscape</span>
+                <span>{t('dashboard.ambientSoundscape')}</span>
               </div>
               {currentAmbience !== 'none' && (
                 <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 uppercase">
-                  Playing: {currentAmbience}
+                  {t('dashboard.playingAmbience', { ambience: currentAmbience })}
                 </span>
               )}
             </div>
@@ -968,7 +987,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 }`}
               >
                 <Flame className="w-3.5 h-3.5" />
-                <span>Campfire</span>
+                <span>{t('dashboard.campfire')}</span>
               </button>
 
               <button
@@ -980,7 +999,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 }`}
               >
                 <Wind className="w-3.5 h-3.5" />
-                <span>Breeze</span>
+                <span>{t('dashboard.breeze')}</span>
               </button>
 
               <button
@@ -992,7 +1011,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 }`}
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Drone</span>
+                <span>{t('dashboard.drone')}</span>
               </button>
             </div>
 
@@ -1001,7 +1020,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400 uppercase tracking-wider flex items-center gap-1.5">
                   <Mic className="w-3 h-3 text-amber-500" />
-                  ElevenLabs Voice
+                  {t('dashboard.voiceTitle')}
                 </span>
                 <span className="text-[11px] text-amber-800 dark:text-amber-400 font-mono">
                   {NARRATOR_VOICES[narratorProfile]?.actor || 'Adam (ElevenLabs)'}
@@ -1082,17 +1101,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             <div className="space-y-3 text-xs md:text-sm">
               <div className="p-3 bg-stone-50 dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800">
-                <strong className="text-amber-800 dark:text-amber-400">1. Real Moment: </strong>
+                <strong className="text-amber-800 dark:text-amber-400">{t('dashboard.briefingRealMoment')}</strong>
                 {dailyBriefing.moment}
               </div>
 
               <div className="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-900/40">
-                <strong className="text-amber-800 dark:text-amber-300">2. Truth for the Pocket: </strong>
+                <strong className="text-amber-800 dark:text-amber-300">{t('dashboard.briefingTruth')}</strong>
                 "{dailyBriefing.scriptureText}" — {dailyBriefing.scriptureReference}
               </div>
 
               <div className="p-3 bg-stone-50 dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800">
-                <strong className="text-amber-800 dark:text-amber-400">3. Your Call Today: </strong>
+                <strong className="text-amber-800 dark:text-amber-400">{t('dashboard.briefingCall')}</strong>
                 {dailyBriefing.dailyCall}
               </div>
             </div>
@@ -1101,7 +1120,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 bg-stone-100 dark:bg-stone-900/90 rounded-xl border border-stone-200 dark:border-stone-800">
               <div className="flex items-center gap-1.5 text-xs font-mono text-stone-600 dark:text-stone-400">
                 <Mic className="w-3.5 h-3.5 text-amber-500" />
-                <span>ElevenLabs Voice:</span>
+                <span>{t('dashboard.voiceTitle')}:</span>
               </div>
               <div className="flex items-center gap-1.5">
                 {[
@@ -1157,7 +1176,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 }`}
               >
                 {isPlayingBriefing ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-amber-500" />}
-                <span>{isPlayingBriefing ? 'Pause Audio' : 'Listen Narration'}</span>
+                <span>{isPlayingBriefing ? t('dashboard.pauseAudio') : t('dashboard.listenNarration')}</span>
               </button>
 
               <button
@@ -1173,7 +1192,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 }}
                 className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs shadow-sm"
               >
-                Anchor Set {!isBriefingBonusClaimed ? '(+50 XP)' : ''} • Let's Go
+                {!isBriefingBonusClaimed ? t('dashboard.anchorSetBonus') : t('dashboard.anchorSet')}
               </button>
             </div>
           </div>

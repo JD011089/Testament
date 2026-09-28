@@ -3,8 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, RefreshCw, X, ArrowUpRight } from 'lucide-react';
 import { applyAppUpdate, isUpdateAvailable } from '../utils/pwaUpdateEngine';
 import { soundEngine } from '../utils/audio';
+import { useLanguage } from '../context/LanguageContext';
 
 export const UpdateNotificationBanner: React.FC = () => {
+  const { t } = useLanguage();
   const [showBanner, setShowBanner] = useState<boolean>(() => isUpdateAvailable());
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
 
@@ -48,14 +50,14 @@ export const UpdateNotificationBanner: React.FC = () => {
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-50">
-                    Update Ready
+                    {t('update.ready')}
                   </span>
                   <span className="text-[11px] font-mono uppercase px-1.5 py-0.2 rounded bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 font-bold hidden sm:inline-block">
-                    New Version
+                    {t('update.newVersion')}
                   </span>
                 </div>
                 <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
-                  A fresh update is ready. Tap to reload.
+                  {t('update.desc')}
                 </p>
               </div>
             </div>
@@ -67,7 +69,7 @@ export const UpdateNotificationBanner: React.FC = () => {
                 className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isUpdating ? 'animate-spin' : ''}`} />
-                <span>{isUpdating ? 'Updating...' : 'Reload'}</span>
+                <span>{isUpdating ? t('update.updating') : t('update.reload')}</span>
                 {!isUpdating && <ArrowUpRight className="w-3 h-3 hidden sm:inline-block" />}
               </button>
 

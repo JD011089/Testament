@@ -28,6 +28,7 @@ import {
 import { sendTestUpdateNotification } from '../utils/pwaUpdateEngine';
 import { getAllVerses, getVerseById } from '../utils/verseRegistry';
 import { soundEngine } from '../utils/audio';
+import { useLanguage } from '../context/LanguageContext';
 
 interface MemoryPulseModalProps {
   isOpen: boolean;
@@ -42,6 +43,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
   targetVerse,
   onOpenWordForge
 }) => {
+  const { t } = useLanguage();
   const modalRef = useModalLock(isOpen);
   const [settings, setSettings] = useState<NotificationSettings>(() => getNotificationSettings());
   const [permission, setPermission] = useState<NotificationPermission>(() => getNotificationPermission());
@@ -232,10 +234,10 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
               </div>
               <div>
                 <h3 className="text-base sm:text-lg font-serif font-bold text-stone-900 dark:text-parchment-50 leading-tight">
-                  Spaced Memory Pulse
+                  {t('pulse.title')}
                 </h3>
                 <p className="text-[11px] sm:text-xs text-stone-500 dark:text-stone-400">
-                  Non-invasive daily active-recall notifications
+                  {t('pulse.subtitle')}
                 </p>
               </div>
             </div>
@@ -259,11 +261,11 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] font-mono uppercase tracking-widest font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300">
-                    Active Memory Target
+                    {t('pulse.activeTarget')}
                   </span>
                   {activeVerse.heroName && (
                     <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400">
-                      from {activeVerse.heroName}
+                      {t('pulse.fromHero', { hero: activeVerse.heroName })}
                     </span>
                   )}
                 </div>
@@ -272,7 +274,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
                   onClick={() => setShowVerseSelector(!showVerseSelector)}
                   className="text-xs text-amber-800 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 font-semibold underline underline-offset-2"
                 >
-                  {showVerseSelector ? 'Hide List' : 'Change Verse'}
+                  {showVerseSelector ? t('pulse.hideList') : t('pulse.changeVerse')}
                 </button>
               </div>
 
@@ -529,7 +531,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
                 className="text-xs text-stone-600 dark:text-stone-400 hover:text-amber-700 dark:hover:text-amber-400 flex items-center gap-1 font-medium transition-colors"
               >
                 <Brain className="w-3.5 h-3.5" />
-                <span>Practice in Word Forge</span>
+                <span>{t('arsenal.practice')}</span>
               </button>
             ) : <div />}
 
@@ -541,7 +543,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
                 }}
                 className="px-3.5 py-2 rounded-xl text-xs text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
               >
-                Cancel
+                {t('pulse.cancel')}
               </button>
 
               <button
@@ -549,7 +551,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
                 className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs transition-all shadow-md flex items-center gap-1.5"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span>Activate Reminders</span>
+                <span>{t('pulse.activate')}</span>
               </button>
             </div>
           </div>

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
 import { useModalLock } from '../utils/useModalLock';
+import { useLanguage } from '../context/LanguageContext';
 
 export interface BattlefieldOption {
   id: string;
@@ -97,8 +98,55 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
   activeBattlefieldId,
   onSelectBattlefield
 }) => {
+  const { t, language } = useLanguage();
   const modalRef = useModalLock(isOpen);
   if (!isOpen) return null;
+
+  const getBattlefieldTitle = (id: string, fallback: string) => {
+    switch (id) {
+      case 'workplace-politics': return t('battlefield.workplace');
+      case 'anxiety-overwhelm': return t('battlefield.anxiety');
+      case 'betrayal-relational': return t('battlefield.betrayal');
+      case 'high-stakes-decision': return t('battlefield.decision');
+      case 'spiritual-dryness': return t('battlefield.dryness');
+      default: return fallback;
+    }
+  };
+
+  const getBattlefieldSubtitle = (id: string, fallback: string) => {
+    switch (id) {
+      case 'workplace-politics': return t('battlefield.workplaceDesc');
+      case 'anxiety-overwhelm': return t('battlefield.anxietyDesc');
+      case 'betrayal-relational': return t('battlefield.betrayalDesc');
+      case 'high-stakes-decision': return t('battlefield.decisionDesc');
+      case 'spiritual-dryness': return t('battlefield.drynessDesc');
+      default: return fallback;
+    }
+  };
+
+  const getBattlefieldPsalmReference = (id: string, fallback: string) => {
+    if (language === 'es') {
+      switch (id) {
+        case 'workplace-politics': return 'Salmo 59 (Cuando Saúl envió a vigilar a David)';
+        case 'anxiety-overwhelm': return 'Salmo 46 (Dios es nuestro refugio y fortaleza)';
+        case 'betrayal-relational': return 'Salmo 55 (Cuando un compañero traiciona la confianza)';
+        case 'high-stakes-decision': return 'Salmo 25 (Encamíname en tu verdad)';
+        case 'spiritual-dryness': return 'Salmo 63 (Dios, Dios mío eres tú; te buscaré)';
+        default: return fallback;
+      }
+    }
+    if (language === 'fr') {
+      switch (id) {
+        case 'workplace-politics': return 'Psaume 59 (Quand Saül envoya surveiller David)';
+        case 'anxiety-overwhelm': return 'Psaume 46 (Dieu est notre refuge et notre force)';
+        case 'betrayal-relational': return 'Psaume 55 (Quand un compagnon trahit la confiance)';
+        case 'high-stakes-decision': return 'Psaume 25 (Conduis-moi dans ta vérité)';
+        case 'spiritual-dryness': return 'Psaume 63 (Ô Dieu! tu es mon Dieu, je te cherche)';
+        default: return fallback;
+      }
+    }
+    return fallback;
+  };
 
   const handleSelect = (id: string) => {
     soundEngine.playSnap();
@@ -157,13 +205,13 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
           <div className="mb-6">
             <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400 mb-1.5">
               <Swords className="w-4 h-4" />
-              <span>5-Second Battlefield Check-In</span>
+              <span>{t('battlefield.modalTitle')}</span>
             </div>
             <h3 className="text-xl md:text-2xl font-serif font-bold text-stone-900 dark:text-parchment-50">
-              What Trial Are You Facing Today?
+              {t('battlefield.modalHeading')}
             </h3>
             <p className="text-xs md:text-sm text-stone-600 dark:text-stone-400 mt-1">
-              Select your immediate battlefield. We’ll tailor today's scripture campaign, dilemma, and field prayers to arm you right where you stand.
+              {t('battlefield.modalDesc')}
             </p>
           </div>
 
@@ -171,6 +219,9 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
           <div className="space-y-3 mb-6">
             {BATTLEFIELD_OPTIONS.map((opt) => {
               const isSelected = activeBattlefieldId === opt.id;
+              const title = getBattlefieldTitle(opt.id, opt.title);
+              const subtitle = getBattlefieldSubtitle(opt.id, opt.subtitle);
+
               return (
                 <button
                   key={opt.id}
@@ -188,21 +239,21 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
                   <div className="flex-1">
                     <div className="flex items-center justify-between gap-2">
                       <h4 className="font-serif font-bold text-sm md:text-base text-stone-900 dark:text-stone-100">
-                        {opt.title}
+                        {title}
                       </h4>
                       {isSelected && (
                         <span className="flex items-center gap-1 text-[11px] font-mono text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/80 px-2 py-0.5 rounded-full">
                           <CheckCircle2 className="w-3 h-3" />
-                          <span>Active</span>
+                          <span>{t('battlefield.active')}</span>
                         </span>
                       )}
                     </div>
                     <p className="text-xs text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">
-                      {opt.subtitle}
+                      {subtitle}
                     </p>
                     <div className="text-[11px] font-mono text-amber-800 dark:text-amber-300/80 mt-1.5 flex items-center gap-1">
                       <Sparkles className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
-                      <span>Field Armor: {opt.psalmReference}</span>
+                      <span>{t('battlefield.fieldArmor', { ref: getBattlefieldPsalmReference(opt.id, opt.psalmReference) })}</span>
                     </div>
                   </div>
                 </button>
@@ -218,11 +269,11 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
                 className="flex items-center gap-1.5 text-stone-500 dark:text-stone-400 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reset to Standard Daily Rotation</span>
+                <span>{t('battlefield.resetRotation')}</span>
               </button>
             ) : (
               <span className="text-stone-500 dark:text-stone-400 font-mono text-[11px]">
-                Currently following general rotation
+                {t('battlefield.generalRotation')}
               </span>
             )}
 
@@ -230,7 +281,7 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
               onClick={onClose}
               className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold transition-all"
             >
-              Done
+              {t('battlefield.done')}
             </button>
           </div>
         </motion.div>

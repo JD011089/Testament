@@ -21,6 +21,9 @@ import {
   Brain,
   Clock
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
+import { LanguageToggle } from './LanguageToggle';
+import { ThemeToggle } from './ThemeToggle';
 
 interface WordItem {
   id: string;
@@ -57,6 +60,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
   onVerseMastered,
   onNextVerse
 }) => {
+  const { t, language } = useLanguage();
   const targetWords = verse.text.split(/\s+/);
   const [assembledWords, setAssembledWords] = useState<WordItem[]>([]);
   const [availableWords, setAvailableWords] = useState<WordItem[]>(() => shuffleWords(verse));
@@ -97,7 +101,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
 
   useEffect(() => {
     resetPuzzle();
-  }, [verse.id]);
+  }, [verse.id, verse.text]);
 
   const resetPuzzle = () => {
     soundEngine.playSnap();
@@ -207,13 +211,13 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
               {isMastered && (
                 <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-100/80 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full">
                   <ShieldCheck className="w-3 h-3" />
-                  <span>Mastered</span>
+                  <span>{t('forge.mastered')}</span>
                 </span>
               )}
-              {verse.id === getDailyVerse().id && (
+              {verse.id === getDailyVerse(0, language).id && (
                 <span className="flex items-center gap-1 text-[11px] font-mono font-bold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/70 px-2 py-0.5 rounded-full">
                   <Sparkles className="w-3 h-3 text-amber-800 dark:text-amber-400" />
-                  <span>Daily Truth</span>
+                  <span>{t('forge.dailyTruth')}</span>
                 </span>
               )}
             </div>
@@ -221,8 +225,8 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
             <div className="flex items-center gap-2">
               <button
                 onClick={handleToggleSpeak}
-                title={isSpeaking ? "Stop speech" : "Listen to verse"}
-                aria-label={isSpeaking ? "Stop speech" : "Listen to verse"}
+                title={isSpeaking ? t('forge.stopSpeech') : t('forge.listen')}
+                aria-label={isSpeaking ? t('forge.stopSpeech') : t('forge.listen')}
                 className="p-2 rounded-lg bg-stone-200/70 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-amber-600 text-stone-700 dark:text-stone-300 hover:text-stone-950 dark:hover:text-black transition-colors focus-visible:ring-2 focus-visible:ring-amber-500"
               >
                 {isSpeaking ? <VolumeX className="w-4 h-4 text-amber-800 dark:text-amber-400 animate-pulse" /> : <Volume2 className="w-4 h-4" />}
@@ -230,8 +234,8 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
               <button
                 onClick={handleHint}
                 disabled={!nextWord || isCompleted || hintLevel >= 2}
-                title="Nudge the next word"
-                aria-label="Nudge the next word"
+                title={t('forge.nudgeHint')}
+                aria-label={t('forge.nudgeHint')}
                 className={`p-2 rounded-lg text-xs font-medium flex items-center gap-1 transition-colors focus-visible:ring-2 focus-visible:ring-amber-500 disabled:opacity-40 ${
                   hintLevel > 0
                     ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300' 
@@ -239,12 +243,12 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                 }`}
               >
                 <Eye className="w-4 h-4" />
-                <span>Hint</span>
+                <span>{t('forge.hint')}</span>
               </button>
               <button
                 onClick={resetPuzzle}
-                title="Reset puzzle words"
-                aria-label="Reset puzzle words"
+                title={t('forge.resetWords')}
+                aria-label={t('forge.resetWords')}
                 className="p-2 rounded-lg bg-stone-200/70 hover:bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 transition-colors focus-visible:ring-2 focus-visible:ring-amber-500"
               >
                 <RotateCcw className="w-4 h-4" />
@@ -256,7 +260,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
             "{verse.plainEnglishSummary}"
           </div>
           <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-3">
-            {useFirstLetters ? 'New verse. Tiles show the first letter.' : 'Review. Build it from the meaning.'}
+            {useFirstLetters ? t('forge.tilesFirstLetter') : t('forge.tilesMeaning')}
           </p>
         </div>
       </div>
@@ -266,9 +270,9 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
         {nextWord && !isCompleted && (
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm text-stone-600 dark:text-stone-300 min-h-[1.25rem]">
-              {hintLevel === 0 && 'Stuck? Hint reveals the next word, one step at a time.'}
-              {hintLevel === 1 && `Next word starts with “${firstLetterOf(nextWord)}”.`}
-              {hintLevel === 2 && `Next word: ${nextWord}`}
+              {hintLevel === 0 && t('forge.stuckHint')}
+              {hintLevel === 1 && t('forge.nextLetter', { letter: firstLetterOf(nextWord) })}
+              {hintLevel === 2 && t('forge.nextWordIs', { word: nextWord })}
             </p>
             <button
               onClick={handlePeek}
@@ -278,7 +282,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                   : 'bg-stone-200/70 dark:bg-stone-800 text-stone-700 dark:text-stone-200 hover:bg-stone-300 dark:hover:bg-stone-700'
               }`}
             >
-              {isPeeking ? 'Hide verse' : 'Show me'}
+              {isPeeking ? t('forge.hideVerse') : t('forge.showMe')}
             </button>
           </div>
         )}
@@ -286,21 +290,21 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
         {/* Assembly Work Area */}
         <div>
           <div className="text-xs uppercase font-mono tracking-wider text-stone-600 dark:text-stone-400 mb-2 flex items-center justify-between">
-            <span>Your Forged Verse ({assembledWords.length}/{targetWords.length} words)</span>
+            <span>{t('forge.yourForgedVerse', { count: assembledWords.length, total: targetWords.length })}</span>
             {assembledWords.length > 0 && (
-              <span className="text-[11px] text-stone-500 italic">Tap any word to return it</span>
+              <span className="text-[11px] text-stone-500 italic">{t('forge.tapToReturn')}</span>
             )}
           </div>
 
           <div className="min-h-[140px] md:min-h-[160px] p-4 md:p-5 rounded-2xl bg-stone-100/50 dark:bg-ink border border-dashed border-stone-300/70 dark:border-stone-800/70 flex flex-wrap items-center content-start gap-2.5 transition-colors">
             {isPeeking ? (
               <div className="w-full rounded-xl bg-stone-900 text-white p-4 md:p-5">
-                <p className="text-[11px] font-mono uppercase tracking-widest text-amber-300 mb-2">Showing the verse · this counts as Again</p>
+                <p className="text-[11px] font-mono uppercase tracking-widest text-amber-300 mb-2">{t('forge.showingVerseAgain')}</p>
                 <p className="font-reading text-base md:text-lg italic leading-relaxed text-white">&ldquo;{verse.text}&rdquo;</p>
               </div>
             ) : assembledWords.length === 0 ? (
               <div className="w-full text-center text-stone-400 dark:text-stone-500 text-sm py-10 font-reading italic">
-                Tap the tiles below in order.
+                {t('forge.tapTilesInOrder')}
               </div>
             ) : (
               assembledWords.map((item, idx) => {
@@ -312,7 +316,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     onClick={() => handleRemoveWord(idx)}
-                    title="Tap to return word to bank"
+                    title={t('forge.tapToReturn')}
                     className={`px-3.5 py-2 rounded-xl text-sm md:text-base font-reading font-medium transition-all focus-visible:ring-2 focus-visible:ring-amber-500 ${
                       isCorrect
                         ? 'bg-amber-100 dark:bg-amber-600/25 text-amber-950 dark:text-parchment-50 hover:bg-red-100 dark:hover:bg-red-950/40 hover:text-red-900 dark:hover:text-red-200'
@@ -330,7 +334,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
         {/* Available Words Bank */}
         <div>
           <div className="text-xs uppercase font-mono tracking-wider text-stone-600 dark:text-stone-400 mb-2">
-            {useFirstLetters ? 'First-letter tiles' : 'Word tiles'}
+            {useFirstLetters ? t('forge.firstLetterTiles') : t('forge.wordTiles')}
           </div>
           <div className="p-4 md:p-5 rounded-2xl bg-stone-100/70 dark:bg-stone-900/60 flex flex-wrap gap-2.5 min-h-[120px] transition-colors">
             {availableWords.map((item) => (
@@ -346,7 +350,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
             ))}
             {availableWords.length === 0 && !isCompleted && (
               <div className="text-xs text-stone-500 dark:text-stone-400 italic py-2">
-                All words placed. Check the sequence above!
+                {t('forge.allWordsPlaced')}
               </div>
             )}
           </div>
@@ -362,35 +366,35 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
             >
               <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-400 font-bold text-sm mb-2">
                 <CheckCircle className="w-5 h-5" />
-                <span>{hasPeeked || isMastered ? 'Verse assembled' : 'Scripture locked in memory (+40 XP)'}</span>
+                <span>{hasPeeked || isMastered ? t('forge.verseAssembled') : t('forge.scriptureLocked')}</span>
               </div>
               <p className="text-base md:text-lg font-reading text-stone-900 dark:text-emerald-100 italic mb-3">
                 "{verse.text}"
               </p>
               <div className="text-xs text-emerald-800 dark:text-emerald-300 font-medium mb-3">
-                <strong>Takeaway for Today: </strong> {verse.keyTakeaway}
+                <strong>{t('forge.takeaway')}</strong> {verse.keyTakeaway}
               </div>
               <div className="mb-4 flex flex-wrap items-center gap-3 text-[11px] text-emerald-900/80 dark:text-emerald-200/80">
                 <span className="inline-flex items-center gap-1">
                   <Brain className="w-3.5 h-3.5" />
-                  Stability {currentFsrs.stability} days
+                  {t('forge.stability', { days: currentFsrs.stability })}
                 </span>
                 <span className="inline-flex items-center gap-1">
                   <Clock className="w-3.5 h-3.5" />
-                  Next review {scheduledNextDays ? `in ${scheduledNextDays} days` : currentFsrs.nextReviewDate}
+                  {t('forge.nextReview', { time: scheduledNextDays ? `in ${scheduledNextDays} days` : currentFsrs.nextReviewDate })}
                 </span>
               </div>
 
               {hasPeeked ? (
                 <p className="text-xs text-amber-800 dark:text-amber-300 mb-3">
-                  You peeked, so this verse comes back soon.
+                  {t('forge.peekNotice')}
                 </p>
               ) : (
               <div className="p-3.5 rounded-xl bg-white/80 dark:bg-black/40 mb-3">
                 <div className="text-xs font-mono font-medium text-emerald-800 dark:text-emerald-300 mb-2 flex items-center justify-between">
-                  <span>How easily did you recall this verse? {fsrsRated && <strong className="text-emerald-600 dark:text-emerald-400">✓ Retention Logged</strong>}</span>
+                  <span>{t('forge.howEasily')} {fsrsRated && <strong className="text-emerald-600 dark:text-emerald-400">{t('forge.retentionLogged')}</strong>}</span>
                   {scheduledNextDays && (
-                    <span className="text-amber-800 dark:text-amber-400 font-bold">Scheduled in {scheduledNextDays} days</span>
+                    <span className="text-amber-800 dark:text-amber-400 font-bold">{t('forge.scheduledIn', { days: scheduledNextDays })}</span>
                   )}
                 </div>
                 <div className="grid grid-cols-4 gap-2">
@@ -399,7 +403,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                     disabled={fsrsRated}
                     className="p-2 rounded-lg bg-stone-100 dark:bg-stone-900 hover:bg-red-500/20 text-[11px] font-medium text-red-700 dark:text-red-300 text-center transition-all disabled:opacity-50"
                   >
-                    <div className="font-bold">Again</div>
+                    <div className="font-bold">{t('forge.again')}</div>
                     <div className="text-[11px] text-stone-500 dark:text-stone-400">{previewFSRSDays(verse.id, 1)}d</div>
                   </button>
                   <button
@@ -407,7 +411,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                     disabled={fsrsRated}
                     className="p-2 rounded-lg bg-stone-100 dark:bg-stone-900 hover:bg-amber-500/20 text-[11px] font-medium text-amber-800 dark:text-amber-300 text-center transition-all disabled:opacity-50"
                   >
-                    <div className="font-bold">Hard</div>
+                    <div className="font-bold">{t('forge.hard')}</div>
                     <div className="text-[11px] text-stone-500 dark:text-stone-400">{previewFSRSDays(verse.id, 2)}d</div>
                   </button>
                   <button
@@ -415,7 +419,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                     disabled={fsrsRated}
                     className="p-2 rounded-lg bg-stone-100 dark:bg-stone-900 hover:bg-emerald-500/20 text-[11px] font-medium text-emerald-700 dark:text-emerald-300 text-center transition-all disabled:opacity-50"
                   >
-                    <div className="font-bold">Good</div>
+                    <div className="font-bold">{t('forge.good')}</div>
                     <div className="text-[11px] text-stone-500 dark:text-stone-400">{previewFSRSDays(verse.id, 3)}d</div>
                   </button>
                   <button
@@ -423,7 +427,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                     disabled={fsrsRated}
                     className="p-2 rounded-lg bg-stone-100 dark:bg-stone-900 hover:bg-cyan-500/20 text-[11px] font-medium text-cyan-800 dark:text-cyan-300 text-center transition-all disabled:opacity-50"
                   >
-                    <div className="font-bold">Easy</div>
+                    <div className="font-bold">{t('forge.easy')}</div>
                     <div className="text-[11px] text-stone-500 dark:text-stone-400">{previewFSRSDays(verse.id, 4)}d</div>
                   </button>
                 </div>
@@ -435,7 +439,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                   onClick={onNextVerse}
                   className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-stone-950 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm focus-visible:ring-2 focus-visible:ring-emerald-400"
                 >
-                  <span>Next Verse</span>
+                  <span>{t('forge.next')} →</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -453,7 +457,8 @@ export const WordForge: React.FC<WordForgeProps> = ({
   targetVerseId,
   onClearTargetVerse
 }) => {
-  const allVerses = getAllVerses();
+  const { t, language } = useLanguage();
+  const allVerses = getAllVerses(language);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [isMemoryPulseOpen, setIsMemoryPulseOpen] = useState<boolean>(false);
 
@@ -532,53 +537,71 @@ export const WordForge: React.FC<WordForgeProps> = ({
         <div>
           <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
             <Flame className="w-4 h-4" />
-            <span>The Word Forge • Scripture Retention</span>
+            <span>{t('forge.badge')}</span>
           </div>
           <h1 className="text-2xl md:text-4xl font-serif font-black text-stone-900 dark:text-parchment-50">
-            Lock Truth Into Memory
+            {t('forge.title')}
           </h1>
           <p className="text-xs md:text-sm text-stone-600 dark:text-stone-400 mt-1">
-            Tactile word assembly designed for adult retention. Assemble the verse by tapping words in sequence.
+            {t('forge.subtitle')}
           </p>
           {verseNotice && (
             <p className="text-xs text-amber-800 dark:text-amber-300 mt-2">{verseNotice}</p>
           )}
         </div>
 
-        <button
-          onClick={() => {
-            soundEngine.playClick();
-            setIsMemoryPulseOpen(true);
-          }}
-          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-500/15 text-amber-800 dark:text-amber-300 text-xs font-semibold hover:bg-amber-500 hover:text-stone-950 transition-all"
-          title="Set this verse as your daily memory challenge"
-        >
-          <Bell className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 animate-pulse" />
-          <span>Train This Verse (Reminders)</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Mobile Quick Controls */}
+          <div className="flex md:hidden items-center gap-1.5 mr-1">
+            <LanguageToggle compact />
+            <ThemeToggle compact />
+          </div>
+
+          <button
+            onClick={() => {
+              soundEngine.playClick();
+              setIsMemoryPulseOpen(true);
+            }}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-500/15 text-amber-800 dark:text-amber-300 text-xs font-semibold hover:bg-amber-500 hover:text-stone-950 transition-all"
+            title={t('forge.trainVerse')}
+          >
+            <Bell className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 animate-pulse" />
+            <span>{t('forge.trainVerse')}</span>
+          </button>
+        </div>
       </div>
 
       {/* Category Pills */}
-      <div className="flex gap-2 overflow-x-auto pb-3 mb-6 scrollbar-none" role="tablist" aria-label="Verse categories">
-        {categories.map(cat => (
-          <button
-            key={cat}
-            role="tab"
-            aria-selected={selectedCategory === cat}
-            onClick={() => {
-              soundEngine.playClick();
-              setSelectedCategory(cat);
-              setActiveVerseIndex(0);
-            }}
-            className={`text-xs px-3.5 py-1.5 rounded-full font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-amber-500 ${
-              selectedCategory === cat
-                ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
-                : 'bg-stone-200/70 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
+      <div className="flex gap-2 overflow-x-auto pb-3 mb-6 scrollbar-none" role="tablist" aria-label={t('dilemma.category')}>
+        {categories.map(cat => {
+          const catLabel = cat === 'All' ? t('forge.all')
+            : cat === 'Courage & Facing Giants' ? t('forge.courage')
+            : cat === 'Pressure & Anxiety' ? t('forge.pressure')
+            : cat === 'Anger & Self-Control' ? t('forge.anger')
+            : cat === 'Restoration After Failure' ? t('forge.restoration')
+            : cat === 'Endurance & Brotherhood' ? t('forge.endurance')
+            : cat;
+
+          return (
+            <button
+              key={cat}
+              role="tab"
+              aria-selected={selectedCategory === cat}
+              onClick={() => {
+                soundEngine.playClick();
+                setSelectedCategory(cat);
+                setActiveVerseIndex(0);
+              }}
+              className={`text-xs px-3.5 py-1.5 rounded-full font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-amber-500 ${
+                selectedCategory === cat
+                  ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                  : 'bg-stone-200/70 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+              }`}
+            >
+              {catLabel}
+            </button>
+          );
+        })}
       </div>
 
       {/* Keyed Workbench that resets cleanly on verse change */}
@@ -596,18 +619,18 @@ export const WordForge: React.FC<WordForgeProps> = ({
           onClick={handlePrevVerse}
           className="text-xs font-medium text-stone-700 dark:text-stone-400 hover:text-stone-950 dark:hover:text-stone-200 px-3.5 py-2 rounded-lg bg-stone-200/70 dark:bg-stone-800 focus-visible:ring-2 focus-visible:ring-amber-500"
         >
-          Previous Verse
+          {t('forge.previousVerse')}
         </button>
 
         <span className="text-xs font-mono text-stone-500 dark:text-stone-400 font-medium">
-          Verse {safeIndex + 1} of {filteredVerses.length}
+          {t('forge.verseCount', { current: safeIndex + 1, total: filteredVerses.length })}
         </span>
 
         <button
           onClick={handleNextVerse}
           className="text-xs font-medium text-amber-800 dark:text-amber-400 hover:text-amber-950 dark:hover:text-amber-300 px-3.5 py-2 rounded-lg bg-amber-500/20 hover:bg-amber-500 hover:text-stone-950 focus-visible:ring-2 focus-visible:ring-amber-500"
         >
-          Next Verse
+          {t('forge.nextVerse')}
         </button>
       </div>
 

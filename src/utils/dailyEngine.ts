@@ -55,11 +55,15 @@ export const getDayIndex = (offsetDays = 0): number => {
   return Math.abs(dayIndex);
 };
 
+import { getStoredLanguage, type SupportedLanguage } from '../context/LanguageContext';
+import { getLocalizedDilemma } from './localizedScripture';
+
 /**
  * Deterministically rotates today's verse across the entire 121-verse library
  */
-export const getDailyVerse = (offsetDays = 0): MemoryVerse => {
-  const all = getAllVerses();
+export const getDailyVerse = (offsetDays = 0, lang?: SupportedLanguage): MemoryVerse => {
+  const activeLang = lang ?? getStoredLanguage();
+  const all = getAllVerses(activeLang);
   const index = (getDayIndex(offsetDays)) % all.length;
   return all[index];
 };
@@ -77,15 +81,16 @@ export const getDailyBriefing = (): MorningBriefing => {
  * Deterministically aligns today's featured tactical dilemma with the 1 dilemma of today's Daily Campaign
  * (Requirement 6: There should only be 1 dilemma per daily campaign, or customized by today's Battlefield Check-in)
  */
-export const getDailyDilemma = (offsetDays = 0): RealLifeDilemma => {
+export const getDailyDilemma = (offsetDays = 0, lang?: SupportedLanguage): RealLifeDilemma => {
+  const activeLang = lang ?? getStoredLanguage();
   const bfId = getTodayBattlefieldId();
   if (bfId) {
     if (bfId === 'anxiety-overwhelm') {
       const match = REAL_LIFE_DILEMMAS.find(d => d.id === 'dilemma-burnout');
-      if (match) return match;
+      if (match) return getLocalizedDilemma(match, activeLang);
     } else {
       const match = REAL_LIFE_DILEMMAS.find(d => d.id === 'dilemma-credit-thief');
-      if (match) return match;
+      if (match) return getLocalizedDilemma(match, activeLang);
     }
   }
 
@@ -93,10 +98,10 @@ export const getDailyDilemma = (offsetDays = 0): RealLifeDilemma => {
   const dilemmaStep = campaign.steps.find(s => s.type === 'dilemma');
   if (dilemmaStep) {
     const matched = REAL_LIFE_DILEMMAS.find(d => d.id === dilemmaStep.targetId);
-    if (matched) return matched;
+    if (matched) return getLocalizedDilemma(matched, activeLang);
   }
   const index = (getDayIndex(offsetDays)) % REAL_LIFE_DILEMMAS.length;
-  return REAL_LIFE_DILEMMAS[index];
+  return getLocalizedDilemma(REAL_LIFE_DILEMMAS[index], activeLang);
 };
 
 /**

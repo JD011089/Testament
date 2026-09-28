@@ -6,10 +6,14 @@ import App from './App.tsx'
 import { AppErrorBoundary } from './components/AppErrorBoundary'
 import { initPwaUpdateEngine } from './utils/pwaUpdateEngine'
 
+import { LanguageProvider } from './context/LanguageContext'
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AppErrorBoundary>
-      <App />
+      <LanguageProvider>
+        <App />
+      </LanguageProvider>
     </AppErrorBoundary>
   </StrictMode>,
 )

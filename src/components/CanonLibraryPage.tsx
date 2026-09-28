@@ -21,6 +21,10 @@ import { parseScriptureReference } from '../utils/scriptureRef';
 import { findCanonBookByName } from '../utils/bookLinks';
 import { getBookChapterCount } from '../utils/bibleService';
 import { loadReadingPlace, loadVisitedChapters, type ReadingPlace } from '../utils/readingPlace';
+import { useLanguage } from '../context/LanguageContext';
+import { getLocalizedCanonBook } from '../utils/localizedScripture';
+import { ThemeToggle } from './ThemeToggle';
+import { LanguageToggle } from './LanguageToggle';
 
 interface CanonLibraryPageProps {
   onBackToDashboard: () => void;
@@ -43,6 +47,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
   passageTarget,
   onPassageOpened
 }) => {
+  const { t, language } = useLanguage();
   const [viewMode, setViewMode] = useState<'list' | 'shelf'>('list');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTestament, setSelectedTestament] = useState<'All' | 'OT' | 'NT'>('All');
@@ -91,8 +96,12 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
     if (book) openReader(book, passageTarget.chapter, passageTarget.verseStart, passageTarget.verseEnd);
   }, [passageTarget]);
 
+  const localizedBooks = useMemo(() => {
+    return CANON_BOOKS.map(b => getLocalizedCanonBook(b, language));
+  }, [language]);
+
   const filteredBooks = useMemo(() => {
-    return CANON_BOOKS.filter((b) => {
+    return localizedBooks.filter((b) => {
       // Testament filter
       if (selectedTestament !== 'All' && b.testament !== selectedTestament) return false;
       // Division filter
@@ -118,7 +127,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
       }
       return true;
     });
-  }, [selectedTestament, selectedDivision, selectedTheme, searchQuery]);
+  }, [localizedBooks, selectedTestament, selectedDivision, selectedTheme, searchQuery]);
 
   // Group books by division for authentic library shelving
   const shelvedDivisions = useMemo(() => {
@@ -161,48 +170,53 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
               className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white dark:bg-stone-900/90 border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-300 hover:border-amber-500/50 transition-all text-xs font-semibold shadow-xs"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Back to Dashboard</span>
+              <span>{t('library.backToDashboard')}</span>
             </button>
 
             <div className="h-4 w-px bg-stone-200 dark:bg-stone-800 hidden sm:block" />
 
             <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-amber-800 dark:text-amber-500 font-bold">
               <BookOpen className="w-4 h-4" />
-              <span>The Scriptorium</span>
+              <span>{t('library.scriptorium')}</span>
             </div>
           </div>
 
-          {/* VIEW MODE TOGGLE (Bookshelf vs Grid) */}
-          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-stone-100 dark:bg-stone-900/90 border border-stone-200 dark:border-stone-800">
-            <button
-              onClick={() => {
-                soundEngine.playSnap();
-                setViewMode('list');
-              }}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                viewMode === 'list'
-                  ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
-                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
-              }`}
-            >
-              <List className="w-3.5 h-3.5" />
-              <span>Book list</span>
-            </button>
+          <div className="flex items-center gap-2">
+            <LanguageToggle compact />
+            <ThemeToggle compact />
 
-            <button
-              onClick={() => {
-                soundEngine.playSnap();
-                setViewMode('shelf');
-              }}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                viewMode === 'shelf'
-                  ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
-                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
-              }`}
-            >
-              <Layers className="w-3.5 h-3.5" />
-              <span>Shelf</span>
-            </button>
+            {/* VIEW MODE TOGGLE (Bookshelf vs Grid) */}
+            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-stone-100 dark:bg-stone-900/90 border border-stone-200 dark:border-stone-800">
+              <button
+                onClick={() => {
+                  soundEngine.playSnap();
+                  setViewMode('list');
+                }}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  viewMode === 'list'
+                    ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                }`}
+              >
+                <List className="w-3.5 h-3.5" />
+                <span>{t('library.list')}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  soundEngine.playSnap();
+                  setViewMode('shelf');
+                }}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  viewMode === 'shelf'
+                    ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                }`}
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>{t('library.bookshelf')}</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -210,13 +224,13 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
         <div className="pt-6 pb-6 text-left">
           <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold mb-1">
             <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span>Complete 66-Book Field Library</span>
+            <span>{t('library.heroBadge')}</span>
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-black text-stone-900 dark:text-parchment-50 leading-tight">
-            The Living Word Library
+            {t('library.heroTitle')}
           </h1>
           <p className="text-sm sm:text-base text-stone-600 dark:text-stone-300 max-w-3xl mt-2 leading-relaxed font-sans">
-            Continue a chapter, browse the 66 books, or jump to a verse such as John 3:16.
+            {t('library.heroSubtitle')}
           </p>
         </div>
 
@@ -233,7 +247,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
           >
             <div>
               <div className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
-                Continue reading
+                {t('library.continueReading')}
               </div>
               <div className="font-serif text-lg font-bold text-stone-900 dark:text-parchment-50">
                 {readingPlace.bookName} {readingPlace.chapter}
@@ -251,7 +265,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
               <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input 
                 type="text"
-                placeholder="Search books, or jump to a verse like John 3:16"
+                placeholder={t('library.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => {
@@ -266,20 +280,20 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
 
             {/* Testament Filter Switcher */}
             <div className="flex items-center gap-1.5 p-1 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shrink-0">
-              {(['All', 'OT', 'NT'] as const).map((t) => (
+              {(['All', 'OT', 'NT'] as const).map((tFilter) => (
                 <button
-                  key={t}
+                  key={tFilter}
                   onClick={() => {
                     soundEngine.playClick();
-                    setSelectedTestament(t);
+                    setSelectedTestament(tFilter);
                   }}
                   className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all ${
-                    selectedTestament === t
+                    selectedTestament === tFilter
                       ? 'bg-amber-100 dark:bg-amber-600/30 text-amber-900 dark:text-amber-300 font-bold border border-amber-300 dark:border-amber-500/50 shadow-xs'
                       : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                   }`}
                 >
-                  {t === 'All' ? 'All (66)' : t === 'OT' ? 'Old Testament (39)' : 'New Testament (27)'}
+                  {tFilter === 'All' ? t('library.all66') : tFilter === 'OT' ? t('library.ot39') : t('library.nt27')}
                 </button>
               ))}
             </div>
@@ -295,7 +309,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
               className="w-full flex items-center justify-between gap-3 rounded-xl bg-white dark:bg-stone-900 border border-amber-500/50 px-4 py-3 text-left hover:border-amber-500 transition-colors"
             >
               <div>
-                <div className="text-xs font-semibold text-amber-800 dark:text-amber-300">Open this passage</div>
+                <div className="text-xs font-semibold text-amber-800 dark:text-amber-300">{t('library.openPassage')}</div>
                 <div className="font-serif text-base font-bold text-stone-900 dark:text-parchment-50">
                   {passageQuery.book.name} {passageQuery.chapter}:{passageQuery.verseStart}
                   {passageQuery.verseEnd !== passageQuery.verseStart ? `–${passageQuery.verseEnd}` : ''}
@@ -318,7 +332,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                   : 'bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 shadow-xs'
               }`}
             >
-              All 7 Shelves
+              {t('library.allShelves')}
             </button>
             {CANON_DIVISIONS.map((div) => (
               <button
@@ -346,7 +360,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
           {/* Life Situation Chips */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
             <span className="text-[11px] font-mono uppercase text-stone-500 shrink-0 mr-1">
-              Filter by Life Battle:
+              {t('library.filterByBattle')}
             </span>
             <button
               onClick={() => {
@@ -359,7 +373,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                   : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
               }`}
             >
-              All
+              {t('library.all')}
             </button>
             {CANON_LIFE_THEMES.filter((theme) => theme !== 'All Themes').map((theme) => (
               <button
@@ -401,7 +415,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                       <h3 className="text-base sm:text-lg font-serif font-black text-stone-900 dark:text-amber-200 tracking-wide uppercase flex items-center gap-2">
                         <span>{shelfGroup.division.label}</span>
                         <span className="text-xs font-mono font-normal text-amber-800 dark:text-amber-400/70">
-                          ({shelfGroup.books.length} Volumes)
+                          {t('library.volumesCount', { count: shelfGroup.books.length })}
                         </span>
                       </h3>
                       <p className="text-xs text-stone-600 dark:text-stone-400 italic">
@@ -411,7 +425,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                   </div>
 
                   <span className="text-[11px] font-mono text-amber-800 dark:text-amber-500/80 uppercase tracking-widest hidden sm:inline">
-                    Tap a volume to read
+                    {t('library.tapVolume')}
                   </span>
                 </div>
 
@@ -460,8 +474,8 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
             {shelvedDivisions.length === 0 && (
               <div className="py-20 text-center rounded-3xl bg-stone-100/50 dark:bg-stone-900/30">
                 <BookOpen className="w-12 h-12 text-stone-400 dark:text-stone-600 mx-auto mb-3" />
-                <h3 className="text-lg font-serif font-bold text-stone-900 dark:text-stone-300">No volumes match your search</h3>
-                <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">Try clearing filters or search terms.</p>
+                <h3 className="text-lg font-serif font-bold text-stone-900 dark:text-stone-300">{t('library.noVolumes')}</h3>
+                <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">{t('library.tryClearing')}</p>
               </div>
             )}
           </div>
@@ -490,11 +504,11 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                               {book.name}
                             </h4>
                             <span className="text-xs font-semibold text-stone-500 dark:text-stone-400">
-                              {book.testament === 'OT' ? 'Old Testament' : 'New Testament'}
+                              {book.testament === 'OT' ? t('library.ot') : t('library.nt')}
                             </span>
                             {lastChapter ? (
                               <span className="text-xs font-semibold text-amber-800 dark:text-amber-300">
-                                Last read ch. {lastChapter}
+                                {t('library.lastRead', { chapter: lastChapter })}
                               </span>
                             ) : null}
                           </div>
@@ -512,7 +526,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                             }}
                             className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-bold"
                           >
-                            {lastChapter ? `Continue ch. ${lastChapter}` : 'Read'}
+                            {lastChapter ? t('library.continueCh', { chapter: lastChapter }) : t('library.read')}
                           </button>
                           <button
                             type="button"
@@ -522,7 +536,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                             }}
                             className="px-3.5 py-2 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-xs font-semibold text-stone-700 dark:text-stone-200"
                           >
-                            About
+                            {t('library.about')}
                           </button>
                         </div>
                       </li>
@@ -534,8 +548,8 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
             {shelvedDivisions.length === 0 && (
               <div className="py-20 text-center">
                 <BookOpen className="w-12 h-12 text-stone-400 dark:text-stone-600 mx-auto mb-3" />
-                <h3 className="text-lg font-serif font-bold text-stone-900 dark:text-stone-300">No books match your search</h3>
-                <p className="text-sm text-stone-600 dark:text-stone-400 mt-1">Try a book name, a theme, or a verse such as John 3:16.</p>
+                <h3 className="text-lg font-serif font-bold text-stone-900 dark:text-stone-300">{t('library.noBooks')}</h3>
+                <p className="text-sm text-stone-600 dark:text-stone-400 mt-1">{t('library.tryBookName')}</p>
               </div>
             )}
           </div>
@@ -544,7 +558,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
         <OpenBookModal
           key={activeBookForModal ? `${activeBookForModal.id}-${readerLaunch?.token ?? 'brief'}` : 'closed'}
           book={activeBookForModal}
-          allBooks={browsingAll ? CANON_BOOKS : filteredBooks}
+          allBooks={browsingAll ? localizedBooks : filteredBooks}
           onClose={() => {
             setActiveBookForModal(null);
             setReaderLaunch(null);
