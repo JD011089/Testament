@@ -37,8 +37,10 @@ export const getTodayDateKey = (): string => {
 /**
  * Formatted human-readable date
  */
-export const getTodayFormatted = (): string => {
-  return new Date().toLocaleDateString('en-US', {
+export const getTodayFormatted = (lang?: SupportedLanguage): string => {
+  const activeLang = lang ?? getStoredLanguage();
+  const locale = activeLang === 'fr' ? 'fr-FR' : activeLang === 'es' ? 'es-ES' : 'en-US';
+  return new Date().toLocaleDateString(locale, {
     weekday: 'short',
     month: 'short',
     day: 'numeric'

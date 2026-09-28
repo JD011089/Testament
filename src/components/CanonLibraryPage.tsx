@@ -22,7 +22,11 @@ import { findCanonBookByName } from '../utils/bookLinks';
 import { getBookChapterCount } from '../utils/bibleService';
 import { loadReadingPlace, loadVisitedChapters, type ReadingPlace } from '../utils/readingPlace';
 import { useLanguage } from '../context/LanguageContext';
-import { getLocalizedCanonBook } from '../utils/localizedScripture';
+import { 
+  getLocalizedCanonBook, 
+  CANON_DIVISION_I18N_KEYS, 
+  CANON_LIFE_THEME_I18N_KEYS 
+} from '../utils/localizedScripture';
 import { ThemeToggle } from './ThemeToggle';
 import { LanguageToggle } from './LanguageToggle';
 
@@ -48,6 +52,22 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
   onPassageOpened
 }) => {
   const { t, language } = useLanguage();
+
+  const getDivisionLabel = (id: string, fallback: string) => {
+    const k = CANON_DIVISION_I18N_KEYS[id];
+    return k ? t(k.label) : fallback;
+  };
+
+  const getDivisionDesc = (id: string, fallback: string) => {
+    const k = CANON_DIVISION_I18N_KEYS[id];
+    return k ? t(k.desc) : fallback;
+  };
+
+  const getThemeLabel = (theme: string) => {
+    const k = CANON_LIFE_THEME_I18N_KEYS[theme];
+    return k ? t(k) : theme;
+  };
+
   const [viewMode, setViewMode] = useState<'list' | 'shelf'>('list');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTestament, setSelectedTestament] = useState<'All' | 'OT' | 'NT'>('All');
@@ -347,7 +367,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                     : 'bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 shadow-xs'
                 }`}
               >
-                <span>{div.label}</span>
+                <span>{getDivisionLabel(div.id, div.label)}</span>
                 <span className={`text-[11px] px-1.5 py-0.2 rounded-full ${
                   selectedDivision === div.id ? 'bg-black/20 text-stone-950 font-extrabold' : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400'
                 }`}>
@@ -389,7 +409,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                 }`}
               >
                 <Flame className={`w-2.5 h-2.5 ${selectedTheme === theme ? 'text-amber-800 dark:text-amber-400' : 'text-stone-400'}`} />
-                <span>{theme}</span>
+                <span>{getThemeLabel(theme)}</span>
               </button>
             ))}
           </div>
@@ -413,13 +433,13 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                     </div>
                     <div>
                       <h3 className="text-base sm:text-lg font-serif font-black text-stone-900 dark:text-amber-200 tracking-wide uppercase flex items-center gap-2">
-                        <span>{shelfGroup.division.label}</span>
+                        <span>{getDivisionLabel(shelfGroup.division.id, shelfGroup.division.label)}</span>
                         <span className="text-xs font-mono font-normal text-amber-800 dark:text-amber-400/70">
                           {t('library.volumesCount', { count: shelfGroup.books.length })}
                         </span>
                       </h3>
                       <p className="text-xs text-stone-600 dark:text-stone-400 italic">
-                        {shelfGroup.division.description}
+                        {getDivisionDesc(shelfGroup.division.id, shelfGroup.division.description)}
                       </p>
                     </div>
                   </div>
@@ -487,10 +507,10 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
               <section key={shelfGroup.division.id}>
                 <div className="mb-3">
                   <h3 className="text-base sm:text-lg font-serif font-bold text-stone-900 dark:text-parchment-50">
-                    {shelfGroup.division.label}
+                    {getDivisionLabel(shelfGroup.division.id, shelfGroup.division.label)}
                   </h3>
                   <p className="text-sm text-stone-600 dark:text-stone-400 mt-0.5">
-                    {shelfGroup.division.description}
+                    {getDivisionDesc(shelfGroup.division.id, shelfGroup.division.description)}
                   </p>
                 </div>
                 <ul className="divide-y divide-stone-200 dark:divide-stone-800 border-y border-stone-200 dark:border-stone-800">
@@ -515,7 +535,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                           <p className="text-sm text-stone-600 dark:text-stone-300 mt-1 leading-relaxed line-clamp-2">
                             {book.whyItMattersMonday}
                           </p>
-                          <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">{book.lifeTheme}</p>
+                          <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">{getThemeLabel(book.lifeTheme)}</p>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           <button

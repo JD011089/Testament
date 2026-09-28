@@ -41,10 +41,33 @@ interface ReleaseMilestone {
 
 const RELEASES: ReleaseMilestone[] = [
   {
-    version: 'v1.13.0',
-    tagline: 'Tri-Language Scripture & Deep Localization',
+    version: 'v1.14.0',
+    tagline: 'End-to-End Mission & Library Localization',
     dateBadge: 'Current Release',
     isLatest: true,
+    highlights: [
+      {
+        icon: <Target className="w-4 h-4 text-amber-400" />,
+        title: 'Universal Daily Mission in French & Spanish',
+        description: 'Hero tracks, tactical mission titles, virtue themes, reasons, and quest atmospheres fully adapt to your active language on the Home screen.'
+      },
+      {
+        icon: <BookOpen className="w-4 h-4 text-amber-400" />,
+        title: 'Localized Canon Library & Shelf Plaque Headers',
+        description: 'Division descriptions, life theme chips, and "Why it matters on Monday" summaries now speak directly in French and Spanish across all 66 canonical books.'
+      },
+      {
+        icon: <Sparkles className="w-4 h-4 text-amber-400" />,
+        title: 'Harmonized Actions & Authentic Localized Dates',
+        description: 'Step badges, action buttons ("Prendre la décision", "Lancer la simulation"), and the top dashboard date dynamically format in your chosen tongue.'
+      }
+    ]
+  },
+  {
+    version: 'v1.13.0',
+    tagline: 'Tri-Language Scripture & Deep Localization',
+    dateBadge: 'Previous Release',
+    isLatest: false,
     highlights: [
       {
         icon: <Languages className="w-4 h-4 text-amber-400" />,
@@ -418,12 +441,12 @@ const RELEASES: ReleaseMilestone[] = [
 
 export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose }) => {
   const modalRef = useModalLock(isOpen);
-  const [activeTab, setActiveTab] = useState<string>('v1.13.0');
+  const [activeTab, setActiveTab] = useState<string>('v1.14.0');
 
   const handleDismiss = () => {
     soundEngine.playClick();
     try {
-      localStorage.setItem('testament_last_seen_version', '1.13.0');
+      localStorage.setItem('testament_last_seen_version', '1.14.0');
     } catch {
       // ignore
     }
@@ -466,7 +489,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
                   Field Update Dispatches
                 </h2>
                 <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 font-bold">
-                  v1.13.0 Live
+                  v1.14.0 Live
                 </span>
               </div>
               <p className="text-xs text-stone-500 dark:text-stone-400">
@@ -556,7 +579,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
         {/* MODAL FOOTER */}
         <div className="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800/90 bg-stone-50 dark:bg-black/40 flex items-center justify-between gap-3 relative z-10">
           <div className="text-[11px] font-mono text-stone-500 dark:text-stone-400 hidden sm:block">
-            Testament v1.13.0 • The Living Word
+            Testament v1.14.0 • The Living Word
           </div>
 
           <button

@@ -740,12 +740,35 @@ export const LOCALIZED_DILEMMAS: Record<'es' | 'fr', Record<string, LocalizedDil
 // ============================================================================
 // CANON BOOKS NAMES & DIVISIONS
 // ============================================================================
+
+/**
+ * Converts a canon book id (e.g. 'canon-genesis') to the localization key
+ * (e.g. 'ot-genesis') used in LOCALIZED_CANON_BOOK_DATA.
+ */
+const OT_BOOKS = new Set([
+  'genesis','exodus','leviticus','numbers','deuteronomy',
+  'joshua','judges','ruth','1samuel','2samuel','1kings','2kings',
+  '1chronicles','2chronicles','ezra','nehemiah','esther','job',
+  'psalms','proverbs','ecclesiastes','songofsolomon','isaiah',
+  'jeremiah','lamentations','ezekiel','daniel','hosea','joel',
+  'amos','obadiah','jonah','micah','nahum','habakkuk','zephaniah',
+  'haggai','zechariah','malachi'
+]);
+
+function canonIdToLocKey(canonId: string): string {
+  // canonId is like 'canon-genesis', 'canon-1samuel', etc.
+  const slug = canonId.replace(/^canon-/, '');
+  const prefix = OT_BOOKS.has(slug) ? 'ot' : 'nt';
+  return `${prefix}-${slug}`;
+}
+
 export const LOCALIZED_CANON_BOOK_DATA: Record<'es' | 'fr', Record<string, {
   name: string;
   codename: string;
   subtitle: string;
   division: string;
   lifeTheme: string;
+  whyItMattersMonday?: string;
   anchorReference: string;
   canonicalText: string;
   streetTranslation: string;
@@ -754,54 +777,167 @@ export const LOCALIZED_CANON_BOOK_DATA: Record<'es' | 'fr', Record<string, {
   es: {
     'ot-genesis': {
       name: 'Génesis',
-      codename: 'Operación Génesis',
-      subtitle: 'El Pacto, el Caos y la Creación',
-      division: 'Torá y Orígenes',
-      lifeTheme: 'Courage Under Fire',
+      codename: 'Orígenes y Dinastías Rotas',
+      subtitle: 'Desde la creación del cosmos hasta el trauma familiar profundo y la resiliencia',
+      division: 'Torah & Orígenes',
+      lifeTheme: 'Family & Conflict Resolution',
+      whyItMattersMonday: 'Las familias en Génesis son profundamente imperfectas — celos entre hermanos, favoritismo y traición. Sin embargo, Dios reorienta el fracaso humano en propósito generacional.',
       anchorReference: 'Génesis 50:20',
       canonicalText: 'Vosotros pensasteis mal contra mí, mas Dios lo encaminó a bien, para hacer lo que vemos hoy, para mantener en vida a mucho pueblo.',
       streetTranslation: 'La traición humana jamás descarrilará los planes de Dios. La fosa y la prisión fueron los escalones para salvar a una nación.',
-      takeaway: 'Confía en que Dios está transformando los peores reveses en preparación para tu propósito.'
+      takeaway: 'Deja de obsesionarte con quien te traicionó. Concéntrate en cómo Dios está usando el arma formada contra ti como tu palanca.'
     },
     'ot-exodus': {
       name: 'Éxodo',
       codename: 'La Gran Fuga',
-      subtitle: 'Ruptura Imperial y el Código de Libertad',
-      division: 'Torá y Orígenes',
+      subtitle: 'Derribar a una superpotencia imperial con un pastor desarmado',
+      division: 'Torah & Orígenes',
       lifeTheme: 'Courage Under Fire',
+      whyItMattersMonday: 'Cuando estás atrapado contra un muro imposible, el pánico es un reflejo natural. El Éxodo enseña que mantenerse quieto y confiar en el mandato de Dios supera a los esfuerzos frenéticos.',
       anchorReference: 'Éxodo 14:14',
       canonicalText: 'Jehová peleará por vosotros, y vosotros estaréis tranquilos.',
-      streetTranslation: 'Con el mar infranqueable adelante y los carros enemigos detrás, tu primera misión es la serenidad bajo fuego.',
-      takeaway: 'Detén el pánico impulsivo. Mira cómo Dios abre caminos donde todo parecía cerrado.'
+      streetTranslation: 'Baja tu ritmo cardíaco. El Comandante del cielo tiene la línea del frente; tu trabajo es mantener la boca cerrada y tu posición.',
+      takeaway: 'Silencia el ruido mental. Antes de enviar ese correo frenético, haz pausa y deja que Dios pelee la batalla.'
+    },
+    'ot-leviticus': {
+      name: 'Levítico',
+      codename: 'El Protocolo de Alto Voltaje',
+      subtitle: 'Sobrevivir en proximidad a la santidad bruta y sin diluir',
+      division: 'Torah & Orígenes',
+      lifeTheme: 'Integrity in Toxic Cultures',
+      whyItMattersMonday: 'El Levítico no es legalismo aburrido — es un manual de aislamiento biohazard y moral que muestra que la verdadera integridad requiere establecer límites claros y sólidos en un mundo desordenado.',
+      anchorReference: 'Levítico 19:18',
+      canonicalText: 'No te vengarás, ni guardarás rencor a los hijos de tu pueblo, sino que amarás a tu prójimo como a ti mismo.',
+      streetTranslation: 'Corta la fantasía de venganza. Guardar rencor es beber veneno esperando que el otro muera.',
+      takeaway: 'Cancela el registro mental de agravios que has estado cargando contra ese compañero de trabajo o familiar.'
+    },
+    'ot-numbers': {
+      name: 'Números',
+      codename: 'Las Arenas Movedizas del Desierto',
+      subtitle: 'Cómo un viaje de 11 días se convirtió en una prisión mental de 40 años',
+      division: 'Torah & Orígenes',
+      lifeTheme: 'Anxiety & Fear',
+      whyItMattersMonday: 'La queja y el miedo son contagiosos. Cuando te concentras en los "gigantes" en lugar de tu objetivo, darás vueltas en círculos por años.',
+      anchorReference: 'Números 14:9',
+      canonicalText: 'Por tanto, no seáis rebeldes contra Jehová, ni temáis al pueblo de esta tierra; porque nosotros los comeremos como pan. Su amparo se ha apartado de ellos, y con nosotros está Jehová.',
+      streetTranslation: 'Deja de temblar. Esos obstáculos intimidantes solo son nuestro desayuno. Su armadura es hueca; nuestro Dios es real.',
+      takeaway: 'Reencuadra tu mayor obstáculo actual como nutrición para tu crecimiento espiritual.'
+    },
+    'ot-deuteronomy': {
+      name: 'Deuteronomio',
+      codename: 'El Último Briefing',
+      subtitle: 'El discurso de despedida de Moisés antes de cruzar las líneas del Jordán',
+      division: 'Torah & Orígenes',
+      lifeTheme: 'Action Over Cheap Talk',
+      whyItMattersMonday: 'La comodidad engendra amnesia. Cuando tu negocio prospera y tus cuentas están pagadas, ese es el momento de mayor peligro de pensar que tu propia astucia lo hizo.',
+      anchorReference: 'Deuteronomio 8:17-18',
+      canonicalText: 'No digas en tu corazón: Mi poder y la fuerza de mi mano me han traído esta riqueza. Acuérdate de Jehová tu Dios, porque él te da el poder para hacer riquezas.',
+      streetTranslation: 'No te engañes pensando que tu puro esfuerzo consiguió esta fortuna. Recuerda quién te dio el aliento y el cerebro para construirla.',
+      takeaway: 'Ancla tu ego hoy. Atribuye tus victorias al Dios que te dio la capacidad de ejecutar.'
+    },
+    'ot-joshua': {
+      name: 'Josué',
+      codename: 'La Invasión de la Cabeza de Playa',
+      subtitle: 'Asumir el liderazgo después de que tu mentor muere',
+      division: 'Guerra & Crónicas',
+      lifeTheme: 'Courage Under Fire',
+      whyItMattersMonday: 'El coraje no es la ausencia de miedo — es avanzar mientras tus rodillas tiemblan porque sabes quién ordenó la carga.',
+      anchorReference: 'Josué 1:9',
+      canonicalText: 'Mira que te mando que te esfuerces y seas valiente; no temas ni desmayes, porque Jehová tu Dios estará contigo en dondequiera que vayas.',
+      streetTranslation: 'Endereza tu espalda. Sin titubear, sin segundas dudas. No estás entrando a esa sala solo.',
+      takeaway: 'Enfrenta la confrontación más difícil de hoy con la cabeza en alto.'
+    },
+    'ot-ruth': {
+      name: 'Rut',
+      codename: 'El Contrato de Lealtad',
+      subtitle: 'Lealtad silenciosa y dignidad en las ruinas del hambre y la viudez',
+      division: 'Guerra & Crónicas',
+      lifeTheme: 'Family & Conflict Resolution',
+      whyItMattersMonday: 'Sin milagros llamativos, solo trabajo arduo y lealtad radical. La decisión de Rut de quedarse junto a la amargada Noemí remodela la historia y da origen a un linaje real.',
+      anchorReference: 'Rut 1:16',
+      canonicalText: 'No me ruegues que te deje, y me aparte de ti; porque a dondequiera que tú fueres, iré yo, y dondequiera que vivieres, viviré. Tu pueblo será mi pueblo, y tu Dios mi Dios.',
+      streetTranslation: 'Deja de tratar de deshacerte de mí. Donde tú sangras, yo sangro. Estoy contigo hasta que la tierra nos cubra.',
+      takeaway: 'Demuestra tu lealtad a alguien que atraviesa una temporada oscura cuando todos los demás se han ido.'
+    },
+    'ot-1samuel': {
+      name: '1 Samuel',
+      codename: 'El Pastor & El Tirano',
+      subtitle: 'El ascenso de David y el colapso mental del rey Saúl',
+      division: 'Guerra & Crónicas',
+      lifeTheme: 'Courage Under Fire',
+      whyItMattersMonday: 'Saúl cayó porque le importaba más la imagen pública que la obediencia secreta. David ascendió porque tenía un corazón auténtico y sin armadura.',
+      anchorReference: '1 Samuel 16:7',
+      canonicalText: 'Jehová no mira lo que mira el hombre; pues el hombre mira lo que está delante de sus ojos, pero Jehová mira el corazón.',
+      streetTranslation: 'La gente te juzga por tu traje, tu título y tus métricas. Dios escanea tus motivos secretos y tu columna vertebral interna.',
+      takeaway: 'Invierte más tiempo calibrando tu integridad privada que cultivando tu marca pública.'
     },
     'ot-psalms': {
       name: 'Salmos',
-      codename: 'El Botiquín del Alma',
-      subtitle: 'Oraciones de Trinchera y Triunfo',
-      division: 'Sabiduría y Triage',
+      codename: 'El Triage del Medico de Campo',
+      subtitle: 'Canciones de batalla y triage emocional bruto de reyes perseguidos y poetas',
+      division: 'Sabiduría & Triage del Alma',
       lifeTheme: 'Anxiety & Fear',
-      anchorReference: 'Salmos 23:4',
-      canonicalText: 'Aunque ande en valle de sombra de muerte, no temeré mal alguno, porque tú estarás conmigo.',
-      streetTranslation: 'Caminar por el valle oscuro no significa estar derrotado. La presencia del Pastor desarma el terror.',
-      takeaway: 'Avanza por el valle con la certeza de que no estás desamparado.'
+      whyItMattersMonday: 'La sala de emergencias emocional de la Biblia. Te da permiso de traer ira, pánico, culpa y lágrimas directamente ante Dios sin filtrar.',
+      anchorReference: 'Salmos 46:1',
+      canonicalText: 'Dios es nuestro amparo y fortaleza, nuestro pronto auxilio en las tribulaciones.',
+      streetTranslation: 'Dios es nuestro búnker y nuestro blindaje — una unidad de apoyo activa ya de pie junto a ti en la batalla.',
+      takeaway: 'Corre a Dios como tu primer refugio en lugar de adormecerte con pantallas o comida.'
     },
     'ot-proverbs': {
       name: 'Proverbios',
-      codename: 'El Manual de Tácticas',
-      subtitle: 'Estrategias Prácticas para el Mundo Real',
-      division: 'Sabiduría y Triage',
+      codename: 'El Códice Táctico',
+      subtitle: 'El manual callejero del rey Salomón para los negocios, el habla y los límites',
+      division: 'Sabiduría & Triage del Alma',
+      lifeTheme: 'Workplace & Career Pressure',
+      whyItMattersMonday: 'Inteligencia práctica de alto nivel para el dinero, las reuniones, el manejo de la ira e identificar aliados tóxicos antes de que arruinen tu carrera.',
+      anchorReference: 'Proverbios 4:23',
+      canonicalText: 'Sobre toda cosa guardada, guarda tu corazón; porque de él mana la vida.',
+      streetTranslation: 'Posta centinelas armados en las puertas de tu mente. Todo tu futuro depende de lo que permites entrar.',
+      takeaway: 'Audita lo que miraste y escuchaste esta mañana. Limpia la basura mental.'
+    },
+    'ot-isaiah': {
+      name: 'Isaías',
+      codename: 'El Profeta del Trono',
+      subtitle: 'Advertencias geopolíticas, el Siervo Sufriente y visiones de nueva creación',
+      division: 'Red de Inteligencia Profética',
+      lifeTheme: 'Courage Under Fire',
+      whyItMattersMonday: 'Contiene el anticipo más claro de Jesucristo 700 años antes de Su nacimiento, junto con promesas sólidas para los que se sienten agotados.',
+      anchorReference: 'Isaías 40:31',
+      canonicalText: 'Los que esperan en Jehová tendrán nuevas fuerzas; levantarán alas como las águilas; correrán, y no se cansarán; caminarán, y no se fatigarán.',
+      streetTranslation: 'Los que fijan sus ojos en el Señor cambiarán sus baterías drenadas por energía divina. Correrás y no golpearás el muro.',
+      takeaway: 'Cambia tu esfuerzo agotado por espera paciente en la presencia de Dios.'
+    },
+    'ot-jeremiah': {
+      name: 'Jeremías',
+      codename: 'El Pilar de Hierro',
+      subtitle: 'Hablar verdades impopulares a una sociedad en colapso mientras estás en un pozo',
+      division: 'Red de Inteligencia Profética',
       lifeTheme: 'Integrity in Toxic Cultures',
-      anchorReference: 'Proverbios 3:5-6',
-      canonicalText: 'Fíate de Jehová de todo tu corazón, y no te apoyes en tu propia prudencia. Reconócelo en todos tus caminos, y él enderezará tus veredas.',
-      streetTranslation: 'Tu inteligencia es un recurso valioso pero un dios pésimo. Entrega el volante de tus planes al Creador.',
-      takeaway: 'Somete tus decisiones estratégicas a Dios antes de dar el primer paso.'
+      whyItMattersMonday: 'Cuando tus colegas o cultura derivan hacia la locura, mantener la línea te hará impopular. Jeremías te enseña a mantenerte como un pilar de hierro.',
+      anchorReference: 'Jeremías 29:11',
+      canonicalText: 'Porque yo sé los pensamientos que tengo acerca de vosotros, dice Jehová, pensamientos de paz, y no de mal, para daros el fin que esperáis.',
+      streetTranslation: 'Dicho no a turistas cómodos, sino a cautivos en Babilonia: Aún tengo el plano maestro para tu supervivencia y tu futuro.',
+      takeaway: 'Recuerda que incluso en temporada de exilio, el plano maestro de Dios sigue activo.'
+    },
+    'ot-daniel': {
+      name: 'Daniel',
+      codename: 'Encubierto en Babilonia',
+      subtitle: 'Prosperar en los pasillos de élite paganos sin perder tu columna vertebral moral',
+      division: 'Red de Inteligencia Profética',
+      lifeTheme: 'Integrity in Toxic Cultures',
+      whyItMattersMonday: 'El manual principal para profesionales cristianos navegando la política corporativa secular. Daniel sobrevivió a cuatro reyes paganos gracias a una competencia inigualable y una oración silenciosa.',
+      anchorReference: 'Daniel 3:17-18',
+      canonicalText: 'He aquí nuestro Dios a quien servimos puede librarnos del horno de fuego ardiendo... Y si no, sepas, oh rey, que no serviremos a tus dioses.',
+      streetTranslation: 'Nuestro Dios puede sacarnos de tu horno. Pero aunque no lo haga, nunca nos inclinaremos ante tu estatua de oro.',
+      takeaway: 'Traza tu línea en la arena antes de que llegue la presión. Decide qué nunca comprometerás.'
     },
     'nt-matthew': {
       name: 'Mateo',
       codename: 'El Manifiesto del Rey',
-      subtitle: 'La Revolución del Reino',
+      subtitle: 'La revolución contracultural de Jesús y la explosiva iglesia primitiva',
       division: 'El Manifiesto del Rey',
       lifeTheme: 'Action Over Cheap Talk',
+      whyItMattersMonday: 'Mateo presenta a Jesús como el Rey esperado, cuyos enseñanzas invierten los valores del mundo y exigen obediencia concreta, no fe de fachada.',
       anchorReference: 'Mateo 6:33',
       canonicalText: 'Mas buscad primeramente el reino de Dios y su justicia, y todas estas cosas os serán añadidas.',
       streetTranslation: 'Alinea tus prioridades con el Reino y deja de angustiarte por las añadiduras materiales.',
@@ -810,9 +946,10 @@ export const LOCALIZED_CANON_BOOK_DATA: Record<'es' | 'fr', Record<string, {
     'nt-john': {
       name: 'Juan',
       codename: 'Luz en las Tinieblas',
-      subtitle: 'La Divinidad Hecha Carne',
+      subtitle: 'La divinidad hecha carne',
       division: 'El Manifiesto del Rey',
       lifeTheme: 'Courage Under Fire',
+      whyItMattersMonday: 'Juan revela la identidad divina de Jesús a través de siete señales poderosas y siete declaraciones "Yo soy", mostrando que Él es la luz en las tinieblas más profundas.',
       anchorReference: 'Juan 1:14',
       canonicalText: 'Y aquel Verbo fue hecho carne, y habitó entre nosotros (y vimos su gloria, gloria como del unigénito del Padre), lleno de gracia y de verdad.',
       streetTranslation: 'Dios no se quedó en una torre lejana observando el dolor; se metió en el lodo con nosotros lleno de gracia.',
@@ -821,9 +958,10 @@ export const LOCALIZED_CANON_BOOK_DATA: Record<'es' | 'fr', Record<string, {
     'nt-romans': {
       name: 'Romanos',
       codename: 'La Constitución de la Gracia',
-      subtitle: 'Doctrina de Acero y Vida Victoriosa',
+      subtitle: 'Doctrina de acero y vida victoriosa',
       division: 'Despachos de Campo',
       lifeTheme: 'Burnout & Meaning',
+      whyItMattersMonday: 'Romanos es la carta más completa de la gracia en toda la Biblia — mostrando por qué incluso los mejores esfuerzos humanos no bastan, y cómo la fe lo transforma todo.',
       anchorReference: 'Romanos 8:31',
       canonicalText: '¿Qué, pues, diremos a esto? Si Dios es por nosotros, ¿quién contra nosotros?',
       streetTranslation: 'Si el Creador del universo está de tu lado, ninguna oposición terrenal tiene la última palabra.',
@@ -832,9 +970,10 @@ export const LOCALIZED_CANON_BOOK_DATA: Record<'es' | 'fr', Record<string, {
     'nt-revelation': {
       name: 'Apocalipsis',
       codename: 'El Desenlace Cósmico',
-      subtitle: 'Victoria Final del Cordero y Ruina Imperial',
+      subtitle: 'Guerra cósmica, la caída del imperio y esperanza inquebrantable en la victoria',
       division: 'El Desenlace Cósmico',
       lifeTheme: 'Courage Under Fire',
+      whyItMattersMonday: 'Guerra cósmica, caída del imperio y esperanza inquebrantable en la victoria. El Cordero triunfa — y quienes perseveren reinarán con Él.',
       anchorReference: 'Apocalipsis 21:4',
       canonicalText: 'Enjugará Dios toda lágrima de los ojos de ellos; y ya no habrá muerte, ni habrá más llanto, ni clamor, ni dolor.',
       streetTranslation: 'El mal, el luto y el dolor tienen fecha de caducidad fijada por el Rey invicto.',
@@ -843,92 +982,280 @@ export const LOCALIZED_CANON_BOOK_DATA: Record<'es' | 'fr', Record<string, {
   },
   fr: {
     'ot-genesis': {
-      name: 'Genèse',
-      codename: 'Opération Genèse',
-      subtitle: 'L’Alliance, le Chaos et la Création',
+      name: 'Gen\u00e8se',
+      codename: 'Origines et Dynasties Bris\u00e9es',
+      subtitle: 'De la cr\u00e9ation du cosmos au traumatisme familial profond et \u00e0 la r\u00e9silience',
       division: 'Torah & Origines',
-      lifeTheme: 'Courage Under Fire',
-      anchorReference: 'Genèse 50:20',
-      canonicalText: 'Vous aviez médité de me faire du mal: Dieu l’a changé en bien, de manière à accomplir ce qui arrive aujourd’hui, pour sauver la vie à un peuple nombreux.',
-      streetTranslation: 'La perfidie humaine ne peut anéantir le dessein de Dieu. La trahison fut l’escalier secret du salut.',
-      takeaway: 'Gardez confiance: Dieu réoriente vos épreuves les plus rudes pour accomplir un bien durable.'
+      lifeTheme: 'Family & Conflict Resolution',
+      whyItMattersMonday: 'Les familles de la Gen\u00e8se sont profond\u00e9ment imparfaites \u2014 jalousie, favoritisme, trahison. Pourtant, Dieu retourne les \u00e9checs humains en destin g\u00e9n\u00e9rationnel.',
+      anchorReference: 'Gen\u00e8se 50:20',
+      canonicalText: 'Vous aviez m\u00e9dit\u00e9 de me faire du mal\u00a0: Dieu l\u2019a chang\u00e9 en bien, de mani\u00e8re \u00e0 accomplir ce qui arrive aujourd\u2019hui, pour sauver la vie \u00e0 un peuple nombreux.',
+      streetTranslation: 'La perfidie humaine ne peut an\u00e9antir le dessein de Dieu. La trahison fut l\u2019escalier secret du salut.',
+      takeaway: 'Gardez confiance\u00a0: Dieu r\u00e9oriente vos \u00e9preuves les plus rudes pour accomplir un bien durable.'
     },
     'ot-exodus': {
       name: 'Exode',
-      codename: 'La Grande Évasion',
-      subtitle: 'Rupture Impériale & Code de Liberté',
+      codename: 'La Grande \u00c9vasion',
+      subtitle: 'Renverser une superpuissance imp\u00e9riale avec un berger d\u00e9sarm\u00e9',
       division: 'Torah & Origines',
       lifeTheme: 'Courage Under Fire',
+      whyItMattersMonday: 'Face \u00e0 un mur impossible, la panique est un r\u00e9flexe naturel. L\u2019Exode enseigne que rester immobile et faire confiance au commandement divin surpasse l\u2019agitation fr\u00e9n\u00e9tique.',
       anchorReference: 'Exode 14:14',
-      canonicalText: 'L’Éternel combattra pour vous; et vous, gardez le silence.',
-      streetTranslation: 'Face à l’impasse de la mer Rouge et aux armées ennemies, la sérénité confiante reste votre meilleure arme.',
-      takeaway: 'Refusez la panique stérile. Laissez Dieu déployer Sa puissance là où vos forces s’arrêtent.'
+      canonicalText: 'L\u2019\u00c9ternel combattra pour vous\u00a0; et vous, gardez le silence.',
+      streetTranslation: 'Face \u00e0 l\u2019impasse de la mer Rouge et aux arm\u00e9es ennemies, la s\u00e9r\u00e9nit\u00e9 confiante reste votre meilleure arme.',
+      takeaway: 'Refusez la panique st\u00e9rile. Laissez Dieu d\u00e9ployer Sa puissance l\u00e0 o\u00f9 vos forces s\u2019arr\u00eatent.'
+    },
+    'ot-leviticus': {
+      name: 'L\u00e9vitique',
+      codename: 'Le Protocole Haute Tension',
+      subtitle: 'Survivre en pr\u00e9sence d\u2019une saintet\u00e9 brute et non dilu\u00e9e',
+      division: 'Torah & Origines',
+      lifeTheme: 'Integrity in Toxic Cultures',
+      whyItMattersMonday: 'Le L\u00e9vitique n\u2019est pas du l\u00e9galisme ennuyeux \u2014 c\u2019est un manuel de d\u00e9contamination morale montrant que l\u2019int\u00e9grit\u00e9 exige des limites nettes dans un monde trouble.',
+      anchorReference: 'L\u00e9vitique 19:18',
+      canonicalText: 'Tu ne te vengeras pas et tu ne garderas pas de rancune envers les enfants de ton peuple. Tu aimeras ton prochain comme toi-m\u00eame.',
+      streetTranslation: 'Abandonnez le fantasme de vengeance. Nourrir une rancune, c\u2019est boire du poison en esp\u00e9rant que l\u2019autre en meure.',
+      takeaway: 'Annulez le registre mental des griefs que vous portez contre ce coll\u00e8gue ou ce proche.'
+    },
+    'ot-numbers': {
+      name: 'Nombres',
+      codename: 'Le Sable Mouvant du D\u00e9sert',
+      subtitle: 'Comment un voyage de 11 jours est devenu une prison mentale de 40 ans',
+      division: 'Torah & Origines',
+      lifeTheme: 'Anxiety & Fear',
+      whyItMattersMonday: 'La plainte et la peur sont contagieuses. Se concentrer sur les \u00ab\u00a0g\u00e9ants\u00a0\u00bb plut\u00f4t que sur l\u2019objectif vous fait tourner en rond pendant des ann\u00e9es.',
+      anchorReference: 'Nombres 14:9',
+      canonicalText: 'Ne vous r\u00e9voltez point contre l\u2019\u00c9ternel, et ne craignez point le peuple de ce pays\u00a0; car il sera notre proie. Leur protection s\u2019est \u00e9loign\u00e9e d\u2019eux, et l\u2019\u00c9ternel est avec nous.',
+      streetTranslation: 'Cessez de trembler. Ces obstacles intimidants ne sont que notre repas du matin. Leur armure est creuse\u00a0; notre Dieu est r\u00e9el.',
+      takeaway: 'Recadrez votre plus grand obstacle actuel comme une \u00e9tape de votre croissance spirituelle.'
+    },
+    'ot-deuteronomy': {
+      name: 'Deut\u00e9ronome',
+      codename: 'Le Dernier Briefing',
+      subtitle: 'Discours d\u2019adieu de Mo\u00efse avant de franchir le Jourdain',
+      division: 'Torah & Origines',
+      lifeTheme: 'Action Over Cheap Talk',
+      whyItMattersMonday: 'Le confort engen\u00e8re l\u2019amn\u00e9sie. Quand les affaires prosp\u00e8rent, c\u2019est le moment le plus dangereux pour croire que c\u2019est votre propre intelligence qui a tout fait.',
+      anchorReference: 'Deut\u00e9ronome 8:17-18',
+      canonicalText: 'Prends garde de ne pas dire dans ton c\u0153ur\u00a0: \u00ab\u00a0C\u2019est ma force et la puissance de ma main qui m\u2019ont acquis ces richesses.\u00a0\u00bb Souviens-toi de l\u2019\u00c9ternel, ton Dieu, car c\u2019est lui qui te donne la force de faire des exploits.',
+      streetTranslation: 'Ne vous leurrez pas en pensant que votre seule ambition vous a apport\u00e9 ce succ\u00e8s. Rappelez-vous qui vous a donn\u00e9 le souffle et la capacit\u00e9 de le construire.',
+      takeaway: 'Ancrez votre ego\u00a0: attribuez vos victoires \u00e0 Dieu qui vous a donn\u00e9 la capacit\u00e9 d\u2019agir.'
+    },
+    'ot-joshua': {
+      name: 'Josu\u00e9',
+      codename: 'L\u2019Invasion de la T\u00eate de Pont',
+      subtitle: 'Prendre la t\u00eate apr\u00e8s la mort de votre mentor',
+      division: 'Guerre & Chroniques',
+      lifeTheme: 'Courage Under Fire',
+      whyItMattersMonday: 'Le courage n\u2019est pas l\u2019absence de peur \u2014 c\u2019est avancer avec les genoux qui tremblent parce que vous savez qui a donn\u00e9 l\u2019ordre d\u2019avancer.',
+      anchorReference: 'Josu\u00e9 1:9',
+      canonicalText: 'Ne t\u2019ai-je pas donn\u00e9 cet ordre\u00a0: Fortifie-toi et prends courage\u00a0? Ne t\u2019effraie point et ne t\u2019\u00e9pouvante point, car l\u2019\u00c9ternel, ton Dieu, est avec toi dans tout ce que tu entreprendras.',
+      streetTranslation: 'Redressez le dos. Pas de recul, pas de remise en question. Vous n\u2019entrez pas dans cette salle seul.',
+      takeaway: 'Abordez la confrontation la plus difficile d\u2019aujourd\u2019hui la t\u00eate haute.'
+    },
+    'ot-judges': {
+      name: 'Juges',
+      codename: 'La R\u00e9sistance des Rebelles',
+      subtitle: 'Des champions imparfaits luttant contre l\u2019anarchie et la d\u00e9cadence morale',
+      division: 'Guerre & Chroniques',
+      lifeTheme: 'Integrity in Toxic Cultures',
+      whyItMattersMonday: 'Dieu se sert de personnes profond\u00e9ment imparfaites (G\u00e9d\u00e9on cach\u00e9 dans un pressoir, Samson luttant contre la luxure) pour briser une oppression syst\u00e9mique.',
+      anchorReference: 'Juges 6:14',
+      canonicalText: 'L\u2019\u00c9ternel se tourna vers lui et dit\u00a0: Va avec cette force que tu as, et tu d\u00e9livreras Isra\u00ebl de la main de Madian\u00a0; n\u2019est-ce pas moi qui t\u2019envoie\u00a0?',
+      streetTranslation: 'Cessez de vous lamenter sur vos origines modestes. Avancez avec la force brute que vous avez maintenant \u2014 c\u2019est moi qui vous soutiens.',
+      takeaway: 'Cessez d\u2019attendre de vous sentir pleinement qualifi\u00e9. Agissez d\u00e8s maintenant avec ce que vous avez.'
+    },
+    'ot-ruth': {
+      name: 'Ruth',
+      codename: 'Le Contrat de Loyaut\u00e9',
+      subtitle: 'Loyaut\u00e9 silencieuse et dignit\u00e9 dans les ruines de la famine et du veuvage',
+      division: 'Guerre & Chroniques',
+      lifeTheme: 'Family & Conflict Resolution',
+      whyItMattersMonday: 'Pas de miracles spectaculaires, juste du travail et une loyaut\u00e9 radicale. La d\u00e9cision de Ruth de rester aupr\u00e8s de la d\u00e9prim\u00e9e Na\u00efomi remodele l\u2019histoire et engendre une lign\u00e9e royale.',
+      anchorReference: 'Ruth 1:16',
+      canonicalText: 'Ne me presse pas de te laisser\u00a0! O\u00f9 tu iras j\u2019irai, o\u00f9 tu demeureras je demeurerai\u00a0; ton peuple sera mon peuple, et ton Dieu sera mon Dieu.',
+      streetTranslation: 'Cessez d\u2019essayer de me repousser. L\u00e0 o\u00f9 tu saignes, je saigne. Je suis engag\u00e9 avec toi jusqu\u2019\u00e0 la fin.',
+      takeaway: 'Prouvez votre loyaut\u00e9 \u00e0 quelqu\u2019un qui traverse une saison sombre quand tout le monde est parti.'
+    },
+    'ot-1samuel': {
+      name: '1 Samuel',
+      codename: 'Le Berger & Le Tyran',
+      subtitle: 'L\u2019asc\u00e9nsion de David et l\u2019effondrement mental du roi Sa\u00fcl',
+      division: 'Guerre & Chroniques',
+      lifeTheme: 'Courage Under Fire',
+      whyItMattersMonday: 'Sa\u00fcl a chut\u00e9 parce qu\u2019il se souciait plus de l\u2019image publique que de l\u2019ob\u00e9issance secr\u00e8te. David s\u2019est \u00e9lev\u00e9 parce qu\u2019il avait un c\u0153ur authentique et sans armure.',
+      anchorReference: '1 Samuel 16:7',
+      canonicalText: 'L\u2019\u00c9ternel ne regarde pas \u00e0 ce que l\u2019homme regarde\u00a0: l\u2019homme regarde \u00e0 ce qui frappe les yeux, mais l\u2019\u00c9ternel regarde au c\u0153ur.',
+      streetTranslation: 'Les gens vous jugent sur votre costume, votre titre et vos chiffres. Dieu scrute vos motivations secr\u00e8tes et votre colonne vert\u00e9brale int\u00e9rieure.',
+      takeaway: 'Consacrez plus de temps \u00e0 calibrer votre int\u00e9grit\u00e9 priv\u00e9e qu\u2019\u00e0 soigner votre image publique.'
+    },
+    'ot-2samuel': {
+      name: '2 Samuel',
+      codename: 'Le Tr\u00f4ne & La Chute',
+      subtitle: 'Consolider un empire et faire face aux cons\u00e9quences d\u2019une d\u00e9faillance morale priv\u00e9e',
+      division: 'Guerre & Chroniques',
+      lifeTheme: 'Unfair Pain & Betrayal',
+      whyItMattersMonday: 'Vous pouvez \u00eatre un leader puissant et vous effondrer quand vous ne prot\u00e9gez pas votre temps libre. Quand David est rest\u00e9 \u00e0 la maison au lieu d\u2019aller au combat, la ruine est entr\u00e9e chez lui.',
+      anchorReference: '2 Samuel 12:13',
+      canonicalText: 'David dit \u00e0 Nathan\u00a0: J\u2019ai p\u00e9ch\u00e9 contre l\u2019\u00c9ternel. Et Nathan dit \u00e0 David\u00a0: L\u2019\u00c9ternel a pardonn\u00e9 ton p\u00e9ch\u00e9\u00a0; tu ne mourras pas.',
+      streetTranslation: 'David n\u2019a pas tent\u00e9 de se justifier. Il a aval\u00e9 son orgueil et admis\u00a0: \u00ab\u00a0Je suis coupable.\u00a0\u00bb Et la gr\u00e2ce l\u2019a accueilli dans la poussi\u00e8re.',
+      takeaway: 'Face \u00e0 un \u00e9chec, \u00e9liminez toutes les excuses. La confession radicale est la seule porte vers la restauration.'
+    },
+    'ot-1kings': {
+      name: '1 Rois',
+      codename: 'Or, Feu & \u00c9puisement',
+      subtitle: 'L\u2019\u00e2ge d\u2019or de Salomon, la confrontation du mont Carmel et l\u2019effondrement d\u2019\u00c9lie',
+      division: 'Guerre & Chroniques',
+      lifeTheme: 'Burnout & Meaning',
+      whyItMattersMonday: 'M\u00eame les champions l\u00e9gendaires s\u2019effondrent. Apr\u00e8s avoir fait descendre le feu sur le mont Carmel, \u00c9lie voulait mourir sous un g\u00ean\u00eate. Dieu lui a donn\u00e9 de la nourriture, du sommeil et un murmure doux.',
+      anchorReference: '1 Rois 19:12',
+      canonicalText: 'Et apr\u00e8s le tremblement de terre, un feu\u00a0: l\u2019\u00c9ternel n\u2019\u00e9tait point dans le feu. Et apr\u00e8s le feu, un murmure doux et l\u00e9ger.',
+      streetTranslation: 'Dieu n\u2019\u00e9tait pas dans l\u2019ouragan hurlant ni dans l\u2019explosion dramatique. Il est apparu dans le silence doux et tranquille.',
+      takeaway: '\u00c9teignez les podcasts, les flux d\u2019actualit\u00e9s et le bruit pendant 15 minutes. \u00c9coutez le murmure doux.'
+    },
+    'ot-esther': {
+      name: 'Esther',
+      codename: 'L\u2019Espionnage au Palais',
+      subtitle: 'Une reine orpheline infiltr\u00e9e qui risque l\u2019ex\u00e9cution pour stopper un g\u00e9nocide',
+      division: 'Guerre & Chroniques',
+      lifeTheme: 'Courage Under Fire',
+      whyItMattersMonday: 'Le nom de Dieu n\u2019est mentionn\u00e9 nulle part dans Esther, pourtant Sa main invisible est sur chaque page. Vous \u00eates plac\u00e9 dans votre position actuelle pour un but strat\u00e9gique.',
+      anchorReference: 'Esther 4:14',
+      canonicalText: 'Et qui sait si ce n\u2019est pas pour un temps comme celui-ci que tu es parvenue \u00e0 la royaut\u00e9\u00a0?',
+      streetTranslation: 'Pensez-vous vraiment que vous \u00eates arriv\u00e9 \u00e0 cette position par accident\u00a0? Vous \u00eates l\u00e0 pr\u00e9cis\u00e9ment pour ce moment de courage.',
+      takeaway: 'Utilisez votre influence pour prot\u00e9ger quelqu\u2019un de vuln\u00e9rable cette semaine.'
+    },
+    'ot-job': {
+      name: 'Job',
+      codename: 'Le Silence de Dieu',
+      subtitle: 'Survivre \u00e0 une perte catastrophique, aux conseils toxiques et au myst\u00e8re divin',
+      division: 'Sagesse & Triage de l\u2019\u00c2me',
+      lifeTheme: 'Unfair Pain & Betrayal',
+      whyItMattersMonday: 'D\u00e9truit les formules de karma simplistes. Quand la vie s\u2019effondre, vous n\u2019avez pas besoin de positivit\u00e9 toxique\u00a0; il vous faut le courage de questionner honn\u00eatement et d\u2019adorer dans les d\u00e9combres.',
+      anchorReference: 'Job 19:25',
+      canonicalText: 'Je sais que mon R\u00e9dempteur est vivant, et qu\u2019il se l\u00e8vera le dernier sur la terre.',
+      streetTranslation: 'M\u00eame avec ma chair en putr\u00e9faction et mon monde en cendres, je sais que mon D\u00e9fenseur est vivant et qu\u2019il aura le dernier mot dans ce tribunal.',
+      takeaway: 'Ancrez-vous dans la v\u00e9rit\u00e9 que votre douleur pr\u00e9sente n\u2019est pas le dernier chapitre.'
     },
     'ot-psalms': {
       name: 'Psaumes',
-      codename: 'L’Infirmerie de l’Âme',
-      subtitle: 'Prières de Tranchées & Victoires',
-      division: 'Sagesse & Triage',
+      codename: 'Le Triage du M\u00e9decin de Champ',
+      subtitle: 'Chants de tranchées et triage \u00e9motionnel brut de rois pourchass\u00e9s et de po\u00e8tes',
+      division: 'Sagesse & Triage de l\u2019\u00c2me',
       lifeTheme: 'Anxiety & Fear',
-      anchorReference: 'Psaume 23:4',
-      canonicalText: 'Quand je marche dans la vallée de l’ombre de la mort, je ne crains aucun mal, car tu es avec moi.',
-      streetTranslation: 'Traverser l’ombre ne signifie pas être abandonné. La houlette du Berger anéantit l’effroi.',
-      takeaway: 'Avancez dans l’épreuve avec la conviction paisible que vous n’êtes jamais seul.'
+      whyItMattersMonday: 'La salle d\u2019urgence \u00e9motionnelle de la Bible. Vous donne la permission d\u2019apporter col\u00e8re, panique, culpabilit\u00e9 et larmes directement devant Dieu sans filtre.',
+      anchorReference: 'Psaume 46:1',
+      canonicalText: 'Dieu est pour nous un refuge et un appui, un secours qui ne manque jamais dans la d\u00e9tresse.',
+      streetTranslation: 'Dieu est notre bunker et notre blindage \u2014 une unit\u00e9 de soutien active d\u00e9j\u00e0 debout \u00e0 c\u00f4t\u00e9 de vous dans le combat.',
+      takeaway: 'Courez vers Dieu comme votre premier refuge plut\u00f4t que de vous engourdir avec des \u00e9crans ou la nourriture.'
     },
     'ot-proverbs': {
       name: 'Proverbes',
-      codename: 'Le Manuel Tactique',
-      subtitle: 'Stratégies Pratiques pour le Monde Réel',
-      division: 'Sagesse & Triage',
+      codename: 'Le Codex Tactique',
+      subtitle: 'Le manuel pratique du roi Salomon pour les affaires, la parole et les limites',
+      division: 'Sagesse & Triage de l\u2019\u00c2me',
+      lifeTheme: 'Workplace & Career Pressure',
+      whyItMattersMonday: 'Intelligence pratique de haut niveau pour l\u2019argent, les r\u00e9unions, la gestion de la col\u00e8re et le rep\u00e9rage des alli\u00e9s toxiques avant qu\u2019ils ne d\u00e9truisent votre carri\u00e8re.',
+      anchorReference: 'Proverbes 4:23',
+      canonicalText: 'Garde ton c\u0153ur plus que toute autre chose, car de lui jaillissent les sources de la vie.',
+      streetTranslation: 'Postez des sentinelles arm\u00e9es aux portes de votre esprit. Tout votre avenir d\u00e9pend de ce que vous y laissez entrer.',
+      takeaway: 'Auditez ce que vous avez regard\u00e9 et \u00e9cout\u00e9 ce matin. Nettoyez les d\u00e9chets mentaux.'
+    },
+    'ot-ecclesiastes': {
+      name: 'Eccl\u00e9siaste',
+      codename: 'L\u2019Antidote \u00e0 l\u2019\u00c9puisement',
+      subtitle: 'D\u00e9construire le statut, la richesse et le bourreautablet sous le soleil',
+      division: 'Sagesse & Triage de l\u2019\u00c2me',
+      lifeTheme: 'Burnout & Meaning',
+      whyItMattersMonday: 'L\u2019antidote \u00e0 l\u2019\u00e9puisement de la course aux rats moderne. Il vous dit clairement que le succ\u00e8s professionnel seul ne comblera jamais votre aspiration la plus profonde.',
+      anchorReference: 'Eccl\u00e9siaste 3:11',
+      canonicalText: 'Il a fait toutes choses belles en leur temps\u00a0; il a m\u00eame mis dans leur c\u0153ur la pens\u00e9e de l\u2019\u00e9ternit\u00e9.',
+      streetTranslation: 'Dieu a plant\u00e9 une faim d\u2019\u00e9ternit\u00e9 au fond de votre poitrine \u2014 c\u2019est pourquoi aucun salaire, aucune promotion ni aucune vacance ne peut jamais vous satisfaire durablement.',
+      takeaway: 'Cessez d\u2019attendre que votre emploi ou votre compte bancaire satisfasse une aspiration \u00e9ternelle.'
+    },
+    'ot-isaiah': {
+      name: '\u00c9sa\u00efe',
+      codename: 'Le Proph\u00e8te de la Salle du Tr\u00f4ne',
+      subtitle: 'Avertissements g\u00e9opolitiques, le Serviteur souffrant et visions de nouvelle cr\u00e9ation',
+      division: 'R\u00e9seau de Renseignement Proph\u00e9tique',
+      lifeTheme: 'Courage Under Fire',
+      whyItMattersMonday: 'Contient l\u2019avant-go\u00fbt le plus clair de J\u00e9sus-Christ 700 ans avant Sa naissance, avec des promesses solides pour ceux qui se sentent \u00e9puis\u00e9s.',
+      anchorReference: '\u00c9sa\u00efe 40:31',
+      canonicalText: 'Mais ceux qui se confient en l\u2019\u00c9ternel renouvellent leur force. Ils prennent le vol comme les aigles\u00a0; ils courent et ne se lassent point, ils marchent et ne se fatiguent point.',
+      streetTranslation: 'Ceux qui fixent les yeux sur le Seigneur \u00e9changeront leurs batteries \u00e9puis\u00e9es contre une \u00e9nergie divine. Vous courrez sans atteindre la limite.',
+      takeaway: '\u00c9changez votre effort \u00e9puis\u00e9 contre une attente patiente dans la pr\u00e9sence de Dieu.'
+    },
+    'ot-jeremiah': {
+      name: 'J\u00e9r\u00e9mie',
+      codename: 'Le Pilier de Fer',
+      subtitle: 'Dire des v\u00e9rit\u00e9s impopulaires \u00e0 une soci\u00e9t\u00e9 en effondrement depuis une fosse de boue',
+      division: 'R\u00e9seau de Renseignement Proph\u00e9tique',
       lifeTheme: 'Integrity in Toxic Cultures',
-      anchorReference: 'Proverbes 3:5-6',
-      canonicalText: 'Confie-toi en l’Éternel de tout ton cœur, et ne t’appuie pas sur ta sagesse; reconnais-le dans toutes tes voies, et il aplanira tes sentiers.',
-      streetTranslation: 'Votre discernement est précieux mais insuffisant sans Dieu. Remettez-Lui la boussole de votre vie.',
-      takeaway: 'Soumettez vos orientations à la prière avant de passer à l’exécution opérationnelle.'
+      whyItMattersMonday: 'Quand vos coll\u00e8gues ou votre culture d\u00e9rivent vers la folie, tenir la ligne vous rendra impopulaire. J\u00e9r\u00e9mie vous apprend \u00e0 vous tenir comme un pilier de fer.',
+      anchorReference: 'J\u00e9r\u00e9mie 29:11',
+      canonicalText: 'Car je connais les projets que j\u2019ai form\u00e9s sur vous, dit l\u2019\u00c9ternel, projets de paix et non de malheur, afin de vous donner un avenir et de l\u2019esp\u00e9rance.',
+      streetTranslation: 'Dit non pas \u00e0 des touristes confortables, mais \u00e0 des captifs en Babylone\u00a0: J\u2019ai encore le plan directeur pour votre survie et votre avenir.',
+      takeaway: 'Rappelez-vous que m\u00eame en saison d\u2019exil, le plan directeur de Dieu reste actif.'
+    },
+    'ot-daniel': {
+      name: 'Daniel',
+      codename: 'Infiltr\u00e9 \u00e0 Babylone',
+      subtitle: 'Prosp\u00e9rer dans les couloirs d\u2019\u00e9lite pa\u00efens sans perdre sa colonne vert\u00e9brale morale',
+      division: 'R\u00e9seau de Renseignement Proph\u00e9tique',
+      lifeTheme: 'Integrity in Toxic Cultures',
+      whyItMattersMonday: 'Le manuel de r\u00e9f\u00e9rence pour les professionnels chr\u00e9tiens naviguant dans la politique d\u2019entreprise s\u00e9culi\u00e8re. Daniel a surviv\u00e9 \u00e0 quatre rois pa\u00efens gr\u00e2ce \u00e0 une comp\u00e9tence in\u00e9gal\u00e9e et \u00e0 une pri\u00e8re silencieuse.',
+      anchorReference: 'Daniel 3:17-18',
+      canonicalText: 'Notre Dieu que nous servons peut nous d\u00e9livrer\u00a0... Mais sinon, sache, \u00f4 roi, que nous ne servirons pas tes dieux.',
+      streetTranslation: 'Notre Dieu peut nous arracher \u00e0 ta fournaise. Mais m\u00eame s\u2019il ne le fait pas, nous n\u2019inchinerons jamais devant ta statue d\u2019or.',
+      takeaway: 'Tracez votre ligne dans le sable avant que la pression n\u2019arrive. D\u00e9cidez ce que vous ne compromettrez jamais.'
     },
     'nt-matthew': {
       name: 'Matthieu',
       codename: 'Le Manifeste du Roi',
-      subtitle: 'La Révolution du Royaume',
+      subtitle: 'La r\u00e9volution contre-culturelle de J\u00e9sus et l\u2019Église primitive explosive',
       division: 'Le Manifeste du Roi',
       lifeTheme: 'Action Over Cheap Talk',
+      whyItMattersMonday: 'Matthieu pr\u00e9sente J\u00e9sus comme le Roi attendu, dont les enseignements renversent les valeurs du monde et appellent \u00e0 une ob\u00e9issance concr\u00e8te, pas \u00e0 une foi de fa\u00e7ade.',
       anchorReference: 'Matthieu 6:33',
-      canonicalText: 'Cherchez premièrement le royaume et la justice de Dieu; et toutes ces choses vous seront données par-dessus.',
-      streetTranslation: 'Recentrez vos priorités absolues sur le Royaume et cessez de consumer vos forces dans l’angoisse du lendemain.',
-      takeaway: 'Mettez l’essentiel au cœur de votre journée: fidélité, justice et droiture devant Dieu.'
+      canonicalText: 'Cherchez premi\u00e8rement le royaume et la justice de Dieu\u00a0; et toutes ces choses vous seront donn\u00e9es par-dessus.',
+      streetTranslation: 'Recentrez vos priorit\u00e9s absolues sur le Royaume et cessez de consumer vos forces dans l\u2019angoisse du lendemain.',
+      takeaway: 'Mettez l\u2019essentiel au c\u0153ur de votre journ\u00e9e\u00a0: fid\u00e9lit\u00e9, justice et droiture devant Dieu.'
     },
     'nt-john': {
       name: 'Jean',
-      codename: 'Lumière dans les Ténèbres',
-      subtitle: 'La Divinité Faite Chair',
+      codename: 'Lumi\u00e8re dans les T\u00e9n\u00e8bres',
+      subtitle: 'La Divinit\u00e9 Faite Chair',
       division: 'Le Manifeste du Roi',
       lifeTheme: 'Courage Under Fire',
+      whyItMattersMonday: 'Jean r\u00e9v\u00e8le l\u2019identit\u00e9 divine de J\u00e9sus \u00e0 travers sept signes puissants et sept d\u00e9clarations \u00ab\u00a0Je suis\u00a0\u00bb, montrant qu\u2019Il est la lumi\u00e8re dans les t\u00e9n\u00e8bres les plus profondes.',
       anchorReference: 'Jean 1:14',
-      canonicalText: 'Et la parole a été faite chair, et elle a habité parmi nous, pleine de grâce et de vérité.',
-      streetTranslation: 'Dieu n’est pas resté dans un sanctuaire lointain; Il a revêtu notre humanité pour nous combler de Sa grâce.',
-      takeaway: 'Venez au Christ en toute assurance: Il comprend vos faiblesses intimes.'
+      canonicalText: 'Et la parole a \u00e9t\u00e9 faite chair, et elle a habit\u00e9 parmi nous, pleine de gr\u00e2ce et de v\u00e9rit\u00e9.',
+      streetTranslation: 'Dieu n\u2019est pas rest\u00e9 dans un sanctuaire lointain\u00a0; Il a rev\u00eatu notre humanit\u00e9 pour nous combler de Sa gr\u00e2ce.',
+      takeaway: 'Venez au Christ en toute assurance\u00a0: Il comprend vos faiblesses intimes.'
     },
     'nt-romans': {
       name: 'Romains',
-      codename: 'La Charte de la Grâce',
-      subtitle: 'Doctrine d’Acier & Victoire Éternelle',
-      division: 'Dépêches de Terrain',
+      codename: 'La Charte de la Gr\u00e2ce',
+      subtitle: 'Doctrine d\u2019Acier & Victoire \u00c9ternelle',
+      division: 'D\u00e9p\u00eaches de Terrain',
       lifeTheme: 'Burnout & Meaning',
+      whyItMattersMonday: 'Romains est la charte la plus compl\u00e8te de la gr\u00e2ce dans toute la Bible \u2014 montrant pourquoi m\u00eame les meilleurs efforts humains ne suffisent pas, et comment la foi transforme tout.',
       anchorReference: 'Romains 8:31',
-      canonicalText: 'Que dirons-nous donc à l’égard de ces choses? Si Dieu est pour nous, qui sera contre nous?',
-      streetTranslation: 'Si le Maître de l’univers combat à vos côtés, aucune adversité terrestre ne saurait avoir le dernier mot.',
-      takeaway: 'Relevez la tête avec foi: aucune condamnation ne tient devant la fidélité de Dieu.'
+      canonicalText: 'Que dirons-nous donc \u00e0 l\u2019\u00e9gard de ces choses\u00a0? Si Dieu est pour nous, qui sera contre nous\u00a0?',
+      streetTranslation: 'Si le Ma\u00eetre de l\u2019univers combat \u00e0 vos c\u00f4t\u00e9s, aucune adversit\u00e9 terrestre ne saurait avoir le dernier mot.',
+      takeaway: 'Relevez la t\u00eate avec foi\u00a0: aucune condamnation ne tient devant la fid\u00e9lit\u00e9 de Dieu.'
     },
     'nt-revelation': {
       name: 'Apocalypse',
-      codename: 'Le Dénouement Cosmique',
-      subtitle: 'Triomphe Final de l’Agneau & Chute de l’Empire',
-      division: 'Le Dénouement Cosmique',
+      codename: 'Le D\u00e9nouement Cosmique',
+      subtitle: 'Guerre cosmique, la chute de l\u2019empire et espoir in\u00e9branlable dans la victoire',
+      division: 'Le D\u00e9nouement Cosmique',
       lifeTheme: 'Courage Under Fire',
+      whyItMattersMonday: 'Guerre cosmique, chute de l\u2019empire et espoir in\u00e9branlable dans la victoire. L\u2019Agneau triomphe \u2014 et ceux qui pers\u00e9v\u00e8rent r\u00e8gneront avec Lui.',
       anchorReference: 'Apocalypse 21:4',
-      canonicalText: 'Il essuiera toute larme de leurs yeux, et la mort ne sera plus, et il n’y aura plus ni deuil, ni cri, ni douleur.',
-      streetTranslation: 'Le deuil, la souffrance et la mort ont un terme irréversiblement scellé par le Seigneur de gloire.',
-      takeaway: 'Persévérez aujourd’hui en gardant les yeux fixés sur la victoire promise: l’Agneau a triomphé.'
+      canonicalText: 'Il essuiera toute larme de leurs yeux, et la mort ne sera plus, et il n\u2019y aura plus ni deuil, ni cri, ni douleur.',
+      streetTranslation: 'Le deuil, la souffrance et la mort ont un terme irr\u00e9versiblement scell\u00e9 par le Seigneur de gloire.',
+      takeaway: 'Pers\u00e9v\u00e9rez aujourd\u2019hui en gardant les yeux fix\u00e9s sur la victoire promise\u00a0: l\u2019Agneau a triomph\u00e9.'
     }
   }
 };
@@ -996,7 +1323,9 @@ export function getLocalizedVerse(verse: MemoryVerse, lang: SupportedLanguage): 
   }
 
   // 5. Check Canon Book Verses
-  const canonMatch = LOCALIZED_CANON_BOOK_DATA[lang]?.[verse.id];
+  const canonLocKey = canonIdToLocKey(verse.id);
+  const canonMatch = LOCALIZED_CANON_BOOK_DATA[lang]?.[canonLocKey]
+                  ?? LOCALIZED_CANON_BOOK_DATA[lang]?.[verse.id];
   if (canonMatch) {
     return {
       ...verse,
@@ -1068,11 +1397,15 @@ export function getLocalizedPsalm(psalm: PsalmPrescription, lang: SupportedLangu
 
 /**
  * Resolves a CanonBook into the active language.
+ * Uses canonIdToLocKey() to bridge the 'canon-genesis' → 'ot-genesis' gap.
  */
 export function getLocalizedCanonBook(book: CanonBook, lang: SupportedLanguage): CanonBook {
   if (lang === 'en') return book;
 
-  const match = LOCALIZED_CANON_BOOK_DATA[lang]?.[book.id];
+  // Try direct lookup first (fallback), then try the normalized key
+  const locKey = canonIdToLocKey(book.id);
+  const match = LOCALIZED_CANON_BOOK_DATA[lang]?.[locKey]
+              ?? LOCALIZED_CANON_BOOK_DATA[lang]?.[book.id];
   if (!match) return book;
 
   return {
@@ -1080,7 +1413,9 @@ export function getLocalizedCanonBook(book: CanonBook, lang: SupportedLanguage):
     name: match.name,
     codename: match.codename,
     subtitle: match.subtitle,
-    division: match.division as any,
+    division: book.division,
+    localizedDivision: match.division,
+    ...(match.whyItMattersMonday ? { whyItMattersMonday: match.whyItMattersMonday } : {}),
     anchorScripture: {
       reference: match.anchorReference,
       canonicalText: match.canonicalText,
@@ -1089,3 +1424,26 @@ export function getLocalizedCanonBook(book: CanonBook, lang: SupportedLanguage):
     }
   };
 }
+
+export const CANON_DIVISION_I18N_KEYS: Record<string, { label: string; desc: string }> = {
+  'Torah & Origins': { label: 'divisionLabel.torah', desc: 'division.torah' },
+  'War & Chronicles': { label: 'divisionLabel.war', desc: 'division.war' },
+  'Wisdom & Soul Triage': { label: 'divisionLabel.wisdom', desc: 'division.wisdom' },
+  'Wisdom & Triage': { label: 'divisionLabel.wisdom', desc: 'division.wisdom' },
+  'Prophet Intelligence': { label: 'divisionLabel.prophet', desc: 'division.prophet' },
+  "The King's Manifesto": { label: 'divisionLabel.kingsManifesto', desc: 'division.kingsManifesto' },
+  'Field Dispatches': { label: 'divisionLabel.fieldDispatches', desc: 'division.fieldDispatches' },
+  'The Cosmic Endgame': { label: 'divisionLabel.cosmicEndgame', desc: 'division.cosmicEndgame' },
+};
+
+export const CANON_LIFE_THEME_I18N_KEYS: Record<string, string> = {
+  'All Themes': 'lifeTheme.all',
+  'Burnout & Meaning': 'lifeTheme.burnout',
+  'Workplace & Career Pressure': 'lifeTheme.workplace',
+  'Anxiety & Fear': 'lifeTheme.anxiety',
+  'Unfair Pain & Betrayal': 'lifeTheme.pain',
+  'Action Over Cheap Talk': 'lifeTheme.action',
+  'Integrity in Toxic Cultures': 'lifeTheme.integrity',
+  'Family & Conflict Resolution': 'lifeTheme.family',
+  'Courage Under Fire': 'lifeTheme.courage',
+};

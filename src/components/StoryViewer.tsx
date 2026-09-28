@@ -109,7 +109,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [act.id, selectedChoiceId, act.unlockedScripture.reference, language]);
+  }, [act.id, selectedChoiceId, act.unlockedScripture.reference, language, scriptureRef?.book, scriptureRef?.chapter, scriptureRef?.verseStart, scriptureRef?.verseEnd]);
 
   // Load saved choices, quizzes, and reflection notes for the current act (Requirement 3)
   useEffect(() => {

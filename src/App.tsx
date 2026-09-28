@@ -183,7 +183,7 @@ export function App() {
         navigator.serviceWorker.removeEventListener('message', handleSwMessage);
       }
     };
-  }, []);
+  }, [currentTab]);
 
   useEffect(() => {
     const onBookmark = (event: Event) => {

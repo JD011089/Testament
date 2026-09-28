@@ -16,6 +16,13 @@ import {
   Flame
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import {
+  getLocalizedHero,
+  getLocalizedVirtue,
+  getLocalizedStep,
+  getLocalizedReason,
+  getLocalizedMissionSummary
+} from '../utils/localizedMission';
 
 interface DailyCampaignCardProps {
   onLaunchStep: (step: DailyCampaignStep) => void;
@@ -26,7 +33,7 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
   onLaunchStep,
   onRewardXP
 }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [composedMission, setComposedMission] = useState<ComposedDailyMission>(() => getComposedDailyMission());
   const [progress, setProgress] = useState<DailyCampaignProgress>(() => {
     return getDailyCampaignProgress(composedMission.id);
@@ -94,19 +101,19 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
                 <span>{t('campaign.title')}</span>
               </span>
               <span className="text-xs font-mono text-stone-500 dark:text-stone-400">
-                {t('campaign.trackSuffix', { hero: activeCampaign.heroName })}
+                {t('campaign.trackSuffix', { hero: getLocalizedHero(activeCampaign.heroName, language) })}
               </span>
             </div>
 
             <h2 className="text-lg sm:text-2xl font-serif font-black text-stone-900 dark:text-parchment-50 leading-tight">
-              {activeCampaign.title}
+              {t('campaign.heroMission', { hero: getLocalizedHero(activeCampaign.heroName, language) })}
             </h2>
 
             <p className="text-xs sm:text-sm text-amber-800 dark:text-amber-300/90 font-medium italic mt-0.5">
-              {t('campaign.virtue', { theme: activeCampaign.virtueTheme })}
+              {t('campaign.virtue', { theme: getLocalizedVirtue(activeCampaign.virtueTheme, language) })}
             </p>
             <p className="text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 mt-1">
-              {composedMission.reason}
+              {getLocalizedReason(composedMission.reason, activeCampaign.heroName, language)}
             </p>
           </div>
         </div>
@@ -122,7 +129,7 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
 
       {/* MISSION BRIEFING TEASER */}
       <p className="relative z-10 text-xs sm:text-sm text-stone-600 dark:text-stone-300/90 leading-relaxed mt-3 sm:mt-4 mb-4 sm:mb-5">
-        {activeCampaign.summary}
+        {getLocalizedMissionSummary(activeCampaign.steps.find(s => s.type === 'quest')?.targetId || '', activeCampaign.summary, language)}
       </p>
 
       {/* PROGRESS TRACKER SECTION - Clean and Unboxed */}
@@ -189,6 +196,7 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
         {activeCampaign.steps.map((step) => {
           const isDone = progress.completedSteps.includes(step.stepNumber);
           const isCurrent = step.stepNumber === currentActiveStepNumber && !isDone;
+          const loc = getLocalizedStep(step, language);
 
           return (
             <div 
@@ -222,7 +230,7 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
                           ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300' 
                           : 'bg-stone-200/80 dark:bg-stone-800 text-stone-600 dark:text-stone-400'
                       }`}>
-                        {step.badge}
+                        {loc.badge}
                       </span>
                       {isCurrent && (
                         <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 font-bold flex items-center gap-1">
@@ -238,11 +246,11 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
                     </div>
 
                     <h3 className="text-sm font-serif font-bold text-stone-900 dark:text-parchment-50 truncate">
-                      {step.subtitle}
+                      {loc.subtitle}
                     </h3>
 
                     <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5 leading-relaxed">
-                      {step.intel}
+                      {loc.intel}
                     </p>
                   </div>
                 </div>
@@ -260,19 +268,7 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
                     }`}
                   >
                     <span>
-                      {isDone 
-                        ? t('campaign.review') 
-                        : step.actionLabel.toLowerCase() === 'enter story' 
-                        ? t('campaign.actionEnterStory') 
-                        : step.actionLabel.toLowerCase() === 'solve dilemma' 
-                        ? t('campaign.actionSolveDilemma') 
-                        : step.actionLabel.toLowerCase() === 'forge truth' 
-                        ? t('campaign.actionForgeTruth') 
-                        : step.actionLabel.toLowerCase() === 'meditate' 
-                        ? t('campaign.actionMeditate') 
-                        : step.actionLabel.toLowerCase() === 'read chapter' 
-                        ? t('campaign.actionReadChapter') 
-                        : step.actionLabel}
+                      {isDone ? t('campaign.review') : loc.actionLabel}
                     </span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
