@@ -53,7 +53,7 @@ export default {
       fontFamily: {
         serif: ['Cinzel', 'Georgia', 'Cambria', 'serif'],
         reading: ['Lora', 'Merriweather', 'Georgia', 'serif'],
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Noto Sans', 'Noto Sans Arabic', 'Noto Sans KR', 'Noto Sans SC', 'sans-serif'],
       },
       boxShadow: {
         glow: '0 0 25px -5px rgba(180, 83, 9, 0.28)',

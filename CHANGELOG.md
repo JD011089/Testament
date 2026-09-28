@@ -5,6 +5,15 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.0] - 2026-09-28
+
+### Added
+- **Interface languages**: English, Spanish, Portuguese, French, German, Korean, Chinese, and Arabic. The language control sits beside the theme switch. A first visit follows the browser language.
+- **Bible reader languages**: Spanish (Reina-Valera 1909), Portuguese (Almeida), French (Louis Segond), German (Luther 1545), Korean, Simplified and Traditional Chinese, and Arabic (Smith & Van Dyke), plus the existing English translations. Choosing a language selects that scripture text.
+
+### Fixed
+- **Reload on an iOS home-screen app**: The update button now navigates in the same tap. iOS was ignoring `location.reload()` and any reload scheduled on a timer, so the waiting update never opened.
+
 ## [1.12.0] - 2026-09-27
 
 ### Added

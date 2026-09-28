@@ -37,6 +37,7 @@ import {
   type ReadingLayout,
 } from '../utils/readingPlace';
 import { BookConnections } from './BookConnections';
+import { getPreferredTranslation, useI18n } from '../i18n';
 
 interface OpenBookModalProps {
   book: CanonBook | null;
@@ -71,6 +72,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
   highlightVerseStart,
   highlightVerseEnd
 }) => {
+  const { t } = useI18n();
   // Navigation & View Mode
   const [activeMode, setActiveMode] = useState<'briefing' | 'reader'>(initialMode);
   const [lens, setLens] = useState<'street' | 'canonical'>('street');
@@ -80,7 +82,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
   // Full Scripture Reader State
   const [selectedChapter, setSelectedChapter] = useState<number>(initialChapter);
   const [selectedTranslation, setSelectedTranslation] = useState<TranslationId>(
-    () => loadReadingPlace()?.translation ?? 'web'
+    () => loadReadingPlace()?.translation ?? getPreferredTranslation()
   );
   const [chapterData, setChapterData] = useState<BibleChapterData | null>(null);
   const [isLoadingChapter, setIsLoadingChapter] = useState(false);
@@ -98,6 +100,15 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
   const readerScrollRef = useRef<HTMLDivElement | null>(null);
 
   const totalChapters = book ? getBookChapterCount(book.name) : 1;
+
+  useEffect(() => {
+    const onLocale = (event: Event) => {
+      const translation = (event as CustomEvent<{ translation?: TranslationId }>).detail?.translation;
+      if (translation) setSelectedTranslation(translation);
+    };
+    window.addEventListener('testament-locale-changed', onLocale);
+    return () => window.removeEventListener('testament-locale-changed', onLocale);
+  }, []);
 
   useEffect(() => {
     const handleVoiceChange = (e: Event) => {
@@ -674,7 +685,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                       setSelectedChapter(c => Math.max(1, c - 1));
                     }}
                     className="p-1.5 sm:p-2 rounded-xl bg-stone-100 dark:bg-stone-850 hover:bg-stone-200 dark:hover:bg-stone-800 disabled:opacity-30 disabled:pointer-events-none text-stone-700 dark:text-stone-300 transition-colors"
-                    title="Previous chapter"
+                    title={t('reader.prev')}
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
@@ -691,7 +702,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                     >
                       {Array.from({ length: totalChapters }, (_, idx) => idx + 1).map((ch) => (
                         <option key={ch} value={ch} className="bg-white dark:bg-stone-900 text-stone-900 dark:text-parchment-100">
-                          Ch {ch} of {totalChapters}
+                          {t('reader.chapterOf', { ch, total: totalChapters })}
                         </option>
                       ))}
                     </select>
@@ -705,7 +716,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                       setSelectedChapter(c => Math.min(totalChapters, c + 1));
                     }}
                     className="p-1.5 sm:p-2 rounded-xl bg-stone-100 dark:bg-stone-850 hover:bg-stone-200 dark:hover:bg-stone-800 disabled:opacity-30 disabled:pointer-events-none text-stone-700 dark:text-stone-300 transition-colors"
-                    title="Next chapter"
+                    title={t('reader.next')}
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -720,13 +731,17 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                       setSelectedTranslation(e.target.value as TranslationId);
                     }}
                     title={BIBLE_TRANSLATIONS.find((item) => item.id === selectedTranslation)?.label}
-                    aria-label="Bible translation"
-                    className="max-w-[5.5rem] px-2 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-250 dark:border-stone-800 text-[11px] sm:text-xs font-mono font-medium text-stone-700 dark:text-stone-300 cursor-pointer focus:outline-none"
+                    aria-label={t('reader.translation')}
+                    className="max-w-[6.5rem] px-2 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-250 dark:border-stone-800 text-[11px] sm:text-xs font-mono font-medium text-stone-700 dark:text-stone-300 cursor-pointer focus:outline-none"
                   >
-                    {BIBLE_TRANSLATIONS.map(t => (
-                      <option key={t.id} value={t.id} className="bg-white dark:bg-stone-900">
-                        {t.id.toUpperCase()}
-                      </option>
+                    {(['en', 'es', 'pt', 'fr', 'de', 'ko', 'zh', 'ar'] as const).map((group) => (
+                      <optgroup key={group} label={group.toUpperCase()}>
+                        {BIBLE_TRANSLATIONS.filter((item) => item.group === group).map((item) => (
+                          <option key={item.id} value={item.id} className="bg-white dark:bg-stone-900">
+                            {item.short}
+                          </option>
+                        ))}
+                      </optgroup>
                     ))}
                   </select>
 

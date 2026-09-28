@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Sun, Moon } from 'lucide-react';
 import { getStoredTheme, toggleTheme, type AppTheme } from '../utils/theme';
 import { soundEngine } from '../utils/audio';
+import { useI18n } from '../i18n';
 
 interface ThemeToggleProps {
   className?: string;
@@ -9,6 +10,7 @@ interface ThemeToggleProps {
 }
 
 export const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '', compact = false }) => {
+  const { t } = useI18n();
   const [theme, setTheme] = useState<AppTheme>(() => getStoredTheme());
 
   useEffect(() => {
@@ -37,8 +39,8 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '', compac
     <button
       onClick={handleToggle}
       type="button"
-      title={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
-      aria-label={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
+      title={isDark ? t('theme.toLight') : t('theme.toDark')}
+      aria-label={isDark ? t('theme.toLight') : t('theme.toDark')}
       className={`relative inline-flex items-center justify-center rounded-xl transition-all duration-200 focus-visible:ring-2 focus-visible:ring-amber-500 ${
         compact
           ? 'p-2 text-stone-600 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 bg-stone-100 dark:bg-stone-900 border border-stone-250 dark:border-stone-800'
@@ -48,12 +50,12 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '', compac
       {isDark ? (
         <>
           <Sun className="w-4 h-4 text-amber-400 animate-fadeIn" />
-          {!compact && <span className="hidden sm:inline">Light</span>}
+          {!compact && <span className="hidden sm:inline">{t('theme.light')}</span>}
         </>
       ) : (
         <>
           <Moon className="w-4 h-4 text-amber-800 animate-fadeIn" />
-          {!compact && <span className="hidden sm:inline">Dark</span>}
+          {!compact && <span className="hidden sm:inline">{t('theme.dark')}</span>}
         </>
       )}
     </button>

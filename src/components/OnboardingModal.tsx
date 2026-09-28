@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
 import { useModalLock } from '../utils/useModalLock';
+import { useI18n, type MessageKey } from '../i18n';
 import confetti from 'canvas-confetti';
 
 export interface UserCalibrationProfile {
@@ -38,6 +39,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   initialProfile
 }) => {
   const modalRef = useModalLock(isOpen);
+  const { t } = useI18n();
   const [step, setStep] = useState<number>(1);
   const [battle, setBattle] = useState<string>(initialProfile?.battleId || 'responsibility');
   const [learningStyle, setLearningStyle] = useState<'visual' | 'audio' | 'tactical' | 'plain'>(initialProfile?.learningStyle || 'visual');
@@ -59,120 +61,37 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
   // BATTLES DEFINITION
   const BATTLES = [
-    {
-      id: 'responsibility',
-      title: 'Carrying the Weight Alone / Heavy Responsibility',
-      desc: 'Work burnout, leadership pressure, provider stress. Carrying heavy expectations in isolation.',
-      recommendedQuestId: 'david-journey',
-      questTitle: "David's Crucible: The Reluctant Warrior",
-      icon: '🛡️',
-      primaryVerse: 'Proverbs 27:17 • "Iron sharpens iron, and one man sharpens another."'
-    },
-    {
-      id: 'betrayal',
-      title: 'Navigating a Crisis, Setback, or Betrayal',
-      desc: 'Blindsided by unfair treatment, broken trust, or waiting endlessly in a difficult season.',
-      recommendedQuestId: 'joseph-journey',
-      questTitle: "Joseph's Rise: From Pit to Palace",
-      icon: '🔥',
-      primaryVerse: 'Genesis 50:20 • "You intended to harm me, but God intended it for good."'
-    },
-    {
-      id: 'regret',
-      title: 'Overcoming Past Regret, Failure, or Guilt',
-      desc: 'Letting down people who mattered. Wondering if your worst mistakes disqualify you.',
-      recommendedQuestId: 'peter-journey',
-      questTitle: "Peter's Crucible: Grace After Failure",
-      icon: '⚔️',
-      primaryVerse: 'Luke 22:32 • "When you have turned back, strengthen your brothers."'
-    },
-    {
-      id: 'purpose',
-      title: 'Seeking Clarity, Direction & Life Purpose',
-      desc: 'Feeling stuck, questioning your calling, or reluctant to step up to a daunting assignment.',
-      recommendedQuestId: 'moses-journey',
-      questTitle: "Moses: From Fugitive to Deliverer",
-      icon: '🧭',
-      primaryVerse: 'Exodus 3:12 • "I will be with you. This will be the sign."'
-    },
-    {
-      id: 'discipline',
-      title: 'Short Fuse, Impatience & Standing Firm',
-      desc: 'Exhausted by compromise all around you. Battling cynicism, anger, or feeling like the only one trying.',
-      recommendedQuestId: 'elijah-journey',
-      questTitle: "Elijah: Standing Alone on Mount Carmel",
-      icon: '⚡',
-      primaryVerse: '1 Kings 19:12 • "After the fire came a gentle whisper."'
-    }
-  ];
+    { id: 'responsibility', recommendedQuestId: 'david-journey', icon: '🛡️' },
+    { id: 'betrayal', recommendedQuestId: 'joseph-journey', icon: '🔥' },
+    { id: 'regret', recommendedQuestId: 'peter-journey', icon: '⚔️' },
+    { id: 'purpose', recommendedQuestId: 'moses-journey', icon: '🧭' },
+    { id: 'discipline', recommendedQuestId: 'elijah-journey', icon: '⚡' },
+  ].map((battle) => ({
+    ...battle,
+    title: t(`battle.${battle.id}.title` as MessageKey),
+    desc: t(`battle.${battle.id}.desc` as MessageKey),
+    questTitle: t(`battle.${battle.id}.quest` as MessageKey),
+    primaryVerse: t(`battle.${battle.id}.verse` as MessageKey),
+  }));
 
-  const LEARNING_STYLES = [
-    {
-      id: 'visual' as const,
-      title: 'Visual & Action-First',
-      desc: 'Graphic novel illustration panels, gritty historical environments, seeing the scene unfold.',
-      icon: '🎬'
-    },
-    {
-      id: 'audio' as const,
-      title: 'Audio & Commute Narration',
-      desc: 'Deep cinematic documentary narration for the truck, gym, or commute. Sub-bass atmosphere.',
-      icon: '🎧'
-    },
-    {
-      id: 'tactical' as const,
-      title: 'Tactical & Hands-On Drills',
-      desc: 'Word Forge tile puzzles, memory retention drills, and real-life scenario simulators.',
-      icon: '🧠'
-    },
-    {
-      id: 'plain' as const,
-      title: 'Zero Religious Jargon & Fluff',
-      desc: 'Raw historical facts, street translation of ancient customs, and 3-minute plain-English takeaways.',
-      icon: '🔍'
-    }
-  ];
+  const LEARNING_STYLES = (['visual', 'audio', 'tactical', 'plain'] as const).map((id) => ({
+    id,
+    title: t(`style.${id}.title` as MessageKey),
+    desc: t(`style.${id}.desc` as MessageKey),
+    icon: id === 'visual' ? '🎬' : id === 'audio' ? '🎧' : id === 'tactical' ? '🧠' : '🔍',
+  }));
 
-  const FAMILIARITIES = [
-    {
-      id: 'new' as const,
-      title: 'Brand New / Blank Slate',
-      desc: "Never read it or don't remember much. Assume zero knowledge, explain ancient terms simply.",
-      tag: 'Plain-English Guide'
-    },
-    {
-      id: 'disconnected' as const,
-      title: 'Grew Up Around It, But Disconnected',
-      desc: 'Tired of dry academic lectures. Want raw authentic history and direct masculine application.',
-      tag: 'Fresh Eyes'
-    },
-    {
-      id: 'sharp' as const,
-      title: 'Familiar, Looking for Sharp Daily Edge',
-      desc: 'Know the basics. Looking for deep tactical study, scripture memory weapons, and brotherhood wisdom.',
-      tag: 'Deep Armor'
-    }
-  ];
+  const FAMILIARITIES = (['new', 'disconnected', 'sharp'] as const).map((id) => ({
+    id,
+    title: t(`familiar.${id}.title` as MessageKey),
+    desc: t(`familiar.${id}.desc` as MessageKey),
+    tag: t(`familiar.${id}.tag` as MessageKey),
+  }));
 
   const CADENCES = [
-    {
-      id: '3min' as const,
-      title: '3 Minutes / Morning Briefing',
-      desc: 'Quick audio briefing with your morning coffee or drive.',
-      icon: '☕'
-    },
-    {
-      id: '10min' as const,
-      title: '7 to 10 Minutes / One Story Act',
-      desc: 'One full story scene, dilemma choice, and unlocked scripture.',
-      icon: '⏱️'
-    },
-    {
-      id: 'deep' as const,
-      title: 'Deep Dive / Flexible Session',
-      desc: 'Story act + Word Forge tile memory + "What\'s the play?" simulator.',
-      icon: '🛡️'
-    }
+    { id: '3min' as const, title: t('cadence.3'), desc: t('cadence.3.desc'), icon: '☕' },
+    { id: '10min' as const, title: t('cadence.10'), desc: t('cadence.10.desc'), icon: '⏱️' },
+    { id: 'deep' as const, title: t('cadence.deep'), desc: t('cadence.deep.desc'), icon: '🛡️' },
   ];
 
   const selectedBattleObj = BATTLES.find(b => b.id === battle) || BATTLES[0];
@@ -239,21 +158,21 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
             <div className="w-9 h-9 rounded-xl overflow-hidden border border-amber-500/60 shadow-md bg-stone-100 dark:bg-stone-950 shrink-0">
               <img 
                 src="/icons/icon-192.png" 
-                alt="Testament Emblem" 
+                alt={t('onboard.emblem')} 
                 className="w-full h-full object-cover"
               />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h3 id="onboarding-modal-title" className="text-sm sm:text-base font-serif font-bold text-stone-900 dark:text-parchment-50">
-                  Battle Plan Calibration
+                  {t('onboard.title')}
                 </h3>
                 <span className="text-[11px] uppercase font-mono px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30">
-                  {step < 5 ? `Step ${step} of 4` : 'Ready'}
+                  {step < 5 ? t('onboard.step', { step }) : t('onboard.ready')}
                 </span>
               </div>
               <p className="text-[11px] text-stone-500 dark:text-stone-400">
-                Tailoring your authentic biblical learning experience
+                {t('onboard.subtitle')}
               </p>
             </div>
           </div>
@@ -270,13 +189,13 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               }}
               className="text-xs text-stone-500 dark:text-stone-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors px-2.5 py-1 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 focus-visible:ring-2 focus-visible:ring-amber-500"
             >
-              Skip
+              {t('onboard.skip')}
             </button>
             <button
               onClick={onClose}
-              aria-label="Close calibration modal"
+              aria-label={t('onboard.close')}
               className="p-1 rounded-lg text-stone-400 hover:text-stone-700 dark:text-stone-500 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors focus-visible:ring-2 focus-visible:ring-amber-500"
-              title="Close"
+              title={t('pwa.close')}
             >
               <X className="w-4 h-4" />
             </button>
@@ -304,13 +223,13 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               <div>
                 <div className="flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
                   <Shield className="w-3.5 h-3.5" />
-                  <span>The front lines</span>
+                  <span>{t('onboard.front')}</span>
                 </div>
                 <h2 className="text-lg sm:text-xl font-serif font-bold text-stone-900 dark:text-parchment-50">
-                  What battle are you fighting in your daily life right now?
+                  {t('onboard.battleQ')}
                 </h2>
                 <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">
-                  We will prioritize stories and tactical scriptures that directly address this weight.
+                  {t('onboard.battleHelp')}
                 </p>
               </div>
 
@@ -355,13 +274,13 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               <div>
                 <div className="flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
                   <Brain className="w-3.5 h-3.5" />
-                  <span>Cognitive Style</span>
+                  <span>{t('onboard.cognitive')}</span>
                 </div>
                 <h2 className="text-lg sm:text-xl font-serif font-bold text-stone-900 dark:text-parchment-50">
-                  How does your mind lock in information best?
+                  {t('onboard.styleQ')}
                 </h2>
                 <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">
-                  Built for practical thinkers who hate boring seminary textbooks.
+                  {t('onboard.styleHelp')}
                 </p>
               </div>
 
@@ -406,13 +325,13 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               <div>
                 <div className="flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
                   <BookOpen className="w-3.5 h-3.5" />
-                  <span>Scripture Familiarity</span>
+                  <span>{t('onboard.familiar')}</span>
                 </div>
                 <h2 className="text-lg sm:text-xl font-serif font-bold text-stone-900 dark:text-parchment-50">
-                  Where are you starting from?
+                  {t('onboard.startQ')}
                 </h2>
                 <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">
-                  We adapt our context cards and ancient customs translator to your comfort level.
+                  {t('onboard.startHelp')}
                 </p>
               </div>
 
@@ -459,13 +378,13 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               <div>
                 <div className="flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
                   <Clock className="w-3.5 h-3.5" />
-                  <span>Daily Commitment</span>
+                  <span>{t('onboard.commit')}</span>
                 </div>
                 <h2 className="text-lg sm:text-xl font-serif font-bold text-stone-900 dark:text-parchment-50">
-                  How much time can you realistically invest daily?
+                  {t('onboard.timeQ')}
                 </h2>
                 <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">
-                  Consistency beats intensity. Set a pace you can actually maintain.
+                  {t('onboard.timeHelp')}
                 </p>
               </div>
 
@@ -508,13 +427,13 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               <div className="text-center py-2">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-600/50 text-emerald-800 dark:text-emerald-300 text-xs font-mono font-bold mb-3 shadow-sm">
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>Calibration Complete • +50 Starter XP Awarded</span>
+                  <span>{t('onboard.done')}</span>
                 </div>
                 <h2 className="text-xl sm:text-2xl font-serif font-black text-stone-900 dark:text-parchment-50">
-                  Your Personal Battle Plan
+                  {t('onboard.planTitle')}
                 </h2>
                 <p className="text-xs text-stone-600 dark:text-stone-400 mt-1 max-w-md mx-auto">
-                  Based on your daily season and cognitive style, here is your customized launchpad:
+                  {t('onboard.planHelp')}
                 </p>
               </div>
 
@@ -523,7 +442,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 <div className="flex items-start justify-between gap-3 border-b border-amber-200 dark:border-amber-900/40 pb-3">
                   <div>
                     <div className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
-                      Recommended Starter Quest
+                      {t('onboard.recommended')}
                     </div>
                     <h3 className="text-base sm:text-lg font-serif font-bold text-stone-900 dark:text-parchment-100 mt-0.5">
                       {selectedBattleObj.questTitle}
@@ -534,23 +453,23 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
                 <div className="space-y-2 text-xs">
                   <div className="text-stone-700 dark:text-stone-300">
-                    <strong className="text-amber-800 dark:text-amber-400">Targeting Your Battle: </strong>
+                    <strong className="text-amber-800 dark:text-amber-400">{t('onboard.targeting')} </strong>
                     {selectedBattleObj.title}
                   </div>
 
                   <div className="p-3 rounded-xl bg-white dark:bg-stone-900/80 border border-amber-200 dark:border-stone-800 text-stone-800 dark:text-parchment-200 italic shadow-xs">
-                    <strong className="text-amber-800 dark:text-amber-300 not-italic">Primary Tactical Verse: </strong>
+                    <strong className="text-amber-800 dark:text-amber-300 not-italic">{t('onboard.verse')} </strong>
                     "{selectedBattleObj.primaryVerse}"
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 pt-1 text-[11px] text-stone-600 dark:text-stone-400 font-mono">
                     <div>
-                      <span className="text-stone-500">Mode: </span>
-                      <span className="text-amber-800 dark:text-amber-300 font-bold uppercase">{learningStyle}</span>
+                      <span className="text-stone-500">{t('onboard.mode')} </span>
+                      <span className="text-amber-800 dark:text-amber-300 font-bold uppercase">{t(`style.${learningStyle}.title` as MessageKey)}</span>
                     </div>
                     <div>
-                      <span className="text-stone-500">Cadence: </span>
-                      <span className="text-amber-800 dark:text-amber-300 font-bold">{dailyCadence === '3min' ? '3 Min / Day' : dailyCadence === '10min' ? '7-10 Min / Day' : 'Deep Study'}</span>
+                      <span className="text-stone-500">{t('onboard.cadence')} </span>
+                      <span className="text-amber-800 dark:text-amber-300 font-bold">{dailyCadence === '3min' ? t('cadence.3') : dailyCadence === '10min' ? t('cadence.10') : t('cadence.deep')}</span>
                     </div>
                   </div>
                 </div>
@@ -563,7 +482,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-bold text-sm sm:text-base flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
                 >
                   <Sparkles className="w-4 h-4 text-stone-950" />
-                  <span>Start today's mission</span>
+                  <span>{t('onboard.startMission')}</span>
                   <ArrowRight className="w-4 h-4 stroke-[2.5]" />
                 </button>
 
@@ -571,7 +490,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   onClick={() => handleFinishCalibration(true, false)}
                   className="w-full py-3 px-4 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 text-xs font-semibold transition-all text-center flex items-center justify-center gap-1.5"
                 >
-                  <span>Jump straight to the story</span>
+                  <span>{t('onboard.jump')}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -591,14 +510,14 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               }`}
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back</span>
+              <span>{t('onboard.back')}</span>
             </button>
 
             <button
               onClick={handleNextStep}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs sm:text-sm transition-all shadow-md cursor-pointer"
             >
-              <span>{step === 4 ? 'Build My Battle Plan' : 'Continue'}</span>
+              <span>{step === 4 ? t('onboard.build') : t('onboard.continue')}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>

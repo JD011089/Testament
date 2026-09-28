@@ -1,6 +1,33 @@
 // PWA Notification & Deep-Linking Worker Script
 // Alarm scheduling uses IndexedDB-persisted timestamps so alarms survive SW restarts.
 
+let claimOnActivate = false;
+
+// Home-screen reloads add testament_reload so this navigation misses the precache
+// and fetches a fresh shell. Registered before Workbox so it can answer first.
+self.addEventListener('fetch', (event) => {
+  const request = event.request;
+  if (request.mode !== 'navigate') return;
+  let url;
+  try {
+    url = new URL(request.url);
+  } catch {
+    return;
+  }
+  if (!url.searchParams.has('testament_reload')) return;
+  event.respondWith((async () => {
+    try {
+      const fresh = await fetch(request, { cache: 'reload' });
+      if (fresh && fresh.ok) return fresh;
+    } catch {
+      // fall through to the app shell
+    }
+    const cached = await caches.match('/index.html');
+    if (cached) return cached;
+    return fetch(request);
+  })());
+});
+
 const DB_NAME = 'testament-notifications-db';
 const DB_VERSION = 1;
 const STORE_NAME = 'state';
@@ -95,7 +122,24 @@ async function checkAndFirePendingAlarm() {
 // ─── Lifecycle: activate — check alarm on every SW activation ────────────────
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(checkAndFirePendingAlarm());
+  event.waitUntil((async () => {
+    if (claimOnActivate && self.clients && typeof self.clients.claim === 'function') {
+      await self.clients.claim();
+      const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      await Promise.all(windows.map(async (client) => {
+        if (typeof client.navigate !== 'function') return;
+        try {
+          const url = new URL(client.url);
+          if (url.searchParams.has('testament_reload')) return;
+          url.searchParams.set('testament_reload', String(Date.now()));
+          await client.navigate(url.href);
+        } catch {
+          // Safari often has no WindowClient.navigate; the page reload handles it.
+        }
+      }));
+    }
+    await checkAndFirePendingAlarm();
+  })());
 });
 
 // ─── Notification click handler ───────────────────────────────────────────────
@@ -142,6 +186,7 @@ self.addEventListener('notificationclose', () => {
 self.addEventListener('message', (event) => {
   event.waitUntil((async () => {
   if (event.data?.type === 'SKIP_WAITING') {
+    claimOnActivate = true;
     if (typeof self.skipWaiting === 'function') self.skipWaiting();
 
   } else if (event.data?.type === 'CHECK_FOR_UPDATE') {

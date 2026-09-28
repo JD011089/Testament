@@ -1,4 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { translate } from '../i18n';
+import { reloadAppDocument } from '../utils/pwaReload';
 
 interface Props {
   children: ReactNode;
@@ -26,7 +28,7 @@ export class AppErrorBoundary extends Component<Props, State> {
     } catch {
       // ignore
     }
-    window.location.reload();
+    reloadAppDocument();
   };
 
   render() {
@@ -35,16 +37,16 @@ export class AppErrorBoundary extends Component<Props, State> {
     return (
       <div className="min-h-screen bg-[#fcfbfa] text-stone-900 flex items-center justify-center p-6">
         <div className="max-w-md text-left space-y-4">
-          <h1 className="text-2xl font-serif font-black">Testament hit a saved-data problem</h1>
+          <h1 className="text-2xl font-serif font-black">{translate('error.title')}</h1>
           <p className="text-sm text-stone-600 leading-relaxed">
-            Progress on this device could not be read. Resetting clears Testament data in this browser and reloads a fresh start.
+            {translate('error.body')}
           </p>
           <button
             type="button"
             onClick={this.resetAppData}
             className="px-4 py-2.5 rounded-xl bg-amber-500 text-stone-950 text-sm font-bold"
           >
-            Reset app data
+            {translate('error.reset')}
           </button>
         </div>
       </div>

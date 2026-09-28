@@ -1,8 +1,15 @@
 /**
  * PWA Update Engine
- * Detects background & foreground updates, dispatches system push notifications
- * ("Update Available: Tap to update and open"), and manages 1-tap reloads.
+ * Detects background & foreground updates, dispatches system push notifications,
+ * and manages 1-tap reloads. iOS home-screen apps need a real navigation.
  */
+import { translate } from '../i18n';
+import {
+  clearReloadParamFromAddressBar,
+  needsGestureNavigation,
+  reloadAppDocument,
+  reloadGuarded,
+} from './pwaReload';
 
 let swRegistration: ServiceWorkerRegistration | null = null;
 let updateAvailableState = false;
@@ -21,14 +28,14 @@ export async function sendUpdatePushNotification(reg?: ServiceWorkerRegistration
     return false;
   }
 
-  const title = '🚀 Testament Update Available';
+  const title = translate('update.pushTitle');
   const options: NotificationOptions & {
     renotify?: boolean;
     requireInteraction?: boolean;
     vibrate?: number[];
     actions?: Array<{ action: string; title: string }>;
   } = {
-    body: 'A new version of Testament is ready! Tap to update and open the latest features.',
+    body: translate('update.pushBody'),
     icon: '/icons/icon-192.png',
     badge: '/icons/badge-96.png',
     tag: 'testament-app-update',
@@ -40,8 +47,8 @@ export async function sendUpdatePushNotification(reg?: ServiceWorkerRegistration
       url: '/'
     },
     actions: [
-      { action: 'update', title: '🔄 Update & Open' },
-      { action: 'dismiss', title: 'Later' }
+      { action: 'update', title: translate('update.actionUpdate') },
+      { action: 'dismiss', title: translate('update.actionLater') }
     ]
   };
 
@@ -87,20 +94,26 @@ export async function checkForUpdates(): Promise<void> {
   }
 }
 
-/**
- * Apply the update: tells waiting service worker to skipWaiting & activates the new version
- */
-export function applyAppUpdate(): void {
+/** Ask the waiting worker to take over. The active worker is already running. */
+export function primeWaitingWorker(): void {
   if (swRegistration?.waiting) {
     swRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
-  } else if (navigator.serviceWorker?.controller) {
-    navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
   }
+}
 
-  // Brief delay to let the worker activate before page refresh
-  setTimeout(() => {
-    window.location.reload();
-  }, 300);
+/**
+ * Apply the update. On an iOS home-screen app this must navigate in the same
+ * turn as the tap; reload() and timed location changes are ignored there.
+ */
+export function applyAppUpdate(): void {
+  primeWaitingWorker();
+  if (needsGestureNavigation()) {
+    reloadAppDocument();
+    return;
+  }
+  window.setTimeout(() => {
+    reloadAppDocument();
+  }, 250);
 }
 
 /**
@@ -128,6 +141,8 @@ export function isUpdateAvailable(): boolean {
  * Initializes the PWA update detection engine
  */
 export function initPwaUpdateEngine(): () => void {
+  clearReloadParamFromAddressBar();
+
   if (!('serviceWorker' in navigator)) {
     return () => {};
   }
@@ -143,18 +158,13 @@ export function initPwaUpdateEngine(): () => void {
     return () => {};
   }
 
-  // Prevent infinite reload loops on controller change
+  // Prevent infinite reload loops on controller change.
+  // localStorage survives iOS standalone navigations; sessionStorage often does not.
   let refreshing = false;
   const handleControllerChange = () => {
-    if (refreshing) return;
-    const lastReload = sessionStorage.getItem('testament_sw_reloaded');
-    if (lastReload && Date.now() - Number(lastReload) < 15000) {
-      console.warn('PWA: Preventing reload loop.');
-      return;
-    }
+    if (refreshing || reloadGuarded()) return;
     refreshing = true;
-    sessionStorage.setItem('testament_sw_reloaded', String(Date.now()));
-    window.location.reload();
+    reloadAppDocument();
   };
   navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
 

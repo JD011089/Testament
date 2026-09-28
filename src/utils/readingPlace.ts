@@ -1,4 +1,4 @@
-import type { TranslationId } from './bibleService';
+import { isTranslationId, type TranslationId } from './bibleService';
 
 const KEY = 'testament_reading_place';
 
@@ -26,7 +26,6 @@ interface StoredReading {
 
 const FONT_SIZES: ReadingFontSize[] = ['sm', 'base', 'lg', 'xl'];
 const LAYOUTS: ReadingLayout[] = ['verses', 'flow'];
-const TRANSLATIONS: TranslationId[] = ['web', 'kjv', 'bbe'];
 
 function isFontSize(value: unknown): value is ReadingFontSize {
   return FONT_SIZES.includes(value as ReadingFontSize);
@@ -37,7 +36,7 @@ function isLayout(value: unknown): value is ReadingLayout {
 }
 
 function isTranslation(value: unknown): value is TranslationId {
-  return TRANSLATIONS.includes(value as TranslationId);
+  return isTranslationId(value);
 }
 
 function emptyStore(): StoredReading {

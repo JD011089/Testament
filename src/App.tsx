@@ -22,6 +22,7 @@ import type { DailyCampaignStep } from './data/dailyCampaigns';
 import { getComposedDailyMission } from './utils/missionComposer';
 import { pathForTab, tabFromPath } from './utils/routes';
 import { loadReadingPlace } from './utils/readingPlace';
+import { useI18n } from './i18n';
 
 const WordForge = lazy(() => import('./components/WordForge').then((m) => ({ default: m.WordForge })));
 const DilemmaSimulator = lazy(() => import('./components/DilemmaSimulator').then((m) => ({ default: m.DilemmaSimulator })));
@@ -29,7 +30,8 @@ const CanonLibraryPage = lazy(() => import('./components/CanonLibraryPage').then
 const DriveModePlayer = lazy(() => import('./components/DriveModePlayer').then((m) => ({ default: m.DriveModePlayer })));
 
 function ViewFallback() {
-  return <div className="max-w-7xl mx-auto px-6 py-16 text-sm text-stone-500">Loading...</div>;
+  const { t } = useI18n();
+  return <div className="max-w-7xl mx-auto px-6 py-16 text-sm text-stone-500">{t('common.loading')}</div>;
 }
 
 function readStringArray(key: string): string[] {

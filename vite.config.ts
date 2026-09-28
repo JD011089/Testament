@@ -329,7 +329,7 @@ export default defineConfig(({ mode }) => {
         workbox: {
           globPatterns: ['**/*.{js,css,html,svg,woff2}'],
           navigateFallback: '/index.html',
-          navigateFallbackDenylist: [/^\/api\//],
+          navigateFallbackDenylist: [/^\/api\//, /testament_reload=/],
           importScripts: ['/sw-notifications.js'],
           runtimeCaching: [
             {
@@ -347,6 +347,15 @@ export default defineConfig(({ mode }) => {
                 cacheName: 'testament-audio',
                 rangeRequests: true,
                 expiration: { maxEntries: 40, maxAgeSeconds: 60 * 60 * 24 * 365 }
+              }
+            },
+            {
+              urlPattern: /^https:\/\/api\.getbible\.net\/.*/i,
+              handler: 'NetworkFirst',
+              options: {
+                cacheName: 'testament-getbible',
+                networkTimeoutSeconds: 4,
+                expiration: { maxEntries: 80, maxAgeSeconds: 60 * 60 * 24 * 30 }
               }
             },
             {

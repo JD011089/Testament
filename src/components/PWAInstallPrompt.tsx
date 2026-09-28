@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Download, X, Smartphone, Monitor, CheckCircle2, ArrowUpRight } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
 import { useModalLock } from '../utils/useModalLock';
+import { useI18n } from '../i18n';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -32,6 +33,7 @@ export const PWAInstallPrompt: React.FC = () => {
   const [isModalMode, setIsModalMode] = useState(false);
   const pwaModalRef = useModalLock(isVisible && isModalMode);
   const [installState, setInstallState] = useState<'ready' | 'prompted' | 'manual_needed'>('ready');
+  const { t } = useI18n();
 
   useEffect(() => {
     // If already installed (running standalone or previously confirmed), suppress banner
@@ -185,14 +187,14 @@ export const PWAInstallPrompt: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-sm sm:text-lg font-serif font-bold text-stone-900 dark:text-parchment-50 leading-tight">
-                Install Testament
+                {t('pwa.title')}
               </h3>
               <span className="text-[11px] sm:text-[11px] uppercase tracking-wider px-1.5 sm:px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 font-mono font-bold border border-amber-300 dark:border-amber-500/30">
                 PWA
               </span>
             </div>
             <p className="text-[11px] sm:text-xs text-stone-600 dark:text-stone-400 mt-0.5 line-clamp-1 sm:line-clamp-none">
-              Works offline for saved content, audio narration, and home screen launch
+              {t('pwa.subtitle')}
             </p>
           </div>
         </div>
@@ -200,7 +202,7 @@ export const PWAInstallPrompt: React.FC = () => {
         <button 
           onClick={handleDismiss}
           className="text-stone-400 hover:text-stone-700 dark:hover:text-parchment-100 p-1 sm:p-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800/60 transition-colors"
-          title="Close"
+          title={t('pwa.close')}
         >
           <X className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
@@ -210,19 +212,19 @@ export const PWAInstallPrompt: React.FC = () => {
       <div className={`${isModalMode ? 'grid' : 'hidden sm:grid'} grid-cols-2 gap-2 py-1 text-[11px] text-stone-600 dark:text-stone-300`}>
         <div className="flex items-center gap-1.5">
           <CheckCircle2 className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 shrink-0" />
-          <span>Saved content offline</span>
+          <span>{t('pwa.offline')}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <CheckCircle2 className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 shrink-0" />
-          <span>Cinematic Voice Audio</span>
+          <span>{t('pwa.voice')}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <CheckCircle2 className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 shrink-0" />
-          <span>Zero App Store Delay</span>
+          <span>{t('pwa.noStore')}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <CheckCircle2 className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 shrink-0" />
-          <span>Desktop & Mobile Icon</span>
+          <span>{t('pwa.icon')}</span>
         </div>
       </div>
 
@@ -233,7 +235,7 @@ export const PWAInstallPrompt: React.FC = () => {
           className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 transition-all shadow-glow cursor-pointer active:scale-[0.98]"
         >
           <Download className="w-5 h-5 text-stone-950 stroke-[2.5]" />
-          <span>Install Testament App Now</span>
+          <span>{t('pwa.installNow')}</span>
         </button>
 
         {/* If deferredPrompt not immediately available, show clear visual instructions */}
@@ -243,26 +245,23 @@ export const PWAInstallPrompt: React.FC = () => {
               <>
                 <div className="text-amber-800 dark:text-amber-400 font-bold flex items-center gap-1.5 text-xs">
                   <Smartphone className="w-4 h-4 text-amber-800 dark:text-amber-400" />
-                  <span>Installing on iPhone / iPad (Safari):</span>
+                  <span>{t('pwa.iosTitle')}</span>
                 </div>
                 <div className="text-stone-600 dark:text-stone-300 space-y-1 pl-1 text-[11px] leading-relaxed">
-                  <p>1. Tap the <strong>Share</strong> button at the bottom of Safari (square with up arrow <ArrowUpRight className="w-3 h-3 inline" />).</p>
-                  <p>2. Scroll down and select <strong>"Add to Home Screen"</strong>.</p>
-                  <p>3. Tap <strong>"Add"</strong> in the top-right corner.</p>
+                  <p>1. {t('pwa.ios1')} <ArrowUpRight className="w-3 h-3 inline" /></p>
+                  <p>2. {t('pwa.ios2')}</p>
+                  <p>3. {t('pwa.ios3')}</p>
                 </div>
               </>
             ) : (
               <>
                 <div className="text-amber-800 dark:text-amber-400 font-bold flex items-center gap-1.5 text-xs">
                   <Monitor className="w-4 h-4 text-amber-800 dark:text-amber-400" />
-                  <span>Installing on Computer / Chrome / Edge:</span>
+                  <span>{t('pwa.desktopTitle')}</span>
                 </div>
                 <div className="text-stone-600 dark:text-stone-300 space-y-1.5 pl-1 text-[11px] leading-relaxed">
-                  <p className="flex items-center gap-1.5">
-                    <span>1. Look at the top right of your address bar for the</span>
-                    <strong className="text-amber-800 dark:text-amber-300 bg-stone-200 dark:bg-stone-800 px-1.5 py-0.5 rounded border border-stone-300 dark:border-stone-700">Install icon (⊕)</strong>
-                  </p>
-                  <p>2. Or open browser menu <strong>(⋮)</strong> ➔ click <strong>"Install Testament"</strong> or <strong>"Add to Home screen"</strong>.</p>
+                  <p>1. {t('pwa.desktop1')}</p>
+                  <p>2. {t('pwa.desktop2')}</p>
                 </div>
               </>
             )}
@@ -274,7 +273,7 @@ export const PWAInstallPrompt: React.FC = () => {
                 className="px-3 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700/60 text-[11px] font-semibold flex items-center gap-1.5 transition-all"
               >
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span>I've added it to Home Screen</span>
+                <span>{t('pwa.added')}</span>
               </button>
             </div>
           </div>
@@ -287,23 +286,23 @@ export const PWAInstallPrompt: React.FC = () => {
           onClick={() => setInstallState(installState === 'manual_needed' ? 'ready' : 'manual_needed')}
           className="text-amber-800 dark:text-amber-400/90 hover:text-amber-800 dark:hover:text-amber-300 underline text-[11px]"
         >
-          {installState === 'manual_needed' ? 'Hide device tips' : 'Need help installing?'}
+          {installState === 'manual_needed' ? t('pwa.hideHelp') : t('pwa.help')}
         </button>
 
         <div className="flex items-center gap-2">
           <button
             onClick={handleMarkAlreadyInstalled}
             className="text-[11px] text-stone-500 dark:text-stone-400 hover:text-emerald-700 dark:hover:text-emerald-400 underline transition-colors"
-            title="Mark as already installed on your device so this prompt won't show again"
+            title={t('pwa.alreadyTip')}
           >
-            Already installed?
+            {t('pwa.already')}
           </button>
           <span className="text-stone-300 dark:text-stone-700">•</span>
           <button
             onClick={handleDismiss}
             className="text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200 py-1 px-1.5 text-[11px]"
           >
-            Maybe Later
+            {t('pwa.later')}
           </button>
         </div>
       </div>

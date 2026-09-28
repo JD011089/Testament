@@ -34,6 +34,9 @@ import { DailyCampaignCard } from './DailyCampaignCard';
 import { BattlefieldCheckInModal, BATTLEFIELD_OPTIONS } from './BattlefieldCheckInModal';
 import { VoiceSelectorModal } from './VoiceSelectorModal';
 import { ThemeToggle } from './ThemeToggle';
+import { LanguageSelect } from './LanguageSelect';
+import { useI18n, type MessageKey } from '../i18n';
+import { APP_VERSION } from '../version';
 import { useModalLock } from '../utils/useModalLock';
 import type { DailyCampaignStep } from '../data/dailyCampaigns';
 import { 
@@ -138,6 +141,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onRewardXP,
   onLaunchCampaignStep
 }) => {
+  const { t } = useI18n();
   const [readingPlace, setReadingPlace] = useState(() => loadReadingPlace());
   useEffect(() => {
     const refresh = () => setReadingPlace(loadReadingPlace());
@@ -278,10 +282,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
   }, []);
 
   const getRankTitle = (points: number) => {
-    if (points >= 500) return 'Iron Pillar';
-    if (points >= 300) return 'Mighty Man of Adullam';
-    if (points >= 150) return 'Story Explorer';
-    return 'Seeker';
+    if (points >= 500) return t('rank.pillar');
+    if (points >= 300) return t('rank.mighty');
+    if (points >= 150) return t('rank.explorer');
+    return t('rank.seeker');
   };
 
   const tracks = ['All', 'Underdog & Courage', 'Career & High Stakes', 'Burnout & Pressure', 'Restoration & Brotherhood'];
@@ -323,27 +327,28 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     onOpenWhatsNew?.();
                   }}
                   className="text-[11px] font-mono px-2 py-0.2 rounded-full bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-600 hover:text-stone-950 dark:text-stone-400 dark:hover:text-amber-300 border border-stone-250 dark:border-stone-750 transition-colors"
-                  title="What changed in v1.12.0"
+                  title={t('dash.whatsNew', { version: APP_VERSION })}
                 >
-                  v1.12.0
+                  v{APP_VERSION}
                 </button>
               </div>
               <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
-                <span className="text-amber-800 dark:text-amber-400 font-medium">{todayFormatted}</span> • The Living Word
+                <span className="text-amber-800 dark:text-amber-400 font-medium">{todayFormatted}</span> • {t('brand.livingWord')}
               </p>
             </div>
           </div>
 
           {/* Right: Guide & Theme Toggle + Universal Streak / XP */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <LanguageSelect compact />
             <ThemeToggle compact />
 
-            <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/80 dark:bg-stone-800 text-xs font-mono font-bold text-orange-800 dark:text-orange-300" title="Daily streak">
+            <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/80 dark:bg-stone-800 text-xs font-mono font-bold text-orange-800 dark:text-orange-300" title={t('dash.streak')}>
               <Flame className="w-3.5 h-3.5 fill-orange-500/20 text-orange-500" />
               <span>{streakCount}d</span>
             </div>
 
-            <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/50 dark:bg-stone-800 text-xs font-mono font-bold text-amber-800 dark:text-amber-300" title="Scripture XP">
+            <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/50 dark:bg-stone-800 text-xs font-mono font-bold text-amber-800 dark:text-amber-300" title={t('dash.xp')}>
               <Award className="w-3.5 h-3.5 text-amber-500" />
               <span>{xp}</span>
             </div>
@@ -430,10 +435,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 onOpenOnboarding();
               }}
               className="snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-xs font-medium whitespace-nowrap transition-colors"
-              title="Calibrate your battle plan"
+              title={t('dash.calibrateTip')}
             >
               <SlidersHorizontal className="w-3.5 h-3.5 text-amber-500" />
-              <span>{userProfile ? 'My Plan' : 'Calibrate'}</span>
+              <span>{userProfile ? t('dash.myPlan') : t('dash.calibrate')}</span>
             </button>
           )}
           </div>
@@ -455,7 +460,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             }`}
           >
             <Target className="w-3.5 h-3.5" />
-            <span>Daily Mission</span>
+            <span>{t('dash.dailyMission')}</span>
           </button>
 
           <button
@@ -467,14 +472,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
             }`}
           >
             <Compass className="w-3.5 h-3.5" />
-            <span>Explore</span>
+            <span>{t('dash.explore')}</span>
           </button>
         </div>
 
         <div className="text-xs text-stone-500 dark:text-stone-400 italic hidden md:block">
           {dashboardMode === 'guided'
-            ? 'One path today, shaped by your check-in and what is due'
-            : 'Browse all stories and field tools'}
+            ? t('dash.guidedHint')
+            : t('dash.exploreHint')}
         </div>
       </div>
 
@@ -497,7 +502,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             >
               <div>
                 <div className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
-                  Continue reading
+                  {t('dash.continueReading')}
                 </div>
                 <div className="font-serif text-base font-bold text-stone-900 dark:text-parchment-50">
                   {readingPlace.bookName} {readingPlace.chapter}
@@ -575,15 +580,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   </div>
                   <div>
                     <div className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
-                      Your Calibrated Battle Plan
+                      {t('dash.plan')}
                     </div>
                     <div className="text-xs sm:text-sm font-serif font-bold text-stone-900 dark:text-parchment-100">
-                      Targeting: {userProfile.battleTitle}
+                      {t('dash.targeting', { battle: t(`battle.${userProfile.battleId}.title` as MessageKey) || userProfile.battleTitle })}
                     </div>
                     <div className="text-[11px] text-stone-500 dark:text-stone-400 flex items-center gap-2 mt-0.5">
-                      <span>Mode: <strong className="text-amber-800 dark:text-amber-300 uppercase">{userProfile.learningStyle}</strong></span>
+                      <span>{t('dash.mode')} <strong className="text-amber-800 dark:text-amber-300 uppercase">{t(`style.${userProfile.learningStyle}.title` as MessageKey)}</strong></span>
                       <span>•</span>
-                      <span>Cadence: <strong className="text-amber-800 dark:text-amber-300">{userProfile.dailyCadence === '3min' ? '3 Min/Day' : userProfile.dailyCadence === '10min' ? '7-10 Min/Day' : 'Deep Study'}</strong></span>
+                      <span>{t('dash.cadence')} <strong className="text-amber-800 dark:text-amber-300">{userProfile.dailyCadence === '3min' ? t('cadence.3') : userProfile.dailyCadence === '10min' ? t('cadence.10') : t('cadence.deep')}</strong></span>
                     </div>
                   </div>
                 </div>
@@ -863,17 +868,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
               <div>
                 <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400 px-1.5 py-0.2 rounded bg-amber-500/10 inline-block mb-0.5">
-                  Complete Canon • 66 Books
+                  {t('dash.libraryKicker')}
                 </span>
                 <h2 className="text-xs sm:text-sm font-serif font-bold text-stone-900 dark:text-parchment-50">
-                  Scripture Field Library
+                  {t('dash.libraryTitle')}
                 </h2>
               </div>
             </div>
             <p className="text-[11px] text-stone-500 dark:text-stone-400 mb-3">
               {readingPlace
-                ? `Pick up ${readingPlace.bookName} ${readingPlace.chapter}, or browse the rest of the canon.`
-                : 'Every book from Genesis to Revelation, ready to read.'}
+                ? t('dash.libraryResume', { book: readingPlace.bookName, chapter: readingPlace.chapter })
+                : t('dash.libraryEmpty')}
             </p>
             <div className="flex gap-2">
               <button
@@ -885,7 +890,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 className="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all"
               >
                 <BookOpen className="w-3.5 h-3.5" />
-                <span>{readingPlace ? `Continue ${readingPlace.bookName} ${readingPlace.chapter}` : 'Open Library'}</span>
+                <span>{readingPlace ? t('dash.continueBook', { book: readingPlace.bookName, chapter: readingPlace.chapter }) : t('dash.openLibrary')}</span>
               </button>
               <button
                 onClick={() => {
@@ -895,7 +900,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 className="py-2 px-3 rounded-xl bg-stone-200/60 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-300 text-xs font-semibold flex items-center justify-center gap-1 transition-all"
                 title="Open Scripture Arsenal Journal"
               >
-                <span>Arsenal</span>
+                <span>{t('dash.arsenal')}</span>
                 <ArrowRight className="w-3 h-3" />
               </button>
             </div>
