@@ -38,6 +38,8 @@ export interface TemperamentProfile {
   archetypeDescription: string;
 }
 
+const stripAccents = (str: string) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
 export function evaluateUserPlay(
   userInput: string,
   selectedFeeling: string | null,
@@ -45,6 +47,11 @@ export function evaluateUserPlay(
 ): HeartEvaluationResult {
   const cleanInput = userInput.trim();
   const text = cleanInput.toLowerCase();
+  const textNorm = stripAccents(text);
+
+  const matchesKeyword = (k: string) => {
+    return text.includes(k) || textNorm.includes(stripAccents(k));
+  };
   
   // Tactical action dictionaries
   const wrathKeywords = [
@@ -52,50 +59,77 @@ export function evaluateUserPlay(
     'curse', 'cuss', 'expose', 'ruin', 'humiliate', 'call out', 'revenge', 'payback', 
     'retaliate', 'get even', 'blast', 'fire back', 'screw', 'rip', 'confront publicly',
     'sue', 'destroy him', 'destroy her', 'throat', 'slap', 'confront', 'argue', 'lash out',
-    'threaten', 'expose them'
+    'threaten', 'expose them',
+    // French keywords
+    'frapper', 'battre', 'crier', 'hurler', 'détruire', 'tuer', 'exploser', 'vengeance', 'venger',
+    'dénoncer', 'humilier', 'attaquer', 'poursuivre', 'menacer', 'insulter', 'éclater',
+    'affronter', 'répliquer', 'faire payer', 'gifler', 'déchirer', 'ruiner', 'engueuler',
+    'colère'
   ];
 
   const escapeKeywords = [
     'quit', 'walk out', 'leave', 'ghost', 'ignore', 'shut down', 'give up', 'hide', 
     'drink', 'drunk', 'smoke', 'bottle', 'isolate', 'pack my bags', 'run away', 
     'never talk', 'disappear', 'numb', 'sleep', 'bed', 'cancel', 'block them', 'resign',
-    'avoid', 'drop out', 'forget it'
+    'avoid', 'drop out', 'forget it',
+    // French keywords
+    'quitter', 'démissionner', 'partir', 'fuir', 'ignorer', 'bloquer', 'abandonner',
+    'disparaître', 'cacher', 'fuite', 'm\'isoler', 'isoler', 'dormir', 'laisser tomber',
+    'éviter', 'ne plus parler', 'tout plaquer'
   ];
 
   const pacifyKeywords = [
     'say nothing', 'let it slide', 'apologize', 'take the blame', 'swallow', 'pretend', 
     'suck it up', 'do nothing', 'be nice', 'keep peace', 'let them have it', 'let them win',
     'stay quiet', 'give in', 'give them the money', 'just pay', 'comply', 'nod along',
-    'compromise', 'avoid conflict'
+    'compromise', 'avoid conflict',
+    // French keywords
+    'rien dire', 'laisser passer', 's\'excuser', 'avaler', 'faire semblant', 'ne rien faire',
+    'être gentil', 'garder la paix', 'céder', 'se taire', 'compromis', 'éviter le conflit',
+    'laisser couler', 'encaisser', 'subir'
   ];
 
   const documentationKeywords = [
     'receipt', 'receipts', 'email', 'emails', 'document', 'proof', 'paper trail',
     'timestamp', 'timestamps', 'screenshot', 'screenshots', 'notes', 'records',
-    'cc', 'bcc', 'audit', 'file', 'forward'
+    'cc', 'bcc', 'audit', 'file', 'forward',
+    // French keywords
+    'preuve', 'preuves', 'courriel', 'courriels', 'capture', 'captures', 'documenter',
+    'reçu', 'reçus', 'dossier', 'enregistrements', 'copie', 'historique', 'horodatage'
   ];
 
   const escalationKeywords = [
     'hr', 'boss', 'manager', 'vp', 'executive', 'director', 'ceo', 'board',
-    'lawyer', 'legal', 'police', 'mediator', 'authority', 'supervisor'
+    'lawyer', 'legal', 'police', 'mediator', 'authority', 'supervisor',
+    // French keywords
+    'ressources humaines', 'rh', 'patron', 'supérieur', 'direction', 'pdg',
+    'avocat', 'juridique', 'médiateur', 'autorité', 'hiérarchie'
   ];
 
   const communicationKeywords = [
     'private', '1 on 1', 'one on one', 'lunch', 'coffee', 'calmly', 'talk',
     'discuss', 'clarify', 'ask', 'listen', 'boundary', 'boundaries', 'honest',
-    'truth', 'conversation', 'explain', 'meet'
+    'truth', 'conversation', 'explain', 'meet',
+    // French keywords
+    'privé', 'en tête à tête', 'tête-à-tête', 'café', 'déjeuner', 'calmement', 'parler',
+    'discuter', 'clarifier', 'demander', 'écouter', 'limite', 'limites', 'honnête',
+    'vérité', 'expliquer', 'rencontrer', 'dialoguer'
   ];
 
   const prayerKeywords = [
     'pray', 'prayer', 'god', 'scripture', 'fast', 'pastor', 'mentor', 'counsel',
-    'breathe', 'pause', 'wait', 'step back', 'wisdom', 'forgive', 'sleep on it'
+    'breathe', 'pause', 'wait', 'step back', 'wisdom', 'forgive', 'sleep on it',
+    // French keywords
+    'prier', 'prière', 'dieu', 'écriture', 'écritures', 'jeûner', 'jeûne', 'pasteur',
+    'conseil', 'respirer', 'attendre', 'sagesse', 'pardonner', 'réfléchir',
+    'discernement', 'méditer', 'recul'
   ];
 
   // Collect all detected keywords
   const detectedKeywords: string[] = [];
   const checkKeywords = (list: string[]) => {
     list.forEach(k => {
-      if (text.includes(k) && !detectedKeywords.includes(k)) {
+      if (matchesKeyword(k) && !detectedKeywords.includes(k)) {
         detectedKeywords.push(k);
       }
     });
@@ -115,50 +149,99 @@ export function evaluateUserPlay(
   let pacifierScore = 0;
   let strategistScore = 0;
 
-  wrathKeywords.forEach(k => { if (text.includes(k)) avengerScore += 2; });
-  escapeKeywords.forEach(k => { if (text.includes(k)) escapistScore += 2; });
-  pacifyKeywords.forEach(k => { if (text.includes(k)) pacifierScore += 2; });
-  documentationKeywords.forEach(k => { if (text.includes(k)) strategistScore += 3; });
-  communicationKeywords.forEach(k => { if (text.includes(k)) strategistScore += 2; });
-  prayerKeywords.forEach(k => { if (text.includes(k)) strategistScore += 2; });
-  escalationKeywords.forEach(k => { if (text.includes(k)) strategistScore += 1; });
+  wrathKeywords.forEach(k => { if (matchesKeyword(k)) avengerScore += 2; });
+  escapeKeywords.forEach(k => { if (matchesKeyword(k)) escapistScore += 2; });
+  pacifyKeywords.forEach(k => { if (matchesKeyword(k)) pacifierScore += 2; });
+  documentationKeywords.forEach(k => { if (matchesKeyword(k)) strategistScore += 3; });
+  communicationKeywords.forEach(k => { if (matchesKeyword(k)) strategistScore += 2; });
+  prayerKeywords.forEach(k => { if (matchesKeyword(k)) strategistScore += 2; });
+  escalationKeywords.forEach(k => { if (matchesKeyword(k)) strategistScore += 1; });
 
-  // Emotional badges weighting
-  if (selectedFeeling === 'Furious / Want Payback') avengerScore += 3;
-  if (selectedFeeling === 'Walk Away / Ghost') escapistScore += 3;
-  if (selectedFeeling === 'Shut Down / Bottle It') pacifierScore += 3;
-  if (selectedFeeling === 'Panicking / Tempted') {
+  // Emotional badges weighting (multilingual support: EN / ES / FR)
+  const fLower = (selectedFeeling || '').toLowerCase();
+  const fNorm = stripAccents(fLower);
+  if (
+    selectedFeeling === 'Furious / Want Payback' ||
+    fNorm.includes('furio') ||
+    fNorm.includes('payback') ||
+    fNorm.includes('venganza') ||
+    fNorm.includes('colere') ||
+    fNorm.includes('vengeance') ||
+    fNorm.includes('venger') ||
+    fNorm.includes('furieux') ||
+    fNorm.includes('repliquer')
+  ) avengerScore += 3;
+
+  if (
+    selectedFeeling === 'Walk Away / Ghost' ||
+    fNorm.includes('walk') ||
+    fNorm.includes('alejar') ||
+    fNorm.includes('ghost') ||
+    fNorm.includes('partir') ||
+    fNorm.includes('fuir') ||
+    fNorm.includes('ignorer') ||
+    fNorm.includes('couper')
+  ) escapistScore += 3;
+
+  if (
+    selectedFeeling === 'Shut Down / Bottle It' ||
+    fNorm.includes('shut') ||
+    fNorm.includes('bloquear') ||
+    fNorm.includes('bottle') ||
+    fNorm.includes('bloquer') ||
+    fNorm.includes('garder') ||
+    fNorm.includes('interioriser') ||
+    fNorm.includes('taire')
+  ) pacifierScore += 3;
+
+  if (
+    selectedFeeling === 'Panicking / Tempted' ||
+    fNorm.includes('panic') ||
+    fNorm.includes('panico') ||
+    fNorm.includes('panique') ||
+    fNorm.includes('tentad') ||
+    fNorm.includes('tente')
+  ) {
     escapistScore += 1;
     pacifierScore += 1;
   }
-  if (selectedFeeling === 'Calm & Strategic') strategistScore += 3;
+
+  if (
+    selectedFeeling === 'Calm & Strategic' ||
+    fNorm.includes('calm') ||
+    fNorm.includes('calme') ||
+    fNorm.includes('tranquil') ||
+    fNorm.includes('estrategic') ||
+    fNorm.includes('strategi') ||
+    fNorm.includes('pose')
+  ) strategistScore += 3;
 
   // Determine Tactic & Tone based on actual user input
   let primaryTactic = 'Direct Action & Gut Instinct';
   let detectedTone = 'Authentic & Unfiltered';
 
-  if (documentationKeywords.some(k => text.includes(k))) {
+  if (documentationKeywords.some(matchesKeyword)) {
     primaryTactic = 'Building an Irrefutable Paper Trail';
     detectedTone = 'Calculated, Methodical & Evidence-Focused';
-  } else if (escalationKeywords.some(k => text.includes(k)) && wrathKeywords.some(k => text.includes(k))) {
+  } else if (escalationKeywords.some(matchesKeyword) && wrathKeywords.some(matchesKeyword)) {
     primaryTactic = 'Aggressive Institutional Escalation';
     detectedTone = 'Indignant, Demanding Accountability';
-  } else if (escalationKeywords.some(k => text.includes(k))) {
+  } else if (escalationKeywords.some(matchesKeyword)) {
     primaryTactic = 'Formal Hierarchy Escalation (HR / Leadership)';
     detectedTone = 'Procedural & Seeking Institutional Intervention';
-  } else if (communicationKeywords.some(k => text.includes(k))) {
+  } else if (communicationKeywords.some(matchesKeyword)) {
     primaryTactic = 'Direct Closed-Door Clarification';
     detectedTone = 'Constructive, Measured & Assertive';
-  } else if (wrathKeywords.some(k => text.includes(k))) {
+  } else if (wrathKeywords.some(matchesKeyword)) {
     primaryTactic = 'Direct Confrontation & Retaliation';
     detectedTone = 'Fierce, Reactive & Emotionally Charged';
-  } else if (escapeKeywords.some(k => text.includes(k))) {
+  } else if (escapeKeywords.some(matchesKeyword)) {
     primaryTactic = 'Total Disengagement & Tactical Withdrawal';
     detectedTone = 'Exhausted, Boundary-Drawing & Self-Preserving';
-  } else if (pacifyKeywords.some(k => text.includes(k))) {
+  } else if (pacifyKeywords.some(matchesKeyword)) {
     primaryTactic = 'Conflict De-escalation through Concession';
     detectedTone = 'Peace-Keeping, Yielding & Protective of Calm';
-  } else if (prayerKeywords.some(k => text.includes(k))) {
+  } else if (prayerKeywords.some(matchesKeyword)) {
     primaryTactic = 'Spiritual Pause & Seeking Divine Counsel';
     detectedTone = 'Reflective, Grounded & Discerning';
   }
@@ -170,9 +253,9 @@ export function evaluateUserPlay(
 
   // Stance classification & dynamic bespoke answers
   if (strategistScore >= 2 && strategistScore >= avengerScore && strategistScore >= escapistScore) {
-    const hasDocumentation = documentationKeywords.some(k => text.includes(k));
-    const hasEscalation = escalationKeywords.some(k => text.includes(k));
-    const hasPrayer = prayerKeywords.some(k => text.includes(k));
+    const hasDocumentation = documentationKeywords.some(matchesKeyword);
+    const hasEscalation = escalationKeywords.some(matchesKeyword);
+    const hasPrayer = prayerKeywords.some(matchesKeyword);
 
     let directAnswer = `You approached this situation with composure. `;
     if (hasDocumentation) {
@@ -346,6 +429,8 @@ export function evaluateSocraticTurn2(
   dilemma: RealLifeDilemma
 ): { followUpFeedback: string; temperament: TemperamentProfile } {
   const combined = `${turn1Answer} ${turn2Answer}`.toLowerCase();
+  const combinedNorm = stripAccents(combined);
+  const hasMarker = (markers: string[]) => markers.some(w => combined.includes(w) || combinedNorm.includes(stripAccents(w)));
   
   // Calculate virtue scores (0-100)
   let graceScore = 45;
@@ -354,19 +439,19 @@ export function evaluateSocraticTurn2(
   let courageScore = 50;
 
   // Grace markers
-  if (['forgive', 'mercy', 'listen', 'patience', 'reconcil', 'private', 'quiet', 'grace', 'heal', 'gentle', 'love'].some(w => combined.includes(w))) {
+  if (hasMarker(['forgive', 'mercy', 'listen', 'patience', 'reconcil', 'private', 'quiet', 'grace', 'heal', 'gentle', 'love', 'pardon', 'miséricorde', 'écoute', 'douceur', 'amour', 'perdon', 'misericordia', 'gracia'])) {
     graceScore += 25;
   }
   // Truth markers
-  if (['truth', 'fact', 'receipt', 'honest', 'confront', 'clear', 'clarity', 'expose', 'call out', 'standard', 'real'].some(w => combined.includes(w))) {
+  if (hasMarker(['truth', 'fact', 'receipt', 'honest', 'confront', 'clear', 'clarity', 'expose', 'call out', 'standard', 'real', 'vérité', 'fait', 'faits', 'preuve', 'honnête', 'franchise', 'clarté', 'dénoncer', 'verdad', 'hechos', 'claro', 'denunciar'])) {
     truthScore += 25;
   }
   // Prudence markers
-  if (['plan', 'pause', 'wait', 'document', 'email', 'counsel', 'pray', 'think', 'advice', 'timing', 'measure'].some(w => combined.includes(w))) {
+  if (hasMarker(['plan', 'pause', 'wait', 'document', 'email', 'counsel', 'pray', 'think', 'advice', 'timing', 'measure', 'attendre', 'réfléchir', 'conseil', 'prier', 'prière', 'recul', 'mesure', 'prudencia', 'esperar', 'pensar', 'oracion', 'orar'])) {
     prudenceScore += 25;
   }
   // Courage markers
-  if (['stand', 'face', 'bold', 'speak', 'refuse', 'boundary', 'boundaries', 'direct', 'action', 'address'].some(w => combined.includes(w))) {
+  if (hasMarker(['stand', 'face', 'bold', 'speak', 'refuse', 'boundary', 'boundaries', 'direct', 'action', 'address', 'courage', 'oser', 'affronter', 'parler', 'refuser', 'limite', 'limites', 'debout', 'valor', 'enfrentar', 'firme'])) {
     courageScore += 25;
   }
 

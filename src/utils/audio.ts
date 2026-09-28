@@ -526,6 +526,47 @@ class SoundEngine {
     const voices = this.cachedVoices.length > 0 ? this.cachedVoices : (typeof window !== 'undefined' ? window.speechSynthesis.getVoices() : []);
     if (voices.length === 0) return null;
 
+    const currentLang = (typeof document !== 'undefined' && document.documentElement?.lang) || 
+                        (typeof localStorage !== 'undefined' && localStorage.getItem('testament_language')) || 
+                        'en';
+    const langPrefix = currentLang.toLowerCase().slice(0, 2);
+
+    if (langPrefix === 'fr') {
+      const frenchVoices = voices.filter(v => v.lang.toLowerCase().startsWith('fr'));
+      if (frenchVoices.length > 0) {
+        if (profile === 'grace') {
+          const femaleFrench = frenchVoices.find(v => {
+            const n = v.name.toLowerCase();
+            return n.includes('natural') || n.includes('online') || n.includes('hortense') || n.includes('julie') || n.includes('denise') || n.includes('celine') || n.includes('female');
+          }) || frenchVoices[0];
+          return femaleFrench;
+        }
+        const maleFrench = frenchVoices.find(v => {
+          const n = v.name.toLowerCase();
+          return (n.includes('natural') || n.includes('online') || n.includes('paul') || n.includes('henri') || n.includes('claude') || n.includes('male')) && !n.includes('female');
+        }) || frenchVoices[0];
+        return maleFrench;
+      }
+    }
+
+    if (langPrefix === 'es') {
+      const spanishVoices = voices.filter(v => v.lang.toLowerCase().startsWith('es'));
+      if (spanishVoices.length > 0) {
+        if (profile === 'grace') {
+          const femaleSpanish = spanishVoices.find(v => {
+            const n = v.name.toLowerCase();
+            return n.includes('natural') || n.includes('online') || n.includes('elena') || n.includes('monica') || n.includes('laura') || n.includes('female');
+          }) || spanishVoices[0];
+          return femaleSpanish;
+        }
+        const maleSpanish = spanishVoices.find(v => {
+          const n = v.name.toLowerCase();
+          return (n.includes('natural') || n.includes('online') || n.includes('jorge') || n.includes('alvaro') || n.includes('male')) && !n.includes('female');
+        }) || spanishVoices[0];
+        return maleSpanish;
+      }
+    }
+
     // Filter OUT any known female or robot voices
     const nonFemale = voices.filter(v => {
       const name = v.name.toLowerCase();
@@ -764,6 +805,11 @@ class SoundEngine {
 
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
+
+    const currentLang = (typeof document !== 'undefined' && document.documentElement?.lang) || 
+                        (typeof localStorage !== 'undefined' && localStorage.getItem('testament_language')) || 
+                        'en';
+    utterance.lang = currentLang === 'fr' ? 'fr-FR' : currentLang === 'es' ? 'es-ES' : 'en-US';
 
     // Apply distinct acoustic profiles for each narrator persona
     switch (this.currentNarratorProfile) {

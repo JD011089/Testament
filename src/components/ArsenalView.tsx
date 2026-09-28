@@ -16,6 +16,9 @@ import {
   FileText,
   Bell
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
+import { LanguageToggle } from './LanguageToggle';
+import { ThemeToggle } from './ThemeToggle';
 
 interface ArsenalViewProps {
   memorizedVerses: string[];
@@ -42,6 +45,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
   onToggleBookmark,
   onPracticeVerse,
 }) => {
+  const { t, language } = useLanguage();
   const [activeFilter, setActiveFilter] = useState<ArsenalFilter>('saved');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeAudioVerseId, setActiveAudioVerseId] = useState<string | null>(null);
@@ -61,7 +65,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
       return {};
     }
   })();
-  const allVerses = getAllVerses();
+  const allVerses = getAllVerses(language);
 
   const savedIdSet = new Set([...memorizedVerses, ...bookmarkedVerses]);
   const savedVerses = allVerses.filter((v) => savedIdSet.has(v.id));
@@ -95,24 +99,32 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
   };
 
   const filters: { id: ArsenalFilter; label: string; count: number }[] = [
-    { id: 'saved', label: 'All Saved', count: savedVerses.length },
-    { id: 'mastered', label: 'Mastered', count: memorizedVerses.length },
-    { id: 'bookmarked', label: 'Bookmarked', count: bookmarkedVerses.length },
+    { id: 'saved', label: t('arsenal.allSaved'), count: savedVerses.length },
+    { id: 'mastered', label: t('arsenal.mastered'), count: memorizedVerses.length },
+    { id: 'bookmarked', label: t('arsenal.bookmarked'), count: bookmarkedVerses.length },
   ];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-8 pb-36 sm:pb-40 md:pb-48 text-left">
-      <div className="mb-6">
-        <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
-          <Shield className="w-4 h-4" />
-          <span>Saved • Mastered & Bookmarked</span>
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
+            <Shield className="w-4 h-4" />
+            <span>{t('arsenal.badge')}</span>
+          </div>
+          <h1 className="text-2xl md:text-4xl font-serif font-black text-stone-900 dark:text-parchment-50">
+            {t('arsenal.title')}
+          </h1>
+          <p className="text-xs md:text-sm text-stone-600 dark:text-stone-400 mt-1 max-w-2xl">
+            {t('arsenal.subtitle')}
+          </p>
         </div>
-        <h1 className="text-2xl md:text-4xl font-serif font-black text-stone-900 dark:text-parchment-50">
-          Your Arsenal
-        </h1>
-        <p className="text-xs md:text-sm text-stone-600 dark:text-stone-400 mt-1 max-w-2xl">
-          Verses you&apos;ve mastered or bookmarked. Practice due reviews in Word Forge — this is your personal stash, not the full catalog.
-        </p>
+
+        {/* Mobile Quick Controls */}
+        <div className="flex md:hidden items-center gap-1.5">
+          <LanguageToggle compact />
+          <ThemeToggle compact />
+        </div>
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -123,7 +135,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             aria-label="Search saved scriptures"
-            placeholder="Search your saved verses..."
+            placeholder={t('arsenal.searchPlaceholder')}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-sm text-stone-900 dark:text-parchment-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:border-amber-500/70 focus-visible:ring-2 focus-visible:ring-amber-500"
           />
         </div>
@@ -152,8 +164,8 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
         <div className="text-center py-16 text-stone-500 text-sm space-y-2">
           <p>
             {savedVerses.length === 0
-              ? 'Nothing saved yet. Master a verse in Word Forge or bookmark one from a story.'
-              : `No verses match "${searchQuery || activeFilter}".`}
+              ? t('arsenal.nothingSaved')
+              : t('arsenal.noMatch', { query: searchQuery || activeFilter })}
           </p>
         </div>
       ) : (
@@ -176,12 +188,12 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
                       </span>
                       {isMastered && (
                         <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-full">
-                          ✓ Mastered
+                          {t('arsenal.masteredBadge')}
                         </span>
                       )}
                       {isBookmarked && (
                         <span className="text-[11px] font-semibold text-amber-800 dark:text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-full">
-                          Bookmarked
+                          {t('arsenal.bookmarkedBadge')}
                         </span>
                       )}
                     </div>
@@ -189,7 +201,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
                     <div className="flex items-center gap-1.5">
                       <button
                         onClick={() => handleSpeak(verse)}
-                        title="Audio Recital"
+                        title={t('arsenal.audioRecital')}
                         className="p-1.5 rounded-lg text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-200/50 dark:hover:bg-stone-800 transition-colors"
                       >
                         {isSpeakingThis ? (
@@ -204,7 +216,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
                           soundEngine.playSnap();
                           onToggleBookmark(verse.id);
                         }}
-                        title="Toggle bookmark"
+                        title={t('arsenal.toggleBookmark')}
                         className="p-1.5 rounded-lg text-stone-500 dark:text-stone-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-stone-200/50 dark:hover:bg-stone-800 transition-colors"
                       >
                         {isBookmarked ? (
@@ -223,7 +235,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
                   <div className="my-3 p-3.5 rounded-xl bg-white/80 dark:bg-stone-950/70 text-xs md:text-sm text-stone-700 dark:text-stone-300">
                     <div className="flex items-center gap-1.5 text-amber-800 dark:text-amber-400 font-semibold mb-1">
                       <Sparkles className="w-3.5 h-3.5" />
-                      <span>Plain English Real Talk</span>
+                      <span>{t('arsenal.plainEnglish')}</span>
                     </div>
                     <p className="leading-relaxed">{verse.plainEnglishSummary}</p>
                   </div>
@@ -241,10 +253,10 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
                         setPulseModalVerse(verse);
                       }}
                       className="flex items-center gap-1 text-xs font-semibold text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-300 py-1.5 px-2.5 rounded-lg bg-stone-200/60 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 transition-colors"
-                      title="Reminder settings for this verse"
+                      title={t('arsenal.reminders')}
                     >
                       <Bell className="w-3.5 h-3.5 text-amber-500" />
-                      <span>Reminders</span>
+                      <span>{t('arsenal.reminders')}</span>
                     </button>
 
                     <button
@@ -255,7 +267,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
                       className="flex items-center gap-1.5 text-xs font-semibold text-amber-800 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 transition-colors py-1.5 px-3 rounded-lg hover:bg-amber-500/10"
                     >
                       <Brain className="w-3.5 h-3.5" />
-                      <span>Practice →</span>
+                      <span>{t('arsenal.practice')} →</span>
                     </button>
                   </div>
                 </div>
@@ -269,7 +281,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
         <div className="mt-12 pt-8 border-t border-stone-200/60 dark:border-stone-800/60">
           <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-3">
             <FileText className="w-4 h-4" />
-            <span>Your Personal Reflections & Journal</span>
+            <span>{t('arsenal.personalJournal')}</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

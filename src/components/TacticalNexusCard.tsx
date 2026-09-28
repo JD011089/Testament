@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { getConnectedNexusItems, type ConnectedNexusItem } from '../data/nexusGraph';
 import { Network, ExternalLink, ChevronDown, ChevronUp, Shield, BookOpen, Scroll, UserCheck } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
+import { useLanguage } from '../context/LanguageContext';
 
 interface TacticalNexusCardProps {
   entityId: string;
@@ -9,6 +10,7 @@ interface TacticalNexusCardProps {
 }
 
 export const TacticalNexusCard: React.FC<TacticalNexusCardProps> = ({ entityId, onOpenEntity }) => {
+  const { t } = useLanguage();
   const items: ConnectedNexusItem[] = getConnectedNexusItems(entityId);
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
@@ -41,13 +43,13 @@ export const TacticalNexusCard: React.FC<TacticalNexusCardProps> = ({ entityId, 
         <div className="flex items-center gap-2">
           <Network className="w-4 h-4 text-cyan-600 dark:text-cyan-400 animate-pulse" />
           <h4 className="text-xs font-mono font-bold text-cyan-800 dark:text-cyan-300 uppercase tracking-widest">
-            Tactical Nexus • Living Canon Intelligence ({items.length} links)
+            {t('nexus.title', { count: items.length })}
           </h4>
         </div>
 
         <button 
           type="button"
-          aria-label={isOpen ? "Collapse tactical nexus" : "Expand tactical nexus"}
+          aria-label={isOpen ? t('nexus.collapse') : t('nexus.expand')}
           className="text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white p-1"
         >
           {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}

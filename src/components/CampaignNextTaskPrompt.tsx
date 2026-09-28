@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { DailyCampaignStep } from '../data/dailyCampaigns';
 import { CheckCircle2, ArrowRight, X, Sparkles } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
+import { useLanguage } from '../context/LanguageContext';
 
 interface CampaignNextTaskPromptProps {
   completedStepNumber: number;
@@ -17,6 +18,7 @@ export const CampaignNextTaskPrompt: React.FC<CampaignNextTaskPromptProps> = ({
   onProceed,
   onDismiss
 }) => {
+  const { t } = useLanguage();
   if (!nextStep) return null;
 
   return (
@@ -40,7 +42,7 @@ export const CampaignNextTaskPrompt: React.FC<CampaignNextTaskPromptProps> = ({
               </span>
               <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
-                <span>Tactical Campaign • Step {completedStepNumber} Completed!</span>
+                <span>{t('nextTask.stepCompleted', { step: completedStepNumber })}</span>
               </span>
             </div>
 
@@ -68,7 +70,7 @@ export const CampaignNextTaskPrompt: React.FC<CampaignNextTaskPromptProps> = ({
                   {nextStep.badge}
                 </span>
                 <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400">
-                  Step {nextStep.stepNumber} of 4
+                  {t('nextTask.stepOf', { step: nextStep.stepNumber })}
                 </span>
               </div>
 
@@ -90,7 +92,7 @@ export const CampaignNextTaskPrompt: React.FC<CampaignNextTaskPromptProps> = ({
               }}
               className="flex-1 py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all transform active:scale-98 cursor-pointer"
             >
-              <span>Go to Next Campaign Task</span>
+              <span>{t('nextTask.goNext')}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
 
@@ -101,7 +103,7 @@ export const CampaignNextTaskPrompt: React.FC<CampaignNextTaskPromptProps> = ({
               }}
               className="py-2.5 px-3 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 text-xs font-medium transition-colors"
             >
-              Later
+              {t('nextTask.later')}
             </button>
           </div>
         </motion.div>

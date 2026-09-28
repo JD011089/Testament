@@ -5,6 +5,19 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.0] - 2026-09-28
+
+### Added
+- **Tri-language scripture engine**: Full biblical text support for English (WEB, KJV, BBE), Spanish (Reina-Valera 1960, RV2004), and French (Louis Segond 1910, BDS).
+- **Dual-API resilience**: Reader queries `bible-api.com` with automatic fallback to `bolls.life` canonical 66-book endpoints and local offline storage cache.
+- **Complete localized scripture registry**: Handcrafted Reina-Valera and Louis Segond translations for Core Memory Verses, Daily Anchor Scriptures, Story Quests, Proverbs Tactical Codex, Psalms Field Medic, Real-Life Dilemmas, and Canon book overviews.
+- **Language-aware Word Forge**: Word tiles immediately re-split, shuffle, and validate in Spanish or French upon language toggle.
+- **Multilingual TTS audio**: 45s tactical briefing, drive mode narrator, and dilemma audio speak localized scripture using neural voices in Spanish and French.
+
+### Changed
+- **Reader translation synchronization**: Changing app language automatically updates the default Bible translation (`rvr` for Spanish, `ls1910` for French, `web` for English).
+- **Arsenal & Canon Library**: Saved scriptures and canonical chapter outlines dynamically render in the active user language.
+
 ## [1.12.0] - 2026-09-27
 
 ### Added

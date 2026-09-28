@@ -18,7 +18,8 @@ import {
   Volume2,
   Brain,
   Compass,
-  Swords
+  Swords,
+  Languages
 } from 'lucide-react';
 
 interface WhatsNewModalProps {
@@ -40,10 +41,33 @@ interface ReleaseMilestone {
 
 const RELEASES: ReleaseMilestone[] = [
   {
-    version: 'v1.12.0',
-    tagline: 'A Library You Can Keep Reading',
+    version: 'v1.13.0',
+    tagline: 'Tri-Language Scripture & Deep Localization',
     dateBadge: 'Current Release',
     isLatest: true,
+    highlights: [
+      {
+        icon: <Languages className="w-4 h-4 text-amber-400" />,
+        title: 'Authentic Multi-Language Scripture Reader',
+        description: 'The Canon reader automatically switches to Reina-Valera 1960 for Spanish and Louis Segond 1910 for French, with dual-API resilience and instant chapter lookup.'
+      },
+      {
+        icon: <Swords className="w-4 h-4 text-amber-400" />,
+        title: 'Localized Word Forge & Daily Truth',
+        description: 'Scripture tiles in Word Forge rebuild dynamically in Spanish and French with accurate punctuation, while daily anchors and briefings speak in your chosen tongue.'
+      },
+      {
+        icon: <BookOpen className="w-4 h-4 text-amber-400" />,
+        title: 'Unified Tri-Language Tactical Codex',
+        description: 'Proverbs, Psalms, Dilemmas, and Story Quests now feature hand-crafted, culturally accurate biblical translations across English, Spanish, and French.'
+      }
+    ]
+  },
+  {
+    version: 'v1.12.0',
+    tagline: 'A Library You Can Keep Reading',
+    dateBadge: 'Previous Release',
+    isLatest: false,
     highlights: [
       {
         icon: <BookOpen className="w-4 h-4 text-amber-400" />,
@@ -394,12 +418,12 @@ const RELEASES: ReleaseMilestone[] = [
 
 export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose }) => {
   const modalRef = useModalLock(isOpen);
-  const [activeTab, setActiveTab] = useState<string>('v1.12.0');
+  const [activeTab, setActiveTab] = useState<string>('v1.13.0');
 
   const handleDismiss = () => {
     soundEngine.playClick();
     try {
-      localStorage.setItem('testament_last_seen_version', '1.12.0');
+      localStorage.setItem('testament_last_seen_version', '1.13.0');
     } catch {
       // ignore
     }
@@ -442,7 +466,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
                   Field Update Dispatches
                 </h2>
                 <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 font-bold">
-                  v1.12.0 Live
+                  v1.13.0 Live
                 </span>
               </div>
               <p className="text-xs text-stone-500 dark:text-stone-400">
@@ -532,7 +556,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
         {/* MODAL FOOTER */}
         <div className="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800/90 bg-stone-50 dark:bg-black/40 flex items-center justify-between gap-3 relative z-10">
           <div className="text-[11px] font-mono text-stone-500 dark:text-stone-400 hidden sm:block">
-            Testament v1.12.0 • The Living Word
+            Testament v1.13.0 • The Living Word
           </div>
 
           <button

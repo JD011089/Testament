@@ -121,6 +121,9 @@ export const CANON_MEMORY_VERSES: MemoryVerse[] = CANON_BOOKS.map((b) => {
   };
 });
 
+import { getLocalizedVerse } from './localizedScripture';
+import { getStoredLanguage, type SupportedLanguage } from '../context/LanguageContext';
+
 /**
  * All available verses (Core arsenal + all story unlocked scriptures + Proverbs Codex + Psalms Field Medic + 66 Canon Books)
  */
@@ -133,11 +136,12 @@ export const ALL_AVAILABLE_VERSES: MemoryVerse[] = [
 ];
 
 /**
- * Returns all verses combined
+ * Returns all verses combined, localized into the selected language
  */
-export const getAllVerses = (): MemoryVerse[] => {
+export const getAllVerses = (lang?: SupportedLanguage): MemoryVerse[] => {
   hydrateCustomVerses();
-  return ALL_AVAILABLE_VERSES;
+  const activeLang = lang ?? getStoredLanguage();
+  return ALL_AVAILABLE_VERSES.map(v => getLocalizedVerse(v, activeLang));
 };
 
 const CUSTOM_VERSES_KEY = 'testament_custom_verses';
@@ -191,13 +195,14 @@ export const getStoryVerses = (): MemoryVerse[] => {
 /**
  * Look up a verse by its ID (handles 'verse-1', 'story-david-journey', legacy 'story-david-act-1', 'david-act-1', etc.)
  */
-export const getVerseById = (id?: string | null): MemoryVerse | null => {
+export const getVerseById = (id?: string | null, lang?: SupportedLanguage): MemoryVerse | null => {
   if (!id) return null;
   hydrateCustomVerses();
+  const activeLang = lang ?? getStoredLanguage();
   
   // Exact match
   const match = ALL_AVAILABLE_VERSES.find(v => v.id === id);
-  if (match) return match;
+  if (match) return getLocalizedVerse(match, activeLang);
 
   // Check if stripped of 'story-' prefix or exact quest match
   const storyMatch = ALL_AVAILABLE_VERSES.find(v => 
@@ -206,7 +211,7 @@ export const getVerseById = (id?: string | null): MemoryVerse | null => {
     `story-${v.storyQuestId}` === id ||
     v.actId === id
   );
-  if (storyMatch) return storyMatch;
+  if (storyMatch) return getLocalizedVerse(storyMatch, activeLang);
 
   // Resolve legacy act IDs (e.g. 'story-david-act-1' or 'david-act-1') to the quest's one memory verse
   const parentQuest = STORY_QUESTS.find(q => 
@@ -216,27 +221,29 @@ export const getVerseById = (id?: string | null): MemoryVerse | null => {
   );
   if (parentQuest) {
     const questVerse = STORY_MEMORY_VERSES.find(v => v.storyQuestId === parentQuest.id);
-    if (questVerse) return questVerse;
+    if (questVerse) return getLocalizedVerse(questVerse, activeLang);
   }
 
   // Fallback to reference match
   const refMatch = ALL_AVAILABLE_VERSES.find(v => v.reference.toLowerCase() === id.toLowerCase());
-  return refMatch || null;
+  return refMatch ? getLocalizedVerse(refMatch, activeLang) : null;
 };
 
 /**
  * Retrieve the single memory verse associated with a specific story quest
  */
-export const getStoryVerseForQuest = (questId: string): MemoryVerse | null => {
-  return STORY_MEMORY_VERSES.find(v => v.storyQuestId === questId || v.id === `story-${questId}`) || null;
+export const getStoryVerseForQuest = (questId: string, lang?: SupportedLanguage): MemoryVerse | null => {
+  const activeLang = lang ?? getStoredLanguage();
+  const found = STORY_MEMORY_VERSES.find(v => v.storyQuestId === questId || v.id === `story-${questId}`) || null;
+  return found ? getLocalizedVerse(found, activeLang) : null;
 };
 
 /**
  * Retrieve the memory verse associated with a specific story quest and act
  * (Always returns the ONE defining memory verse of the quest, satisfying requirement 1)
  */
-export const getStoryVerseForAct = (questId: string, _actId?: string): MemoryVerse | null => {
-  return getStoryVerseForQuest(questId) || STORY_MEMORY_VERSES.find(v => v.storyQuestId === questId) || null;
+export const getStoryVerseForAct = (questId: string, _actId?: string, lang?: SupportedLanguage): MemoryVerse | null => {
+  return getStoryVerseForQuest(questId, lang) || (STORY_MEMORY_VERSES.find(v => v.storyQuestId === questId) ? getLocalizedVerse(STORY_MEMORY_VERSES.find(v => v.storyQuestId === questId)!, lang ?? getStoredLanguage()) : null);
 };
 
 /**

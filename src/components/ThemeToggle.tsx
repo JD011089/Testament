@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Sun, Moon } from 'lucide-react';
 import { getStoredTheme, toggleTheme, type AppTheme } from '../utils/theme';
 import { soundEngine } from '../utils/audio';
+import { useLanguage } from '../context/LanguageContext';
 
 interface ThemeToggleProps {
   className?: string;
@@ -10,6 +11,7 @@ interface ThemeToggleProps {
 
 export const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '', compact = false }) => {
   const [theme, setTheme] = useState<AppTheme>(() => getStoredTheme());
+  const { t } = useLanguage();
 
   useEffect(() => {
     const handleThemeChange = (e: Event) => {
@@ -37,23 +39,23 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '', compac
     <button
       onClick={handleToggle}
       type="button"
-      title={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
-      aria-label={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
-      className={`relative inline-flex items-center justify-center rounded-xl transition-all duration-200 focus-visible:ring-2 focus-visible:ring-amber-500 ${
+      title={isDark ? t('theme.switchToLight') : t('theme.switchToDark')}
+      aria-label={isDark ? t('theme.switchToLight') : t('theme.switchToDark')}
+      className={`relative inline-flex items-center justify-center rounded-xl transition-all duration-200 focus-visible:ring-2 focus-visible:ring-amber-500 cursor-pointer select-none shrink-0 ${
         compact
-          ? 'p-2 text-stone-600 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 bg-stone-100 dark:bg-stone-900 border border-stone-250 dark:border-stone-800'
+          ? 'p-1.5 text-stone-600 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 bg-stone-100 dark:bg-stone-900 border border-stone-250 dark:border-stone-800 min-h-[32px] min-w-[32px]'
           : 'px-2.5 py-1.5 gap-1.5 text-xs font-semibold bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 text-stone-700 dark:text-stone-300 hover:text-stone-950 dark:hover:text-parchment-100 border border-stone-200 dark:border-stone-800 shadow-sm'
       } ${className}`}
     >
       {isDark ? (
         <>
           <Sun className="w-4 h-4 text-amber-400 animate-fadeIn" />
-          {!compact && <span className="hidden sm:inline">Light</span>}
+          {!compact && <span className="hidden sm:inline">{t('theme.light')}</span>}
         </>
       ) : (
         <>
           <Moon className="w-4 h-4 text-amber-800 animate-fadeIn" />
-          {!compact && <span className="hidden sm:inline">Dark</span>}
+          {!compact && <span className="hidden sm:inline">{t('theme.dark')}</span>}
         </>
       )}
     </button>

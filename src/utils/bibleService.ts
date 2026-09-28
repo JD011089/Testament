@@ -1,8 +1,11 @@
 /**
  * Testament Bible Service
  * Fetches chapters and verses across all 66 books of the Bible
- * with offline local caching and instant response.
+ * with offline local caching, tri-language support (EN / ES / FR),
+ * and instant fallback response.
  */
+
+import type { SupportedLanguage } from '../context/LanguageContext';
 
 export interface BibleVerse {
   book_id: string;
@@ -95,18 +98,142 @@ export const BIBLE_BOOK_CHAPTER_COUNTS: Record<string, number> = {
   'Revelation': 22
 };
 
-export const getBookChapterCount = (bookName: string): number => {
-  return BIBLE_BOOK_CHAPTER_COUNTS[bookName] || 1;
+export const BIBLE_BOOK_ORDER: Record<string, number> = {
+  // Old Testament
+  'genesis': 1, 'génesis': 1, 'genèse': 1,
+  'exodus': 2, 'éxodo': 2, 'exode': 2,
+  'leviticus': 3, 'levítico': 3, 'lévitique': 3,
+  'numbers': 4, 'números': 4, 'nombres': 4,
+  'deuteronomy': 5, 'deuteronomio': 5, 'deutéronome': 5,
+  'joshua': 6, 'josué': 6,
+  'judges': 7, 'jueces': 7, 'juges': 7,
+  'ruth': 8, 'rut': 8,
+  '1 samuel': 9, '1 samuel ': 9, '1º samuel': 9,
+  '2 samuel': 10, '2 samuel ': 10, '2º samuel': 10,
+  '1 kings': 11, '1 reyes': 11, '1 rois': 11,
+  '2 kings': 12, '2 reyes': 12, '2 rois': 12,
+  '1 chronicles': 13, '1 crónicas': 13, '1 chroniques': 13,
+  '2 chronicles': 14, '2 crónicas': 14, '2 chroniques': 14,
+  'ezra': 15, 'esdras': 15,
+  'nehemiah': 16, 'nehemías': 16, 'néhémie': 16,
+  'esther': 17, 'ester': 17,
+  'job': 18,
+  'psalms': 19, 'psalm': 19, 'salmos': 19, 'salmo': 19, 'psaumes': 19, 'psaume': 19,
+  'proverbs': 20, 'proverb': 20, 'proverbios': 20, 'proverbes': 20,
+  'ecclesiastes': 21, 'eclesiastés': 21, 'ecclésiaste': 21,
+  'song of solomon': 22, 'song of songs': 22, 'cantares': 22, 'cantique des cantiques': 22,
+  'isaiah': 23, 'isaías': 23, 'ésaïe': 23,
+  'jeremiah': 24, 'jeremías': 24, 'jérémie': 24,
+  'lamentations': 25, 'lamentaciones': 25,
+  'ezekiel': 26, 'ezequiel': 26, 'ézéchiel': 26,
+  'daniel': 27,
+  'hosea': 28, 'oseas': 28, 'osée': 28,
+  'joel': 29, 'joël': 29,
+  'amos': 30,
+  'obadiah': 31, 'abdías': 31, 'abdias': 31,
+  'jonah': 32, 'jonás': 32,
+  'micah': 33, 'miqueas': 33, 'michée': 33,
+  'nahum': 34,
+  'habakkuk': 35, 'habacuc': 35,
+  'zephaniah': 36, 'sofonías': 36, 'sophonie': 36,
+  'haggai': 37, 'hageo': 37, 'aggée': 37,
+  'zechariah': 38, 'zacarías': 38, 'zacharie': 38,
+  'malachi': 39, 'malaquías': 39, 'malachie': 39,
+
+  // New Testament
+  'matthew': 40, 'mateo': 40, 'matthieu': 40,
+  'mark': 41, 'marcos': 41, 'marc': 41,
+  'luke': 42, 'lucas': 42, 'luc': 42,
+  'john': 43, 'juan': 43, 'jean': 43,
+  'acts': 44, 'hechos': 44, 'actes': 44,
+  'romans': 45, 'romanos': 45, 'romains': 45,
+  '1 corinthians': 46, '1 corintios': 46, '1 corinthiens': 46,
+  '2 corinthians': 47, '2 corintios': 47, '2 corinthiens': 47,
+  'galatians': 48, 'gálatas': 48, 'galates': 48,
+  'ephesians': 49, 'efesios': 49, 'éphésiens': 49,
+  'philippians': 50, 'filipenses': 50, 'philippiens': 50,
+  'colossians': 51, 'colosenses': 51, 'colossiens': 51,
+  '1 thessalonians': 52, '1 tesalonicenses': 52, '1 thessaloniciens': 52,
+  '2 thessalonians': 53, '2 tesalonicenses': 53, '2 thessaloniciens': 53,
+  '1 timothy': 54, '1 timoteo': 54, '1 timothée': 54,
+  '2 timothy': 55, '2 timoteo': 55, '2 timothée': 55,
+  'titus': 56, 'tito': 56, 'tite': 56,
+  'philemon': 57, 'filemón': 57, 'philémon': 57,
+  'hebrews': 58, 'hebreos': 58, 'hébreux': 58,
+  'james': 59, 'santiago': 59, 'jacques': 59,
+  '1 peter': 60, '1 pedro': 60, '1 pierre': 60,
+  '2 peter': 61, '2 pedro': 61, '2 pierre': 61,
+  '1 john': 62, '1 juan': 62, '1 jean': 62,
+  '2 john': 63, '2 juan': 63, '2 jean': 63,
+  '3 john': 64, '3 juan': 64, '3 jean': 64,
+  'jude': 65, 'judas': 65,
+  'revelation': 66, 'apocalipsis': 66, 'apocalypse': 66
 };
 
-// Available translations supported by the engine
-export const BIBLE_TRANSLATIONS = [
-  { id: 'web', label: 'World English Bible (WEB)', note: 'Clear, modern standard English' },
-  { id: 'kjv', label: 'Classic King James (KJV)', note: 'Traditional poetic phrasing' },
-  { id: 'bbe', label: 'Basic Bible English (BBE)', note: 'Simplified direct English' }
-] as const;
+export const getBookChapterCount = (bookName: string): number => {
+  const norm = bookName.trim();
+  if (BIBLE_BOOK_CHAPTER_COUNTS[norm]) return BIBLE_BOOK_CHAPTER_COUNTS[norm];
+  const order = getBookOrder(bookName);
+  const entry = Object.entries(BIBLE_BOOK_ORDER).find(([_, o]) => o === order);
+  if (entry) {
+    const canonicalKey = Object.keys(BIBLE_BOOK_CHAPTER_COUNTS).find(
+      k => k.toLowerCase() === entry[0]
+    );
+    if (canonicalKey) return BIBLE_BOOK_CHAPTER_COUNTS[canonicalKey];
+  }
+  return 1;
+};
 
-export type TranslationId = typeof BIBLE_TRANSLATIONS[number]['id'];
+export const getBookOrder = (bookName: string): number => {
+  const key = bookName.toLowerCase().trim();
+  return BIBLE_BOOK_ORDER[key] || 1;
+};
+
+export interface BibleTranslationInfo {
+  id: string;
+  label: string;
+  note: string;
+  language: 'en' | 'es' | 'fr';
+}
+
+// Available translations supported by the engine across English, Spanish, and French
+export const BIBLE_TRANSLATIONS: BibleTranslationInfo[] = [
+  // English translations
+  { id: 'web', label: 'World English Bible (WEB)', note: 'Clear, modern standard English', language: 'en' },
+  { id: 'kjv', label: 'Classic King James (KJV)', note: 'Traditional poetic phrasing', language: 'en' },
+  { id: 'bbe', label: 'Basic Bible English (BBE)', note: 'Simplified direct English', language: 'en' },
+  // Spanish translations
+  { id: 'rvr', label: 'Reina-Valera 1960 (RVR)', note: 'Traducción clásica en español', language: 'es' },
+  { id: 'rv2004', label: 'Reina Valera Gómez (RV2004)', note: 'Texto bíblico fiel en español', language: 'es' },
+  // French translations
+  { id: 'ls1910', label: 'Louis Segond 1910 (LSG)', note: 'Traduction classique en français', language: 'fr' },
+  { id: 'bds', label: 'La Bible du Semeur (BDS)', note: 'Français contemporain et fluide', language: 'fr' }
+];
+
+export type TranslationId = 'web' | 'kjv' | 'bbe' | 'rvr' | 'rv2004' | 'ls1910' | 'bds' | 'valera' | 'rv1960' | 'lsg' | 'frlsg';
+
+export function normalizeTranslationId(id: string): string {
+  const lower = id.toLowerCase().trim();
+  if (lower === 'valera' || lower === 'rv1960') return 'rvr';
+  if (lower === 'lsg' || lower === 'frlsg') return 'ls1910';
+  return lower;
+}
+
+export function getDefaultTranslationForLanguage(lang: SupportedLanguage): TranslationId {
+  switch (lang) {
+    case 'es': return 'rvr';
+    case 'fr': return 'ls1910';
+    case 'en':
+    default: return 'web';
+  }
+}
+
+const cleanVerseText = (raw: string): string => {
+  return raw
+    .replace(/<[^>]+>/g, '') // remove HTML tags
+    .replace(/\s+/g, ' ')
+    .trim();
+};
 
 /**
  * Fetch a whole chapter with local storage caching for instant offline reading
@@ -116,56 +243,144 @@ export async function fetchBibleChapter(
   chapter: number,
   translation: TranslationId = 'web'
 ): Promise<BibleChapterData> {
-  const cacheKey = `testament_chapter_${bookName.toLowerCase().replace(/\s+/g, '_')}_${chapter}_${translation}`;
+  const normTrans = normalizeTranslationId(translation);
+  const cacheKey = `testament_chapter_${bookName.toLowerCase().replace(/\s+/g, '_')}_${chapter}_${normTrans}`;
   const totalChapters = getBookChapterCount(bookName);
 
   // 1. Check local offline cache first
   try {
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) {
-      const parsed = JSON.parse(cached) as BibleChapterData;
-      return {
-        ...parsed,
-        totalChapters
-      };
+    if (typeof localStorage !== 'undefined') {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached) as BibleChapterData;
+        return {
+          ...parsed,
+          totalChapters
+        };
+      }
     }
   } catch (e) {
     console.warn('Cache read error:', e);
   }
 
-  // 2. Fetch from fast, open public Bible API
-  const queryParam = `${encodeURIComponent(bookName)}+${chapter}?translation=${translation}`;
-  const response = await fetch(`https://bible-api.com/${queryParam}`);
+  const bookNumber = getBookOrder(bookName);
 
-  if (!response.ok) {
-    throw new Error(`Failed to load ${bookName} Chapter ${chapter} (Status ${response.status})`);
+  // 2. Fetch Spanish or French translations from high-speed bolls.life API
+  if (normTrans === 'rvr' || normTrans === 'rv2004' || normTrans === 'ls1910' || normTrans === 'bds') {
+    const bollsMap: Record<string, string> = {
+      rvr: 'RV1960',
+      rv2004: 'RV2004',
+      ls1910: 'FRLSG',
+      bds: 'BDS'
+    };
+    const bollsTrans = bollsMap[normTrans] || 'RV1960';
+
+    try {
+      const response = await fetch(`https://bolls.life/get-chapter/${bollsTrans}/${bookNumber}/${chapter}/`);
+      if (response.ok) {
+        const rawVerses: Array<{ pk?: number; verse: number; text: string }> = await response.json();
+        if (Array.isArray(rawVerses) && rawVerses.length > 0) {
+          const formattedVerses: BibleVerse[] = rawVerses.map(v => ({
+            book_id: bookName.toLowerCase().replace(/\s+/g, '_'),
+            book_name: bookName,
+            chapter,
+            verse: v.verse,
+            text: cleanVerseText(v.text)
+          }));
+
+          const matchedLabel = BIBLE_TRANSLATIONS.find(t => t.id === normTrans)?.label || normTrans.toUpperCase();
+          const chapterData: BibleChapterData = {
+            reference: `${bookName} ${chapter}`,
+            bookName,
+            chapter,
+            verses: formattedVerses,
+            translation: matchedLabel,
+            totalChapters
+          };
+
+          try {
+            if (typeof localStorage !== 'undefined') {
+              localStorage.setItem(cacheKey, JSON.stringify(chapterData));
+            }
+          } catch {}
+          return chapterData;
+        }
+      }
+    } catch (bollsErr) {
+      console.warn('Bolls API request failed:', bollsErr);
+    }
   }
 
-  const data = await response.json();
-
-  const formattedVerses: BibleVerse[] = (data.verses || []).map((v: any) => ({
-    book_id: v.book_id,
-    book_name: v.book_name || bookName,
-    chapter: v.chapter || chapter,
-    verse: v.verse,
-    text: (v.text || '').trim().replace(/\n+/g, ' ')
-  }));
-
-  const chapterData: BibleChapterData = {
-    reference: data.reference || `${bookName} ${chapter}`,
-    bookName,
-    chapter,
-    verses: formattedVerses,
-    translation: data.translation_name || translation.toUpperCase(),
-    totalChapters
-  };
-
-  // 3. Save to local storage for instant offline recall
+  // 3. Fetch English translations from bible-api.com
   try {
-    localStorage.setItem(cacheKey, JSON.stringify(chapterData));
-  } catch (e) {
-    // Local storage full or private mode, gracefully proceed
+    const queryParam = `${encodeURIComponent(bookName)}+${chapter}?translation=${normTrans}`;
+    const response = await fetch(`https://bible-api.com/${queryParam}`);
+
+    if (response.ok) {
+      const data = await response.json();
+      const formattedVerses: BibleVerse[] = (data.verses || []).map((v: any) => ({
+        book_id: v.book_id,
+        book_name: v.book_name || bookName,
+        chapter: v.chapter || chapter,
+        verse: v.verse,
+        text: cleanVerseText(v.text || '')
+      }));
+
+      const chapterData: BibleChapterData = {
+        reference: data.reference || `${bookName} ${chapter}`,
+        bookName,
+        chapter,
+        verses: formattedVerses,
+        translation: data.translation_name || normTrans.toUpperCase(),
+        totalChapters
+      };
+
+      try {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem(cacheKey, JSON.stringify(chapterData));
+        }
+      } catch {}
+      return chapterData;
+    }
+  } catch (apiErr) {
+    console.warn('bible-api.com request failed, trying secondary fallback:', apiErr);
   }
 
-  return chapterData;
+  // 4. English fallback to bolls.life WEB/KJV
+  try {
+    const fallbackCode = normTrans === 'kjv' ? 'KJV' : 'WEB';
+    const fallbackResp = await fetch(`https://bolls.life/get-chapter/${fallbackCode}/${bookNumber}/${chapter}/`);
+    if (fallbackResp.ok) {
+      const rawVerses: Array<{ pk?: number; verse: number; text: string }> = await fallbackResp.json();
+      if (Array.isArray(rawVerses) && rawVerses.length > 0) {
+        const formattedVerses: BibleVerse[] = rawVerses.map(v => ({
+          book_id: bookName.toLowerCase().replace(/\s+/g, '_'),
+          book_name: bookName,
+          chapter,
+          verse: v.verse,
+          text: cleanVerseText(v.text)
+        }));
+
+        const chapterData: BibleChapterData = {
+          reference: `${bookName} ${chapter}`,
+          bookName,
+          chapter,
+          verses: formattedVerses,
+          translation: fallbackCode,
+          totalChapters
+        };
+
+        try {
+          if (typeof localStorage !== 'undefined') {
+            localStorage.setItem(cacheKey, JSON.stringify(chapterData));
+          }
+        } catch {}
+        return chapterData;
+      }
+    }
+  } catch (err) {
+    console.warn('Secondary fallback failed:', err);
+  }
+
+  throw new Error(`Failed to load ${bookName} Chapter ${chapter} (${normTrans.toUpperCase()}). Please check your connection.`);
 }

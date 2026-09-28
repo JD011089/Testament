@@ -21,6 +21,10 @@ import {
   BookOpen,
   Filter
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
+import { LanguageToggle } from './LanguageToggle';
+import { ThemeToggle } from './ThemeToggle';
+import { getLocalizedDilemma } from '../utils/localizedScripture';
 
 interface DilemmaSimulatorProps {
   onRewardXP: (amount: number) => void;
@@ -35,7 +39,8 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
   onClearTargetDilemma,
   onOpenNexus
 }) => {
-  const dailyDilemma = getDailyDilemma();
+  const { t, language } = useLanguage();
+  const dailyDilemma = getDailyDilemma(0, language);
   const [selectedDilemmaId, setSelectedDilemmaId] = useState<string>(() => {
     return targetDilemmaId || dailyDilemma.id;
   });
@@ -116,9 +121,10 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
 
   const filteredDilemmas = REAL_LIFE_DILEMMAS.filter(d => 
     selectedCategory === 'All' || d.category === selectedCategory
-  );
+  ).map(d => getLocalizedDilemma(d, language));
 
-  const dilemma: RealLifeDilemma = REAL_LIFE_DILEMMAS.find(d => d.id === selectedDilemmaId) || dailyDilemma;
+  const rawDilemma: RealLifeDilemma = REAL_LIFE_DILEMMAS.find(d => d.id === selectedDilemmaId) || dailyDilemma;
+  const dilemma: RealLifeDilemma = getLocalizedDilemma(rawDilemma, language);
 
   // Reset inputs when switching dilemmas
   const handleSelectDilemma = (dilemmaId: string) => {
@@ -263,17 +269,25 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-8 pb-36 sm:pb-40 md:pb-48 text-left">
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
-          <ShieldAlert className="w-4 h-4" />
-          <span>Real-Life Tactical Simulator</span>
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
+            <ShieldAlert className="w-4 h-4" />
+            <span>{t('dilemma.badge')}</span>
+          </div>
+          <h1 className="text-2xl md:text-4xl font-serif font-black text-stone-900 dark:text-parchment-50">
+            {t('dilemma.title')}
+          </h1>
+          <p className="text-xs md:text-sm text-stone-600 dark:text-stone-400 mt-1 max-w-2xl">
+            {t('dilemma.subtitle')}
+          </p>
         </div>
-        <h1 className="text-2xl md:text-4xl font-serif font-black text-stone-900 dark:text-parchment-50">
-          "What’s the Play?"
-        </h1>
-        <p className="text-xs md:text-sm text-stone-600 dark:text-stone-400 mt-1 max-w-2xl">
-          High-pressure moments adults face every week. Write your honest gut reaction, uncover where your heart is really at, and redirect your energy with the King’s Playbook.
-        </p>
+
+        {/* Mobile Quick Controls */}
+        <div className="flex md:hidden items-center gap-1.5">
+          <LanguageToggle compact />
+          <ThemeToggle compact />
+        </div>
       </div>
 
       {/* Category Filter Pills & Single Campaign Dilemma Focus (Requirement 6) */}
@@ -283,10 +297,10 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
             <span className="text-xl">🎯</span>
             <div>
               <span className="text-xs font-mono font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider block">
-                Today's Daily Campaign Dilemma • 1 of 1 Daily Scenario
+                {t('dilemma.campaignFocus')}
               </span>
               <span className="text-xs text-stone-600 dark:text-stone-400">
-                Sharpening your real-world wisdom for today's assignment.
+                {t('dilemma.campaignFocusSub')}
               </span>
             </div>
           </div>
@@ -294,36 +308,45 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
             onClick={() => setIsCampaignFocus(false)}
             className="text-xs text-amber-800 hover:text-amber-600 dark:text-amber-400 dark:hover:text-amber-300 underline underline-offset-2 transition-colors font-semibold"
           >
-            Browse All Scenarios (Free Roam)
+            {t('dilemma.browseAll')}
           </button>
         </div>
       ) : (
         <>
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none" role="tablist" aria-label="Dilemma categories">
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none" role="tablist" aria-label={t('dilemma.category')}>
               <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400 flex items-center gap-1 pl-1">
-                <Filter className="w-3 h-3 text-amber-800 dark:text-amber-500" /> Category:
+                <Filter className="w-3 h-3 text-amber-800 dark:text-amber-500" /> {t('dilemma.category')}
               </span>
-              {categories.map(cat => (
-                <button
-                  key={cat}
-                  role="tab"
-                  aria-selected={selectedCategory === cat}
-                  onClick={() => {
-                    soundEngine.playClick();
-                    setSelectedCategory(cat);
-                    const firstInCat = REAL_LIFE_DILEMMAS.find(d => cat === 'All' || d.category === cat);
-                    if (firstInCat) handleSelectDilemma(firstInCat.id);
-                  }}
-                  className={`text-xs px-3 py-1 rounded-full font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-amber-500 ${
-                    selectedCategory === cat
-                      ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
-                      : 'bg-stone-200/50 dark:bg-stone-900/80 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
-                  }`}
-                >
-                  {cat} {cat === 'All' ? `(${REAL_LIFE_DILEMMAS.length})` : ''}
-                </button>
-              ))}
+              {categories.map(cat => {
+                const catLabel = cat === 'All' ? t('dilemma.catAll')
+                  : cat === 'Workplace & Ambition' ? t('dilemma.catWorkplace')
+                  : cat === 'Family & Relationships' ? t('dilemma.catFamily')
+                  : cat === 'Stress & Burnout' ? t('dilemma.catStress')
+                  : cat === 'Betrayal & Integrity' ? t('dilemma.catBetrayal')
+                  : cat;
+
+                return (
+                  <button
+                    key={cat}
+                    role="tab"
+                    aria-selected={selectedCategory === cat}
+                    onClick={() => {
+                      soundEngine.playClick();
+                      setSelectedCategory(cat);
+                      const firstInCat = REAL_LIFE_DILEMMAS.find(d => cat === 'All' || d.category === cat);
+                      if (firstInCat) handleSelectDilemma(firstInCat.id);
+                    }}
+                    className={`text-xs px-3 py-1 rounded-full font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-amber-500 ${
+                      selectedCategory === cat
+                        ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                        : 'bg-stone-200/50 dark:bg-stone-900/80 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                    }`}
+                  >
+                    {catLabel} {cat === 'All' ? `(${REAL_LIFE_DILEMMAS.length})` : ''}
+                  </button>
+                );
+              })}
             </div>
 
             <button
@@ -333,7 +356,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
               }}
               className="text-xs font-mono text-amber-800 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 font-bold shrink-0 ml-auto pb-2"
             >
-              Focus on Daily Campaign (1 Dilemma)
+              {t('dilemma.focusCampaign')}
             </button>
           </div>
 
@@ -374,18 +397,18 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
             {dilemma.id === getDailyDilemma().id && (
               <span className="flex items-center gap-1 text-[11px] font-mono font-bold text-amber-800 dark:text-amber-300 bg-amber-500/15 px-2.5 py-0.5 rounded-full">
                 <Sparkles className="w-3 h-3 text-amber-800 dark:text-amber-400" />
-                <span>Today's Daily Dilemma</span>
+                <span>{t('dilemma.todayDilemma')}</span>
               </span>
             )}
             <span className="text-xs text-stone-500 dark:text-stone-400 font-mono">
-              Scenario #{REAL_LIFE_DILEMMAS.findIndex(x => x.id === dilemma.id) + 1} of {REAL_LIFE_DILEMMAS.length}
+              {t('dilemma.scenarioCount', { index: REAL_LIFE_DILEMMAS.findIndex(x => x.id === dilemma.id) + 1, total: REAL_LIFE_DILEMMAS.length })}
             </span>
           </div>
 
           {completedDilemmas.includes(dilemma.id) && (
             <span className="flex items-center gap-1 text-xs font-bold text-emerald-800 dark:text-emerald-400 bg-emerald-500/15 px-3 py-1 rounded-full">
               <Award className="w-3.5 h-3.5" />
-              <span>Dilemma Completed (+50 XP)</span>
+              <span>{t('dilemma.completedXp')}</span>
             </span>
           )}
         </div>
@@ -397,7 +420,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
         {/* The Situation */}
         <div className="p-4 rounded-xl bg-white/80 dark:bg-stone-950/70 text-sm text-stone-800 dark:text-stone-200 leading-relaxed font-reading mb-4">
           <strong className="text-amber-800 dark:text-amber-400 block font-sans font-bold text-xs uppercase tracking-wider mb-1">
-            The Incident:
+            {t('dilemma.incident')}
           </strong>
           {dilemma.situationSetup}
         </div>
@@ -405,13 +428,13 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
         {/* Stakes & Ancient Parallel */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
           <div className="p-3 rounded-lg bg-white/80 dark:bg-stone-950/60">
-            <span className="text-stone-600 dark:text-stone-400 font-bold block mb-1">⚠️ What’s On The Line:</span>
+            <span className="text-stone-600 dark:text-stone-400 font-bold block mb-1">{t('dilemma.whatsAtStake')}</span>
             <p className="text-stone-700 dark:text-stone-300">{dilemma.whatIsAtStake}</p>
           </div>
 
           <div className="p-3 rounded-lg bg-amber-500/10">
             <span className="text-amber-800 dark:text-amber-400 font-bold block mb-1">
-              📜 Ancient Precedent: {dilemma.biblicalParallel.hero}
+              {t('dilemma.ancientPrecedent', { hero: dilemma.biblicalParallel.hero })}
             </span>
             <p className="text-amber-950/90 dark:text-amber-200/90">{dilemma.biblicalParallel.event}</p>
           </div>
@@ -432,7 +455,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
           }`}
         >
           <PenTool className="w-4 h-4" />
-          <span>My Real Answer (Heart Check)</span>
+          <span>{t('dilemma.heartCheck')}</span>
         </button>
 
         <button
@@ -447,7 +470,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
           }`}
         >
           <BookOpen className="w-4 h-4" />
-          <span>The Playbook (Compare)</span>
+          <span>{t('dilemma.kingsPlaybook')}</span>
         </button>
       </div>
 
@@ -459,32 +482,32 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
             <div className="mb-4">
               <h3 className="text-base md:text-lg font-serif font-bold text-stone-900 dark:text-parchment-50 flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-amber-800 dark:text-amber-400" />
-                <span>What Would YOU Honestly Do?</span>
+                <span>{t('dilemma.whatWouldYouDo')}</span>
               </h3>
               <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">
-                Be 100% authentic. No church answers or polite filters required. How would you actually react in this exact moment?
+                {t('dilemma.authenticPrompt')}
               </p>
             </div>
 
             {/* Quick Feeling Selector */}
             <div className="mb-4">
               <label className="text-[11px] font-mono text-stone-500 dark:text-stone-400 uppercase tracking-wider block mb-2">
-                Quick Emotional Gut Reaction:
+                {t('dilemma.gutReactionLabel')}
               </label>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { label: 'Furious / Want Payback', color: 'border-red-300 dark:border-red-600/60 bg-red-100/70 dark:bg-red-950/40 text-red-800 dark:text-red-300' },
-                  { label: 'Walk Away / Ghost', color: 'border-amber-300 dark:border-amber-600/60 bg-amber-100/70 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300' },
-                  { label: 'Shut Down / Bottle It', color: 'border-blue-300 dark:border-blue-600/60 bg-blue-100/70 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300' },
-                  { label: 'Panicking / Tempted', color: 'border-purple-300 dark:border-purple-600/60 bg-purple-100/70 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300' },
-                  { label: 'Calm & Strategic', color: 'border-emerald-300 dark:border-emerald-600/60 bg-emerald-100/70 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300' }
+                  { value: 'Furious / Want Payback', label: t('dilemma.reactionFurious'), color: 'border-red-300 dark:border-red-600/60 bg-red-100/70 dark:bg-red-950/40 text-red-800 dark:text-red-300' },
+                  { value: 'Walk Away / Ghost', label: t('dilemma.reactionWalkAway'), color: 'border-amber-300 dark:border-amber-600/60 bg-amber-100/70 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300' },
+                  { value: 'Shut Down / Bottle It', label: t('dilemma.reactionShutDown'), color: 'border-blue-300 dark:border-blue-600/60 bg-blue-100/70 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300' },
+                  { value: 'Panicking / Tempted', label: t('dilemma.reactionPanicking'), color: 'border-purple-300 dark:border-purple-600/60 bg-purple-100/70 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300' },
+                  { value: 'Calm & Strategic', label: t('dilemma.reactionCalm'), color: 'border-emerald-300 dark:border-emerald-600/60 bg-emerald-100/70 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300' }
                 ].map(feeling => (
                   <button
                     type="button"
-                    key={feeling.label}
-                    onClick={() => handleQuickFeelingSelect(feeling.label)}
+                    key={feeling.value}
+                    onClick={() => handleQuickFeelingSelect(feeling.value)}
                     className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-all ${
-                      selectedFeeling === feeling.label
+                      selectedFeeling === feeling.value
                         ? `${feeling.color} ring-2 ring-amber-500 font-bold scale-105 shadow-xs`
                         : 'border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/60 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                     }`}
@@ -498,13 +521,13 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
             {/* Freeform Textarea */}
             <div className="mb-4">
               <label htmlFor="gut-reaction-input" className="sr-only">
-                Your authentic gut reaction
+                {t('dilemma.whatWouldYouDo')}
               </label>
               <textarea
                 id="gut-reaction-input"
                 value={userText}
                 onChange={e => setUserText(e.target.value)}
-                placeholder="Type your unvarnished reaction here... (e.g. 'I’d be furious. I’d corner him after the meeting, call him a liar, or pull the VP aside and show the email receipts...')"
+                placeholder={t('dilemma.placeholder')}
                 rows={4}
                 className="w-full p-4 rounded-xl bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-600 text-sm focus:outline-none focus:border-amber-500 focus-visible:ring-2 focus-visible:ring-amber-500 transition-all font-sans leading-relaxed shadow-inner"
               />
@@ -525,7 +548,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                     : 'bg-stone-200 dark:bg-stone-800 text-stone-400 dark:text-stone-500 cursor-not-allowed'
                 }`}
               >
-                <span>Submit My Play & Check My Heart</span>
+                <span>{t('dilemma.submitPlay')}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -539,7 +562,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 uppercase tracking-widest font-bold">
-                    Diagnostic Heart Check
+                    {t('dilemma.diagnosticCheck')}
                   </span>
                   <span className={`text-xs px-3 py-1 rounded-full font-bold ${evaluationResult.badgeColor}`}>
                     {evaluationResult.stanceTitle}
@@ -547,7 +570,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                 </div>
 
                 <h3 className="text-lg md:text-xl font-serif font-bold text-stone-900 dark:text-parchment-50">
-                  Where Your Heart Is Driving You:
+                  {t('dilemma.whereHeartDriving')}
                 </h3>
                 <p className="text-xs md:text-sm text-stone-700 dark:text-stone-300 mt-1 italic">
                   "{evaluationResult.coreMotive}"
@@ -561,7 +584,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                     <div className="flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-amber-800 dark:text-amber-400" />
                       <h4 className="text-xs sm:text-sm font-serif font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider">
-                        Analysis of Your Proposed Play
+                        {t('dilemma.analysisProposed')}
                       </h4>
                     </div>
 
@@ -591,13 +614,13 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-stone-200/60 dark:border-stone-800/60 text-xs">
                       <div className="p-3 rounded-xl bg-emerald-500/10 dark:bg-emerald-950/30">
                         <strong className="text-emerald-700 dark:text-emerald-400 block mb-1 font-mono uppercase text-[11px] tracking-wider">
-                          ✓ Tactical Strength
+                          {t('dilemma.tacticalStrength')}
                         </strong>
                         <span className="text-stone-700 dark:text-stone-300 leading-relaxed">{evaluationResult.tacticalProsCons.strength}</span>
                       </div>
                       <div className="p-3 rounded-xl bg-rose-500/10 dark:bg-rose-950/20">
                         <strong className="text-rose-700 dark:text-rose-400 block mb-1 font-mono uppercase text-[11px] tracking-wider">
-                          ⚠️ Critical Vulnerability
+                          {t('dilemma.hiddenVulnerability')}
                         </strong>
                         <span className="text-stone-700 dark:text-stone-300 leading-relaxed">{evaluationResult.tacticalProsCons.vulnerability}</span>
                       </div>
