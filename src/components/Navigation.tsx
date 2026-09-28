@@ -38,14 +38,44 @@ export const Navigation: React.FC<NavigationProps> = ({
   streakCount = 0,
   xp = 0
 }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
-  const navItems: { tab: NavTab; label: string; tooltip: string; icon: React.ReactNode }[] = [
-    { tab: 'dashboard', label: t('nav.home'), tooltip: t('nav.homeTooltip'), icon: <Compass className="w-4 h-4 md:w-4 md:h-4" /> },
-    { tab: 'library', label: t('nav.library'), tooltip: t('nav.libraryTooltip'), icon: <BookOpen className="w-4 h-4 md:w-4 md:h-4" /> },
-    { tab: 'wordforge', label: t('nav.memorize'), tooltip: t('nav.memorizeTooltip'), icon: <Brain className="w-4 h-4 md:w-4 md:h-4" /> },
-    { tab: 'dilemmas', label: t('nav.dilemmas'), tooltip: t('nav.dilemmasTooltip'), icon: <ShieldAlert className="w-4 h-4 md:w-4 md:h-4" /> },
-    { tab: 'arsenal', label: t('nav.saved'), tooltip: t('nav.savedTooltip'), icon: <Shield className="w-4 h-4 md:w-4 md:h-4" /> },
+  const navItems: { tab: NavTab; label: string; mobileLabel?: string; tooltip: string; icon: React.ReactNode }[] = [
+    { 
+      tab: 'dashboard', 
+      label: t('nav.home'), 
+      mobileLabel: language === 'fr' ? 'Accueil' : language === 'es' ? 'Inicio' : t('nav.home'),
+      tooltip: t('nav.homeTooltip'), 
+      icon: <Compass className="w-4 h-4 md:w-4 md:h-4" /> 
+    },
+    { 
+      tab: 'library', 
+      label: t('nav.library'), 
+      mobileLabel: language === 'fr' ? 'Biblio' : language === 'es' ? 'Biblia' : t('nav.library'),
+      tooltip: t('nav.libraryTooltip'), 
+      icon: <BookOpen className="w-4 h-4 md:w-4 md:h-4" /> 
+    },
+    { 
+      tab: 'wordforge', 
+      label: t('nav.memorize'), 
+      mobileLabel: language === 'fr' ? 'Mémoire' : language === 'es' ? 'Memoria' : t('nav.memorize'),
+      tooltip: t('nav.memorizeTooltip'), 
+      icon: <Brain className="w-4 h-4 md:w-4 md:h-4" /> 
+    },
+    { 
+      tab: 'dilemmas', 
+      label: t('nav.dilemmas'), 
+      mobileLabel: language === 'fr' ? 'Dilemmes' : language === 'es' ? 'Dilemas' : t('nav.dilemmas'),
+      tooltip: t('nav.dilemmasTooltip'), 
+      icon: <ShieldAlert className="w-4 h-4 md:w-4 md:h-4" /> 
+    },
+    { 
+      tab: 'arsenal', 
+      label: t('nav.saved'), 
+      mobileLabel: language === 'fr' ? 'Favoris' : language === 'es' ? 'Guardados' : t('nav.saved'),
+      tooltip: t('nav.savedTooltip'), 
+      icon: <Shield className="w-4 h-4 md:w-4 md:h-4" /> 
+    },
   ];
 
   return (
@@ -168,9 +198,9 @@ export const Navigation: React.FC<NavigationProps> = ({
       <nav 
         role="navigation" 
         aria-label="Mobile Navigation" 
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-ink/95 backdrop-blur-lg border-t border-stone-200 dark:border-stone-800/90 px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-ink/95 backdrop-blur-lg border-t border-stone-200 dark:border-stone-800/90 px-1 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg"
       >
-        <div className="max-w-xl mx-auto flex items-center justify-between">
+        <div className="grid grid-cols-6 items-center w-full max-w-lg mx-auto">
           {navItems.map((item) => {
             const isActive = currentTab === item.tab;
             return (
@@ -181,14 +211,18 @@ export const Navigation: React.FC<NavigationProps> = ({
                   onSelectTab(item.tab);
                 }}
                 aria-current={isActive ? 'page' : undefined}
-                className={`flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-1 py-1 px-2 rounded-xl transition-all focus-visible:ring-2 focus-visible:ring-amber-500 ${
+                className={`flex flex-col items-center justify-center min-h-[44px] py-1 px-0.5 rounded-lg transition-all focus-visible:ring-2 focus-visible:ring-amber-500 w-full min-w-0 ${
                   isActive
                     ? 'text-amber-800 dark:text-amber-300 font-bold'
                     : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                 }`}
               >
-                {item.icon}
-                <span className="text-xs">{item.label}</span>
+                <div className="shrink-0">
+                  {item.icon}
+                </div>
+                <span className="text-[10px] leading-tight font-medium truncate w-full text-center block mt-0.5">
+                  {item.mobileLabel || item.label}
+                </span>
               </button>
             );
           })}
@@ -198,10 +232,14 @@ export const Navigation: React.FC<NavigationProps> = ({
             onClick={onOpenDriveMode}
             title={t('nav.driveModeTooltip')}
             aria-label={t('nav.driveModeTooltip')}
-            className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-1 py-1 px-2 rounded-xl text-stone-600 dark:text-stone-400 hover:text-amber-800 dark:hover:text-amber-300 transition-all focus-visible:ring-2 focus-visible:ring-amber-500"
+            className="flex flex-col items-center justify-center min-h-[44px] py-1 px-0.5 rounded-lg text-stone-600 dark:text-stone-400 hover:text-amber-800 dark:hover:text-amber-300 transition-all focus-visible:ring-2 focus-visible:ring-amber-500 w-full min-w-0"
           >
-            <Car className="w-4 h-4" />
-            <span className="text-xs">{t('nav.driveAudio')}</span>
+            <div className="shrink-0">
+              <Car className="w-4 h-4" />
+            </div>
+            <span className="text-[10px] leading-tight font-medium truncate w-full text-center block mt-0.5">
+              {t('nav.driveAudio')}
+            </span>
           </button>
         </div>
       </nav>
