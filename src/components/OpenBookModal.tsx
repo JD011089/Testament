@@ -85,7 +85,11 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
   const [selectedChapter, setSelectedChapter] = useState<number>(initialChapter);
   const [selectedTranslation, setSelectedTranslation] = useState<TranslationId>(() => {
     const saved = loadReadingPlace()?.translation as TranslationId | undefined;
-    return saved || getDefaultTranslationForLanguage(language);
+    if (saved) {
+      const match = BIBLE_TRANSLATIONS.find(tr => tr.id === saved);
+      if (match && match.language === language) return saved;
+    }
+    return getDefaultTranslationForLanguage(language);
   });
   const [chapterData, setChapterData] = useState<BibleChapterData | null>(null);
   const [isLoadingChapter, setIsLoadingChapter] = useState(false);
@@ -302,7 +306,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
     const reference = `${book.name} ${selectedChapter}:${verseNum}`;
     const dynamicVerse = registerDynamicBibleVerse(reference, text, chapterData?.translation || 'WEB');
 
-    showToast(`"${reference}" loaded into Word Forge!`);
+    showToast(t('reader.loadedForge', { ref: reference }));
 
     if (onOpenWordForge) {
       setTimeout(() => {
@@ -317,7 +321,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
     const reference = `${book.name} ${selectedChapter}:${verseNum}`;
     const dynamicVerse = registerDynamicBibleVerse(reference, text, chapterData?.translation || 'WEB');
     const added = onSaveBookmark ? onSaveBookmark(dynamicVerse.id) : true;
-    showToast(added ? `Saved ${reference} to your Arsenal.` : `${reference} is already in your Arsenal.`);
+    showToast(added ? t('reader.savedArsenal', { ref: reference }) : t('reader.alreadyArsenal', { ref: reference }));
   };
 
   const handleCopyVerse = (verseNum: number, text: string) => {
@@ -325,7 +329,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
     const reference = `${book.name} ${selectedChapter}:${verseNum}`;
     const fullCitation = `"${text}" — ${reference} (${chapterData?.translation || 'CSB'})`;
     navigator.clipboard.writeText(fullCitation);
-    showToast(`Copied ${reference} to clipboard!`);
+    showToast(t('reader.copied', { ref: reference }));
   };
 
   const handleLaunchDeepLink = () => {

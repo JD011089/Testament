@@ -23,6 +23,8 @@ import {
 } from '../data/psalms';
 import { soundEngine } from '../utils/audio';
 import { useModalLock } from '../utils/useModalLock';
+import { useLanguage } from '../context/LanguageContext';
+import { getLocalizedPsalm } from '../utils/localizedScripture';
 
 interface PsalmsFieldMedicModalProps {
   isOpen: boolean;
@@ -43,6 +45,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
   onToggleAmbience,
   onRewardXP
 }) => {
+  const { t, language } = useLanguage();
   const modalRef = useModalLock(isOpen);
   const [selectedMood, setSelectedMood] = useState<PsalmCrisisMood>('panic-fear');
   const [completedPrescriptions, setCompletedPrescriptions] = useState<Record<string, boolean>>(() => {
@@ -56,8 +59,21 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
   });
   const [isFormalMode, setIsFormalMode] = useState<boolean>(false);
 
-  const activePrescriptions = PSALM_PRESCRIPTIONS.filter(p => p.moodId === selectedMood);
-  const activeItem: PsalmPrescription = activePrescriptions[0] || PSALM_PRESCRIPTIONS[0];
+  const rawPrescriptions = PSALM_PRESCRIPTIONS.filter(p => p.moodId === selectedMood);
+  const rawItem: PsalmPrescription = rawPrescriptions[0] || PSALM_PRESCRIPTIONS[0];
+  const activeItem: PsalmPrescription = getLocalizedPsalm(rawItem, language);
+
+  const getMoodLabel = (moodKey: PsalmCrisisMood): string => {
+    switch (moodKey) {
+      case 'panic-fear': return t('medic.moodPanic');
+      case 'insomnia-overwhelm': return t('medic.moodInsomnia');
+      case 'betrayal-hurt': return t('medic.moodBetrayal');
+      case 'guilt-ruin': return t('medic.moodGuilt');
+      case 'rage-injustice': return t('medic.moodRage');
+      case 'grief-exhaustion': return t('medic.moodGrief');
+      default: return '';
+    }
+  };
 
   const handleApplyPrescription = () => {
     soundEngine.playVictory();
@@ -120,14 +136,14 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-base sm:text-lg font-serif font-black text-stone-900 dark:text-parchment-50 leading-tight">
-                    Psalms Field Medic
+                    {t('medic.title')}
                   </h3>
                   <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/60 text-amber-900 dark:text-amber-300 font-bold uppercase tracking-wider">
-                    Soul Under Fire
+                    {t('medic.badge')}
                   </span>
                 </div>
                 <p className="text-[11px] sm:text-xs text-stone-600 dark:text-stone-400">
-                  Emergency battlefield prescriptions for panic, insomnia, betrayal, and brokenness
+                  {t('medic.desc')}
                 </p>
               </div>
             </div>
@@ -138,7 +154,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
                 <div className="flex items-center gap-1 bg-stone-100 dark:bg-stone-950 p-1 rounded-xl border border-stone-250 dark:border-stone-800 text-xs">
                   <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400 px-1.5 flex items-center gap-1">
                     <Volume2 className="w-3 h-3 text-amber-800 dark:text-amber-500" />
-                    <span className="hidden sm:inline">Atmosphere:</span>
+                    <span className="hidden sm:inline">{t('medic.atmosphere')}</span>
                   </span>
                   <button
                     onClick={() => handleSwitchAmbience('wind')}
@@ -147,10 +163,10 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
                         ? 'bg-amber-100 dark:bg-amber-600/30 text-amber-900 dark:text-amber-300 border border-amber-400 dark:border-amber-500/60 font-bold' 
                         : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                     }`}
-                    title="Desert Wilderness Wind"
+                    title={t('medic.wind')}
                   >
                     <Wind className="w-3 h-3" />
-                    <span>Wind</span>
+                    <span>{t('medic.wind')}</span>
                   </button>
                   <button
                     onClick={() => handleSwitchAmbience('campfire')}
@@ -159,10 +175,10 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
                         ? 'bg-amber-100 dark:bg-amber-600/30 text-amber-900 dark:text-amber-300 border border-amber-400 dark:border-amber-500/60 font-bold' 
                         : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                     }`}
-                    title="Adullam Cave Campfire"
+                    title={t('medic.fire')}
                   >
                     <Flame className="w-3 h-3 text-orange-500" />
-                    <span>Fire</span>
+                    <span>{t('medic.fire')}</span>
                   </button>
                   <button
                     onClick={() => handleSwitchAmbience('sanctuary')}
@@ -171,10 +187,10 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
                         ? 'bg-amber-100 dark:bg-amber-600/30 text-amber-900 dark:text-amber-300 border border-amber-400 dark:border-amber-500/60 font-bold' 
                         : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                     }`}
-                    title="Sanctuary Reverb"
+                    title={t('medic.sanctuary')}
                   >
                     <Music className="w-3 h-3 text-blue-500" />
-                    <span>Sanctuary</span>
+                    <span>{t('medic.sanctuary')}</span>
                   </button>
                 </div>
               )}
@@ -195,7 +211,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
           <div className="px-4 py-3 border-b border-stone-200 dark:border-stone-800/80 bg-stone-50 dark:bg-stone-950/70 shrink-0">
             <div className="text-[11px] font-mono text-stone-500 dark:text-stone-400 mb-2 flex items-center gap-1.5">
               <Compass className="w-3.5 h-3.5 text-amber-800 dark:text-amber-500" />
-              <span>TRIAGE: What is attacking your soul right now?</span>
+              <span>{t('medic.triage')}</span>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
               {(Object.keys(PSALM_MOODS) as PsalmCrisisMood[]).map((moodKey) => {
@@ -216,7 +232,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
                   >
                     <span className="text-lg mb-1">{info.icon}</span>
                     <span className="text-xs font-semibold leading-tight line-clamp-2">
-                      {info.label}
+                      {getMoodLabel(moodKey)}
                     </span>
                   </button>
                 );
@@ -233,7 +249,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                   <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400 flex items-center gap-1.5">
                     <span>{activeItem.moodIcon}</span>
-                    <span>Emergency Prescription • {activeItem.moodLabel}</span>
+                    <span>{t('medic.emergencyPrescription', { mood: getMoodLabel(activeItem.moodId) })}</span>
                   </span>
                   <span className="text-sm font-mono font-bold text-amber-800 dark:text-amber-500">
                     {activeItem.reference}
@@ -249,7 +265,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
                   <ShieldAlert className="w-4 h-4 text-amber-800 dark:text-amber-500 shrink-0 mt-0.5" />
                   <div>
                     <span className="font-mono font-bold text-amber-800 dark:text-amber-400 uppercase text-[11px] block mb-0.5">
-                      Symptom Audit
+                      {t('medic.symptomAudit')}
                     </span>
                     <span>{activeItem.symptomCheck}</span>
                   </div>
@@ -260,7 +276,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
                   <div className="flex items-center justify-between text-xs font-mono text-amber-800 dark:text-amber-400 mb-2">
                     <span className="font-bold flex items-center gap-1">
                       <Sparkles className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
-                      <span>Scripture Under Heavy Fire</span>
+                      <span>{t('medic.scriptureUnderFire')}</span>
                     </span>
                     <button
                       onClick={() => {
@@ -269,7 +285,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
                       }}
                       className="text-[11px] underline text-stone-600 dark:text-stone-400 hover:text-amber-700 dark:hover:text-amber-300"
                     >
-                      {isFormalMode ? '⚡ View Street Translation' : '📖 View Formal Translation'}
+                      {isFormalMode ? t('medic.viewStreet') : t('medic.viewFormal')}
                     </button>
                   </div>
 
@@ -281,7 +297,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
                   <div className="pt-3 border-t border-amber-200 dark:border-amber-900/40 flex items-start gap-2 text-xs text-stone-700 dark:text-amber-300/80">
                     <MapPin className="w-3.5 h-3.5 text-amber-800 dark:text-amber-500 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-stone-900 dark:text-amber-300">Where David Screamed This: </strong>
+                      <strong className="text-stone-900 dark:text-amber-300">{t('medic.whereDavidScreamed')}</strong>
                       <span>{activeItem.caveBackstory}</span>
                     </div>
                   </div>
@@ -290,12 +306,12 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
                 {/* The 3-Step Field Medic Protocol */}
                 <div className="space-y-3 pt-2">
                   <div className="text-xs font-mono font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400">
-                    The 3-Step Field Medic Protocol
+                    {t('medic.threeStepProtocol')}
                   </div>
 
                   <div className="grid grid-cols-1 gap-2.5">
                     {activeItem.fieldMedicSteps.map((step, idx) => {
-                      const titles = ['1. Physiological Reset', '2. Vocal Anchor', '3. Immediate Trench Action'];
+                      const titles = [t('medic.step1'), t('medic.step2'), t('medic.step3')];
                       return (
                         <div
                           key={idx}
@@ -329,7 +345,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
                         className="px-3.5 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-amber-800 dark:text-amber-400 border border-stone-250 dark:border-stone-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
                       >
                         <Brain className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
-                        <span>Lock in Word Forge</span>
+                        <span>{t('medic.lockWordForge')}</span>
                       </button>
                     )}
 
@@ -343,7 +359,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
                         className="px-3.5 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-amber-800 dark:text-amber-400 border border-stone-250 dark:border-stone-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
                       >
                         <Bell className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
-                        <span>Train with Daily Pulse</span>
+                        <span>{t('medic.trainPulse')}</span>
                       </button>
                     )}
                   </div>
@@ -353,7 +369,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
                     className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all ml-auto"
                   >
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>Apply Prescription (+{activeItem.xpReward} XP)</span>
+                    <span>{t('medic.applyPrescription', { xp: activeItem.xpReward })}</span>
                   </button>
                 </div>
               </div>
@@ -364,7 +380,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
           {/* Footer */}
           <div className="p-3.5 sm:p-4 border-t border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-ink flex items-center justify-between text-xs text-stone-600 dark:text-stone-400 shrink-0">
             <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400 flex items-center gap-1">
-              <span>Field medic prescriptions are designed for raw combat against despair</span>
+              <span>{t('medic.footerCombat')}</span>
             </span>
 
             <button
@@ -374,7 +390,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
               }}
               className="px-4 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-200 text-xs font-semibold border border-stone-250 dark:border-stone-700"
             >
-              Exit Medic Station
+              {t('medic.exit')}
             </button>
           </div>
         </motion.div>

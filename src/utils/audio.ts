@@ -892,7 +892,19 @@ class SoundEngine {
     onFinished?: () => void
   ) {
     this.playSnap();
-    const script = `Command Center Morning Tactical Briefing for today. Battlefield Focus: ${briefing.battlefieldFocus}. Anchor Scripture: ${briefing.memoryVerse}. Field Wisdom: ${briefing.proverb}. Tactical Directive: Stand fast in truth and maintain spiritual discernment. You are equipped for victory.`;
+    const currentLang = (typeof document !== 'undefined' && document.documentElement?.lang) || 
+                        (typeof localStorage !== 'undefined' && localStorage.getItem('testament_language')) || 
+                        'en';
+    const langPrefix = currentLang.toLowerCase().slice(0, 2);
+
+    let script = `Command Center Morning Tactical Briefing for today. Battlefield Focus: ${briefing.battlefieldFocus}. Anchor Scripture: ${briefing.memoryVerse}. Field Wisdom: ${briefing.proverb}. Tactical Directive: Stand fast in truth and maintain spiritual discernment. You are equipped for victory.`;
+
+    if (langPrefix === 'es') {
+      script = `Informe táctico matutino del Centro de Mando para hoy. Enfoque del campo de batalla: ${briefing.battlefieldFocus}. Escritura ancla: ${briefing.memoryVerse}. Sabiduría de campo: ${briefing.proverb}. Directiva táctica: Permanece firme en la verdad y mantén el discernimiento espiritual. Estás equipado para la victoria.`;
+    } else if (langPrefix === 'fr') {
+      script = `Rapport tactique matinal du Centre de Commandement pour aujourd'hui. Objectif du champ de bataille : ${briefing.battlefieldFocus}. Écriture d'ancrage : ${briefing.memoryVerse}. Sagesse de terrain : ${briefing.proverb}. Directive tactique : Tiens bon dans la vérité et garde le discernement spirituel. Tu es équipé pour la victoire.`;
+    }
+
     this.speakVerse(script, onFinished);
   }
 }

@@ -259,7 +259,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
     } catch {
       // ignore
     }
-  }, []);
+  }, [language]);
+
+  const getCategoryLabel = (category: string) => {
+    switch (category) {
+      case 'Pressure & Anxiety': return t('category.pressure');
+      case 'Courage & Facing Giants': return t('category.courage');
+      case 'Anger & Self-Control': return t('category.anger');
+      case 'Restoration After Failure': return t('category.restoration');
+      case 'Endurance & Brotherhood': return t('category.endurance');
+      default: return category;
+    }
+  };
 
   useEffect(() => {
     if (!showMorningBriefing) return;
@@ -556,7 +567,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-mono text-amber-800 dark:text-amber-500 font-semibold">{dailyVerse.reference}</span>
                   <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400 px-2 py-0.5 rounded bg-stone-200/60 dark:bg-stone-900 hidden sm:inline-block">
-                    {dailyVerse.category}
+                    {getCategoryLabel(dailyVerse.category)}
                   </span>
                 </div>
                 <button

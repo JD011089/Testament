@@ -28,9 +28,10 @@ import {
 import { MemoryPulseModal } from './MemoryPulseModal';
 import { getStoryVerseForAct, getStoryVerseForQuest } from '../utils/verseRegistry';
 import { parseScriptureReference, passageWindow } from '../utils/scriptureRef';
-import { fetchBibleChapter, type BibleVerse } from '../utils/bibleService';
+import { fetchBibleChapter, getDefaultTranslationForLanguage, type BibleVerse } from '../utils/bibleService';
 import { deriveConsequenceRipple, generateAfterActionReport } from '../utils/narrativeMomentum';
 import { TacticalNexusCard } from './TacticalNexusCard';
+import { useLanguage } from '../context/LanguageContext';
 
 interface StoryViewerProps {
   quest: StoryQuest;
@@ -53,6 +54,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
   onOpenBibleChapter,
   onRewardXP
 }) => {
+  const { language } = useLanguage();
   const [currentActIndex, setCurrentActIndex] = useState(() => {
     const nextIndex = quest.acts.findIndex((item) => !completedActs.includes(item.id));
     return nextIndex === -1 ? 0 : nextIndex;
@@ -76,7 +78,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
   const act: StoryAct = quest.acts[currentActIndex];
   const isActFinished = completedActs.includes(act.id);
   const isQuestFullyCompleted = quest.acts.every(a => completedActs.includes(a.id));
-  const questAnchorVerse = getStoryVerseForQuest(quest.id) || getStoryVerseForAct(quest.id, act.id);
+  const questAnchorVerse = getStoryVerseForQuest(quest.id, language) || getStoryVerseForAct(quest.id, act.id, language);
   const scriptureRef = parseScriptureReference(act.unlockedScripture.reference);
 
   useEffect(() => {
@@ -88,7 +90,8 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     let cancelled = false;
     setPassageStatus('loading');
     setPassageVerses(null);
-    fetchBibleChapter(scriptureRef.book, scriptureRef.chapter, 'web')
+    const activeTranslation = getDefaultTranslationForLanguage(language);
+    fetchBibleChapter(scriptureRef.book, scriptureRef.chapter, activeTranslation)
       .then((data) => {
         if (cancelled) return;
         const window = passageWindow(scriptureRef.verseStart, scriptureRef.verseEnd, data.verses.length);
@@ -106,7 +109,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [act.id, selectedChoiceId, act.unlockedScripture.reference]);
+  }, [act.id, selectedChoiceId, act.unlockedScripture.reference, language]);
 
   // Load saved choices, quizzes, and reflection notes for the current act (Requirement 3)
   useEffect(() => {
@@ -189,8 +192,8 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
   const scriptureSpeech = () => {
     const body = passageStatus === 'ready' && passageVerses
       ? passageVerses.map(v => v.text).join(' ')
-      : act.unlockedScripture.text;
-    return `${act.unlockedScripture.reference}. ${body}. ${act.unlockedScripture.deepDive}`;
+      : (questAnchorVerse?.text || act.unlockedScripture.text);
+    return `${questAnchorVerse?.reference || act.unlockedScripture.reference}. ${body}. ${act.unlockedScripture.deepDive}`;
   };
 
   const handleToggleSpeakScripture = () => {
@@ -794,7 +797,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             </div>
 
             <h3 className="text-base font-serif font-bold text-amber-800 dark:text-amber-300 mb-2">
-              {act.unlockedScripture.reference}
+              {questAnchorVerse?.reference || act.unlockedScripture.reference}
             </h3>
 
             {!selectedChoiceId ? (
@@ -824,7 +827,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
               </div>
             ) : (
               <blockquote className="font-reading text-lg md:text-xl text-stone-900 dark:text-parchment-50 italic my-3 pl-4 border-l-2 border-amber-500 leading-relaxed">
-                "{act.unlockedScripture.text}"
+                "{questAnchorVerse?.text || act.unlockedScripture.text}"
               </blockquote>
             )}
 
