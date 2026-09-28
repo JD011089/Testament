@@ -24,6 +24,8 @@ import {
 } from '../data/proverbs';
 import { soundEngine } from '../utils/audio';
 import { useModalLock } from '../utils/useModalLock';
+import { useLanguage } from '../context/LanguageContext';
+import { getLocalizedProverb } from '../utils/localizedScripture';
 
 interface ProverbsCodexModalProps {
   isOpen: boolean;
@@ -40,6 +42,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
   onSetMemoryVerse,
   onRewardXP
 }) => {
+  const { t, language } = useLanguage();
   const modalRef = useModalLock(isOpen);
   const [activeTab, setActiveTab] = useState<'simulator' | 'vault'>('simulator');
   const [selectedCategory, setSelectedCategory] = useState<ProverbCategory | 'all'>('all');
@@ -56,13 +59,25 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
   });
   const [translationMode, setTranslationMode] = useState<Record<string, 'street' | 'formal'>>({});
 
-  const scenarios = selectedCategory === 'all' 
+  const rawScenarios = selectedCategory === 'all' 
     ? PROVERB_SCENARIOS 
     : PROVERB_SCENARIOS.filter(s => s.category === selectedCategory);
 
+  const scenarios = rawScenarios.map(s => getLocalizedProverb(s, language));
   const currentScenario = scenarios[currentScenarioIndex] || scenarios[0];
   const isOptionSelected = selectedOptionId !== null;
   const chosenOption = currentScenario.dilemma.options.find(o => o.id === selectedOptionId);
+
+  const getProverbCategoryLabel = (cat: ProverbCategory): string => {
+    switch (cat) {
+      case 'money-debt': return t('proverbs.categoryMoney');
+      case 'tongue-conflict': return t('proverbs.categorySpeech');
+      case 'sluggard-work': return t('proverbs.categoryWork');
+      case 'ego-criticism': return t('proverbs.categoryCounsel');
+      case 'toxic-allies': return t('proverbs.categoryFlattery');
+      default: return '';
+    }
+  };
 
   const handleSelectOption = (optionId: string, isWise: boolean) => {
     if (selectedOptionId) return; // Prevent double pick
@@ -152,14 +167,14 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-base sm:text-lg font-serif font-black text-stone-900 dark:text-parchment-50 leading-tight">
-                    Proverbs Tactical Codex
+                    {t('proverbs.title')}
                   </h3>
                   <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/60 text-amber-900 dark:text-amber-300 font-bold uppercase tracking-wider">
-                    Solomon's Playbook
+                    {t('proverbs.badge')}
                   </span>
                 </div>
                 <p className="text-[11px] sm:text-xs text-stone-600 dark:text-stone-400">
-                  Street-smart intelligence for money, meetings, ego, and high-stakes dilemmas
+                  {t('proverbs.desc')}
                 </p>
               </div>
             </div>
@@ -179,7 +194,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                   }`}
                 >
                   <Zap className="w-3.5 h-3.5" />
-                  <span>Dilemma Simulator</span>
+                  <span>{t('proverbs.simulator')}</span>
                 </button>
                 <button
                   onClick={() => {
@@ -193,7 +208,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                   }`}
                 >
                   <BookOpen className="w-3.5 h-3.5" />
-                  <span>Tactical Vault ({PROVERB_SCENARIOS.length})</span>
+                  <span>{t('proverbs.vault', { count: PROVERB_SCENARIOS.length })}</span>
                 </button>
               </div>
 
@@ -213,7 +228,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
           <div className="px-4 py-2.5 border-b border-stone-200 dark:border-stone-800/80 bg-stone-50 dark:bg-stone-950/70 flex items-center gap-1.5 overflow-x-auto shrink-0 scrollbar-none">
             <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400 mr-1 flex items-center gap-1">
               <SlidersHorizontal className="w-3 h-3 text-amber-500" />
-              <span>Arena:</span>
+              <span>{t('proverbs.arena')}</span>
             </span>
             <button
               onClick={() => {
@@ -228,7 +243,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                   : 'bg-white dark:bg-stone-900 border-stone-250 dark:border-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
               }`}
             >
-              All Arenas
+              {t('proverbs.allArenas')}
             </button>
             {(Object.keys(PROVERB_CATEGORIES) as ProverbCategory[]).map((cat) => {
               const info = PROVERB_CATEGORIES[cat];
@@ -249,7 +264,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                   }`}
                 >
                   <span>{info.icon}</span>
-                  <span>{info.label}</span>
+                  <span>{getProverbCategoryLabel(cat)}</span>
                 </button>
               );
             })}
@@ -264,17 +279,17 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                 <div className="flex items-center justify-between text-xs font-mono text-stone-500 dark:text-stone-400 border-b border-stone-200 dark:border-stone-800/80 pb-2">
                   <div className="flex items-center gap-2">
                     <span className="text-amber-800 dark:text-amber-400 font-bold">
-                      Case #{currentScenarioIndex + 1} of {scenarios.length}
+                      {t('proverbs.caseNumber', { current: currentScenarioIndex + 1, total: scenarios.length })}
                     </span>
                     <span>•</span>
                     <span className="text-stone-700 dark:text-stone-300 font-semibold flex items-center gap-1">
-                      {PROVERB_CATEGORIES[currentScenario.category]?.icon} {PROVERB_CATEGORIES[currentScenario.category]?.label}
+                      {PROVERB_CATEGORIES[currentScenario.category]?.icon} {getProverbCategoryLabel(currentScenario.category)}
                     </span>
                   </div>
                   {completedScenarios[currentScenario.id] && (
                     <span className="text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-1">
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                      <span>Solved (+{currentScenario.xpReward} XP)</span>
+                      <span>{t('proverbs.solved', { xp: currentScenario.xpReward })}</span>
                     </span>
                   )}
                 </div>
@@ -283,7 +298,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                 <div className="p-5 rounded-2xl bg-stone-50 dark:bg-ink-raised border border-amber-500/25 dark:border-amber-500/30 shadow-md relative overflow-hidden">
                   <div className="flex items-center justify-between gap-2 mb-2">
                     <span className="text-xs font-mono uppercase tracking-wider text-amber-800 dark:text-amber-500 font-bold">
-                      Real-World Battlefield Situation
+                      {t('proverbs.realWorldSituation')}
                     </span>
                     <span className="text-xs font-serif font-bold text-amber-800 dark:text-amber-300">
                       {currentScenario.reference}
@@ -352,7 +367,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                             : 'bg-rose-50 dark:bg-rose-950/50 border-rose-300 dark:border-rose-700 text-rose-900 dark:text-rose-200'
                         }`}>
                           <strong className="block mb-1 font-mono uppercase tracking-wider text-[11px]">
-                            {chosenOption.isWise ? '⚔️ Tactical Victory' : '⚠️ Tactical Misstep'}
+                            {chosenOption.isWise ? t('proverbs.tacticalVictory') : t('proverbs.tacticalMisstep')}
                           </strong>
                           {chosenOption.feedback}
                         </div>
@@ -362,10 +377,10 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                           <div className="flex items-center justify-between text-xs font-mono text-amber-800 dark:text-amber-400">
                             <span className="font-bold flex items-center gap-1.5">
                               <Sparkles className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
-                              <span>Solomon’s Intelligence Briefing</span>
+                              <span>{t('proverbs.solomonBriefing')}</span>
                             </span>
                             <span className="text-[11px] underline cursor-pointer" onClick={() => toggleTranslation(currentScenario.id)}>
-                              {translationMode[currentScenario.id] === 'formal' ? 'View Street Breakdown' : 'View Formal Text'}
+                              {translationMode[currentScenario.id] === 'formal' ? t('proverbs.viewStreet') : t('proverbs.viewFormal')}
                             </span>
                           </div>
 
@@ -378,7 +393,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                           </p>
 
                           <div className="text-[11px] font-mono text-amber-800 dark:text-amber-300 font-semibold pt-1">
-                            Rule of Thumb: {currentScenario.keyTakeaway}
+                            {t('proverbs.ruleOfThumb')} {currentScenario.keyTakeaway}
                           </div>
                         </div>
 
@@ -395,7 +410,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                                 className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-amber-800 dark:text-amber-400 border border-stone-250 dark:border-stone-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
                               >
                                 <Brain className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
-                                <span>Lock in Word Forge</span>
+                                <span>{t('proverbs.lockWordForge')}</span>
                               </button>
                             )}
 
@@ -409,7 +424,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                                 className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-amber-800 dark:text-amber-400 border border-stone-250 dark:border-stone-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
                               >
                                 <Bell className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
-                                <span>Train with Daily Pulse</span>
+                                <span>{t('proverbs.trainPulse')}</span>
                               </button>
                             )}
                           </div>
@@ -418,7 +433,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                             onClick={handleNextScenario}
                             className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center gap-1.5 shadow-md ml-auto transition-all"
                           >
-                            <span>Next Scenario</span>
+                            <span>{t('proverbs.nextScenario')}</span>
                             <ArrowRight className="w-3.5 h-3.5" />
                           </button>
                         </div>
@@ -433,7 +448,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                     onClick={handlePrevScenario}
                     className="px-3.5 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 border border-stone-250 dark:border-stone-800 text-stone-700 dark:text-stone-400 hover:text-stone-950 dark:hover:text-stone-200 text-xs font-semibold transition-colors"
                   >
-                    ← Previous Case
+                    {t('proverbs.prevCase')}
                   </button>
 
                   <button
@@ -444,14 +459,14 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                     className="text-xs text-stone-500 hover:text-amber-600 dark:hover:text-amber-400 flex items-center gap-1 transition-colors"
                   >
                     <RotateCcw className="w-3 h-3" />
-                    <span>Reset Choice</span>
+                    <span>{t('proverbs.resetChoice')}</span>
                   </button>
 
                   <button
                     onClick={handleNextScenario}
                     className="px-3.5 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 border border-stone-250 dark:border-stone-800 text-stone-700 dark:text-stone-400 hover:text-stone-950 dark:hover:text-stone-200 text-xs font-semibold transition-colors"
                   >
-                    Next Case →
+                    {t('proverbs.nextCase')}
                   </button>
                 </div>
               </div>
@@ -469,7 +484,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                         <div>
                           <div className="flex items-center justify-between gap-2 mb-1.5">
                             <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-900 text-amber-800 dark:text-amber-400 border border-stone-250 dark:border-stone-800 font-bold">
-                              {PROVERB_CATEGORIES[item.category]?.icon} {PROVERB_CATEGORIES[item.category]?.label}
+                              {PROVERB_CATEGORIES[item.category]?.icon} {getProverbCategoryLabel(item.category)}
                             </span>
                             <span className="text-xs font-mono font-bold text-amber-800 dark:text-amber-500">
                               {item.reference}
@@ -494,7 +509,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                             onClick={() => toggleTranslation(item.id)}
                             className="text-[11px] font-mono text-amber-800 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 underline"
                           >
-                            {isFormal ? '⚡ Street Translation' : '📖 Formal Text'}
+                            {isFormal ? t('proverbs.viewStreet') : t('proverbs.viewFormal')}
                           </button>
 
                           <div className="flex items-center gap-1.5 ml-auto">
@@ -506,7 +521,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                                   onOpenWordForge(item.id);
                                 }}
                                 className="p-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-600 hover:text-stone-950 dark:text-stone-300 dark:hover:text-amber-400 border border-stone-250 dark:border-stone-700 transition-colors"
-                                title="Practice in Word Forge"
+                                title={t('proverbs.practiceWordForge')}
                               >
                                 <Brain className="w-3.5 h-3.5" />
                               </button>
@@ -520,7 +535,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                                   onClose();
                                 }}
                                 className="p-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-600 hover:text-stone-950 dark:text-stone-300 dark:hover:text-amber-400 border border-stone-250 dark:border-stone-700 transition-colors"
-                                title="Train in Spaced Memory Pulse"
+                                title={t('proverbs.trainPulse')}
                               >
                                 <Bell className="w-3.5 h-3.5" />
                               </button>
@@ -536,7 +551,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                               }}
                               className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-bold transition-all shadow-sm flex items-center gap-1"
                             >
-                              <span>Play Dilemma</span>
+                              <span>{t('proverbs.playDilemma')}</span>
                               <ArrowRight className="w-3 h-3" />
                             </button>
                           </div>
@@ -553,7 +568,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
           <div className="p-3.5 sm:p-4 border-t border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-ink flex items-center justify-between text-xs text-stone-600 dark:text-stone-400 shrink-0">
             <span className="flex items-center gap-1 text-[11px] font-mono">
               <Flame className="w-3.5 h-3.5 text-amber-500" />
-              <span>Ancient wisdom stress-tested for modern high stakes</span>
+              <span>{t('proverbs.footerWisdom')}</span>
             </span>
 
             <button
@@ -563,7 +578,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
               }}
               className="px-4 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-200 text-xs font-semibold border border-stone-250 dark:border-stone-700"
             >
-              Close Codex
+              {t('proverbs.close')}
             </button>
           </div>
         </motion.div>
