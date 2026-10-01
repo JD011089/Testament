@@ -35,10 +35,22 @@ export const PWAInstallPrompt: React.FC = () => {
   const pwaModalRef = useModalLock(isVisible && isModalMode);
   const [installState, setInstallState] = useState<'ready' | 'prompted' | 'manual_needed'>('ready');
 
+  const [isDismissed, setIsDismissed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('testament_pwa_dismissed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
   useEffect(() => {
     // If already installed (running standalone or previously confirmed), suppress banner
     if (checkIsPWAInstalled()) {
       setIsInstalled(true);
+    }
+
+    if (isDismissed) {
+      return;
     }
 
     // Listen to media query changes (e.g. if user opened standalone app window)
@@ -94,9 +106,15 @@ export const PWAInstallPrompt: React.FC = () => {
       if (timer) clearTimeout(timer);
       if (installDismissed() || checkIsPWAInstalled()) return;
       if (!onboardingDone()) return;
+      // Never pop up if a reader or another dialog is active
+      if (document.body.classList.contains('overflow-hidden') || document.querySelector('[role="dialog"]')) return;
       timer = setTimeout(() => {
-        if (!checkIsPWAInstalled() && !installDismissed()) setIsVisible(true);
-      }, 800);
+        if (!checkIsPWAInstalled() && !installDismissed()) {
+          if (!document.body.classList.contains('overflow-hidden') && !document.querySelector('[role="dialog"]')) {
+            setIsVisible(true);
+          }
+        }
+      }, 1200);
     };
 
     const onSettled = () => queueBanner();
@@ -140,6 +158,8 @@ export const PWAInstallPrompt: React.FC = () => {
   const handleMarkAlreadyInstalled = () => {
     soundEngine.playVictory();
     localStorage.setItem('testament_pwa_installed', 'true');
+    localStorage.setItem('testament_pwa_dismissed', 'true');
+    setIsDismissed(true);
     setIsInstalled(true);
     setIsVisible(false);
     setIsModalMode(false);
@@ -149,7 +169,12 @@ export const PWAInstallPrompt: React.FC = () => {
     soundEngine.playClick();
     setIsVisible(false);
     setIsModalMode(false);
-    localStorage.setItem('testament_pwa_dismissed', 'true');
+    setIsDismissed(true);
+    try {
+      localStorage.setItem('testament_pwa_dismissed', 'true');
+    } catch {
+      // ignore
+    }
   };
 
   useEffect(() => {
@@ -165,8 +190,8 @@ export const PWAInstallPrompt: React.FC = () => {
     };
   }, [isVisible]);
 
-  // NEVER show if not visible, or if already installed and not in explicit modal mode
-  if (!isVisible || (isInstalled && !isModalMode)) return null;
+  // NEVER show if not visible, or if already dismissed (unless in explicit modal mode), or if already installed
+  if (!isVisible || (isDismissed && !isModalMode) || (isInstalled && !isModalMode)) return null;
 
   // Render content
   const cardContent = (

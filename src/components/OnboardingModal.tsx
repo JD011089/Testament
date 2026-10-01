@@ -136,29 +136,29 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   const FAMILIARITIES = [
     {
       id: 'new' as const,
-      title: 'Brand New / Blank Slate',
-      desc: "Never read it or don't remember much. Assume zero knowledge, explain ancient terms simply.",
-      tag: 'Plain-English Guide'
+      title: "I'm brand new to the Bible",
+      desc: "Assume zero knowledge. Start with the core life and teachings of Jesus.",
+      tag: 'Start with Jesus'
     },
     {
       id: 'disconnected' as const,
-      title: 'Grew Up Around It, But Disconnected',
-      desc: 'Tired of dry academic lectures. Want raw authentic history and direct masculine application.',
+      title: "I've read some of the Bible",
+      desc: "Familiar with some stories. Looking for authentic history and direct practical application.",
       tag: 'Fresh Eyes'
     },
     {
       id: 'sharp' as const,
-      title: 'Familiar, Looking for Sharp Daily Edge',
-      desc: 'Know the basics. Looking for deep tactical study, scripture memory weapons, and brotherhood wisdom.',
-      tag: 'Deep Armor'
+      title: "I know the Bible well",
+      desc: "Solid foundation. Looking for deep daily study, scripture memory, and actionable wisdom.",
+      tag: 'Deep Study'
     }
   ];
 
   const CADENCES = [
     {
       id: '3min' as const,
-      title: '3 Minutes / Morning Briefing',
-      desc: 'Quick audio briefing with your morning coffee or drive.',
+      title: '3 Minutes / Quick Briefing',
+      desc: 'Quick audio summary with your morning coffee or drive.',
       icon: '☕'
     },
     {
@@ -170,7 +170,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
     {
       id: 'deep' as const,
       title: 'Deep Dive / Flexible Session',
-      desc: 'Story act + Word Forge tile memory + "What\'s the play?" simulator.',
+      desc: 'Story act + Word Forge tile memory + scenario simulator.',
       icon: '🛡️'
     }
   ];
@@ -203,10 +203,11 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
   const handleFinishCalibration = (startQuest: boolean, openTour: boolean = false) => {
     soundEngine.playVictory();
+    const recommendedQuestId = familiarity === 'new' ? 'jesus-journey' : selectedBattleObj.recommendedQuestId;
     const profile: UserCalibrationProfile = {
       battleId: selectedBattleObj.id,
-      battleTitle: selectedBattleObj.title,
-      recommendedQuestId: selectedBattleObj.recommendedQuestId,
+      battleTitle: familiarity === 'new' ? 'The Life of Jesus' : selectedBattleObj.title,
+      recommendedQuestId,
       learningStyle,
       familiarity,
       dailyCadence,
@@ -246,9 +247,9 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h3 id="onboarding-modal-title" className="text-sm sm:text-base font-serif font-bold text-stone-900 dark:text-parchment-50">
-                  Battle Plan Calibration
+                  Personalize Your Plan
                 </h3>
-                <span className="text-[11px] uppercase font-mono px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30">
+                <span className="text-xs uppercase font-mono px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30">
                   {step < 5 ? `Step ${step} of 4` : 'Ready'}
                 </span>
               </div>
@@ -345,6 +346,24 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                     </button>
                   );
                 })}
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playClick();
+                    try {
+                      localStorage.setItem('testament_onboarding_completed', 'true');
+                    } catch {
+                      // ignore
+                    }
+                    onClose();
+                  }}
+                  className="w-full py-2.5 px-4 rounded-xl border border-stone-200 dark:border-stone-800 text-xs font-semibold text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-850 hover:text-stone-900 dark:hover:text-stone-200 transition-colors text-center"
+                >
+                  Skip for now — take me to the app →
+                </button>
               </div>
             </div>
           )}

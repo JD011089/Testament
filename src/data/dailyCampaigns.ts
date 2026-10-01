@@ -471,11 +471,11 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
       {
         stepNumber: 2,
         type: 'dilemma',
-        title: 'Step 2: "What\'s The Play?" Tactical Sim',
-        badge: 'Real-Life Dilemma',
-        subtitle: 'The Trusted Friend’s Slander',
+        title: 'Step 2 • What would you do?',
+        badge: 'Real-Life Scenario',
+        subtitle: 'Navigating Broken Trust & Rumors',
         targetId: 'dilemma-friend-betrayal',
-        actionLabel: 'Navigate Broken Brotherhood',
+        actionLabel: 'Try scenario',
         icon: '🛡️',
         intel: 'Someone in your inner circle betrayed your confidence. Choose biblical restoration over spiteful retaliation.'
       },

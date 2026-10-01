@@ -798,38 +798,8 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                 </div>
 
                 {/* Desktop Reader Controls (Hidden on mobile) */}
-                <div className="hidden sm:flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
-                  {/* Translation Switcher */}
-                  <select
-                    value={selectedTranslation}
-                    onChange={(e) => {
-                      soundEngine.playClick();
-                      setSelectedTranslation(e.target.value as TranslationId);
-                    }}
-                    title={BIBLE_TRANSLATIONS.find((item) => item.id === selectedTranslation)?.label}
-                    aria-label="Bible translation"
-                    className="max-w-[7.5rem] px-2 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-250 dark:border-stone-800 text-[11px] sm:text-xs font-mono font-medium text-stone-700 dark:text-stone-300 cursor-pointer focus:outline-none"
-                  >
-                    {BIBLE_TRANSLATIONS.map(t => (
-                      <option key={t.id} value={t.id} className="bg-white dark:bg-stone-900">
-                        {t.id.toUpperCase()} ({t.language.toUpperCase()})
-                      </option>
-                    ))}
-                  </select>
-
-                  {/* Reading Voice Picker Button */}
-                  <button
-                    onClick={() => {
-                      soundEngine.playClick();
-                      setIsVoiceModalOpen(true);
-                    }}
-                    className="flex items-center gap-1 px-2 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 border border-stone-250 dark:border-stone-800 text-[11px] sm:text-xs font-mono font-medium text-stone-700 dark:text-stone-300 transition-colors"
-                    title="Change reading voice"
-                  >
-                    <Mic className="w-3.5 h-3.5 text-amber-500" />
-                    <span className="font-bold">{NARRATOR_VOICES[currentVoice]?.name.split(' ')[0] || 'Adam'}</span>
-                  </button>
-
+                <div className="hidden sm:flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                  {/* Progressive Disclosure Toolbar: Text Size (A- to A++) */}
                   <div className="inline-flex items-center p-0.5 rounded-lg bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800">
                     {([
                       ['sm', 'A-'],
@@ -841,7 +811,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                         key={size}
                         type="button"
                         onClick={() => chooseFontSize(size)}
-                        className={`px-2 py-1 rounded text-[11px] font-mono ${readingFontSize === size ? 'bg-white dark:bg-stone-800 font-bold text-stone-900 dark:text-stone-100' : 'text-stone-500'}`}
+                        className={`px-2.5 py-1 rounded text-xs font-mono transition-colors ${readingFontSize === size ? 'bg-white dark:bg-stone-800 font-bold text-stone-900 dark:text-stone-100 shadow-xs' : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-200'}`}
                         aria-label={`Text size ${label}`}
                       >
                         {label}
@@ -849,27 +819,25 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                     ))}
                   </div>
 
-                  <div className="inline-flex items-center p-0.5 rounded-lg bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800">
-                    <button
-                      type="button"
-                      onClick={() => chooseLayout('verses')}
-                      className={`px-2 py-1 rounded text-[11px] font-semibold ${readingLayout === 'verses' ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100' : 'text-stone-500'}`}
-                    >
-                      Verses
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => chooseLayout('flow')}
-                      className={`px-2 py-1 rounded text-[11px] font-semibold ${readingLayout === 'flow' ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100' : 'text-stone-500'}`}
-                    >
-                      Flow
-                    </button>
-                  </div>
+                  {/* More Reader Settings Button (Translation, Voice, Layout) */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundEngine.playClick();
+                      setShowReadingPrefs(true);
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 border border-stone-250 dark:border-stone-800 text-xs font-medium text-stone-700 dark:text-stone-300 transition-colors"
+                    title="More Settings (Translation, Voice, Layout)"
+                    aria-label="More reader settings"
+                  >
+                    <SlidersHorizontal className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Settings</span>
+                  </button>
 
                   {/* Chapter Audio Reader */}
                   <button
                     onClick={handleToggleChapterAudio}
-                    className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border text-[11px] sm:text-xs font-semibold transition-all ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
                       isPlayingChapterAudio
                         ? 'bg-amber-500 text-stone-950 border-amber-600 shadow-glow'
                         : 'bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 text-stone-700 dark:text-stone-300 border-stone-250 dark:border-stone-800'
@@ -937,14 +905,14 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                 )}
               </div>
 
-              {/* MOBILE READING PREFERENCES SLIDE-UP DRAWER */}
+              {/* READING PREFERENCES DRAWER / MODAL */}
               {showReadingPrefs && (
                 <div 
-                  className="sm:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex flex-col justify-end"
+                  className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex flex-col justify-end sm:justify-center sm:items-center p-0 sm:p-4"
                   onClick={() => setShowReadingPrefs(false)}
                 >
                   <div 
-                    className="bg-white dark:bg-ink-raised border-t-2 border-amber-500/50 rounded-t-3xl p-5 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto"
+                    className="bg-white dark:bg-ink-raised border-t-2 sm:border-2 border-amber-500/50 rounded-t-3xl sm:rounded-3xl p-5 space-y-4 shadow-2xl max-h-[85vh] sm:max-w-md w-full overflow-y-auto"
                     onClick={e => e.stopPropagation()}
                   >
                     <div className="flex items-center justify-between pb-2 border-b border-stone-200 dark:border-stone-800">
@@ -1116,6 +1084,14 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                           onClose();
                         }}
                       />
+                      {chapterData.verses.some(v => v.text.includes('Yahweh')) && (
+                        <div className="mt-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2.5 text-left">
+                          <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                          <div>
+                            <span className="font-bold">Note on God's Name:</span> In this translation, <em>Yahweh</em> is the personal Hebrew name of God, frequently translated as &ldquo;the LORD&rdquo; or &ldquo;God&rdquo; in English Bibles.
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <div className={`font-reading leading-[1.75] w-full max-w-[65ch] mx-auto overflow-x-hidden text-stone-800 dark:text-stone-200 ${fontClass} ${readingLayout === 'verses' ? 'space-y-4' : ''}`}>

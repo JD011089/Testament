@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { MemoryVerse } from '../types';
 import { getAllVerses } from '../utils/verseRegistry';
@@ -45,6 +45,36 @@ interface PuzzleWorkbenchProps {
   onNextVerse: () => void;
 }
 
+export const splitIntoPhrases = (text: string): string[] => {
+  const parts = text.split(/(?<=[,;:!?.\u2014])\s+/);
+  const phrases: string[] = [];
+
+  for (const part of parts) {
+    const trimmed = part.trim();
+    if (!trimmed) continue;
+    const words = trimmed.split(/\s+/);
+    if (words.length <= 7) {
+      phrases.push(trimmed);
+    } else {
+      // Chunk long clauses into segments of <= 6 words (≤8 taps)
+      for (let i = 0; i < words.length; i += 6) {
+        phrases.push(words.slice(i, i + 6).join(' '));
+      }
+    }
+  }
+
+  return phrases.length > 0 ? phrases : [text];
+};
+
+const shuffleWordsForPhrase = (phraseText: string, verseId: string, phraseIdx: number): WordItem[] => {
+  const words: WordItem[] = phraseText.split(/\s+/).map((word, idx) => ({ 
+    id: `${verseId}-p${phraseIdx}-${word}-${idx}`, 
+    word,
+    originalIndex: idx
+  }));
+  return [...words].sort(() => Math.random() - 0.5);
+};
+
 const shuffleWords = (verse: MemoryVerse): WordItem[] => {
   const words: WordItem[] = verse.text.split(/\s+/).map((word, idx) => ({ 
     id: `${verse.id}-${word}-${idx}`, 
@@ -61,9 +91,24 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
   onNextVerse
 }) => {
   const { t, language } = useLanguage();
-  const targetWords = verse.text.split(/\s+/);
+  const [forgeMode, setForgeMode] = useState<'phrases' | 'full' | 'reveal'>('phrases');
+  const phrases = useMemo(() => splitIntoPhrases(verse.text), [verse.text]);
+  const [currentPhraseIdx, setCurrentPhraseIdx] = useState<number>(0);
+  const [completedPhrases, setCompletedPhrases] = useState<string[]>([]);
+  const [revealedPhraseCount, setRevealedPhraseCount] = useState<number>(1);
+
+  const targetWords = useMemo(() => {
+    if (forgeMode === 'phrases') {
+      return phrases[currentPhraseIdx] ? phrases[currentPhraseIdx].split(/\s+/) : [];
+    }
+    return verse.text.split(/\s+/);
+  }, [forgeMode, phrases, currentPhraseIdx, verse.text]);
+
   const [assembledWords, setAssembledWords] = useState<WordItem[]>([]);
-  const [availableWords, setAvailableWords] = useState<WordItem[]>(() => shuffleWords(verse));
+  const [availableWords, setAvailableWords] = useState<WordItem[]>(() => {
+    const firstPhrase = splitIntoPhrases(verse.text)[0] || verse.text;
+    return shuffleWordsForPhrase(firstPhrase, verse.id, 0);
+  });
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
   const [hintLevel, setHintLevel] = useState<0 | 1 | 2>(0);
   const [isPeeking, setIsPeeking] = useState<boolean>(false);
@@ -99,13 +144,11 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
     };
   }, []);
 
-  useEffect(() => {
-    resetPuzzle();
-  }, [verse.id, verse.text]);
-
   const resetPuzzle = () => {
     soundEngine.playSnap();
-    setAvailableWords(shuffleWords(verse));
+    setCurrentPhraseIdx(0);
+    setCompletedPhrases([]);
+    setRevealedPhraseCount(1);
     setAssembledWords([]);
     setIsCompleted(false);
     setHintLevel(0);
@@ -113,7 +156,18 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
     setHasPeeked(false);
     setFsrsRated(false);
     setScheduledNextDays(null);
+
+    if (forgeMode === 'phrases') {
+      const firstPhrase = phrases[0] || verse.text;
+      setAvailableWords(shuffleWordsForPhrase(firstPhrase, verse.id, 0));
+    } else {
+      setAvailableWords(shuffleWords(verse));
+    }
   };
+
+  useEffect(() => {
+    resetPuzzle();
+  }, [verse.id, verse.text, forgeMode]);
 
   const nextWord = targetWords[assembledWords.length];
 
@@ -146,25 +200,84 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
     setAvailableWords(prev => prev.filter(w => w.id !== item.id));
     setHintLevel(0);
 
-    if (newAssembled.length === targetWords.length) {
-      const isCorrect = newAssembled.map(w => w.word).join(' ') === targetWords.join(' ');
-      if (isCorrect) {
-        setIsCompleted(true);
-        soundEngine.playVictory();
-        confetti({
-          particleCount: 60,
-          spread: 70,
-          origin: { y: 0.75 },
-          colors: ['#ea580c', '#f59e0b', '#10b981', '#fbbf24']
-        });
-        if (!hasPeeked) {
-          if (!fsrsRated) {
-            const updated = recordFSRSReview(verse.id, 3);
-            setFsrsRated(true);
-            setScheduledNextDays(updated.stability);
+    if (forgeMode === 'phrases') {
+      if (newAssembled.length === targetWords.length) {
+        const isCorrect = newAssembled.map(w => w.word).join(' ') === targetWords.join(' ');
+        if (isCorrect) {
+          soundEngine.playVictory();
+          const nextCompleted = [...completedPhrases, phrases[currentPhraseIdx]];
+          setCompletedPhrases(nextCompleted);
+
+          if (currentPhraseIdx < phrases.length - 1) {
+            const nextIdx = currentPhraseIdx + 1;
+            setCurrentPhraseIdx(nextIdx);
+            setAssembledWords([]);
+            setAvailableWords(shuffleWordsForPhrase(phrases[nextIdx], verse.id, nextIdx));
+          } else {
+            // Completed all phrases!
+            setIsCompleted(true);
+            confetti({
+              particleCount: 60,
+              spread: 70,
+              origin: { y: 0.75 },
+              colors: ['#ea580c', '#f59e0b', '#10b981', '#fbbf24']
+            });
+            if (!hasPeeked) {
+              if (!fsrsRated) {
+                const updated = recordFSRSReview(verse.id, 3);
+                setFsrsRated(true);
+                setScheduledNextDays(updated.stability);
+              }
+              onVerseMastered(verse.id);
+            }
           }
-          onVerseMastered(verse.id);
         }
+      }
+    } else {
+      if (newAssembled.length === targetWords.length) {
+        const isCorrect = newAssembled.map(w => w.word).join(' ') === targetWords.join(' ');
+        if (isCorrect) {
+          setIsCompleted(true);
+          soundEngine.playVictory();
+          confetti({
+            particleCount: 60,
+            spread: 70,
+            origin: { y: 0.75 },
+            colors: ['#ea580c', '#f59e0b', '#10b981', '#fbbf24']
+          });
+          if (!hasPeeked) {
+            if (!fsrsRated) {
+              const updated = recordFSRSReview(verse.id, 3);
+              setFsrsRated(true);
+              setScheduledNextDays(updated.stability);
+            }
+            onVerseMastered(verse.id);
+          }
+        }
+      }
+    }
+  };
+
+  const handleRevealNext = () => {
+    soundEngine.playSnap();
+    if (revealedPhraseCount < phrases.length) {
+      setRevealedPhraseCount(prev => prev + 1);
+    } else {
+      setIsCompleted(true);
+      soundEngine.playVictory();
+      confetti({
+        particleCount: 60,
+        spread: 70,
+        origin: { y: 0.75 },
+        colors: ['#ea580c', '#f59e0b', '#10b981', '#fbbf24']
+      });
+      if (!hasPeeked) {
+        if (!fsrsRated) {
+          const updated = recordFSRSReview(verse.id, 3);
+          setFsrsRated(true);
+          setScheduledNextDays(updated.stability);
+        }
+        onVerseMastered(verse.id);
       }
     }
   };
@@ -267,94 +380,206 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
 
       {/* RIGHT COLUMN: WORKBENCH & WORD BANK */}
       <div className="lg:col-span-7 space-y-6 relative">
-        {nextWord && !isCompleted && (
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-sm text-stone-600 dark:text-stone-300 min-h-[1.25rem]">
-              {hintLevel === 0 && t('forge.stuckHint')}
-              {hintLevel === 1 && t('forge.nextLetter', { letter: firstLetterOf(nextWord) })}
-              {hintLevel === 2 && t('forge.nextWordIs', { word: nextWord })}
-            </p>
-            <button
-              onClick={handlePeek}
-              className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold ${
-                isPeeking
-                  ? 'bg-amber-500 text-stone-950'
-                  : 'bg-stone-200/70 dark:bg-stone-800 text-stone-700 dark:text-stone-200 hover:bg-stone-300 dark:hover:bg-stone-700'
-              }`}
-            >
-              {isPeeking ? t('forge.hideVerse') : t('forge.showMe')}
-            </button>
-          </div>
-        )}
+        {/* Memorization Mode Selector (M-10: chunking ≤8 taps or progressive reveal) */}
+        <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-stone-200/60 dark:bg-stone-900 self-start text-xs font-medium">
+          <button
+            type="button"
+            onClick={() => setForgeMode('phrases')}
+            className={`px-3 py-1.5 rounded-lg text-xs transition-all ${
+              forgeMode === 'phrases' 
+                ? 'bg-amber-500 text-stone-950 font-bold shadow-xs' 
+                : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+            }`}
+          >
+            By Phrase (Chunked)
+          </button>
+          <button
+            type="button"
+            onClick={() => setForgeMode('reveal')}
+            className={`px-3 py-1.5 rounded-lg text-xs transition-all ${
+              forgeMode === 'reveal' 
+                ? 'bg-amber-500 text-stone-950 font-bold shadow-xs' 
+                : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+            }`}
+          >
+            Progressive Reveal
+          </button>
+          <button
+            type="button"
+            onClick={() => setForgeMode('full')}
+            className={`px-3 py-1.5 rounded-lg text-xs transition-all ${
+              forgeMode === 'full' 
+                ? 'bg-amber-500 text-stone-950 font-bold shadow-xs' 
+                : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+            }`}
+          >
+            Full Verse
+          </button>
+        </div>
 
-        {/* Assembly Work Area */}
-        <div>
-          <div className="text-xs uppercase font-mono tracking-wider text-stone-600 dark:text-stone-400 mb-2 flex items-center justify-between">
-            <span>{t('forge.yourForgedVerse', { count: assembledWords.length, total: targetWords.length })}</span>
-            {assembledWords.length > 0 && (
-              <span className="text-[11px] text-stone-500 italic">{t('forge.tapToReturn')}</span>
+        {forgeMode === 'reveal' ? (
+          /* PROGRESSIVE REVEAL MODE */
+          <div className="space-y-4">
+            <div className="p-5 md:p-6 rounded-2xl bg-stone-100/70 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 space-y-4">
+              <div className="flex items-center justify-between text-xs font-mono text-stone-500 dark:text-stone-400">
+                <span>Phrase {Math.min(revealedPhraseCount, phrases.length)} of {phrases.length}</span>
+                <span>{Math.round((Math.min(revealedPhraseCount, phrases.length) / phrases.length) * 100)}%</span>
+              </div>
+
+              <div className="p-5 rounded-xl bg-white dark:bg-ink min-h-[140px] flex flex-col justify-center">
+                <p className="font-reading text-lg md:text-xl leading-relaxed text-stone-900 dark:text-parchment-50">
+                  {phrases.slice(0, revealedPhraseCount).map((phrase: string, idx: number) => (
+                    <span key={idx} className="mr-1.5 animate-fadeIn">
+                      {phrase}{' '}
+                    </span>
+                  ))}
+                  {revealedPhraseCount < phrases.length && (
+                    <span className="text-stone-400 dark:text-stone-600 select-none">
+                      ... [{phrases.length - revealedPhraseCount} more phrase{phrases.length - revealedPhraseCount > 1 ? 's' : ''}]
+                    </span>
+                  )}
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setRevealedPhraseCount(1)}
+                  className="px-3 py-2 rounded-xl text-xs font-semibold text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-800"
+                >
+                  Start Over
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRevealNext}
+                  className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs sm:text-sm shadow-md flex items-center gap-1.5 transition-all"
+                >
+                  <span>{revealedPhraseCount < phrases.length ? `Reveal Next Phrase (${revealedPhraseCount + 1}/${phrases.length})` : 'Confirm Mastered'}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* TILE ASSEMBLY MODE (PHRASES OR FULL) */
+          <>
+            {nextWord && !isCompleted && (
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm text-stone-600 dark:text-stone-300 min-h-[1.25rem]">
+                  {hintLevel === 0 && (forgeMode === 'phrases' ? `Assembling phrase ${currentPhraseIdx + 1} of ${phrases.length}` : t('forge.stuckHint'))}
+                  {hintLevel === 1 && t('forge.nextLetter', { letter: firstLetterOf(nextWord) })}
+                  {hintLevel === 2 && t('forge.nextWordIs', { word: nextWord })}
+                </p>
+                <button
+                  onClick={handlePeek}
+                  className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold ${
+                    isPeeking
+                      ? 'bg-amber-500 text-stone-950'
+                      : 'bg-stone-200/70 dark:bg-stone-800 text-stone-700 dark:text-stone-200 hover:bg-stone-300 dark:hover:bg-stone-700'
+                  }`}
+                >
+                  {isPeeking ? t('forge.hideVerse') : t('forge.showMe')}
+                </button>
+              </div>
             )}
-          </div>
 
-          <div className="min-h-[140px] md:min-h-[160px] p-4 md:p-5 rounded-2xl bg-stone-100/50 dark:bg-ink border border-dashed border-stone-300/70 dark:border-stone-800/70 flex flex-wrap items-center content-start gap-2.5 transition-colors">
-            {isPeeking ? (
-              <div className="w-full rounded-xl bg-stone-900 text-white p-4 md:p-5">
-                <p className="text-[11px] font-mono uppercase tracking-widest text-amber-300 mb-2">{t('forge.showingVerseAgain')}</p>
-                <p className="font-reading text-base md:text-lg italic leading-relaxed text-white">&ldquo;{verse.text}&rdquo;</p>
+            {/* Assembly Work Area */}
+            <div>
+              <div className="text-xs uppercase font-mono tracking-wider text-stone-600 dark:text-stone-400 mb-2 flex items-center justify-between">
+                <span>
+                  {forgeMode === 'phrases'
+                    ? `Phrase ${currentPhraseIdx + 1} of ${phrases.length} (${assembledWords.length}/${targetWords.length} words)`
+                    : t('forge.yourForgedVerse', { count: assembledWords.length, total: targetWords.length })}
+                </span>
+                {assembledWords.length > 0 && (
+                  <span className="text-xs text-stone-500 italic">{t('forge.tapToReturn')}</span>
+                )}
               </div>
-            ) : assembledWords.length === 0 ? (
-              <div className="w-full text-center text-stone-400 dark:text-stone-500 text-sm py-10 font-reading italic">
-                {t('forge.tapTilesInOrder')}
+
+              <div className="min-h-[140px] md:min-h-[160px] p-4 md:p-5 rounded-2xl bg-stone-100/50 dark:bg-ink border border-dashed border-stone-300/70 dark:border-stone-800/70 flex flex-wrap items-center content-start gap-2.5 transition-colors">
+                {isPeeking ? (
+                  <div className="w-full rounded-xl bg-stone-900 text-white p-4 md:p-5">
+                    <p className="text-xs font-mono uppercase tracking-widest text-amber-300 mb-2">{t('forge.showingVerseAgain')}</p>
+                    <p className="font-reading text-base md:text-lg italic leading-relaxed text-white">&ldquo;{verse.text}&rdquo;</p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Previously completed phrases in phrase mode */}
+                    {forgeMode === 'phrases' && completedPhrases.length > 0 && (
+                      <div className="w-full pb-2 mb-2 border-b border-stone-200 dark:border-stone-800 flex flex-wrap gap-1.5 items-center">
+                        <span className="text-xs font-mono text-emerald-700 dark:text-emerald-400 font-bold mr-1">✓ Completed:</span>
+                        {completedPhrases.map((phrase, idx) => (
+                          <span key={idx} className="px-2 py-0.5 rounded-md bg-emerald-100/80 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-reading">
+                            {phrase}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {assembledWords.length === 0 ? (
+                      <div className="w-full text-center text-stone-400 dark:text-stone-500 text-sm py-8 font-reading italic">
+                        {forgeMode === 'phrases' 
+                          ? `Tap tiles below to assemble phrase ${currentPhraseIdx + 1} (${targetWords.length} words)`
+                          : t('forge.tapTilesInOrder')}
+                      </div>
+                    ) : (
+                      assembledWords.map((item, idx) => {
+                        const isCorrect = isWordCorrectAtIndex(idx);
+                        return (
+                          <motion.button
+                            key={item.id}
+                            layout
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            onClick={() => handleRemoveWord(idx)}
+                            title={t('forge.tapToReturn')}
+                            className={`px-3.5 py-2 rounded-xl text-sm md:text-base font-reading font-medium transition-all focus-visible:ring-2 focus-visible:ring-amber-500 ${
+                              isCorrect
+                                ? 'bg-amber-100 dark:bg-amber-600/25 text-amber-950 dark:text-parchment-50 hover:bg-red-100 dark:hover:bg-red-950/40 hover:text-red-900 dark:hover:text-red-200'
+                                : 'bg-red-100 dark:bg-red-950/40 text-red-800 dark:text-red-200'
+                            }`}
+                          >
+                            {item.word}
+                          </motion.button>
+                        );
+                      })
+                    )}
+                  </>
+                )}
               </div>
-            ) : (
-              assembledWords.map((item, idx) => {
-                const isCorrect = isWordCorrectAtIndex(idx);
-                return (
+            </div>
+
+            {/* Available Words Bank (≤8 tiles in phrase mode!) */}
+            <div>
+              <div className="text-xs uppercase font-mono tracking-wider text-stone-600 dark:text-stone-400 mb-2 flex items-center justify-between">
+                <span>{useFirstLetters ? t('forge.firstLetterTiles') : t('forge.wordTiles')}</span>
+                {forgeMode === 'phrases' && (
+                  <span className="text-xs font-mono text-amber-800 dark:text-amber-400">
+                    {availableWords.length} words in this phrase
+                  </span>
+                )}
+              </div>
+              <div className="p-4 md:p-5 rounded-2xl bg-stone-100/70 dark:bg-stone-900/60 flex flex-wrap gap-2.5 min-h-[100px] transition-colors">
+                {availableWords.map((item) => (
                   <motion.button
                     key={item.id}
                     layout
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    onClick={() => handleRemoveWord(idx)}
-                    title={t('forge.tapToReturn')}
-                    className={`px-3.5 py-2 rounded-xl text-sm md:text-base font-reading font-medium transition-all focus-visible:ring-2 focus-visible:ring-amber-500 ${
-                      isCorrect
-                        ? 'bg-amber-100 dark:bg-amber-600/25 text-amber-950 dark:text-parchment-50 hover:bg-red-100 dark:hover:bg-red-950/40 hover:text-red-900 dark:hover:text-red-200'
-                        : 'bg-red-100 dark:bg-red-950/40 text-red-800 dark:text-red-200'
-                    }`}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleSelectWord(item)}
+                    className="px-4 py-2.5 rounded-xl text-sm md:text-base font-reading font-medium bg-white dark:bg-ink-overlay text-stone-900 dark:text-parchment-200 hover:bg-amber-100 dark:hover:bg-stone-800 active:bg-amber-600 active:text-stone-950 focus-visible:ring-2 focus-visible:ring-amber-500 transition-colors shadow-xs"
                   >
-                    {item.word}
+                    {useFirstLetters ? getGhostDisplay(item.word) : item.word}
                   </motion.button>
-                );
-              })
-            )}
-          </div>
-        </div>
-
-        {/* Available Words Bank */}
-        <div>
-          <div className="text-xs uppercase font-mono tracking-wider text-stone-600 dark:text-stone-400 mb-2">
-            {useFirstLetters ? t('forge.firstLetterTiles') : t('forge.wordTiles')}
-          </div>
-          <div className="p-4 md:p-5 rounded-2xl bg-stone-100/70 dark:bg-stone-900/60 flex flex-wrap gap-2.5 min-h-[120px] transition-colors">
-            {availableWords.map((item) => (
-              <motion.button
-                key={item.id}
-                layout
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleSelectWord(item)}
-                className="px-4 py-2.5 rounded-xl text-sm md:text-base font-reading font-medium bg-white dark:bg-ink-overlay text-stone-900 dark:text-parchment-200 hover:bg-amber-100 dark:hover:bg-stone-800 active:bg-amber-600 active:text-stone-950 focus-visible:ring-2 focus-visible:ring-amber-500 transition-colors"
-              >
-                {useFirstLetters ? getGhostDisplay(item.word) : item.word}
-              </motion.button>
-            ))}
-            {availableWords.length === 0 && !isCompleted && (
-              <div className="text-xs text-stone-500 dark:text-stone-400 italic py-2">
-                {t('forge.allWordsPlaced')}
+                ))}
+                {availableWords.length === 0 && !isCompleted && (
+                  <div className="text-xs text-stone-500 dark:text-stone-400 italic py-2">
+                    {t('forge.allWordsPlaced')}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </div>
+            </div>
+          </>
+        )}
 
         {/* Success Card with FSRS Evaluation */}
         <AnimatePresence>

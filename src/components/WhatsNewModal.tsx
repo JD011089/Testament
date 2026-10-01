@@ -19,7 +19,8 @@ import {
   Brain,
   Compass,
   Swords,
-  Languages
+  Languages,
+  Clock
 } from 'lucide-react';
 
 interface WhatsNewModalProps {
@@ -41,10 +42,38 @@ interface ReleaseMilestone {
 
 const ACTIVE_RELEASES: ReleaseMilestone[] = [
   {
-    version: 'v1.16.0',
-    tagline: 'Progressive Quest Stepper, Cognitive Declutter & Mobile Optimization',
+    version: 'v1.17.0',
+    tagline: 'Persona-Based Usability Overhaul, Plain Language & Beginner On-Ramp',
     dateBadge: 'Current Release',
     isLatest: true,
+    highlights: [
+      {
+        icon: <Sparkles className="w-4 h-4 text-amber-400" />,
+        title: 'New to the Bible? Beginner On-Ramp & Jesus Journey',
+        description: 'First-time learners now have a clear, immediate starting point on the homepage featuring the full 3-act Life of Jesus journey with the "Great for Beginners" badge.'
+      },
+      {
+        icon: <BookOpen className="w-4 h-4 text-amber-400" />,
+        title: 'Plain, Everyday Language Across All Controls',
+        description: 'Replaced military jargon with intuitive labels (e.g., "Daily check-in", "45-second summary", "Today\'s plan", "What would you do?"). Library shelves renamed to clear book groupings.'
+      },
+      {
+        icon: <Brain className="w-4 h-4 text-amber-400" />,
+        title: 'Chunked Word Forge & Memory Modes',
+        description: 'Memorize Scripture by short natural phrases (≤8 taps), progressive reveal, or full verse assembly without cognitive overload.'
+      },
+      {
+        icon: <Clock className="w-4 h-4 text-amber-400" />,
+        title: 'ADHD-Friendly Homepage & Instant Audio Feedback',
+        description: 'Single prominent daily CTA above the fold, collapsible secondary quick tools, and instant audio playing feedback with animated equalizer bars.'
+      }
+    ]
+  },
+  {
+    version: 'v1.16.0',
+    tagline: 'Progressive Quest Stepper, Cognitive Declutter & Mobile Optimization',
+    dateBadge: 'Previous Release',
+    isLatest: false,
     highlights: [
       {
         icon: <Sparkles className="w-4 h-4 text-amber-400" />,
@@ -518,7 +547,7 @@ const ARCHIVED_RELEASES: ReleaseMilestone[] = [
 
 export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose }) => {
   const modalRef = useModalLock(isOpen);
-  const [activeTab, setActiveTab] = useState<string>('v1.16.0');
+  const [activeTab, setActiveTab] = useState<string>('v1.17.0');
   const [showArchive, setShowArchive] = useState(false);
 
   const RELEASES = showArchive ? [...ACTIVE_RELEASES, ...ARCHIVED_RELEASES] : ACTIVE_RELEASES;
@@ -526,7 +555,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
   const handleDismiss = () => {
     soundEngine.playClick();
     try {
-      localStorage.setItem('testament_last_seen_version', '1.16.0');
+      localStorage.setItem('testament_last_seen_version', '1.17.0');
     } catch {
       // ignore
     }
@@ -568,8 +597,8 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
                 <h2 className="text-lg sm:text-xl font-serif font-black text-stone-900 dark:text-parchment-50">
                   Field Update Dispatches
                 </h2>
-                <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 font-bold">
-                  v1.16.0 Live
+                <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 font-bold">
+                  v1.17.0 Live
                 </span>
               </div>
 
@@ -621,9 +650,9 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
                 soundEngine.playClick();
                 setShowArchive(true);
               }}
-              className="text-[11px] px-3 py-1.5 rounded-xl font-mono whitespace-nowrap bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 transition-all"
+              className="text-xs px-3 py-1.5 rounded-xl font-mono whitespace-nowrap bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 transition-all"
             >
-              + Archive (v1.0–v1.15.0)
+              + Archive (v1.0–v1.16.0)
             </button>
           )}
           {showArchive && (
@@ -631,9 +660,9 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
               onClick={() => {
                 soundEngine.playClick();
                 setShowArchive(false);
-                setActiveTab('v1.16.0');
+                setActiveTab('v1.17.0');
               }}
-              className="text-[11px] px-3 py-1.5 rounded-xl font-mono whitespace-nowrap bg-stone-300 dark:bg-stone-700 text-stone-700 dark:text-stone-300 hover:text-stone-900 dark:hover:text-stone-100 transition-all"
+              className="text-xs px-3 py-1.5 rounded-xl font-mono whitespace-nowrap bg-stone-300 dark:bg-stone-700 text-stone-700 dark:text-stone-300 hover:text-stone-900 dark:hover:text-stone-100 transition-all"
             >
               − Hide Archive
             </button>
@@ -644,7 +673,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
         <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 scrollbar-thin">
           <div className="flex items-center justify-between gap-3 pb-2 border-b border-stone-200 dark:border-stone-800/60">
             <div>
-              <span className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
+              <span className="text-xs font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
                 {selectedRelease.dateBadge}
               </span>
               <h3 className="text-base sm:text-lg font-serif font-bold text-stone-900 dark:text-parchment-100">
@@ -682,8 +711,8 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
 
         {/* MODAL FOOTER */}
         <div className="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800/90 bg-stone-50 dark:bg-black/40 flex items-center justify-between gap-3 relative z-10">
-          <div className="text-[11px] font-mono text-stone-500 dark:text-stone-400 hidden sm:block">
-            Testament v1.16.0 • The Living Word
+          <div className="text-xs font-mono text-stone-500 dark:text-stone-400 hidden sm:block">
+            Testament v1.17.0 • The Living Word
           </div>
 
 

@@ -33,13 +33,13 @@ export interface CanonBook {
 }
 
 export const CANON_DIVISIONS: { id: CanonDivision; label: string; count: number; description: string; icon: string }[] = [
-  { id: 'Torah & Origins', label: 'Torah & Origins', count: 5, description: 'Foundations of humanity, covenant, and the wilderness survival code.', icon: '📜' },
-  { id: 'War & Chronicles', label: 'War & Chronicles', count: 12, description: 'Military campaigns, palace coups, espionage, and exile resistance.', icon: '⚔️' },
-  { id: 'Wisdom & Soul Triage', label: 'Wisdom & Triage', count: 5, description: 'High-stakes dilemma tactics, emergency soul triage, and burnout antidotes.', icon: '🛡️' },
-  { id: 'Prophet Intelligence', label: 'Prophet Intelligence', count: 17, description: 'Geopolitical whistleblowers, imperial infiltrators, and moral warnings.', icon: '🔥' },
-  { id: 'The King\'s Manifesto', label: 'The King\'s Manifesto', count: 5, description: 'The counter-cultural revolution of Jesus and the explosive early church.', icon: '👑' },
-  { id: 'Field Dispatches', label: 'Field Dispatches', count: 21, description: 'Tactical letters to underground cells on freedom, integrity, and action.', icon: '✉️' },
-  { id: 'The Cosmic Endgame', label: 'The Cosmic Endgame', count: 1, description: 'Cosmic warfare, the fall of empire, and unshakeable hope in victory.', icon: '⚡' }
+  { id: 'Torah & Origins', label: 'The Beginning: Books of Moses (Genesis–Deuteronomy)', count: 5, description: 'Foundations of humanity, covenant, and the wilderness journey.', icon: '📜' },
+  { id: 'War & Chronicles', label: 'History of Israel', count: 12, description: 'History, leadership, victories, struggles, and restoration.', icon: '⚔️' },
+  { id: 'Wisdom & Soul Triage', label: 'Wisdom & Poetry', count: 5, description: 'Practical life wisdom, honest prayers, and hope in suffering.', icon: '🛡️' },
+  { id: 'Prophet Intelligence', label: 'The Prophets', count: 17, description: 'Bold voices calling people back to justice, faith, and hope.', icon: '🔥' },
+  { id: 'The King\'s Manifesto', label: 'The Gospels: The Life of Jesus', count: 5, description: 'The life, teachings, death, and resurrection of Jesus, plus the early church.', icon: '👑' },
+  { id: 'Field Dispatches', label: 'Letters of the Early Church', count: 21, description: 'Encouraging letters to early believers on faith, love, and daily integrity.', icon: '✉️' },
+  { id: 'The Cosmic Endgame', label: 'Revelation: The End Times', count: 1, description: 'The final victory of God over darkness and the promise of a renewed creation.', icon: '⚡' }
 ];
 
 export const CANON_LIFE_THEMES = [

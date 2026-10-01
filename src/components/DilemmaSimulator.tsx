@@ -20,6 +20,7 @@ import {
   PenTool, 
   BookOpen,
   Filter,
+  ChevronDown,
   X
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
@@ -106,9 +107,11 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
   const [temperamentProfile, setTemperamentProfile] = useState<TemperamentProfile | null>(null);
   const [activeEvalTab, setActiveEvalTab] = useState<'diagnosis' | 'playbook'>('diagnosis');
   const [isTurn2Expanded, setIsTurn2Expanded] = useState<boolean>(false);
+  const [isAnalysisExpanded, setIsAnalysisExpanded] = useState<boolean>(false);
 
   // Load saved answers for the current dilemma on mount or when switching
   React.useEffect(() => {
+    setIsAnalysisExpanded(false);
     try {
       const stored = localStorage.getItem('testament_dilemma_answers');
       if (stored) {
@@ -632,34 +635,47 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
             </div>
 
             {/* Submit Button */}
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] text-stone-500 dark:text-stone-400 font-mono">
-                {userText.length > 0 ? `${userText.length} characters typed` : 'Write a sentence or pick a gut reaction'}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+              <span className="text-xs text-stone-600 dark:text-stone-400 font-mono">
+                {selectedFeeling && userText.trim()
+                  ? `✓ Gut reaction (${selectedFeeling}) & ${userText.length} chars typed`
+                  : selectedFeeling
+                  ? `✓ Gut reaction selected: ${selectedFeeling}`
+                  : userText.trim()
+                  ? `✓ ${userText.length} characters typed`
+                  : 'To submit: pick a gut reaction above or type one sentence'}
               </span>
 
-              <button
-                type="submit"
-                disabled={(!userText.trim() && !selectedFeeling) || isEvaluating}
-                className={`py-2.5 px-5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
-                  isEvaluating
-                    ? 'bg-amber-500/80 text-stone-950 cursor-wait animate-pulse'
-                    : userText.trim() || selectedFeeling
-                      ? 'bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-sm cursor-pointer font-extrabold'
-                      : 'bg-stone-200 dark:bg-stone-800 text-stone-400 dark:text-stone-500 cursor-not-allowed'
-                }`}
-              >
-                {isEvaluating ? (
-                  <>
-                    <Sparkles className="w-4 h-4 animate-spin text-stone-950" />
-                    <span>Discerning in Scripture...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>{t('dilemma.submitPlay')}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
+              <div className="flex flex-col items-end gap-1">
+                <button
+                  type="submit"
+                  disabled={(!userText.trim() && !selectedFeeling) || isEvaluating}
+                  className={`py-2.5 px-5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                    isEvaluating
+                      ? 'bg-amber-500/80 text-stone-950 cursor-wait animate-pulse'
+                      : userText.trim() || selectedFeeling
+                        ? 'bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-sm cursor-pointer font-extrabold'
+                        : 'bg-stone-200 dark:bg-stone-800 text-stone-400 dark:text-stone-500 cursor-not-allowed'
+                  }`}
+                >
+                  {isEvaluating ? (
+                    <>
+                      <Sparkles className="w-4 h-4 animate-spin text-stone-950" />
+                      <span>Discerning in Scripture...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>{t('dilemma.submitPlay')}</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+                {!userText.trim() && !selectedFeeling && (
+                  <span className="text-xs text-amber-700 dark:text-amber-400 font-medium">
+                    Pick a gut reaction above or type your thoughts to continue
+                  </span>
                 )}
-              </button>
+              </div>
             </div>
           </form>
 
@@ -691,7 +707,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                   }`}
                 >
                   <Shield className="w-3.5 h-3.5 text-emerald-500" />
-                  <span>Tactical Playbook</span>
+                  <span>Scripture Guidance</span>
                 </button>
               </div>
 
@@ -701,7 +717,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                   {/* Stance Badge & Motivation */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 uppercase tracking-widest font-bold">
+                  <span className="text-xs font-mono text-amber-800 dark:text-amber-400 uppercase tracking-widest font-bold">
                     {t('dilemma.diagnosticCheck')}
                   </span>
                   <span className={`text-xs px-3 py-1 rounded-full font-bold ${evaluationResult.badgeColor}`}>
@@ -717,10 +733,10 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                 </p>
               </div>
 
-              {/* Dynamic Analysis of User's Typed Words (Requirement 4) */}
+              {/* Dynamic Analysis of User's Typed Words (Collapsible for M-11) */}
               {evaluationResult.userWordsAnalysis && (
                 <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/10 dark:bg-amber-950/30">
-                  <div className="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2.5 border-b border-stone-200/60 dark:border-stone-800/60">
+                  <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-stone-200/60 dark:border-stone-800/60">
                     <div className="flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-amber-800 dark:text-amber-400" />
                       <h4 className="text-xs sm:text-sm font-serif font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider">
@@ -729,47 +745,69 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                     </div>
 
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 font-bold">
+                      <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 font-bold">
                         Tactic: {evaluationResult.userWordsAnalysis.primaryTactic}
                       </span>
-                      <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-stone-200/60 dark:bg-stone-800 text-stone-600 dark:text-stone-400">
+                      <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-stone-200/60 dark:bg-stone-800 text-stone-600 dark:text-stone-400">
                         {evaluationResult.userWordsAnalysis.detectedTone}
                       </span>
                     </div>
                   </div>
 
-                  {evaluationResult.userWordsAnalysis.userQuoteSummary && (
-                    <div className="mb-3 px-3 py-2 rounded-xl bg-white/80 dark:bg-black/30 text-xs text-stone-700 dark:text-stone-300">
-                      <span className="text-stone-500 dark:text-stone-400 text-[11px] font-mono uppercase tracking-wider block mb-0.5">Your Words:</span>
-                      <span className="text-amber-800 dark:text-amber-200 italic font-reading">{evaluationResult.userWordsAnalysis.userQuoteSummary}</span>
-                    </div>
-                  )}
+                  {/* Summary & Collapsible Toggle (M-11) */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-3">
+                    <p className="text-xs sm:text-sm text-stone-700 dark:text-stone-300 leading-relaxed font-sans line-clamp-2 sm:line-clamp-none">
+                      {evaluationResult.userWordsAnalysis.userQuoteSummary
+                        ? evaluationResult.userWordsAnalysis.userQuoteSummary
+                        : `Your response was classified as "${evaluationResult.stanceTitle}".`}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setIsAnalysisExpanded(prev => !prev)}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-200 py-1.5 px-3 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 transition-colors shrink-0 self-start sm:self-center"
+                    >
+                      <span>{isAnalysisExpanded ? 'Hide full analysis' : 'Read full analysis'}</span>
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isAnalysisExpanded ? 'rotate-180' : ''}`} />
+                    </button>
+                  </div>
 
-                  <p className="text-xs sm:text-sm text-stone-800 dark:text-stone-200 leading-relaxed font-sans mb-3">
-                    {evaluationResult.directAnswerToUser}
-                  </p>
+                  {/* Expanded Full Analysis Section */}
+                  {isAnalysisExpanded && (
+                    <div className="mt-4 pt-3 border-t border-stone-200/60 dark:border-stone-800/60 space-y-4 animate-fadeIn">
+                      {evaluationResult.userWordsAnalysis.userQuoteSummary && (
+                        <div className="px-3 py-2 rounded-xl bg-white/80 dark:bg-black/30 text-xs text-stone-700 dark:text-stone-300">
+                          <span className="text-stone-500 dark:text-stone-400 text-xs font-mono uppercase tracking-wider block mb-0.5">Your Response:</span>
+                          <span className="text-amber-800 dark:text-amber-200 italic font-reading">{evaluationResult.userWordsAnalysis.userQuoteSummary}</span>
+                        </div>
+                      )}
 
-                  {/* Tactical Pros & Cons */}
-                  {evaluationResult.tacticalProsCons && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-stone-200/60 dark:border-stone-800/60 text-xs">
-                      <div className="p-3 rounded-xl bg-emerald-500/10 dark:bg-emerald-950/30">
-                        <strong className="text-emerald-700 dark:text-emerald-400 block mb-1 font-mono uppercase text-[11px] tracking-wider">
-                          {t('dilemma.tacticalStrength')}
-                        </strong>
-                        <span className="text-stone-700 dark:text-stone-300 leading-relaxed">{evaluationResult.tacticalProsCons.strength}</span>
-                      </div>
-                      <div className="p-3 rounded-xl bg-rose-500/10 dark:bg-rose-950/20">
-                        <strong className="text-rose-700 dark:text-rose-400 block mb-1 font-mono uppercase text-[11px] tracking-wider">
-                          {t('dilemma.hiddenVulnerability')}
-                        </strong>
-                        <span className="text-stone-700 dark:text-stone-300 leading-relaxed">{evaluationResult.tacticalProsCons.vulnerability}</span>
-                      </div>
+                      <p className="text-xs sm:text-sm text-stone-800 dark:text-stone-200 leading-relaxed font-sans">
+                        {evaluationResult.directAnswerToUser}
+                      </p>
+
+                      {/* Tactical Pros & Cons */}
+                      {evaluationResult.tacticalProsCons && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-stone-200/60 dark:border-stone-800/60 text-xs">
+                          <div className="p-3 rounded-xl bg-emerald-500/10 dark:bg-emerald-950/30">
+                            <strong className="text-emerald-700 dark:text-emerald-400 block mb-1 font-mono uppercase text-xs tracking-wider">
+                              {t('dilemma.tacticalStrength')}
+                            </strong>
+                            <span className="text-stone-700 dark:text-stone-300 leading-relaxed">{evaluationResult.tacticalProsCons.strength}</span>
+                          </div>
+                          <div className="p-3 rounded-xl bg-rose-500/10 dark:bg-rose-950/20">
+                            <strong className="text-rose-700 dark:text-rose-400 block mb-1 font-mono uppercase text-xs tracking-wider">
+                              {t('dilemma.hiddenVulnerability')}
+                            </strong>
+                            <span className="text-stone-700 dark:text-stone-300 leading-relaxed">{evaluationResult.tacticalProsCons.vulnerability}</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
               )}
 
-              {/* MULTI-TURN SOCRATIC AI: THE MENTOR'S COUNTER-CHALLENGE (OPTIONAL) */}
+              {/* MULTI-TURN SOCRATIC AI: THINK DEEPER (OPTIONAL) */}
               {evaluationResult.socraticChallenge && (
                 <>
                   {!temperamentProfile && !isTurn2Expanded ? (
@@ -777,10 +815,10 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                       <div>
                         <div className="flex items-center gap-1.5 text-indigo-700 dark:text-indigo-400 font-bold uppercase tracking-wider text-xs mb-1">
                           <Shield className="w-3.5 h-3.5" />
-                          <span>The Mentor's Socratic Counter-Challenge (Optional)</span>
+                          <span>Think deeper (optional)</span>
                         </div>
                         <p className="text-xs text-stone-600 dark:text-stone-400">
-                          Lock horns with a tailored follow-up question to test your tactical temperament.
+                          Reflect on a tailored follow-up question to test your heart's reaction under pressure.
                         </p>
                       </div>
                       <button
@@ -788,7 +826,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                         onClick={() => setIsTurn2Expanded(true)}
                         className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shrink-0 flex items-center gap-1.5 shadow-sm transition-all"
                       >
-                        <span>Unlock Counter-Challenge (+20 XP)</span>
+                        <span>Think deeper (+20 XP)</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -798,12 +836,12 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                         <div className="flex items-center gap-2">
                           <Shield className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                           <h4 className="text-xs sm:text-sm font-mono font-bold text-indigo-900 dark:text-indigo-300 uppercase tracking-wider">
-                            The Mentor's Socratic Counter-Challenge (Turn 2)
+                            Think deeper: Follow-up question
                           </h4>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/60 text-indigo-800 dark:text-indigo-200 font-bold">
-                            Discipleship Drill
+                          <span className="text-xs font-mono px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/60 text-indigo-800 dark:text-indigo-200 font-bold">
+                            Reflection Drill
                           </span>
                           {!temperamentProfile && (
                             <button

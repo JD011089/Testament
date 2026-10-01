@@ -30,8 +30,8 @@ export interface BattlefieldOption {
 export const BATTLEFIELD_OPTIONS: BattlefieldOption[] = [
   {
     id: 'workplace-politics',
-    title: 'Workplace Politics & Authority Tension',
-    subtitle: 'Dealing with credit theft, difficult superiors, or toxic office dynamics.',
+    title: 'Work, School & Social Pressure',
+    subtitle: 'Dealing with unfair credit, high expectations, or difficult people.',
     icon: 'briefcase',
     suggestedQuestId: 'david-journey',
     suggestedDilemmaId: 'dilemma-credit-thief',
@@ -41,8 +41,8 @@ export const BATTLEFIELD_OPTIONS: BattlefieldOption[] = [
   },
   {
     id: 'anxiety-overwhelm',
-    title: 'Anxiety, Burnout & Heavy Overwhelm',
-    subtitle: 'Depleted energy, high-stress pressure, feeling like quitting.',
+    title: 'Anxiety & Feeling Overwhelmed',
+    subtitle: 'Racing mind, heavy worry about tomorrow, or feeling completely depleted.',
     icon: 'flame',
     suggestedQuestId: 'elijah-journey',
     suggestedDilemmaId: 'dilemma-burnout-home',
@@ -52,8 +52,8 @@ export const BATTLEFIELD_OPTIONS: BattlefieldOption[] = [
   },
   {
     id: 'betrayal-relational',
-    title: 'Betrayal, Slander & Relational Friction',
-    subtitle: 'Stung by friends, family conflict, or someone talking behind your back.',
+    title: 'Broken Trust & Hurt Feelings',
+    subtitle: 'Stung by friends, family tension, or someone talking behind your back.',
     icon: 'heart',
     suggestedQuestId: 'joseph-journey',
     suggestedDilemmaId: 'dilemma-friend-betrayal',
@@ -63,8 +63,8 @@ export const BATTLEFIELD_OPTIONS: BattlefieldOption[] = [
   },
   {
     id: 'high-stakes-decision',
-    title: 'High-Stakes Decision & Moral Courage',
-    subtitle: 'Standing at a critical crossroad; pressure to compromise integrity.',
+    title: 'Tough Decisions & Pressure to Compromise',
+    subtitle: 'Standing at a critical crossroad; trying to do what is right when it is hard.',
     icon: 'compass',
     suggestedQuestId: 'peter-journey',
     suggestedDilemmaId: 'dilemma-group-chat-pressure',
@@ -74,10 +74,10 @@ export const BATTLEFIELD_OPTIONS: BattlefieldOption[] = [
   },
   {
     id: 'spiritual-dryness',
-    title: 'Spiritual Dryness & Lethargy',
-    subtitle: 'Feeling distant from God, going through the motions, needing fresh fire.',
+    title: 'Feeling Distant from God',
+    subtitle: 'Going through the motions, feeling disconnected, wanting a fresh start.',
     icon: 'swords',
-    suggestedQuestId: 'david-journey',
+    suggestedQuestId: 'jesus-journey',
     suggestedDilemmaId: 'dilemma-envy-spiral',
     psalmReference: 'Psalm 63 (My soul thirsts for You in a parched land)',
     colorBorder: 'border-emerald-500/60',
