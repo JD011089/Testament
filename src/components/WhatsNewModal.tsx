@@ -41,10 +41,33 @@ interface ReleaseMilestone {
 
 const RELEASES: ReleaseMilestone[] = [
   {
-    version: 'v1.14.0',
-    tagline: 'End-to-End Mission & Library Localization',
+    version: 'v1.15.0',
+    tagline: 'Dynamic Gemini Discipleship AI & Authentic Custom Instincts',
     dateBadge: 'Current Release',
     isLatest: true,
+    highlights: [
+      {
+        icon: <Brain className="w-4 h-4 text-amber-400" />,
+        title: 'Deep Gemini AI Evaluation of Your Exact Words',
+        description: 'Type your authentic response to any life dilemma. Gemini dissects your exact strategy and words with pastoral discernment, custom stance titles, and 3 morning battle moves.'
+      },
+      {
+        icon: <Swords className="w-4 h-4 text-amber-400" />,
+        title: 'Custom Quest Crossroads & Multi-Turn Socratic AI',
+        description: 'Type how you would handle biblical crises in Story Quests, or lock horns with the Mentor\'s Socratic counter-challenge to test your biblical tactical temperament.'
+      },
+      {
+        icon: <Bell className="w-4 h-4 text-amber-400" />,
+        title: 'Custom Reminder Times & Multi-Verse Queue Rotation',
+        description: 'Set your exact custom notification schedule with time pickers, rotating reminders across all your trained and bookmarked verses.'
+      }
+    ]
+  },
+  {
+    version: 'v1.14.0',
+    tagline: 'End-to-End Mission & Library Localization',
+    dateBadge: 'Previous Release',
+    isLatest: false,
     highlights: [
       {
         icon: <Target className="w-4 h-4 text-amber-400" />,
@@ -441,12 +464,12 @@ const RELEASES: ReleaseMilestone[] = [
 
 export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose }) => {
   const modalRef = useModalLock(isOpen);
-  const [activeTab, setActiveTab] = useState<string>('v1.14.0');
+  const [activeTab, setActiveTab] = useState<string>('v1.15.0');
 
   const handleDismiss = () => {
     soundEngine.playClick();
     try {
-      localStorage.setItem('testament_last_seen_version', '1.14.0');
+      localStorage.setItem('testament_last_seen_version', '1.15.0');
     } catch {
       // ignore
     }
@@ -579,7 +602,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
         {/* MODAL FOOTER */}
         <div className="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800/90 bg-stone-50 dark:bg-black/40 flex items-center justify-between gap-3 relative z-10">
           <div className="text-[11px] font-mono text-stone-500 dark:text-stone-400 hidden sm:block">
-            Testament v1.14.0 • The Living Word
+            Testament v1.15.0 • The Living Word
           </div>
 
           <button

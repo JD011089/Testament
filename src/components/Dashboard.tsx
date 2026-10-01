@@ -339,7 +339,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   className="text-[11px] font-mono px-2 py-0.2 rounded-full bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-600 hover:text-stone-950 dark:text-stone-400 dark:hover:text-amber-300 border border-stone-250 dark:border-stone-750 transition-colors"
                   title={t('dashboard.versionTooltip')}
                 >
-                  v1.14.0
+                  v1.15.0
                 </button>
               </div>
               <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
