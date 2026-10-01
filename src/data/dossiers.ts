@@ -14,6 +14,22 @@ export interface CharacterDossier {
 
 export const CHARACTER_DOSSIERS: CharacterDossier[] = [
   {
+    id: 'jesus',
+    name: 'Jesus of Nazareth',
+    codename: 'The Servant King',
+    era: 'c. 30 AD • Roman Judea & Galilee',
+    occupation: 'Carpenter → Rabbi → Savior of the World',
+    image: '/images/hero_banner.jpg',
+    superpower: 'Infinite grace, absolute truth, authority over nature and death.',
+    majorFlaws: [
+      'Sinless; misunderstood by family and hometown critics.',
+      'Refused worldly political power, frustrating those who wanted an earthly revolutionary.'
+    ],
+    definingMoment: 'Washing the feet of his disciples, dying on the cross for sinners, and walking out of the tomb alive.',
+    realTalkLesson: 'Greatness is not about dominating others; it is having the strength to lay your life down in love.',
+    relatedQuestId: 'jesus-journey'
+  },
+  {
     id: 'david',
     name: 'David ben Jesse',
     codename: 'The Outlaw Shepherd',

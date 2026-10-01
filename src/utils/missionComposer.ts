@@ -172,11 +172,11 @@ function buildMission(): ComposedDailyMission {
   const dilemmaStep: DailyCampaignStep = {
     stepNumber: 2,
     type: 'dilemma',
-    title: `Step 2 • What's the play?`,
-    badge: 'Real-Life Dilemma',
+    title: `Step 2 • What would you do?`,
+    badge: 'Real-Life Scenario',
     subtitle: dilemma.title,
     targetId: dilemma.id,
-    actionLabel: 'Run the sim',
+    actionLabel: 'Try a scenario',
     icon: '🛡️',
     intel: dilemma.situationSetup.slice(0, 180),
   };
@@ -184,11 +184,11 @@ function buildMission(): ComposedDailyMission {
   const forgeStep: DailyCampaignStep = {
     stepNumber: 3,
     type: 'wordforge',
-    title: dueVerse ? 'Step 3 • Review a due verse' : 'Step 3 • Lock the story verse',
-    badge: dueVerse ? 'FSRS Review' : 'Scripture Memory',
+    title: dueVerse ? 'Step 3 • Review a due verse' : 'Step 3 • Memorize the verse',
+    badge: dueVerse ? 'Memory Review' : 'Scripture Memory',
     subtitle: forgeVerse ? forgeVerse.reference : quest.heroName,
     targetId: forgeVerse?.id || `story-${quest.id}`,
-    actionLabel: dueVerse ? 'Review now' : 'Forge the verse',
+    actionLabel: dueVerse ? 'Review now' : 'Memorize this verse',
     icon: '🧠',
     intel: dueVerse
       ? 'This verse is due. A short retrieval keeps it from fading.'
@@ -216,7 +216,7 @@ function buildMission(): ComposedDailyMission {
       badge: 'Psalms',
       subtitle: psalm.target.title,
       targetId: psalm.target.id,
-      actionLabel: 'Open Psalms',
+      actionLabel: 'Pray this Psalm',
       icon: '🙏',
       intel: psalm.connection.contextNote,
     };
@@ -225,7 +225,7 @@ function buildMission(): ComposedDailyMission {
       stepNumber: 4,
       type: 'canon',
       title: 'Step 4 • Open the library',
-      badge: 'Field Library',
+      badge: 'Scripture Library',
       subtitle: 'One chapter, then close the loop',
       targetId: 'library',
       actionLabel: 'Open Library',

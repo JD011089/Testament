@@ -42,6 +42,6 @@ export function dilemmasForBook(bookName: string): { id: string; title: string }
 export function bookModuleLabel(book: CanonBook): string | null {
   if (book.deepLinkType === 'story' && book.deepLinkId) return 'Open the story';
   if (book.deepLinkType === 'proverbs') return 'Open Proverbs';
-  if (book.deepLinkType === 'psalms') return 'Open Psalms';
+  if (book.deepLinkType === 'psalms') return 'Emergency verses (Psalm triage)';
   return null;
 }

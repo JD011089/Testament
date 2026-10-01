@@ -539,7 +539,7 @@ export const REAL_LIFE_DILEMMAS: RealLifeDilemma[] = [
   // 12. Betrayal: Backstabbing Friend
   {
     id: 'dilemma-friend-betrayal',
-    title: 'The Trusted Friend’s Slander',
+    title: 'Navigating Broken Trust & Rumors',
     category: 'Betrayal & Integrity',
     situationSetup: 'A close friend you mentored, helped financially, and invited into your inner circle was overheard at a social gathering mocking your personal struggles and spreading exaggerated rumors about you to gain favor with a cooler crowd.',
     whatIsAtStake: 'Your heart hardening into cynicism and hatred towards people.',

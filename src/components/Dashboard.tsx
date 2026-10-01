@@ -26,7 +26,8 @@ import {
   HeartHandshake,
   Target,
   CheckCircle2,
-  Swords
+  Swords,
+  ChevronDown
 } from 'lucide-react';
 import type { UserCalibrationProfile } from './OnboardingModal';
 import { MemoryPulseModal } from './MemoryPulseModal';
@@ -38,6 +39,8 @@ import { LanguageToggle } from './LanguageToggle';
 import { useLanguage } from '../context/LanguageContext';
 import { useModalLock } from '../utils/useModalLock';
 import type { DailyCampaignStep } from '../data/dailyCampaigns';
+import { getDailyCampaignProgress } from '../data/dailyCampaigns';
+import { getComposedDailyMission } from '../utils/missionComposer';
 import { 
   getNotificationSettings, 
   getNextScheduledReminder,
@@ -79,6 +82,7 @@ interface DashboardProps {
 }
 
 const QUEST_IMAGES: Record<string, string> = {
+  'jesus-journey': '/images/hero_banner.jpg',
   'david-journey': '/images/valley_battlefield.jpg',
   'joseph-journey': '/images/desert_canyon.jpg',
   'peter-journey': '/images/courtyard_fire.jpg',
@@ -96,6 +100,7 @@ const QUEST_IMAGES: Record<string, string> = {
 };
 
 const RELIC_ICONS: Record<string, string> = {
+  basin: '🥣',
   stones: '🪨',
   staff: '🪵',
   mantle: '🧥',
@@ -181,6 +186,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [isPlayingMorningTacticalAudio, setIsPlayingMorningTacticalAudio] = useState<boolean>(false);
   const [notificationSettings, setNotificationSettings] = useState(() => getNotificationSettings());
   const [, setPulseRefreshTrigger] = useState(0);
+  const [showQuickTools, setShowQuickTools] = useState<boolean>(false);
+  const [showAllQuests, setShowAllQuests] = useState<boolean>(false);
+  const [showAllRelics, setShowAllRelics] = useState<boolean>(false);
 
   useEffect(() => {
     const handleSettingsUpdated = () => {
@@ -225,7 +233,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const activeBattlefield = BATTLEFIELD_OPTIONS.find(b => b.id === activeBattlefieldId);
   const dueFSRSCount = getDueFSRSCount();
 
+  const composedMission = getComposedDailyMission();
+  const campaignProgress = getDailyCampaignProgress(composedMission.id);
+  const activeStepToLaunch = composedMission.steps.find(s => !campaignProgress.completedSteps.includes(s.stepNumber)) || composedMission.steps[0];
+  const isMissionComplete = campaignProgress.isFullyCompleted;
+  const completedStepCount = campaignProgress.completedSteps.length;
+  const totalMissionSteps = composedMission.steps.length;
+  const jesusQuest = STORY_QUESTS.find(q => q.id === 'jesus-journey') || STORY_QUESTS[0];
+
   const handlePlayMorningTacticalAudio = () => {
+    soundEngine.playClick();
     if (isPlayingMorningTacticalAudio) {
       soundEngine.stopSpeaking();
       setIsPlayingMorningTacticalAudio(false);
@@ -328,7 +345,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <h1 className="text-base sm:text-lg font-serif font-bold text-stone-900 dark:text-parchment-100 tracking-wide">
                   Testament
                 </h1>
-                <span className="text-[11px] font-mono px-2 py-0.2 rounded-full bg-amber-100/70 dark:bg-amber-950/80 border border-amber-300/60 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 font-bold">
+                <span className="text-xs font-mono px-2 py-0.2 rounded-full bg-amber-100/70 dark:bg-amber-950/80 border border-amber-300/60 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 font-bold">
                   {getRankTitle(xp)}
                 </span>
                 <button
@@ -337,13 +354,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     soundEngine.playClick();
                     onOpenWhatsNew?.();
                   }}
-                  className="text-[11px] font-mono px-2 py-0.2 rounded-full bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-600 hover:text-stone-950 dark:text-stone-400 dark:hover:text-amber-300 border border-stone-250 dark:border-stone-750 transition-colors"
+                  className="text-xs font-mono px-2 py-0.2 rounded-full bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-600 hover:text-stone-950 dark:text-stone-400 dark:hover:text-amber-300 border border-stone-250 dark:border-stone-750 transition-colors"
                   title={t('dashboard.versionTooltip')}
                 >
-                  v1.16.0
+                  v1.17.0
                 </button>
               </div>
-              <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
+              <p className="text-xs text-stone-500 dark:text-stone-400 truncate">
                 <span className="text-amber-800 dark:text-amber-400 font-medium">{todayFormatted}</span> • {t('dashboard.livingWord')}
               </p>
             </div>
@@ -366,95 +383,178 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
 
-        {/* Row 2: Streamlined action bar — one briefing, due reviews, calibrate */}
-        <div className="relative pt-3 mt-3 border-t border-stone-200/60 dark:border-stone-800/60">
-          <div className="flex flex-wrap items-center gap-2 w-full">
-          <button
-            onClick={() => {
-              soundEngine.playClick();
-              setIsBattlefieldModalOpen(true);
-            }}
-            className={`snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-              activeBattlefield
-                ? 'bg-cyan-500/15 text-cyan-800 dark:text-cyan-200'
-                : 'bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-cyan-800 dark:text-cyan-300'
-            }`}
-            title={t('dashboard.declareBattlefieldTooltip')}
-          >
-            <Swords className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
-            <span>{activeBattlefield ? t('dashboard.battlefieldPrefix', { name: activeBattlefield.title.split('&')[0].trim() }) : t('dashboard.declareBattlefield')}</span>
-          </button>
+        {/* Primary Action Card — Single clear focus above the fold (M-2) */}
+        <div className="mt-4 p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-transparent border border-amber-500/30 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300">
+                  {t('campaign.title')} • {completedStepCount}/{totalMissionSteps} {t('dashboard.completed')}
+                </span>
+              </div>
+              <h2 className="text-base sm:text-lg font-serif font-bold text-stone-900 dark:text-parchment-50 truncate">
+                {composedMission.title}
+              </h2>
+              <p className="text-xs text-stone-600 dark:text-stone-300 mt-0.5 line-clamp-1">
+                {isMissionComplete
+                  ? "All daily objectives completed! Review any step or explore below."
+                  : `Next objective: ${activeStepToLaunch.title} • ${activeStepToLaunch.subtitle}`}
+              </p>
+            </div>
 
-          <button
-            onClick={handlePlayMorningTacticalAudio}
-            className={`snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-              isPlayingMorningTacticalAudio
-                ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
-                : 'bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-amber-800 dark:text-amber-300'
-            }`}
-            title={t('dashboard.briefingAudio')}
-          >
-            {isPlayingMorningTacticalAudio ? (
-              <Pause className="w-3.5 h-3.5 animate-pulse" />
-            ) : (
-              <Play className="w-3.5 h-3.5 text-amber-500" />
-            )}
-            <span>{isPlayingMorningTacticalAudio ? t('dashboard.briefingPlaying') : t('dashboard.briefingBtn')}</span>
-          </button>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => {
+                  soundEngine.playClick();
+                  if (onLaunchCampaignStep) {
+                    onLaunchCampaignStep(activeStepToLaunch);
+                  }
+                }}
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <span>
+                  {isMissionComplete
+                    ? "Review Today's Mission"
+                    : completedStepCount === 0
+                    ? "Start Today's Mission"
+                    : `Continue Step ${activeStepToLaunch.stepNumber}`}
+                </span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
 
-          {dueFSRSCount > 0 && (
-            <button
-              onClick={() => onOpenWordForge(getDueFSRSCards()[0]?.verseId)}
-              className="snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 text-amber-800 dark:text-amber-300 text-xs font-bold whitespace-nowrap"
-              title={t('dashboard.dueTooltip')}
-            >
-              <Brain className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 animate-pulse" />
-              <span>{dueFSRSCount} {t('dashboard.due')}</span>
-            </button>
-          )}
-
-          <button
-            onClick={() => {
-              soundEngine.playClick();
-              setIsMemoryPulseModalOpen(true);
-            }}
-            className="snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-xs font-medium whitespace-nowrap transition-colors"
-            title={t('dashboard.remindersTooltip')}
-          >
-            <Bell className="w-3.5 h-3.5 text-amber-500" />
-            <span>{t('dashboard.remindersBtn')}</span>
-          </button>
-
-          <button
-            onClick={() => setShowMorningBriefing(true)}
-            className="snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-xs font-medium whitespace-nowrap transition-colors"
-            title={t('dashboard.goDeeperTooltip')}
-          >
-            <Coffee className="w-3.5 h-3.5 text-amber-500" />
-            <span>{t('dashboard.goDeeper')}</span>
-            {!isBriefingBonusClaimed && (
-              <span className="text-[11px] bg-amber-500 text-stone-950 font-extrabold px-1 py-0.2 rounded-full">
-                +50 XP
-              </span>
-            )}
-          </button>
-
-          {onOpenOnboarding && (
+          {/* C-2a: Beginner On-Ramp entry point for Marcus & Maya */}
+          <div className="mt-3 pt-3 border-t border-amber-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+            <div className="flex items-center gap-2 text-stone-700 dark:text-stone-300">
+              <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+              <span>New to the Bible? Start here:</span>
+            </div>
             <button
               onClick={() => {
                 soundEngine.playClick();
-                onOpenOnboarding();
+                onSelectQuest(jesusQuest);
               }}
-              className="snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-xs font-medium whitespace-nowrap transition-colors"
-              title={t('dashboard.calibrateTooltip')}
+              className="inline-flex items-center gap-1 font-bold text-amber-800 dark:text-amber-400 hover:underline underline-offset-2 self-start sm:self-auto"
             >
-              <SlidersHorizontal className="w-3.5 h-3.5 text-amber-500" />
-              <span>{userProfile ? t('dashboard.myPlan') : t('dashboard.calibrate')}</span>
+              <span>Jesus: The Living Word (Beginner Journey • 3 min)</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
-          )}
-          <div className="shrink-0 w-8 h-1" aria-hidden="true" />
           </div>
-          <div className="pointer-events-none absolute right-0 top-3 bottom-0 w-10 bg-gradient-to-l from-surface dark:from-ink to-transparent md:hidden" aria-hidden="true" />
+        </div>
+
+        {/* Collapsible Quick Tools Drawer (M-2) */}
+        <div className="pt-3 mt-3 border-t border-stone-200/60 dark:border-stone-800/60">
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => {
+                soundEngine.playSnap();
+                setShowQuickTools(prev => !prev);
+              }}
+              className="text-xs font-semibold text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 flex items-center gap-1.5 py-1 px-2 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800 transition-colors"
+            >
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showQuickTools ? 'rotate-180' : ''}`} />
+              <span>{showQuickTools ? 'Hide quick tools' : 'Show quick tools & daily check-in'}</span>
+            </button>
+
+            {dueFSRSCount > 0 && (
+              <button
+                onClick={() => onOpenWordForge(getDueFSRSCards()[0]?.verseId)}
+                className="flex items-center gap-1 text-xs font-bold text-amber-800 dark:text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg"
+              >
+                <Brain className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+                <span>{dueFSRSCount} {t('dashboard.due')}</span>
+              </button>
+            )}
+          </div>
+
+          {showQuickTools && (
+            <div className="flex flex-wrap items-center gap-2 w-full pt-3 mt-2">
+              <button
+                onClick={() => {
+                  soundEngine.playClick();
+                  setIsBattlefieldModalOpen(true);
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                  activeBattlefield
+                    ? 'bg-cyan-500/15 text-cyan-800 dark:text-cyan-200'
+                    : 'bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-cyan-800 dark:text-cyan-300'
+                }`}
+                title={t('dashboard.declareBattlefieldTooltip')}
+              >
+                <Swords className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+                <span>{activeBattlefield ? t('dashboard.battlefieldPrefix', { name: activeBattlefield.title.split('&')[0].trim() }) : t('dashboard.declareBattlefield')}</span>
+              </button>
+
+              <button
+                onClick={handlePlayMorningTacticalAudio}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                  isPlayingMorningTacticalAudio
+                    ? 'bg-amber-500 text-stone-950 font-bold shadow-sm ring-2 ring-amber-400'
+                    : 'bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-amber-800 dark:text-amber-300'
+                }`}
+                title={t('dashboard.briefingAudio')}
+              >
+                {isPlayingMorningTacticalAudio ? (
+                  <>
+                    <Pause className="w-3.5 h-3.5 animate-pulse" />
+                    <span className="flex gap-0.5 items-end h-3" aria-hidden="true">
+                      <span className="w-0.5 h-3 bg-stone-950 animate-pulse" />
+                      <span className="w-0.5 h-2 bg-stone-950 animate-ping" />
+                      <span className="w-0.5 h-3 bg-stone-950 animate-pulse" />
+                    </span>
+                    <span>Playing 45s summary...</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-3.5 h-3.5 text-amber-500" />
+                    <span>{t('dashboard.briefingBtn')}</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={() => {
+                  soundEngine.playClick();
+                  setIsMemoryPulseModalOpen(true);
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-xs font-medium whitespace-nowrap transition-colors"
+                title={t('dashboard.remindersTooltip')}
+              >
+                <Bell className="w-3.5 h-3.5 text-amber-500" />
+                <span>{t('dashboard.remindersBtn')}</span>
+              </button>
+
+              <button
+                onClick={() => setShowMorningBriefing(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-xs font-medium whitespace-nowrap transition-colors"
+                title={t('dashboard.goDeeperTooltip')}
+              >
+                <Coffee className="w-3.5 h-3.5 text-amber-500" />
+                <span>{t('dashboard.goDeeper')}</span>
+                {!isBriefingBonusClaimed && (
+                  <span className="text-xs bg-amber-500 text-stone-950 font-extrabold px-1.5 py-0.2 rounded-full">
+                    +50 XP
+                  </span>
+                )}
+              </button>
+
+              {onOpenOnboarding && (
+                <button
+                  onClick={() => {
+                    soundEngine.playClick();
+                    onOpenOnboarding();
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-xs font-medium whitespace-nowrap transition-colors"
+                  title={t('dashboard.calibrateTooltip')}
+                >
+                  <SlidersHorizontal className="w-3.5 h-3.5 text-amber-500" />
+                  <span>{userProfile ? t('dashboard.myPlan') : t('dashboard.calibrate')}</span>
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -513,7 +613,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               className="w-full flex items-center justify-between gap-3 rounded-2xl bg-stone-100/60 dark:bg-stone-900/40 px-4 py-3 text-left hover:bg-stone-100 dark:hover:bg-stone-900/70 transition-colors"
             >
               <div>
-                <div className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
+                <div className="text-xs font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
                   {t('dashboard.continueReading')}
                 </div>
                 <div className="font-serif text-base font-bold text-stone-900 dark:text-parchment-50">
@@ -547,11 +647,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             <div className="p-4 sm:p-6 relative">
               <div className="flex items-center justify-between gap-2 mb-1.5">
-                <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400">
+                <div className="flex items-center gap-2 text-xs font-mono font-bold text-amber-800 dark:text-amber-400">
                   <Sparkles className="w-4 h-4 text-amber-500" />
                   <span>{t('dashboard.dailyTruthTitle')}</span>
                 </div>
-                <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400/90 px-2.5 py-0.5 rounded bg-amber-500/10">
+                <span className="text-xs font-mono text-amber-800 dark:text-amber-400/90 px-2.5 py-0.5 rounded bg-amber-500/10">
                   {todayFormatted}
                 </span>
               </div>
@@ -567,7 +667,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="flex items-center justify-between pt-3 border-t border-stone-200/60 dark:border-stone-800/60">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-mono text-amber-800 dark:text-amber-500 font-semibold">{dailyVerse.reference}</span>
-                  <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400 px-2 py-0.5 rounded bg-stone-200/60 dark:bg-stone-900 hidden sm:inline-block">
+                  <span className="text-xs font-mono text-stone-500 dark:text-stone-400 px-2 py-0.5 rounded bg-stone-200/60 dark:bg-stone-900 hidden sm:inline-block">
                     {getCategoryLabel(dailyVerse.category)}
                   </span>
                 </div>
@@ -591,13 +691,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     🎯
                   </div>
                   <div>
-                    <div className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
+                    <div className="text-xs font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
                       {t('dashboard.calibratedPlan')}
                     </div>
                     <div className="text-xs sm:text-sm font-serif font-bold text-stone-900 dark:text-parchment-100">
                       {t('dashboard.targeting', { battle: userProfile.battleTitle })}
                     </div>
-                    <div className="text-[11px] text-stone-500 dark:text-stone-400 flex items-center gap-2 mt-0.5">
+                    <div className="text-xs text-stone-500 dark:text-stone-400 flex items-center gap-2 mt-0.5">
                       <span>{t('dashboard.mode')} <strong className="text-amber-800 dark:text-amber-300 uppercase">{userProfile.learningStyle}</strong></span>
                       <span>•</span>
                       <span>{t('dashboard.cadence')} <strong className="text-amber-800 dark:text-amber-300">{userProfile.dailyCadence === '3min' ? t('dashboard.cadence3min') : userProfile.dailyCadence === '10min' ? t('dashboard.cadence10min') : t('dashboard.cadenceDeep')}</strong></span>
@@ -667,7 +767,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             {/* 2-COLUMN GRID OF ILLUSTRATED QUEST CARDS (Stretches full-width on mobile) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-              {filteredQuests.map((quest) => {
+              {(showAllQuests ? filteredQuests : filteredQuests.slice(0, 4)).map((quest) => {
                 const completedCount = quest.acts.filter(a => completedActs.includes(a.id)).length;
                 const isFullyComplete = completedCount === quest.acts.length;
                 const questImage = QUEST_IMAGES[quest.id] || '/images/valley_battlefield.jpg';
@@ -691,26 +791,26 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 dark:from-[#12151b] via-transparent to-transparent" />
-                      <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded bg-black/80 backdrop-blur-md text-[11px] font-mono text-amber-400 uppercase">
+                      <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded bg-black/80 backdrop-blur-md text-xs font-mono text-amber-400 uppercase">
                         {quest.heroName}
                       </div>
 
                       {isFullyComplete ? (
-                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-emerald-950/90 backdrop-blur-md text-emerald-300 text-[11px] font-mono font-bold uppercase tracking-wider flex items-center gap-1">
+                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-emerald-950/90 backdrop-blur-md text-emerald-300 text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-1">
                           <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                           <span>{t('dashboard.completed')}</span>
                         </div>
                       ) : userProfile?.recommendedQuestId === quest.id ? (
-                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 text-stone-950 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1">
+                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 text-stone-950 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
                           <span>🎯</span>
                           <span>{t('dashboard.battlePlanBadge')}</span>
                         </div>
-                      ) : !userProfile && quest.id === 'david-journey' && completedCount === 0 ? (
-                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-amber-500 text-stone-950 text-[11px] font-bold uppercase tracking-wider">
+                      ) : !userProfile && quest.id === 'jesus-journey' && completedCount === 0 ? (
+                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-amber-500 text-stone-950 text-xs font-bold uppercase tracking-wider">
                           {t('dashboard.recommendedFirst')}
                         </div>
                       ) : quest.starterTrack ? (
-                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded bg-amber-950/80 backdrop-blur-md text-[11px] font-mono text-amber-300 uppercase">
+                        <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded bg-amber-950/80 backdrop-blur-md text-xs font-mono text-amber-300 uppercase">
                           {quest.starterTrack}
                         </div>
                       ) : null}
@@ -774,6 +874,22 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 );
               })}
             </div>
+
+            {filteredQuests.length > 4 && (
+              <div className="pt-4 text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playSnap();
+                    setShowAllQuests(prev => !prev);
+                  }}
+                  className="px-4 py-2 rounded-xl bg-stone-200/70 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-xs font-bold text-stone-800 dark:text-stone-200 transition-colors inline-flex items-center gap-1.5"
+                >
+                  <span>{showAllQuests ? 'Show fewer journeys' : `View all ${filteredQuests.length} Story Journeys`}</span>
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showAllQuests ? 'rotate-180' : ''}`} />
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -810,7 +926,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </h2>
               </div>
             </div>
-            <p className="text-[11px] text-stone-500 dark:text-stone-400 mb-3">
+            <p className="text-xs text-stone-500 dark:text-stone-400 mb-3">
               {t('dashboard.fieldToolsSubtitle')}
             </p>
 
@@ -824,7 +940,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               >
                 <ShieldAlert className="w-4 h-4 text-amber-500 mb-1 group-hover:scale-110 transition-transform" />
                 <div className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100">{t('dashboard.whatsThePlay')}</div>
-                <div className="text-[11px] text-stone-500 dark:text-stone-400 truncate">{t('dashboard.whatsThePlayDesc')}</div>
+                <div className="text-xs text-stone-500 dark:text-stone-400 truncate">{t('dashboard.whatsThePlayDesc')}</div>
               </button>
 
               <button
@@ -836,7 +952,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               >
                 <Shield className="w-4 h-4 text-amber-500 mb-1 group-hover:scale-110 transition-transform" />
                 <div className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100">{t('dashboard.proverbsCodex')}</div>
-                <div className="text-[11px] text-stone-500 dark:text-stone-400 truncate">{t('dashboard.proverbsCodexDesc')}</div>
+                <div className="text-xs text-stone-500 dark:text-stone-400 truncate">{t('dashboard.proverbsCodexDesc')}</div>
               </button>
 
               <button
@@ -848,7 +964,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               >
                 <HeartHandshake className="w-4 h-4 text-rose-500 mb-1 group-hover:scale-110 transition-transform" />
                 <div className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100">{t('dashboard.psalmsMedic')}</div>
-                <div className="text-[11px] text-stone-500 dark:text-stone-400 truncate">{t('dashboard.psalmsMedicDesc')}</div>
+                <div className="text-xs text-stone-500 dark:text-stone-400 truncate">{t('dashboard.psalmsMedicDesc')}</div>
               </button>
             </div>
           </div>
@@ -864,7 +980,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <div className="text-xs font-mono font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400">
                     {t('dashboard.memoryReminders')}
                   </div>
-                  <div className="text-[11px] text-stone-500 dark:text-stone-400">
+                  <div className="text-xs text-stone-500 dark:text-stone-400">
                     {notificationSettings.enabled
                       ? t('dashboard.remindersCount', { sent: notificationSettings.notificationsSentToday, total: notificationSettings.frequencyPerDay })
                       : t('dashboard.remindersOff')}
@@ -876,7 +992,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   soundEngine.playClick();
                   setIsMemoryPulseModalOpen(true);
                 }}
-                className="text-[11px] font-semibold text-amber-800 dark:text-amber-400 hover:underline underline-offset-2"
+                className="text-xs font-semibold text-amber-800 dark:text-amber-400 hover:underline underline-offset-2"
               >
                 {t('dashboard.settings')}
               </button>
@@ -890,7 +1006,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </p>
             </div>
             {nextReminder && notificationSettings.enabled && (
-              <div className="text-[11px] font-mono text-amber-800 dark:text-amber-300/90 mb-3 flex items-center gap-1.5 bg-amber-500/10 px-2.5 py-1 rounded-lg">
+              <div className="text-xs font-mono text-amber-800 dark:text-amber-300/90 mb-3 flex items-center gap-1.5 bg-amber-500/10 px-2.5 py-1 rounded-lg">
                 <Clock className="w-3 h-3 text-amber-800 dark:text-amber-400 shrink-0" />
                 <span>Next: {nextReminder.label} ({nextReminder.remainingFormatted})</span>
               </div>
@@ -913,7 +1029,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 📜
               </div>
               <div>
-                <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400 px-1.5 py-0.2 rounded bg-amber-500/10 inline-block mb-0.5">
+                <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400 px-1.5 py-0.2 rounded bg-amber-500/10 inline-block mb-0.5">
                   {t('dashboard.completeCanon')}
                 </span>
                 <h2 className="text-xs sm:text-sm font-serif font-bold text-stone-900 dark:text-parchment-50">
@@ -921,7 +1037,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </h2>
               </div>
             </div>
-            <p className="text-[11px] text-stone-500 dark:text-stone-400 mb-3">
+            <p className="text-xs text-stone-500 dark:text-stone-400 mb-3">
               {readingPlace
                 ? t('dashboard.pickUp', { book: readingPlace.bookName, chapter: readingPlace.chapter })
                 : t('dashboard.everyBook')}
@@ -965,12 +1081,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 {t('dashboard.unlockedCount', { unlocked: unlockedRelics.length, total: ALL_RELICS.length })}
               </span>
             </div>
-            <p className="text-[11px] text-stone-500 dark:text-stone-400 mb-3">
+            <p className="text-xs text-stone-500 dark:text-stone-400 mb-3">
               {t('dashboard.armorySubtitle')}
             </p>
 
             <div className="grid grid-cols-2 gap-2">
-              {ALL_RELICS.map((relic) => {
+              {(showAllRelics ? ALL_RELICS : ALL_RELICS.slice(0, 4)).map((relic) => {
                 const isUnlocked = unlockedRelics.includes(relic.id);
                 return (
                   <div
@@ -986,13 +1102,29 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     <div className="text-xs font-bold truncate text-stone-900 dark:text-parchment-100">
                       {isUnlocked ? relic.name : t('dashboard.lockedRelic')}
                     </div>
-                    <div className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
+                    <div className="text-xs text-stone-500 dark:text-stone-400 truncate">
                       {relic.character}
                     </div>
                   </div>
                 );
               })}
             </div>
+
+            {ALL_RELICS.length > 4 && (
+              <div className="pt-3 text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playSnap();
+                    setShowAllRelics(prev => !prev);
+                  }}
+                  className="text-xs font-semibold text-amber-800 dark:text-amber-400 hover:underline inline-flex items-center gap-1"
+                >
+                  <span>{showAllRelics ? 'Show fewer relics' : `View all ${ALL_RELICS.length} relics`}</span>
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showAllRelics ? 'rotate-180' : ''}`} />
+                </button>
+              </div>
+            )}
           </div>
 
           {/* ATMOSPHERIC AUDIO SOUNDSCAPE */}
@@ -1003,7 +1135,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <span>{t('dashboard.ambientSoundscape')}</span>
               </div>
               {currentAmbience !== 'none' && (
-                <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 uppercase">
+                <span className="text-xs font-mono text-amber-800 dark:text-amber-400 uppercase">
                   {t('dashboard.playingAmbience', { ambience: currentAmbience })}
                 </span>
               )}
@@ -1050,11 +1182,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
             {/* DRAMATIZED NARRATOR PERSONA */}
             <div className="mt-3 pt-3 border-t border-stone-200 dark:border-stone-800/80">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400 uppercase tracking-wider flex items-center gap-1.5">
+                <span className="text-xs font-mono text-stone-500 dark:text-stone-400 uppercase tracking-wider flex items-center gap-1.5">
                   <Mic className="w-3 h-3 text-amber-500" />
                   {t('dashboard.voiceTitle')}
                 </span>
-                <span className="text-[11px] text-amber-800 dark:text-amber-400 font-mono">
+                <span className="text-xs text-amber-800 dark:text-amber-400 font-mono">
                   {NARRATOR_VOICES[narratorProfile]?.actor || 'Adam (ElevenLabs)'}
                 </span>
               </div>
@@ -1073,14 +1205,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       soundEngine.setNarratorProfile(newProfile);
                       setNarratorProfile(newProfile);
                     }}
-                    className={`py-1.5 px-1 rounded-lg text-[11px] font-semibold transition-all text-center border flex flex-col items-center justify-center ${
+                    className={`py-1.5 px-1 rounded-lg text-xs font-semibold transition-all text-center border flex flex-col items-center justify-center ${
                       narratorProfile === p.id
                         ? 'bg-amber-500 border-amber-600 text-stone-950 font-bold shadow-sm'
                         : 'bg-white dark:bg-stone-800/70 border-stone-250 dark:border-stone-750 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'
                     }`}
                   >
                     <span>{p.label}</span>
-                    <span className="text-[11px] opacity-80 font-normal">{p.sub}</span>
+                    <span className="text-xs opacity-80 font-normal">{p.sub}</span>
                   </button>
                 ))}
               </div>

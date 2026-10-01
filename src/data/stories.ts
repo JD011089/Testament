@@ -2,6 +2,232 @@ import type { StoryQuest } from '../types';
 
 export const STORY_QUESTS: StoryQuest[] = [
   {
+    id: 'jesus-journey',
+    title: 'Jesus: The King Who Serves',
+    subtitle: 'The revolutionary who redefined power, entered our storm, and conquered death',
+    heroName: 'Jesus',
+    characterTitle: 'The Servant King',
+    testament: 'New Testament',
+    historicalPeriod: 'c. 30 AD — Roman Judea & Galilee',
+    estimatedMinutes: 6,
+    themeColor: 'from-amber-500 to-indigo-950',
+    badgeName: 'Great for Beginners',
+    starterTrack: 'Great for Beginners',
+    relicReward: {
+      id: 'jesus-basin',
+      name: 'The Basin & The Towel',
+      iconName: 'basin',
+      description: 'The washbasin Jesus used to wash the dusty feet of his disciples before going to the cross.',
+      lesson: 'In God\'s kingdom, greatness is measured by how you love and serve others, not how many serve you.'
+    },
+    summary: 'The life of Jesus of Nazareth: who he was, why he turned religious hypocrisy and imperial power upside down, and how his resurrection changes everything.',
+    acts: [
+      {
+        id: 'jesus-act-1',
+        actNumber: 1,
+        actTitle: 'The Authority in the Gale',
+        visualTheme: 'sea_storm',
+        sceneAtmosphere: 'Nightfall on the freshwater lake of Galilee. Violent subterranean squalls whip six-foot waves over the wooden gunwales of an open fishing skiff. Veteran fishermen are screaming; Jesus is asleep on a cushion.',
+        historicalContext: 'The Sea of Galilee sits nearly 700 feet below sea level, surrounded by steep basalt hills. Cold winds rushing down the ravines collide with warm lake air, creating sudden, violent squalls that could swamp heavy wooden boats in minutes.',
+        narrativeParagraphs: [
+          'Put yourself in the boat. These disciples aren’t delicate tourists—several of them are hardened commercial fishermen who have spent their whole lives pulling nets on these exact waters. They know lake weather. Yet waves are pounding over the bow, the boat is filling with dark water, and they are genuinely terrified they are about to drown.',
+          'They scramble to the stern and find Jesus sound asleep on a coarse leather cushion. In sheer panic, they shake him awake with an accusation every human being has whispered: "Teacher, don’t you care if we drown?"',
+          'Jesus doesn’t panic. He doesn’t reach for a bucket. He simply stands up in the howling wind, looks at the raging black water, and says three words: "Peace! Be still!"',
+          'Immediately the screaming wind cuts out. The lake turns completely flat as glass. And the disciples are suddenly far more terrified of the man standing in front of them than they were of the storm: "Who then is this, that even the wind and the sea obey him?"'
+        ],
+        perspectivePrompt: 'Life throws sudden crises—unexpected bad news, stress, or relational conflict—that feel like waves flooding your boat. What is your initial reflex?',
+        choices: [
+          {
+            id: 'choice-jesus-1',
+            text: 'Assume God has abandoned you and panic in isolation.',
+            reaction: 'That is the default human response. When the storm hits, fear tells us God must not care.',
+            historicalPivot: 'The disciples thought Jesus sleeping meant he didn’t care. In reality, his calm proved he possessed complete sovereignty over the crisis.'
+          },
+          {
+            id: 'choice-jesus-2',
+            text: 'Wake Jesus with honest raw prayers, admitting you cannot fix it alone.',
+            reaction: 'Jesus welcomed their honest cry. He didn’t rebuke them for asking for help; he invited them to trust his presence in the storm.',
+            historicalPivot: 'Jesus spoke directly to the chaos. Having Jesus in your boat doesn’t mean you will never face storms—it means the storm cannot sink you.'
+          }
+        ],
+        unlockedScripture: {
+          reference: 'Mark 4:39-40',
+          translation: 'CSB / Modern Plain English',
+          text: 'He got up, rebuked the wind, and said to the sea, "Silence! Be still!" The wind ceased, and there was a great calm. Then he said to them, "Why are you afraid? Do you still have no faith?"',
+          deepDive: 'The Greek word used for "be still" literally means "be muzzled." Jesus treated the violent chaos of nature like an unruly beast that instantly recognizes its Creator\'s voice.'
+        },
+        glossary: [
+          {
+            term: 'Sea of Galilee',
+            ancientMeaning: 'A 13-mile-long freshwater rift lake bordered by steep ravines prone to sudden flash storms.',
+            modernAnalogy: 'Like driving an open small boat into an unexpected mountain microburst with zero cell service.'
+          },
+          {
+            term: 'Rabbi / Teacher',
+            ancientMeaning: 'An authoritative Jewish master of the Torah whom disciples followed intimately to imitate his life.',
+            modernAnalogy: 'A trusted master mentor whose character and habits you adopt completely.'
+          }
+        ],
+        realTalkTakeaway: {
+          coreChallenge: 'Feeling overwhelmed when circumstances spiral completely out of your control.',
+          practicalLesson: 'The presence of a storm does not mean the absence of God. Peace is not the absence of trouble; it is the presence of Jesus.',
+          dailyAction: 'Name the one overwhelming situation keeping you awake right now. Surrender the illusion of total control and ask Jesus for his peace in the center of it.'
+        },
+        wisdomQuiz: {
+          question: 'What surprised the disciples most after Jesus calmed the fierce storm on the lake?',
+          options: [
+            {
+              text: 'They were angry that the fish got scared away by the wind.',
+              isCorrect: false,
+              explanation: 'Fishing was the last thing on their minds during a near-death encounter.'
+            },
+            {
+              text: 'They were struck with awe and wonder at who Jesus truly was, realizing even nature obeyed his voice.',
+              isCorrect: true,
+              explanation: 'Spot on! Experiencing the power of Jesus shifted their fear of the storm into deep awe and reverence for Him.'
+            }
+          ]
+        },
+        teaserForNext: 'Next: The King of Kings kneels on the floor with a towel to wash the dirty feet of his followers.'
+      },
+      {
+        id: 'jesus-act-2',
+        actNumber: 2,
+        actTitle: 'The King With a Towel',
+        visualTheme: 'palace_hall',
+        sceneAtmosphere: 'An intimate upstairs dining room in Jerusalem on the eve of the Passover. Twelve men reclined around a low table, arguing over who is the most important, their sandals kicked off and feet caked in street dust.',
+        historicalContext: 'In first-century Judea, roads were dusty tracks littered with animal waste. Etiquette required foot-washing upon entering a house, but it was considered so filthy that only the lowest non-Jewish slave was ever tasked with doing it.',
+        narrativeParagraphs: [
+          'It is the night before Jesus is betrayed and executed. Knowing that all authority in heaven and earth has been placed in his hands, what does Jesus do? Does he demand a coronation? Does he summon an army of angels to crush the Roman legions?',
+          'Instead, Jesus stands up from dinner, takes off his outer robe, and wraps a rough linen towel around his waist. He pours clean water into a ceramic washbasin.',
+          'One by one, Jesus kneels in the dirt before his disciples and washes their filthy, calloused feet, drying them with the towel tied around his waist. When he gets to Peter, Peter recoils in shock: "Lord, you are going to wash my feet? Never!"',
+          'Jesus answers: "If I do not wash you, you have no part with me... For I have given you an example, that you also should do just as I have done to you. The greatest among you must be your servant."'
+        ],
+        perspectivePrompt: 'When you are around people who take you for granted or disagree with you, how hard is it to swallow your pride and serve them first?',
+        choices: [
+          {
+            id: 'choice-jesus-3',
+            text: 'Defend your status and insist on being treated with proper respect.',
+            reaction: 'That is the world\'s game: compete for status, dominate the room, and make sure everyone knows your worth.',
+            historicalPivot: 'Jesus completely upended the world\'s definition of power. True strength is not using people to elevate yourself; it is using your strength to lift up others.'
+          },
+          {
+            id: 'choice-jesus-4',
+            text: 'Step down into humble service, choosing to love without keeping score.',
+            reaction: 'This takes supreme internal security. You can only wash feet when you know your identity is already secure in God.',
+            historicalPivot: 'Jesus washed even Judas’s feet—knowing Judas would betray him within hours. Love that gives without condition breaks the cycle of human retaliation.'
+          }
+        ],
+        unlockedScripture: {
+          reference: 'John 13:14-15',
+          translation: 'CSB / Modern Plain English',
+          text: '"If I then, your Lord and Teacher, have washed your feet, you also ought to wash one another’s feet. For I have given you an example, that you also should do just as I have done to you."',
+          deepDive: 'Jesus didn’t merely teach humility as an abstract philosophy; he enacted it physically before dying on a Roman cross for the very people who mocked him.'
+        },
+        glossary: [
+          {
+            term: 'Passover',
+            ancientMeaning: 'The sacred Jewish festival celebrating God delivering Israel out of Egyptian slavery with the blood of the lamb.',
+            modernAnalogy: 'Like an independence celebration combined with profound spiritual remembrance of liberation.'
+          },
+          {
+            term: 'Foot Washing',
+            ancientMeaning: 'The lowest household task in antiquity, reserved exclusively for the most junior servant.',
+            modernAnalogy: 'Volunteering to scrub the dirtiest public bathroom without telling anyone.'
+          }
+        ],
+        realTalkTakeaway: {
+          coreChallenge: 'Pride, entitlement, and the temptation to treat people based on what they can do for you.',
+          practicalLesson: 'True leadership is servant leadership. You never look more like Jesus than when you quietly serve someone who can never pay you back.',
+          dailyAction: 'Do one unseen act of service today for someone in your family, workplace, or school without mentioning it to anyone.'
+        },
+        wisdomQuiz: {
+          question: 'Why did Simon Peter initially refuse to let Jesus wash his feet?',
+          options: [
+            {
+              text: 'Peter thought his feet were already too clean.',
+              isCorrect: false,
+              explanation: 'First-century Jerusalem roads were filthy; Peter’s feet definitely needed washing.'
+            },
+            {
+              text: 'Peter felt uncomfortable seeing his Master and King stoop down to do the work of a lowly servant.',
+              isCorrect: true,
+              explanation: 'Exactly right. Peter had worldly ideas about power, but Jesus showed that God\'s kingdom is built on sacrificial love.'
+            }
+          ]
+        },
+        teaserForNext: 'Next: The cross, the empty tomb, and the message that ignited hope across the ancient world.'
+      },
+      {
+        id: 'jesus-act-3',
+        actNumber: 3,
+        actTitle: 'The Empty Tomb & The Living Hope',
+        visualTheme: 'cave_refuge',
+        sceneAtmosphere: 'Pre-dawn gray light outside the city walls of Jerusalem. A garden tomb carved out of solid limestone. The massive circular stone has been rolled away up its track, and the Roman military seal is broken.',
+        historicalContext: 'Crucifixion was Rome’s most brutal public execution, designed to crush rebellious movements and deter anyone from following their leader. When Jesus was crucified, his followers went into hiding, terrified and crushed with grief.',
+        narrativeParagraphs: [
+          'By Saturday evening, Rome and the religious establishment thought the Jesus movement was dead and buried. The disciples were locked behind closed doors for fear of arrest. All their hopes seemed extinguished on a Roman hill called Golgotha.',
+          'Early Sunday morning, before sunrise, Mary Magdalene and other women walked through the chill air with funeral spices to finish anointing his body. They were wondering how on earth they would move the heavy stone sealing the cave.',
+          'When they arrived, the ground shook. The stone was rolled aside. Looking inside, the grave clothes were lying folded, and the tomb was completely empty. Angels announced the words that changed human history: "Why do you look for the living among the dead? He is not here; he has risen!"',
+          'Over the next forty days, Jesus appeared alive to his followers, eating with them, walking with them, and sending them out to the ends of the earth with good news: death is defeated, grace is real, and Jesus is Lord forever.'
+        ],
+        perspectivePrompt: 'When you face grief, painful loss, or what feels like an absolute dead end, where do you look for hope?',
+        choices: [
+          {
+            id: 'choice-jesus-5',
+            text: 'Conclude that darkness has the final say and give up.',
+            reaction: 'That is what the disciples almost did on Saturday. They forgot that God does his greatest work in the dark.',
+            historicalPivot: 'Friday looked like defeat; Sunday proved that God’s love and life are stronger than Rome, sin, and the grave.'
+          },
+          {
+            id: 'choice-jesus-6',
+            text: 'Anchor your life to the living Jesus, knowing no grave can hold God’s promise.',
+            reaction: 'The resurrection turned terrified fishermen into fearless apostles who laid down their lives because they knew Jesus was alive.',
+            historicalPivot: 'Because Jesus lives, failure is never final and death is not the end. Your story is held in his hands.'
+          }
+        ],
+        unlockedScripture: {
+          reference: 'Luke 24:5-6',
+          translation: 'CSB / Modern Plain English',
+          text: '"Why do you look for the living among the dead? He is not here, but has risen!"',
+          deepDive: 'The resurrection is the cornerstone of Christian faith. Christianity did not survive because of a clever philosophy, but because an empty tomb proved Jesus conquered the grave.'
+        },
+        glossary: [
+          {
+            term: 'Resurrection',
+            ancientMeaning: 'Bodily rising from physical death to immortal, renewed physical life—not merely a ghostly spirit.',
+            modernAnalogy: 'Not a ghost or metaphor; a real, physical defeat of death and permanent restoration of life.'
+          },
+          {
+            term: 'The Gospel',
+            ancientMeaning: 'Euangelion: An imperial proclamation of victory that a new king has ascended the throne and peace is declared.',
+            modernAnalogy: 'Breaking news announced to the entire world that freedom and pardon have arrived.'
+          }
+        ],
+        realTalkTakeaway: {
+          coreChallenge: 'Despair, fear of the future, and wondering if your worst mistakes or losses are permanent.',
+          practicalLesson: 'Because Jesus rose from the dead, hope is never lost. God can bring life, purpose, and renewal out of the darkest graveyard in your life.',
+          dailyAction: 'Walk into today with your head held high. No matter what happened yesterday, Sunday has come—take one step forward in faith.'
+        },
+        wisdomQuiz: {
+          question: 'What message did the angel give to the women at the empty tomb on Sunday morning?',
+          options: [
+            {
+              text: 'He told them to build a museum around the burial clothes.',
+              isCorrect: false,
+              explanation: 'The tomb was an announcement of life, not a memorial to death.'
+            },
+            {
+              text: '"Why do you look for the living among the dead? He is not here; he has risen!"',
+              isCorrect: true,
+              explanation: 'Yes! The tomb was empty because Jesus defeated death once and for all.'
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
     id: 'david-journey',
     title: 'David: The Outlaw & The Giant',
     subtitle: 'From overlooked shepherd to king forged in desert caves',

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { StoryQuest, StoryAct } from '../types';
+import type { StoryQuest, StoryAct, TermExplainer } from '../types';
 import { SceneIllustration } from './SceneIllustration';
 import { soundEngine, type NarratorProfile, NARRATOR_VOICES } from '../utils/audio';
 import confetti from 'canvas-confetti';
@@ -34,6 +34,39 @@ import { TacticalNexusCard } from './TacticalNexusCard';
 import { useLanguage } from '../context/LanguageContext';
 import type { QuestCustomEvaluation } from '../utils/questInstinctEngine';
 import { evaluateQuestCustomResponseWithGemini } from '../utils/geminiDilemmaService';
+
+const UNIVERSAL_BIBLICAL_TERMS: TermExplainer[] = [
+  {
+    term: 'Covenant',
+    ancientMeaning: 'A sacred, binding life-and-death commitment sealed in blood, pledging total faithfulness between parties.',
+    modernAnalogy: 'Far deeper than a legal contract — like marriage vows where two become one family forever.'
+  },
+  {
+    term: 'Righteousness',
+    ancientMeaning: 'Living in correct, harmonious relationship with God and fellow humans; ethical integrity and justice.',
+    modernAnalogy: 'Walking in alignment with your true design, where your inner heart matches your outward actions.'
+  },
+  {
+    term: 'Atonement',
+    ancientMeaning: 'The covering, reconciliation, or cleansing of guilt and relational rupture through sacrificial substitute.',
+    modernAnalogy: 'Wiping a crippling debt completely off the books so two estranged parties can embrace in peace.'
+  },
+  {
+    term: 'Sheol',
+    ancientMeaning: 'The Hebrew concept of the realm of the dead or the grave, the place of silence awaiting resurrection.',
+    modernAnalogy: 'The unseen realm of rest for those who have departed this earthly life.'
+  },
+  {
+    term: 'Yahweh (The LORD)',
+    ancientMeaning: 'The personal, uncreated, covenant name of God revealed to Moses: "I AM WHO I AM".',
+    modernAnalogy: "God's intimate personal name, showing He is not an impersonal force but a living relational Father."
+  },
+  {
+    term: 'Grace',
+    ancientMeaning: 'Unmerited royal favor freely bestowed on an inferior who had zero claim to it.',
+    modernAnalogy: 'Receiving an unconditional full scholarship and royal adoption after failing the entrance exam.'
+  }
+];
 
 interface StoryViewerProps {
   quest: StoryQuest;
@@ -81,8 +114,15 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
   const [selectedQuizOption, setSelectedQuizOption] = useState<number | null>(null);
   const [hasSubmittedQuiz, setHasSubmittedQuiz] = useState<boolean>(false);
   const [activeStepIndex, setActiveStepIndex] = useState<number>(1);
+  const [actCompletionData, setActCompletionData] = useState<{ actNumber: number; isLastAct: boolean; relicName?: string } | null>(null);
 
   const act: StoryAct = quest.acts[currentActIndex];
+  const actGlossary: TermExplainer[] = [
+    ...(act.glossary || []),
+    ...UNIVERSAL_BIBLICAL_TERMS.filter(
+      u => !(act.glossary || []).some(g => g.term.toLowerCase() === u.term.toLowerCase())
+    )
+  ];
   const isActFinished = completedActs.includes(act.id);
   const isQuestFullyCompleted = quest.acts.every(a => completedActs.includes(a.id));
   const questAnchorVerse = getStoryVerseForQuest(quest.id, language) || getStoryVerseForAct(quest.id, act.id, language);
@@ -116,7 +156,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [act.id, selectedChoiceId, act.unlockedScripture.reference, language, scriptureRef?.book, scriptureRef?.chapter, scriptureRef?.verseStart, scriptureRef?.verseEnd]);
+  }, [act.id, selectedChoiceId, act.unlockedScripture.reference, language, scriptureRef]);
 
   // Load saved choices, quizzes, and reflection notes for the current act (Requirement 3)
   useEffect(() => {
@@ -326,7 +366,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     }
   };
 
-  // Requirement 2: Auto-scroll all the way to top on Act and Quest completion
+  // Present celebration screen with explicit choices upon completing an act
   const handleFinishAct = () => {
     if (!selectedChoiceId) return;
     soundEngine.playVictory();
@@ -341,24 +381,11 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     const relicId = isLastAct ? quest.relicReward?.id : undefined;
     onCompleteAct(act.id, quest.id, relicId);
 
-    if (!isLastAct) {
-      // Advance to start the next act and go all the way to the top!
-      setCurrentActIndex(prev => prev + 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-    } else {
-      // Completed the entire quest! Scroll to top and finish
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-      setTimeout(() => {
-        onBack();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        document.documentElement.scrollTop = 0;
-        document.body.scrollTop = 0;
-      }, 700);
-    }
+    setActCompletionData({
+      actNumber: currentActIndex + 1,
+      isLastAct,
+      relicName: quest.relicReward?.name
+    });
   };
 
   // Stop audio on unmount
@@ -620,7 +647,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                 { step: 1, id: 'section-crossroads', label: 'Decide First (What would you do?)' },
                 { step: 2, id: 'section-narrative', label: 'What Actually Unfolded' },
                 { step: 3, id: 'section-scripture', label: 'Scripture Unlocked' },
-                { step: 4, id: 'section-realtalk', label: 'Real Talk For Today' },
+                { step: 4, id: 'section-realtalk', label: 'Why This Matters Today' },
                 { step: 5, id: 'section-quiz', label: 'Wisdom Check Drill' }
               ].map((item) => (
                 <button
@@ -636,7 +663,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                       : 'text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-stone-100 dark:hover:bg-stone-850/60'
                   }`}
                 >
-                  <span className={`w-5 h-5 rounded-full text-[11px] font-mono flex items-center justify-center font-bold shrink-0 ${
+                  <span className={`w-5 h-5 rounded-full text-xs font-mono flex items-center justify-center font-bold shrink-0 ${
                     activeStepIndex === item.step
                       ? 'bg-amber-500 text-stone-950'
                       : 'bg-stone-100 dark:bg-stone-800 text-amber-800 dark:text-amber-400'
@@ -674,7 +701,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                 { step: 1, label: 'Decide' },
                 { step: 2, label: 'Story' },
                 { step: 3, label: 'Scripture' },
-                { step: 4, label: 'Real Talk' },
+                { step: 4, label: 'Why It Matters' },
                 { step: 5, label: 'Wisdom Drill' }
               ].map((s) => {
                 const isCurrent = activeStepIndex === s.step;
@@ -946,7 +973,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   </div>
 
                   {/* Tap-to-Explain Ancient Customs & Terms */}
-                  {act.glossary.length > 0 && (
+                  {actGlossary.length > 0 && (
                     <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 mt-4">
                       <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-3">
                         <HelpCircle className="w-4 h-4 text-amber-800 dark:text-amber-500" />
@@ -954,7 +981,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                       </div>
 
                       <div className="flex flex-wrap gap-2 mb-3">
-                        {act.glossary.map((item, idx) => (
+                        {actGlossary.map((item, idx) => (
                           <button
                             key={idx}
                             onClick={() => {
@@ -973,7 +1000,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                       </div>
 
                       <AnimatePresence>
-                        {activeTermIndex !== null && (
+                        {activeTermIndex !== null && actGlossary[activeTermIndex] && (
                           <motion.div 
                             initial={{ opacity: 0, y: 5 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -982,11 +1009,11 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                           >
                             <div>
                               <strong className="text-amber-800 dark:text-amber-400">Ancient Context: </strong>
-                              {act.glossary[activeTermIndex].ancientMeaning}
+                              {actGlossary[activeTermIndex].ancientMeaning}
                             </div>
                             <div className="text-stone-800 dark:text-parchment-200">
                               <strong className="text-amber-800 dark:text-amber-300">Everyday Translation: </strong>
-                              {act.glossary[activeTermIndex].modernAnalogy}
+                              {actGlossary[activeTermIndex].modernAnalogy}
                             </div>
                           </motion.div>
                         )}
@@ -1161,20 +1188,20 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   }}
                   className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs sm:text-sm shadow-md flex items-center gap-2 transition-all cursor-pointer"
                 >
-                  <span>Continue to Step 4: Real Talk</span>
+                  <span>Continue to Step 4: Why This Matters</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </section>
           )}
 
-          {/* STEP 4: REAL TALK FOR TODAY (TAKEAWAY FOR ADULTS) */}
+          {/* STEP 4: WHY THIS MATTERS TODAY (TAKEAWAY FOR ALL AGES) */}
           {activeStepIndex === 4 && (
             <section id="section-realtalk" className="p-5 md:p-6 rounded-2xl bg-white dark:bg-gradient-to-br dark:from-[#17191e] dark:to-[#0e1014] border border-stone-200 dark:border-stone-700 shadow-sm scroll-mt-6">
               <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400 mb-2">
                 <span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30">Step 4 of 5</span>
                 <Sparkles className="w-4 h-4 text-amber-800 dark:text-amber-500" />
-                <span>Real Talk For Today</span>
+                <span>Why This Matters Today</span>
               </div>
               
               <h3 className="text-lg md:text-xl font-serif font-bold text-stone-900 dark:text-parchment-100 mb-2">
@@ -1333,7 +1360,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   }}
                   className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-stone-700 dark:text-stone-300 hover:text-stone-950 dark:hover:text-white bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 transition-colors"
                 >
-                  ← Back to Step 4: Real Talk
+                  ← Back to Step 4: Why This Matters
                 </button>
 
                 <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -1383,6 +1410,77 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
 
         </div>
       </div>
+
+      {/* Act & Story Completion Celebration Overlay (M-5: explicit related choices, no hijacking) */}
+      {actCompletionData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+          <div className="max-w-md w-full bg-white dark:bg-ink-raised border-2 border-amber-500 rounded-3xl p-6 sm:p-8 text-center shadow-2xl space-y-5 animate-scaleUp">
+            <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-3xl shadow-glow">
+              🎉
+            </div>
+            <div>
+              <div className="text-xs font-mono font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400">
+                {actCompletionData.isLastAct ? 'Story Completed!' : `Act ${actCompletionData.actNumber} Completed!`}
+              </div>
+              <h2 className="text-2xl font-serif font-extrabold text-stone-900 dark:text-white mt-1">
+                {actCompletionData.isLastAct ? quest.title : act.actTitle}
+              </h2>
+              <p className="text-sm text-stone-600 dark:text-stone-300 mt-2">
+                {actCompletionData.isLastAct
+                  ? `You mastered all ${quest.acts.length} acts and unlocked ${actCompletionData.relicName || 'the story relic'}!`
+                  : `Great job! You earned +50 XP and finished this part of the story.`}
+              </p>
+            </div>
+
+            <div className="space-y-3 pt-2">
+              {!actCompletionData.isLastAct ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundEngine.playSnap();
+                      setActCompletionData(null);
+                      setCurrentActIndex(prev => prev + 1);
+                      setActiveStepIndex(1);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                      document.documentElement.scrollTop = 0;
+                      document.body.scrollTop = 0;
+                    }}
+                    className="w-full py-3.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <span>Continue Story: Act {actCompletionData.actNumber + 1}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundEngine.playClick();
+                      setActCompletionData(null);
+                      onBack();
+                    }}
+                    className="w-full py-3 px-4 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-800 dark:text-stone-200 font-semibold text-sm border border-stone-200 dark:border-stone-750 transition-colors"
+                  >
+                    Return to Today's Plan
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playClick();
+                    setActCompletionData(null);
+                    onBack();
+                  }}
+                  className="w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Return to Today's Plan</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Memory Verse Pulse & Notification Modal (Passes quest's single anchor memory verse) */}
       <MemoryPulseModal

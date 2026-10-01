@@ -388,8 +388,7 @@ export function App() {
       if (questStep && (questStep.targetId === _questId || questStep.targetSecondaryId === actId)) {
         markCampaignStepCompleted(todayCampaign.id, questStep.stepNumber, undefined, todayCampaign.steps.length);
         window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
-        const nextStep = todayCampaign.steps.find(step => step.stepNumber === questStep.stepNumber + 1);
-        if (nextStep) setCampaignPrompt({ completedStep: questStep.stepNumber, nextStep });
+        // Do not auto-pop campaignPrompt here: StoryViewer handles act progression and next-step choices cleanly
       }
     }
   };
@@ -780,8 +779,10 @@ export function App() {
         initialProfile={userProfile}
       />
 
-      {/* PWA Home-Screen Install Prompt (Mutually exclusive with CampaignNextTaskPrompt to prevent 12px overlap collision) */}
-      {!campaignPrompt && <PWAInstallPrompt />}
+      {/* PWA Home-Screen Install Prompt (Mutually exclusive with CampaignNextTaskPrompt and readers/modals) */}
+      {!campaignPrompt && !activeQuest && !isDossierOpen && !isProverbsOpen && !isPsalmsOpen && !isDriveModeOpen && !isOnboardingOpen && (
+        <PWAInstallPrompt />
+      )}
 
       {/* PWA Update & Restart Floating Notification Banner */}
       <UpdateNotificationBanner />
