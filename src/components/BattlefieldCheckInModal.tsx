@@ -45,7 +45,7 @@ export const BATTLEFIELD_OPTIONS: BattlefieldOption[] = [
     subtitle: 'Depleted energy, high-stress pressure, feeling like quitting.',
     icon: 'flame',
     suggestedQuestId: 'elijah-journey',
-    suggestedDilemmaId: 'dilemma-burnout',
+    suggestedDilemmaId: 'dilemma-burnout-home',
     psalmReference: 'Psalm 46 (God is our refuge and strength)',
     colorBorder: 'border-blue-500/60',
     colorBg: 'from-blue-950/40'
@@ -56,7 +56,7 @@ export const BATTLEFIELD_OPTIONS: BattlefieldOption[] = [
     subtitle: 'Stung by friends, family conflict, or someone talking behind your back.',
     icon: 'heart',
     suggestedQuestId: 'joseph-journey',
-    suggestedDilemmaId: 'dilemma-credit-thief',
+    suggestedDilemmaId: 'dilemma-friend-betrayal',
     psalmReference: 'Psalm 55 (When a companion betrays trust)',
     colorBorder: 'border-red-500/60',
     colorBg: 'from-red-950/40'
@@ -67,7 +67,7 @@ export const BATTLEFIELD_OPTIONS: BattlefieldOption[] = [
     subtitle: 'Standing at a critical crossroad; pressure to compromise integrity.',
     icon: 'compass',
     suggestedQuestId: 'peter-journey',
-    suggestedDilemmaId: 'dilemma-credit-thief',
+    suggestedDilemmaId: 'dilemma-group-chat-pressure',
     psalmReference: 'Proverbs 3:5-6 & Psalm 27 (Whom shall I fear?)',
     colorBorder: 'border-purple-500/60',
     colorBg: 'from-purple-950/40'
@@ -78,7 +78,7 @@ export const BATTLEFIELD_OPTIONS: BattlefieldOption[] = [
     subtitle: 'Feeling distant from God, going through the motions, needing fresh fire.',
     icon: 'swords',
     suggestedQuestId: 'david-journey',
-    suggestedDilemmaId: 'dilemma-burnout',
+    suggestedDilemmaId: 'dilemma-envy-spiral',
     psalmReference: 'Psalm 63 (My soul thirsts for You in a parched land)',
     colorBorder: 'border-emerald-500/60',
     colorBg: 'from-emerald-950/40'

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState, useEffect } from 'react';
+import { lazy, Suspense, useState, useEffect, useRef } from 'react';
 import type { StoryQuest } from './types';
 import { STORY_QUESTS } from './data/stories';
 import { Dashboard } from './components/Dashboard';
@@ -116,10 +116,7 @@ export function App() {
   const [targetWordForgeVerseId, setTargetWordForgeVerseId] = useState<string | null>(() => {
     if (typeof window === 'undefined') return null;
     const params = new URLSearchParams(window.location.search);
-    if (params.get('verseId') && (params.get('action') === 'wordforge' || window.location.pathname.startsWith('/memorize'))) {
-      return params.get('verseId');
-    }
-    return null;
+    return params.get('verseId') || null;
   });
 
   const [targetDilemmaId, setTargetDilemmaId] = useState<string | null>(null);
@@ -151,6 +148,12 @@ export function App() {
     }
   };
 
+  // Keep activeQuestRef in sync with state for popstate listener closure
+  const activeQuestRef = useRef(activeQuest);
+  useEffect(() => {
+    activeQuestRef.current = activeQuest;
+  }, [activeQuest]);
+
   // Initialize client-side notification scheduler
   useEffect(() => {
     const cleanup = initNotificationScheduler();
@@ -159,13 +162,20 @@ export function App() {
 
   // Handle URL deep links cleanup and listen for Service Worker messages
   useEffect(() => {
-    const onPop = () => setCurrentTabState(tabFromPath(window.location.pathname));
+    const onPop = (e: PopStateEvent) => {
+      if (activeQuestRef.current) {
+        setActiveQuest(null);
+        return;
+      }
+      const nextTab = (e.state as { tab?: string } | null)?.tab || tabFromPath(window.location.pathname);
+      setCurrentTabState(nextTab as NavTab);
+    };
     window.addEventListener('popstate', onPop);
 
-    const params = new URLSearchParams(window.location.search);
     const next = pathForTab(currentTab);
-    if (params.get('action') || params.get('verseId') || window.location.pathname !== next) {
-      window.history.replaceState({ tab: currentTab }, '', next);
+    const search = window.location.search;
+    if (window.location.pathname !== next) {
+      window.history.replaceState({ tab: currentTab }, '', next + search);
     }
 
     const handleSwMessage = (event: MessageEvent) => {
@@ -329,6 +339,11 @@ export function App() {
   };
 
   const handleSelectQuest = (quest: StoryQuest) => {
+    try {
+      window.history.pushState({ modal: 'quest', questId: quest.id, tab: currentTab }, '', window.location.pathname + window.location.search);
+    } catch {
+      // ignore
+    }
     setActiveQuest(quest);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -342,7 +357,11 @@ export function App() {
 
   const handleBackFromQuest = () => {
     soundEngine.playClick();
-    setActiveQuest(null);
+    if (window.history.state?.modal === 'quest') {
+      window.history.back();
+    } else {
+      setActiveQuest(null);
+    }
   };
 
   const handleCompleteAct = (actId: string, _questId: string, relicId?: string) => {
@@ -761,8 +780,8 @@ export function App() {
         initialProfile={userProfile}
       />
 
-      {/* PWA Home-Screen Install Prompt */}
-      <PWAInstallPrompt />
+      {/* PWA Home-Screen Install Prompt (Mutually exclusive with CampaignNextTaskPrompt to prevent 12px overlap collision) */}
+      {!campaignPrompt && <PWAInstallPrompt />}
 
       {/* PWA Update & Restart Floating Notification Banner */}
       <UpdateNotificationBanner />

@@ -176,22 +176,23 @@ export const BookSpine: React.FC<BookSpineProps> = ({
           width: `${width}px`,
           height: `${height}px`,
         }}
-        className={`relative rounded-t-[3px] rounded-b-[1px] bg-gradient-to-r ${style.gradient} border-x border-t border-stone-800/80 cursor-pointer shadow-lg transition-shadow flex flex-col justify-between items-center py-2.5 px-0.5 overflow-hidden ${
+        className={`relative rounded-t-[3px] rounded-b-[1px] bg-gradient-to-r ${style.gradient} border-x border-t border-stone-800/80 cursor-pointer shadow-lg transition-shadow flex flex-col justify-between items-center py-2.5 px-0.5 before:absolute before:-inset-x-2 before:-inset-y-1 before:content-[''] before:z-10 ${
           isHovered || isSelected ? `shadow-2xl ring-1 ring-amber-400/60 ${style.glowColor}` : 'shadow-md'
         }`}
       >
-        {/* Antique Book Leather Texture Grain Overlay */}
-        <div 
-          className="absolute inset-0 pointer-events-none opacity-20 mix-blend-overlay bg-repeat" 
-          style={{
-            backgroundImage: `radial-gradient(circle at 50% 50%, rgba(255,255,255,0.15) 1px, transparent 1px)`,
-            backgroundSize: '4px 4px'
-          }}
-        />
-
-        {/* Vertical Spine Crease Light Reflection */}
-        <div className="absolute top-0 bottom-0 left-1 w-[2px] bg-gradient-to-r from-white/10 to-transparent pointer-events-none" />
-        <div className="absolute top-0 bottom-0 right-1 w-[2px] bg-gradient-to-l from-black/40 to-transparent pointer-events-none" />
+        {/* Antique Book Leather Texture Grain & Crease Overlay */}
+        <div className="absolute inset-0 rounded-t-[3px] rounded-b-[1px] overflow-hidden pointer-events-none">
+          <div 
+            className="absolute inset-0 opacity-20 mix-blend-overlay bg-repeat" 
+            style={{
+              backgroundImage: `radial-gradient(circle at 50% 50%, rgba(255,255,255,0.15) 1px, transparent 1px)`,
+              backgroundSize: '4px 4px'
+            }}
+          />
+          {/* Vertical Spine Crease Light Reflection */}
+          <div className="absolute top-0 bottom-0 left-1 w-[2px] bg-gradient-to-r from-white/10 to-transparent" />
+          <div className="absolute top-0 bottom-0 right-1 w-[2px] bg-gradient-to-l from-black/40 to-transparent" />
+        </div>
 
         {/* TOP EMBOSSED SPINE BAND (Rib) */}
         <div className="w-full flex flex-col items-center gap-1 z-10 shrink-0">

@@ -32,7 +32,7 @@ import type { UserCalibrationProfile } from './OnboardingModal';
 import { MemoryPulseModal } from './MemoryPulseModal';
 import { DailyCampaignCard } from './DailyCampaignCard';
 import { BattlefieldCheckInModal, BATTLEFIELD_OPTIONS } from './BattlefieldCheckInModal';
-import { VoiceSelectorModal } from './VoiceSelectorModal';
+
 import { ThemeToggle } from './ThemeToggle';
 import { LanguageToggle } from './LanguageToggle';
 import { useLanguage } from '../context/LanguageContext';
@@ -175,7 +175,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [narratorProfile, setNarratorProfile] = useState<NarratorProfile>(() => soundEngine.getNarratorProfile());
   const [isMemoryPulseModalOpen, setIsMemoryPulseModalOpen] = useState<boolean>(false);
   const [isBattlefieldModalOpen, setIsBattlefieldModalOpen] = useState<boolean>(false);
-  const [isVoiceSelectorOpen, setIsVoiceSelectorOpen] = useState<boolean>(false);
+  const [isMobileGearOpen, setIsMobileGearOpen] = useState<boolean>(false);
+
   const [activeBattlefieldId, setActiveBattlefieldId] = useState<string | null>(() => getTodayBattlefieldId());
   const [isPlayingMorningTacticalAudio, setIsPlayingMorningTacticalAudio] = useState<boolean>(false);
   const [notificationSettings, setNotificationSettings] = useState(() => getNotificationSettings());
@@ -339,7 +340,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   className="text-[11px] font-mono px-2 py-0.2 rounded-full bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-600 hover:text-stone-950 dark:text-stone-400 dark:hover:text-amber-300 border border-stone-250 dark:border-stone-750 transition-colors"
                   title={t('dashboard.versionTooltip')}
                 >
-                  v1.15.1
+                  v1.16.0
                 </button>
               </div>
               <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
@@ -348,8 +349,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
 
-          {/* Right: Language Toggle, Theme Toggle + Universal Streak / XP */}
-          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          {/* Right: Language Toggle, Theme Toggle + Universal Streak / XP (mobile only — duplicates Navigation on desktop) */}
+          <div className="flex md:hidden items-center gap-1 sm:gap-2 shrink-0">
             <LanguageToggle compact />
             <ThemeToggle compact />
 
@@ -367,7 +368,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         {/* Row 2: Streamlined action bar — one briefing, due reviews, calibrate */}
         <div className="relative pt-3 mt-3 border-t border-stone-200/60 dark:border-stone-800/60">
-          <div className="flex items-center gap-2 overflow-x-auto snap-x snap-mandatory scroll-px-1 scrollbar-none w-full pr-12">
+          <div className="flex flex-wrap items-center gap-2 w-full">
           <button
             onClick={() => {
               soundEngine.playClick();
@@ -776,8 +777,28 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
 
-        {/* RIGHT SIDEBAR — tools + saved progress (mobile + desktop) */}
-        <div className="lg:col-span-4 space-y-6">
+        {/* MOBILE GEAR ACCORDION TRIGGER */}
+        <div className="lg:hidden col-span-12">
+          <button
+            type="button"
+            onClick={() => {
+              soundEngine.playSnap();
+              setIsMobileGearOpen(prev => !prev);
+            }}
+            className="w-full py-3 px-4 rounded-2xl bg-stone-100/90 dark:bg-stone-900/90 border border-stone-250 dark:border-stone-800 text-stone-900 dark:text-parchment-100 font-serif font-bold text-xs flex items-center justify-between shadow-xs transition-colors"
+          >
+            <span className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-amber-500" />
+              <span>Field Gear, Tools & Soundscapes</span>
+            </span>
+            <span className="text-xs text-amber-800 dark:text-amber-400 font-mono font-bold">
+              {isMobileGearOpen ? '− Hide Gear' : '+ Show Gear'}
+            </span>
+          </button>
+        </div>
+
+        {/* RIGHT SIDEBAR — tools + saved progress (always on desktop, toggled on mobile) */}
+        <div className={`${isMobileGearOpen ? 'block' : 'hidden'} lg:block lg:col-span-4 space-y-6`}>
           
           {/* Field Tools */}
           <div className="p-4 sm:p-5 rounded-2xl bg-stone-100/60 dark:bg-stone-900/40">
@@ -1037,11 +1058,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   {NARRATOR_VOICES[narratorProfile]?.actor || 'Adam (ElevenLabs)'}
                 </span>
               </div>
-              <div className="grid grid-cols-3 gap-1.5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                 {[
                   { id: 'cinematic', label: '🎬 Adam', sub: 'Cinematic' },
                   { id: 'brotherhood', label: '🤝 Antoni', sub: 'Grounded' },
-                  { id: 'scholar', label: '📜 George', sub: 'Scholar' }
+                  { id: 'scholar', label: '📜 George', sub: 'Scholar' },
+                  { id: 'grace', label: '🙏 Rachel', sub: 'Grace' }
                 ].map(p => (
                   <button
                     key={p.id}
@@ -1139,11 +1161,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <Mic className="w-3.5 h-3.5 text-amber-500" />
                 <span>{t('dashboard.voiceTitle')}:</span>
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 {[
                   { id: 'cinematic', label: '🎬 Adam' },
                   { id: 'brotherhood', label: '🤝 Antoni' },
-                  { id: 'scholar', label: '📜 George' }
+                  { id: 'scholar', label: '📜 George' },
+                  { id: 'grace', label: '🙏 Rachel' }
                 ].map(p => (
                   <button
                     key={p.id}
@@ -1241,11 +1264,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         }}
       />
 
-      {/* App-Wide Reading Voice Selector Modal */}
-      <VoiceSelectorModal
-        isOpen={isVoiceSelectorOpen}
-        onClose={() => setIsVoiceSelectorOpen(false)}
-      />
+
     </div>
   );
 };

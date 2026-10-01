@@ -19,7 +19,8 @@ import {
   RotateCcw, 
   PenTool, 
   BookOpen,
-  Filter
+  Filter,
+  X
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { LanguageToggle } from './LanguageToggle';
@@ -103,6 +104,8 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
   const [turn2Text, setTurn2Text] = useState<string>('');
   const [turn2Feedback, setTurn2Feedback] = useState<string | null>(null);
   const [temperamentProfile, setTemperamentProfile] = useState<TemperamentProfile | null>(null);
+  const [activeEvalTab, setActiveEvalTab] = useState<'diagnosis' | 'playbook'>('diagnosis');
+  const [isTurn2Expanded, setIsTurn2Expanded] = useState<boolean>(false);
 
   // Load saved answers for the current dilemma on mount or when switching
   React.useEffect(() => {
@@ -129,6 +132,8 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
     setTurn2Text('');
     setTurn2Feedback(null);
     setTemperamentProfile(null);
+    setActiveEvalTab('diagnosis');
+    setIsTurn2Expanded(false);
   }, [selectedDilemmaId]);
 
   if (targetDilemmaId && targetDilemmaId !== prevTargetDilemmaId) {
@@ -430,7 +435,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                       const firstInCat = REAL_LIFE_DILEMMAS.find(d => cat === 'All' || d.category === cat);
                       if (firstInCat) handleSelectDilemma(firstInCat.id);
                     }}
-                    className={`text-xs px-3 py-1 rounded-full font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-amber-500 ${
+                    className={`text-xs px-3.5 py-2 rounded-full font-medium whitespace-nowrap min-h-[44px] flex items-center transition-all focus-visible:ring-2 focus-visible:ring-amber-500 ${
                       selectedCategory === cat
                         ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
                         : 'bg-stone-200/50 dark:bg-stone-900/80 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
@@ -662,7 +667,38 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
           {/* Heart Check Evaluation Results Card */}
           {evaluationResult && (
             <div className="p-5 md:p-8 rounded-2xl bg-stone-100/70 dark:bg-stone-900/50 space-y-6 transition-colors">
-              {/* Stance Badge & Motivation */}
+              {/* EVALUATION TABS: Pastoral Diagnosis vs Tactical Playbook */}
+              <div className="flex items-center gap-2 p-1 rounded-xl bg-stone-200/80 dark:bg-stone-950 border border-stone-300/60 dark:border-stone-800">
+                <button
+                  type="button"
+                  onClick={() => setActiveEvalTab('diagnosis')}
+                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-mono font-bold transition-all flex items-center justify-center gap-1.5 ${
+                    activeEvalTab === 'diagnosis'
+                      ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 shadow-sm'
+                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                  }`}
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Pastoral Diagnosis</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveEvalTab('playbook')}
+                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-mono font-bold transition-all flex items-center justify-center gap-1.5 ${
+                    activeEvalTab === 'playbook'
+                      ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 shadow-sm'
+                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                  }`}
+                >
+                  <Shield className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>Tactical Playbook</span>
+                </button>
+              </div>
+
+              {/* TAB 1: PASTORAL DIAGNOSIS */}
+              {activeEvalTab === 'diagnosis' && (
+                <div className="space-y-6">
+                  {/* Stance Badge & Motivation */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 uppercase tracking-widest font-bold">
@@ -733,69 +769,105 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                 </div>
               )}
 
-              {/* MULTI-TURN SOCRATIC AI: THE MENTOR'S COUNTER-CHALLENGE */}
+              {/* MULTI-TURN SOCRATIC AI: THE MENTOR'S COUNTER-CHALLENGE (OPTIONAL) */}
               {evaluationResult.socraticChallenge && (
-                <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-50/80 via-white to-stone-50 dark:from-indigo-950/50 dark:via-[#10141f] dark:to-stone-900 space-y-4">
-                  <div className="flex items-center justify-between pb-2 border-b border-indigo-200/50 dark:border-indigo-900/40">
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                      <h4 className="text-xs sm:text-sm font-mono font-bold text-indigo-900 dark:text-indigo-300 uppercase tracking-wider">
-                        The Mentor's Socratic Counter-Challenge (Turn 2)
-                      </h4>
-                    </div>
-                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/60 text-indigo-800 dark:text-indigo-200 font-bold">
-                      Discipleship Drill
-                    </span>
-                  </div>
-
-                  {/* Socratic Probe */}
-                  <div className="p-3.5 rounded-xl bg-stone-50/80 dark:bg-black/40 text-xs sm:text-sm text-stone-800 dark:text-indigo-100 font-reading leading-relaxed italic">
-                    "{evaluationResult.socraticChallenge}"
-                  </div>
-
-                  {/* Turn 2 Interactive Form */}
-                  <form onSubmit={handleSubmitSocraticTurn2} className="space-y-3">
-                    <label htmlFor="turn2-input" className="text-[11px] font-mono text-stone-500 dark:text-stone-400 uppercase tracking-wider block font-semibold">
-                      Your Response To This Counter-Challenge:
-                    </label>
-                    <textarea
-                      id="turn2-input"
-                      value={turn2Text}
-                      onChange={e => setTurn2Text(e.target.value)}
-                      placeholder="Address the challenge directly... (e.g., 'I will meet him privately at 8:30 AM before the team call. I will say: I noticed you presented the slides without mentioning our joint work...')"
-                      rows={3}
-                      className="w-full p-3 rounded-xl bg-stone-100/70 dark:bg-stone-950 text-stone-900 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-600 text-xs sm:text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 transition-all font-sans leading-relaxed"
-                    />
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] text-stone-500 font-mono">
-                        {turn2Text.length > 0 ? `${turn2Text.length} chars` : 'Test your tactical maturity'}
-                      </span>
+                <>
+                  {!temperamentProfile && !isTurn2Expanded ? (
+                    <div className="p-4 sm:p-5 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-200/60 dark:border-indigo-900/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <div>
+                        <div className="flex items-center gap-1.5 text-indigo-700 dark:text-indigo-400 font-bold uppercase tracking-wider text-xs mb-1">
+                          <Shield className="w-3.5 h-3.5" />
+                          <span>The Mentor's Socratic Counter-Challenge (Optional)</span>
+                        </div>
+                        <p className="text-xs text-stone-600 dark:text-stone-400">
+                          Lock horns with a tailored follow-up question to test your tactical temperament.
+                        </p>
+                      </div>
                       <button
-                        type="submit"
-                        disabled={!turn2Text.trim() || isEvaluatingTurn2}
-                        className={`py-2 px-4 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                          isEvaluatingTurn2
-                            ? 'bg-indigo-600/80 text-white cursor-wait animate-pulse'
-                            : turn2Text.trim()
-                              ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm cursor-pointer font-bold'
-                              : 'bg-stone-200 dark:bg-stone-800 text-stone-400 dark:text-stone-500 cursor-not-allowed'
-                        }`}
+                        type="button"
+                        onClick={() => setIsTurn2Expanded(true)}
+                        className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shrink-0 flex items-center gap-1.5 shadow-sm transition-all"
                       >
-                        {isEvaluatingTurn2 ? (
-                          <>
-                            <Sparkles className="w-3.5 h-3.5 animate-spin text-white" />
-                            <span>Discerning Temperament...</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>Lock In Play & Evaluate Temperament (+40 XP)</span>
-                            <ArrowRight className="w-3.5 h-3.5" />
-                          </>
-                        )}
+                        <span>Unlock Counter-Challenge (+20 XP)</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
                       </button>
                     </div>
-                  </form>
+                  ) : (
+                    <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-50/80 via-white to-stone-50 dark:from-indigo-950/50 dark:via-[#10141f] dark:to-stone-900 space-y-4">
+                      <div className="flex items-center justify-between pb-2 border-b border-indigo-200/50 dark:border-indigo-900/40">
+                        <div className="flex items-center gap-2">
+                          <Shield className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                          <h4 className="text-xs sm:text-sm font-mono font-bold text-indigo-900 dark:text-indigo-300 uppercase tracking-wider">
+                            The Mentor's Socratic Counter-Challenge (Turn 2)
+                          </h4>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/60 text-indigo-800 dark:text-indigo-200 font-bold">
+                            Discipleship Drill
+                          </span>
+                          {!temperamentProfile && (
+                            <button
+                              type="button"
+                              onClick={() => setIsTurn2Expanded(false)}
+                              className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 p-1"
+                              aria-label="Collapse challenge"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Socratic Probe */}
+                      <div className="p-3.5 rounded-xl bg-stone-50/80 dark:bg-black/40 text-xs sm:text-sm text-stone-800 dark:text-indigo-100 font-reading leading-relaxed italic">
+                        "{evaluationResult.socraticChallenge}"
+                      </div>
+
+                      {/* Turn 2 Interactive Form */}
+                      {!temperamentProfile && (
+                        <form onSubmit={handleSubmitSocraticTurn2} className="space-y-3">
+                          <label htmlFor="turn2-input" className="text-[11px] font-mono text-stone-500 dark:text-stone-400 uppercase tracking-wider block font-semibold">
+                            Your Response To This Counter-Challenge:
+                          </label>
+                          <textarea
+                            id="turn2-input"
+                            value={turn2Text}
+                            onChange={e => setTurn2Text(e.target.value)}
+                            placeholder="Address the challenge directly... (e.g., 'I will meet him privately at 8:30 AM before the team call. I will say: I noticed you presented the slides without mentioning our joint work...')"
+                            rows={3}
+                            className="w-full p-3 rounded-xl bg-stone-100/70 dark:bg-stone-950 text-stone-900 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-600 text-xs sm:text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 transition-all font-sans leading-relaxed"
+                          />
+
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] text-stone-500 font-mono">
+                              {turn2Text.length > 0 ? `${turn2Text.length} chars` : 'Test your tactical maturity'}
+                            </span>
+                            <button
+                              type="submit"
+                              disabled={!turn2Text.trim() || isEvaluatingTurn2}
+                              className={`py-2 px-4 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                                isEvaluatingTurn2
+                                  ? 'bg-indigo-600/80 text-white cursor-wait animate-pulse'
+                                  : turn2Text.trim()
+                                    ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm cursor-pointer font-bold'
+                                    : 'bg-stone-200 dark:bg-stone-800 text-stone-400 dark:text-stone-500 cursor-not-allowed'
+                              }`}
+                            >
+                              {isEvaluatingTurn2 ? (
+                                <>
+                                  <Sparkles className="w-3.5 h-3.5 animate-spin text-white" />
+                                  <span>Discerning Temperament...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <span>Lock In Play & Evaluate Temperament (+40 XP)</span>
+                                  <ArrowRight className="w-3.5 h-3.5" />
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </form>
+                      )}
 
                   {/* Temperament Profile Results */}
                   {temperamentProfile && (
@@ -870,6 +942,8 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                   )}
                 </div>
               )}
+            </>
+          )}
 
               {/* Grid: Human Validation vs The Flesh Trap */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -895,7 +969,12 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                   </p>
                 </div>
               </div>
+            </div>
+          )}
 
+          {/* TAB 2: TACTICAL PLAYBOOK */}
+          {activeEvalTab === 'playbook' && (
+            <div className="space-y-6">
               {/* The Biblical Redirection (High Road Play) */}
               <div className="p-5 rounded-xl bg-emerald-500/10 dark:bg-emerald-950/25">
                 <div className="flex items-center gap-1.5 text-emerald-800 dark:text-emerald-400 font-bold uppercase tracking-wider text-xs mb-2">
@@ -955,8 +1034,10 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                   ))}
                 </div>
               </div>
+            </div>
+          )}
 
-              {/* Bottom Action Footer */}
+          {/* Bottom Action Footer */}
               <div className="pt-4 border-t border-stone-200 dark:border-stone-800 flex flex-wrap items-center justify-between gap-3">
                 <button
                   onClick={() => {

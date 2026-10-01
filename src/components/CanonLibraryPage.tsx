@@ -202,8 +202,10 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <LanguageToggle compact />
-            <ThemeToggle compact />
+            <div className="flex md:hidden items-center gap-1.5">
+              <LanguageToggle compact />
+              <ThemeToggle compact />
+            </div>
 
             {/* VIEW MODE TOGGLE (Bookshelf vs Grid) */}
             <div className="flex items-center gap-1.5 p-1 rounded-xl bg-stone-100 dark:bg-stone-900/90 border border-stone-200 dark:border-stone-800">

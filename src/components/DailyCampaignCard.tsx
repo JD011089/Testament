@@ -155,40 +155,6 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
           />
         </div>
 
-        {/* 4 Interactive Step Nodes - Clean Stepper */}
-        <div className={`grid gap-1.5 sm:gap-2 mt-3 ${stepTotal === 3 ? 'grid-cols-3' : 'grid-cols-4'}`}>
-          {activeCampaign.steps.map((step) => {
-            const isDone = progress.completedSteps.includes(step.stepNumber);
-            const isCurrent = step.stepNumber === currentActiveStepNumber && !isDone;
-
-            return (
-              <button
-                key={step.stepNumber}
-                onClick={() => handleStepClick(step)}
-                className={`flex flex-col items-center gap-1 text-center py-2 px-1 rounded-xl transition-all ${
-                  isDone 
-                    ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-950/30' 
-                    : isCurrent 
-                    ? 'text-amber-800 dark:text-amber-300 bg-amber-500/15 dark:bg-amber-500/20 font-bold' 
-                    : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 bg-stone-100/50 dark:bg-stone-900/30'
-                }`}
-              >
-                <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[11px] sm:text-xs font-mono font-bold ${
-                  isDone 
-                    ? 'bg-emerald-500 text-black' 
-                    : isCurrent 
-                    ? 'bg-amber-500 text-black' 
-                    : 'bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-400'
-                }`}>
-                  {isDone ? '✓' : step.stepNumber}
-                </div>
-                <span className="text-[11px] font-mono uppercase tracking-wider truncate w-full">
-                  {step.type === 'quest' ? t('campaign.story') : step.type === 'dilemma' ? t('campaign.dilemma') : step.type === 'wordforge' ? t('campaign.forge') : step.type === 'proverb' ? t('campaign.proverb') : step.type === 'psalm' ? t('campaign.psalm') : t('campaign.library')}
-                </span>
-              </button>
-            );
-          })}
-        </div>
       </div>
 
       {/* ALL 4 MISSION STEP ROWS - Flat, Seamless Native List */}

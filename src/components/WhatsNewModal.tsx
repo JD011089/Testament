@@ -39,12 +39,40 @@ interface ReleaseMilestone {
   }[];
 }
 
-const RELEASES: ReleaseMilestone[] = [
+const ACTIVE_RELEASES: ReleaseMilestone[] = [
+  {
+    version: 'v1.16.0',
+    tagline: 'Progressive Quest Stepper, Cognitive Declutter & Mobile Optimization',
+    dateBadge: 'Current Release',
+    isLatest: true,
+    highlights: [
+      {
+        icon: <Sparkles className="w-4 h-4 text-amber-400" />,
+        title: 'Bite-Sized 5-Step Story Quests',
+        description: 'No more vertical scroll overwhelm. Quests now unfold one focused stage at a time: Decide First → What Unfolded → Unlocked Scripture → Real Talk → Wisdom Check Drill.'
+      },
+      {
+        icon: <BookOpen className="w-4 h-4 text-amber-400" />,
+        title: 'Compact Reader & Reading Preferences Drawer',
+        description: 'Saved 53px of mobile screen space with a streamlined reader bar and an off-screen preferences drawer with full 44px touch targets for Translation, Voice, and Font Size.'
+      },
+      {
+        icon: <Layers className="w-4 h-4 text-amber-400" />,
+        title: 'Tabbed Dilemmas & Expandable Mobile Explore',
+        description: 'Dilemmas now organize into Pastoral Diagnosis vs Tactical Playbook tabs. On the Dashboard, 7 explore tools now live cleanly inside a quick-expand mobile drawer.'
+      },
+      {
+        icon: <Volume2 className="w-4 h-4 text-amber-400" />,
+        title: 'Voice Parity & Deep-Linking Back Button',
+        description: 'Added 4th voice profile Rachel (Grace) across all narrator controls, trimmed mobile bottom nav to 5 columns, and enabled native mobile back-button navigation for active quests.'
+      }
+    ]
+  },
   {
     version: 'v1.15.1',
     tagline: 'Interactive 12-Hour Custom Reminder Controls & Anti-Forced Scheduling',
-    dateBadge: 'Current Release',
-    isLatest: true,
+    dateBadge: 'Previous Release',
+    isLatest: false,
     highlights: [
       {
         icon: <Bell className="w-4 h-4 text-amber-400" />,
@@ -63,6 +91,9 @@ const RELEASES: ReleaseMilestone[] = [
       }
     ]
   },
+];
+
+const ARCHIVED_RELEASES: ReleaseMilestone[] = [
   {
     version: 'v1.15.0',
     tagline: 'Dynamic Gemini Discipleship AI & Authentic Custom Instincts',
@@ -86,7 +117,6 @@ const RELEASES: ReleaseMilestone[] = [
       }
     ]
   },
-
   {
     version: 'v1.14.0',
     tagline: 'End-to-End Mission & Library Localization',
@@ -488,12 +518,15 @@ const RELEASES: ReleaseMilestone[] = [
 
 export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose }) => {
   const modalRef = useModalLock(isOpen);
-  const [activeTab, setActiveTab] = useState<string>('v1.15.1');
+  const [activeTab, setActiveTab] = useState<string>('v1.16.0');
+  const [showArchive, setShowArchive] = useState(false);
+
+  const RELEASES = showArchive ? [...ACTIVE_RELEASES, ...ARCHIVED_RELEASES] : ACTIVE_RELEASES;
 
   const handleDismiss = () => {
     soundEngine.playClick();
     try {
-      localStorage.setItem('testament_last_seen_version', '1.15.1');
+      localStorage.setItem('testament_last_seen_version', '1.16.0');
     } catch {
       // ignore
     }
@@ -536,7 +569,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
                   Field Update Dispatches
                 </h2>
                 <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 font-bold">
-                  v1.15.1 Live
+                  v1.16.0 Live
                 </span>
               </div>
 
@@ -582,6 +615,29 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
               </button>
             );
           })}
+          {!showArchive && (
+            <button
+              onClick={() => {
+                soundEngine.playClick();
+                setShowArchive(true);
+              }}
+              className="text-[11px] px-3 py-1.5 rounded-xl font-mono whitespace-nowrap bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 transition-all"
+            >
+              + Archive (v1.0–v1.15.0)
+            </button>
+          )}
+          {showArchive && (
+            <button
+              onClick={() => {
+                soundEngine.playClick();
+                setShowArchive(false);
+                setActiveTab('v1.16.0');
+              }}
+              className="text-[11px] px-3 py-1.5 rounded-xl font-mono whitespace-nowrap bg-stone-300 dark:bg-stone-700 text-stone-700 dark:text-stone-300 hover:text-stone-900 dark:hover:text-stone-100 transition-all"
+            >
+              − Hide Archive
+            </button>
+          )}
         </div>
 
         {/* RELEASE CONTENT BODY */}
@@ -627,7 +683,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
         {/* MODAL FOOTER */}
         <div className="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800/90 bg-stone-50 dark:bg-black/40 flex items-center justify-between gap-3 relative z-10">
           <div className="text-[11px] font-mono text-stone-500 dark:text-stone-400 hidden sm:block">
-            Testament v1.15.1 • The Living Word
+            Testament v1.16.0 • The Living Word
           </div>
 
 
