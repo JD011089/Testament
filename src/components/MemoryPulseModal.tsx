@@ -24,15 +24,21 @@ import {
   sendTestMemoryNotification, 
   setActiveMemoryVerse,
   getNextScheduledReminder,
-  formatSlot12h,
   syncNextAlarmToServiceWorker,
   saveCustomScheduledSlots,
-  getTrainingVerseQueue
+  getTrainingVerseQueue,
+  parseSlotTo12h,
+  build24hTime,
+  formatTime12hDisplay
 } from '../utils/notificationEngine';
 import { sendTestUpdateNotification } from '../utils/pwaUpdateEngine';
 import { getAllVerses, getVerseById } from '../utils/verseRegistry';
 import { soundEngine } from '../utils/audio';
 import { useLanguage } from '../context/LanguageContext';
+
+const HOUR_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+const MINUTE_OPTIONS = ['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'];
+
 
 interface MemoryPulseModalProps {
   isOpen: boolean;
@@ -59,6 +65,10 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
   const [showVerseSelector, setShowVerseSelector] = useState(false);
   const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
   const [prevTargetVerseId, setPrevTargetVerseId] = useState(targetVerse?.id);
+  const [newHour, setNewHour] = useState<number>(8);
+  const [newMinute, setNewMinute] = useState<string>('00');
+  const [newAmPm, setNewAmPm] = useState<'AM' | 'PM'>('AM');
+  const [slotFeedback, setSlotFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
 
   const allVerses = getAllVerses();
   const activeVerse = getVerseById(selectedVerseId) || allVerses[0];
@@ -73,6 +83,7 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
         setSelectedVerseId(targetVerse.id);
       }
       setTestSentMessage(null);
+      setSlotFeedback(null);
     }
   }
 
@@ -90,21 +101,38 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
 
   const trainingQueue = getTrainingVerseQueue();
 
-  const handleUpdateSlotTime = (index: number, newTime: string) => {
-    if (!newTime) return;
+  const handleUpdateSlot12h = (index: number, hour: number, minute: string, ampm: 'AM' | 'PM') => {
     soundEngine.playSnap();
+    const newTime = build24hTime(hour, minute, ampm);
     const existing = [...(settings.scheduledSlots || [])];
     existing[index] = newTime;
     const updated = saveCustomScheduledSlots(existing);
     setSettings(updated);
+    setSlotFeedback(null);
   };
 
   const handleAddCustomSlot = () => {
-    soundEngine.playSnap();
+    const chosenTime = build24hTime(newHour, newMinute, newAmPm);
     const existing = settings.scheduledSlots || [];
-    const newTime = existing.length > 0 ? '16:00' : '09:00';
-    const updated = saveCustomScheduledSlots([...existing, newTime]);
+    
+    if (existing.includes(chosenTime)) {
+      soundEngine.playClick();
+      setSlotFeedback({
+        type: 'error',
+        message: `${formatTime12hDisplay(newHour, newMinute, newAmPm)} is already in your schedule.`
+      });
+      setTimeout(() => setSlotFeedback(null), 3500);
+      return;
+    }
+    
+    soundEngine.playVictory();
+    const updated = saveCustomScheduledSlots([...existing, chosenTime]);
     setSettings(updated);
+    setSlotFeedback({
+      type: 'success',
+      message: `Added ${formatTime12hDisplay(newHour, newMinute, newAmPm)} to schedule!`
+    });
+    setTimeout(() => setSlotFeedback(null), 3000);
   };
 
   const handleRemoveCustomSlot = (index: number) => {
@@ -114,7 +142,9 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
     const updated = existing.filter((_, i) => i !== index);
     const updatedSettings = saveCustomScheduledSlots(updated);
     setSettings(updatedSettings);
+    setSlotFeedback(null);
   };
+
 
   const handlePromptStyleChange = (style: RecallPromptStyle) => {
     soundEngine.playSnap();
@@ -364,60 +394,233 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
                 </span>
               </div>
 
-              {/* Slot list with native time pickers */}
+              {/* Slot list with interactive 12-hour controls */}
               <div className="space-y-2">
-                {(settings.scheduledSlots || []).map((slot, idx) => (
-                  <div 
-                    key={idx}
-                    className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 shadow-xs"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono font-semibold text-stone-500 dark:text-stone-400 w-16">
-                        Slot {idx + 1}:
-                      </span>
-                      <input
-                        type="time"
-                        value={slot}
-                        onChange={(e) => handleUpdateSlotTime(idx, e.target.value)}
-                        className="bg-stone-100 dark:bg-stone-900 text-stone-900 dark:text-parchment-100 text-xs font-mono font-bold px-2.5 py-1.5 rounded-lg border border-stone-200 dark:border-stone-800 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                      />
-                      <span className="text-xs font-mono text-amber-800 dark:text-amber-400 font-bold ml-1">
-                        ({formatSlot12h(slot)})
-                      </span>
-                    </div>
+                {(settings.scheduledSlots || []).map((slot, idx) => {
+                  const { hour, minute, ampm } = parseSlotTo12h(slot);
+                  const minuteOptions = MINUTE_OPTIONS.includes(minute) 
+                    ? MINUTE_OPTIONS 
+                    : [...MINUTE_OPTIONS, minute].sort((a, b) => Number(a) - Number(b));
 
-                    {(settings.scheduledSlots || []).length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveCustomSlot(idx)}
-                        title="Remove this reminder time"
-                        className="p-1.5 text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-900 transition-colors"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
-                ))}
+                  return (
+                    <div 
+                      key={`${slot}-${idx}`}
+                      className="flex flex-wrap items-center justify-between p-2.5 rounded-xl bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 shadow-xs gap-2"
+                    >
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <span className="text-xs font-mono font-bold text-stone-500 dark:text-stone-400 w-14 shrink-0">
+                          Slot {idx + 1}:
+                        </span>
+                        
+                        {/* Hour Dropdown */}
+                        <select
+                          value={hour}
+                          onChange={(e) => handleUpdateSlot12h(idx, Number(e.target.value), minute, ampm)}
+                          aria-label={`Slot ${idx + 1} Hour`}
+                          className="bg-stone-100 dark:bg-stone-900 text-stone-900 dark:text-parchment-100 text-xs font-mono font-bold px-2 py-1.5 rounded-lg border border-stone-300 dark:border-stone-700 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer"
+                        >
+                          {HOUR_OPTIONS.map(h => (
+                            <option key={h} value={h}>{h}</option>
+                          ))}
+                        </select>
+
+                        <span className="font-bold text-stone-400 text-xs">:</span>
+
+                        {/* Minute Dropdown */}
+                        <select
+                          value={minute}
+                          onChange={(e) => handleUpdateSlot12h(idx, hour, e.target.value, ampm)}
+                          aria-label={`Slot ${idx + 1} Minute`}
+                          className="bg-stone-100 dark:bg-stone-900 text-stone-900 dark:text-parchment-100 text-xs font-mono font-bold px-2 py-1.5 rounded-lg border border-stone-300 dark:border-stone-700 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer"
+                        >
+                          {minuteOptions.map(m => (
+                            <option key={m} value={m}>{m}</option>
+                          ))}
+                        </select>
+
+                        {/* AM/PM Button */}
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateSlot12h(idx, hour, minute, ampm === 'AM' ? 'PM' : 'AM')}
+                          aria-label={`Toggle AM/PM for slot ${idx + 1}`}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold border transition-all cursor-pointer ${
+                            ampm === 'AM'
+                              ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-300 border-amber-300 dark:border-amber-800/80 shadow-xs'
+                              : 'bg-indigo-100 dark:bg-indigo-950/80 text-indigo-900 dark:text-indigo-300 border-indigo-300 dark:border-indigo-800/80 shadow-xs'
+                          }`}
+                        >
+                          {ampm}
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-2.5 ml-auto">
+                        <span className="text-xs font-mono font-bold text-amber-800 dark:text-amber-400">
+                          {formatTime12hDisplay(hour, minute, ampm)}
+                        </span>
+
+                        {(settings.scheduledSlots || []).length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveCustomSlot(idx)}
+                            title="Remove this reminder time"
+                            aria-label={`Remove slot ${idx + 1}`}
+                            className="p-1.5 text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-900 transition-colors cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
-              {/* Add Slot Button */}
-              <div className="flex items-center justify-between pt-1">
+              {/* Set & Add a New Custom Reminder Time */}
+              <div className="p-3.5 rounded-xl bg-white dark:bg-stone-950 border border-amber-200/70 dark:border-amber-900/40 space-y-3 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
+                    <Plus className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                    <span>Choose Time to Add:</span>
+                  </span>
+                  {slotFeedback && (
+                    <span className={`text-[11px] font-mono font-semibold animate-pulse ${
+                      slotFeedback.type === 'error' 
+                        ? 'text-rose-600 dark:text-rose-400' 
+                        : 'text-emerald-700 dark:text-emerald-400'
+                    }`}>
+                      {slotFeedback.message}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                  {/* Hour selector */}
+                  <div className="flex items-center gap-1">
+                    <span className="text-[11px] font-mono uppercase text-stone-400 font-bold">Hr</span>
+                    <select
+                      value={newHour}
+                      onChange={(e) => {
+                        soundEngine.playSnap();
+                        setNewHour(Number(e.target.value));
+                        setSlotFeedback(null);
+                      }}
+                      aria-label="Select hour to add"
+                      className="bg-stone-100 dark:bg-stone-900 text-stone-900 dark:text-parchment-100 text-xs font-mono font-bold px-2.5 py-1.5 rounded-lg border border-stone-300 dark:border-stone-700 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer"
+                    >
+                      {HOUR_OPTIONS.map(h => (
+                        <option key={h} value={h}>{h}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <span className="font-bold text-stone-400 text-xs">:</span>
+
+                  {/* Minute selector */}
+                  <div className="flex items-center gap-1">
+                    <span className="text-[11px] font-mono uppercase text-stone-400 font-bold">Min</span>
+                    <select
+                      value={newMinute}
+                      onChange={(e) => {
+                        soundEngine.playSnap();
+                        setNewMinute(e.target.value);
+                        setSlotFeedback(null);
+                      }}
+                      aria-label="Select minute to add"
+                      className="bg-stone-100 dark:bg-stone-900 text-stone-900 dark:text-parchment-100 text-xs font-mono font-bold px-2.5 py-1.5 rounded-lg border border-stone-300 dark:border-stone-700 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer"
+                    >
+                      {MINUTE_OPTIONS.map(m => (
+                        <option key={m} value={m}>{m}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* AM/PM toggle */}
+                  <div className="flex items-center bg-stone-100 dark:bg-stone-900 p-0.5 rounded-lg border border-stone-300 dark:border-stone-700">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        soundEngine.playSnap();
+                        setNewAmPm('AM');
+                        setSlotFeedback(null);
+                      }}
+                      className={`px-2.5 py-1 rounded-md text-xs font-mono font-bold transition-all cursor-pointer ${
+                        newAmPm === 'AM'
+                          ? 'bg-amber-500 text-stone-950 shadow-xs'
+                          : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-200'
+                      }`}
+                    >
+                      AM
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        soundEngine.playSnap();
+                        setNewAmPm('PM');
+                        setSlotFeedback(null);
+                      }}
+                      className={`px-2.5 py-1 rounded-md text-xs font-mono font-bold transition-all cursor-pointer ${
+                        newAmPm === 'PM'
+                          ? 'bg-indigo-600 text-white shadow-xs'
+                          : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-200'
+                      }`}
+                    >
+                      PM
+                    </button>
+                  </div>
+
+                  {/* Quick Presets */}
+                  <div className="flex items-center gap-1 text-[11px] font-mono text-stone-500 dark:text-stone-400 ml-auto">
+                    <span className="text-[10px] uppercase text-stone-400">Quick:</span>
+                    <button
+                      type="button"
+                      onClick={() => { soundEngine.playSnap(); setNewHour(7); setNewMinute('00'); setNewAmPm('AM'); setSlotFeedback(null); }}
+                      className="px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-900 hover:bg-amber-100 dark:hover:bg-amber-950 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-800 text-[10px] cursor-pointer"
+                    >
+                      7 AM
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { soundEngine.playSnap(); setNewHour(12); setNewMinute('00'); setNewAmPm('PM'); setSlotFeedback(null); }}
+                      className="px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-900 hover:bg-amber-100 dark:hover:bg-amber-950 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-800 text-[10px] cursor-pointer"
+                    >
+                      12 PM
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { soundEngine.playSnap(); setNewHour(6); setNewMinute('30'); setNewAmPm('PM'); setSlotFeedback(null); }}
+                      className="px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-900 hover:bg-amber-100 dark:hover:bg-amber-950 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-800 text-[10px] cursor-pointer"
+                    >
+                      6:30 PM
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { soundEngine.playSnap(); setNewHour(9); setNewMinute('30'); setNewAmPm('PM'); setSlotFeedback(null); }}
+                      className="px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-900 hover:bg-amber-100 dark:hover:bg-amber-950 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-800 text-[10px] cursor-pointer"
+                    >
+                      9:30 PM
+                    </button>
+                  </div>
+                </div>
+
+                {/* Add button with explicit selected time */}
                 <button
                   type="button"
                   onClick={handleAddCustomSlot}
-                  className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-200/80 hover:bg-stone-300 dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-800 dark:text-stone-200 transition-colors flex items-center gap-1.5"
+                  className="w-full py-2 px-3 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-stone-950 transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.99] cursor-pointer"
                 >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Add Reminder Time</span>
+                  <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                  <span>Add {formatTime12hDisplay(newHour, newMinute, newAmPm)} to Schedule</span>
                 </button>
-
-                {nextReminder && (
-                  <div className="flex items-center gap-1.5 text-[11px] font-mono text-amber-800 dark:text-amber-300">
-                    <Clock className="w-3.5 h-3.5" />
-                    <span>Next: <strong>{nextReminder.label}</strong></span>
-                  </div>
-                )}
               </div>
+
+              {/* Next Scheduled Reminder Display */}
+              {nextReminder && (
+                <div className="flex items-center justify-end gap-1.5 text-[11px] font-mono text-amber-800 dark:text-amber-300 pt-0.5">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>Next scheduled pulse: <strong>{nextReminder.label}</strong></span>
+                </div>
+              )}
+
             </div>
 
             {/* Verses in Daily Rotation (Multi-verse training queue) */}
