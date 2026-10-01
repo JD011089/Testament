@@ -11,13 +11,16 @@ const CANDIDATE_MODELS = [
   'gemini-flash-latest'
 ];
 
+const DEFAULT_GEMINI_CLIENT_KEY = 'REDACTED_API_KEY';
+
 function getApiKey(): string {
   const envKey = import.meta.env.VITE_GEMINI_API_KEY || '';
   if (envKey) return envKey;
   if (typeof localStorage !== 'undefined') {
-    return localStorage.getItem('testament_gemini_api_key') || '';
+    const stored = localStorage.getItem('testament_gemini_api_key');
+    if (stored) return stored;
   }
-  return '';
+  return DEFAULT_GEMINI_CLIENT_KEY;
 }
 
 /**

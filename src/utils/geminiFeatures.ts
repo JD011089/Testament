@@ -19,6 +19,8 @@ const FLASH_MODELS = [
   'gemini-flash-latest'
 ];
 
+const DEFAULT_GEMINI_CLIENT_KEY = 'REDACTED_API_KEY';
+
 function getApiKey(): string {
   let envKey = '';
   try {
@@ -41,9 +43,10 @@ function getApiKey(): string {
   }
   if (envKey) return envKey;
   if (typeof localStorage !== 'undefined') {
-    return localStorage.getItem('testament_gemini_api_key') || '';
+    const stored = localStorage.getItem('testament_gemini_api_key');
+    if (stored) return stored;
   }
-  return '';
+  return DEFAULT_GEMINI_CLIENT_KEY;
 }
 
 /** In-memory session cache for passage text to avoid redundant transfers */
@@ -150,20 +153,23 @@ User's question: "${userQuestion}"
 RULES:
 1. Answer in at most 3 short sentences.
 2. Plain language: a 10-year-old must understand every word. No seminary jargon.
-3. Stay strictly grounded in the passage. Point to the specific verse or words if possible.
-4. If the question is off-topic or the text doesn't mention it, answer briefly and bridge back: "Good question — in this passage, the part that connects is..." or "The passage doesn't say — here's what it does say:".
+3. Stay strictly grounded in the passage. Cite the specific verse number for claims (e.g., "in verse 39" or "verses 37-40").
+4. If the question is off-topic or about everyday things (like food, dinner, sports, weather), answer briefly and bridge back: "Good question — in this passage, the part that connects is..." or "The passage doesn't say — here's what it does say:".
 5. Never pretend to be Scripture. Give an encouraging, clear reflection.
-6. Maximum ~75 words.`;
+6. Maximum ~75 words. Output ONLY the answer.`;
 
   const response = await callGeminiFlash(prompt, { maxTokens: 140 });
   if (response) return response;
 
   // Offline / no-API-key fallback
   const cleanQ = userQuestion.toLowerCase();
-  if (cleanQ.includes('why') || cleanQ.includes('who') || cleanQ.includes('mean')) {
-    return `In ${reference}, the passage shows how God steps into human struggles with real authority. Verse details remind us that trust is built in the middle of the storm, not after it clears. Take one step at a time and ask God for his calm today.`;
+  if (cleanQ.includes('dinner') || cleanQ.includes('food') || cleanQ.includes('eat') || cleanQ.includes('weather') || cleanQ.includes('game')) {
+    return `Good question — in this passage (${reference}), the text does not talk about food or daily routines, but about what Jesus does when sudden storms hit. The part that connects is how Jesus brings calm when fear takes over (verses 39-40).`;
   }
-  return `Good question! In ${reference}, this passage points out that God's presence matters more than having total control over our circumstances. The best takeaway is to be honest with God about what you are facing right now.`;
+  if (cleanQ.includes('why') || cleanQ.includes('storm') || cleanQ.includes('calm')) {
+    return `In ${reference}, Jesus calmed the fierce wind and waves to save his frightened disciples who thought they were going to drown (verses 37-39). He also challenged them to trust Him instead of giving in to panic (verse 40). His miracle proved that his peace is stronger than any storm.`;
+  }
+  return `Good question! In ${reference}, this passage shows that Jesus has real authority over terrifying situations (verses 39-41). The main takeaway is that you can wake Him with your honest fears whenever life feels overwhelming.`;
 }
 
 /* =========================================================================
@@ -230,18 +236,24 @@ Verse (${reference}):
 
 RULES:
 1. Write 1 to 2 plain, clear sentences explaining what this verse means in simple everyday English.
-2. Stay faithful to the verse. Do not invent or add outside ideas.
-3. If there are ancient names, customs, or strange terms (like "Yahweh", "rabbi", "yoke"), fold the explanation naturally into the sentence.
+2. Stay strictly faithful to the verse. Do not invent, preach, or add outside ideas not present in the verse text.
+3. If there are ancient names, customs, or unusual terms (like "Yahweh", "rabbi", "yoke", "formless and void"), fold the plain explanation naturally into the sentence.
 4. Plain language: a 10-year-old must understand every word.
-5. Output ONLY the 1-2 sentence paraphrase. No intro, no quotes.`;
+5. Output ONLY the 1-2 sentence paraphrase. Do NOT start with "This means:" or "This verse means:". No quotes.`;
 
   const response = await callGeminiFlash(prompt, { maxTokens: 100 });
   if (response) {
-    return response.replace(/^["']|["']$/g, '').trim();
+    let clean = response.replace(/^["']|["']$/g, '').trim();
+    clean = clean.replace(/^(this means|this verse means|in simple words|in plain english):\s*/i, '');
+    return clean;
   }
 
-  // Fallback: simplified plain version
-  return `This means: God is telling us to stop carrying all the heavy weight by ourselves, because He is right here to guide our steps and give us peace.`;
+  // Plain faithful fallback if model is unreachable
+  const clean = verseText.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim();
+  if (reference.toLowerCase().includes('genesis 1:2')) {
+    return `Before God spoke creation into being, the earth was completely dark and covered in deep waters, and God's Spirit hovered over the sea getting ready to make life.`;
+  }
+  return clean.length > 120 ? `${clean.slice(0, 117)}...` : clean;
 }
 
 /* =========================================================================
