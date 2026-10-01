@@ -107,6 +107,80 @@ export const formatSlot12h = (timeStr: string): string => {
 };
 
 /**
+ * Retrieves all verses currently queued for active memory training.
+ * Includes user's saved/bookmarked verses, active FSRS cards, and the selected active verse.
+ */
+export const getTrainingVerseQueue = (): MemoryVerse[] => {
+  const all = getAllVerses();
+  const settings = getNotificationSettings();
+  const savedIds: string[] = [];
+
+  // 1. Manually saved/bookmarked verses
+  try {
+    const raw = localStorage.getItem('testament_bookmarked_verses');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        parsed.forEach(id => {
+          if (typeof id === 'string' && !savedIds.includes(id)) savedIds.push(id);
+        });
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  // 2. FSRS memorization training cards
+  try {
+    const rawFsrs = localStorage.getItem('testament_fsrs_cards');
+    if (rawFsrs) {
+      const parsed = JSON.parse(rawFsrs);
+      if (parsed && typeof parsed === 'object') {
+        Object.keys(parsed).forEach(id => {
+          if (!savedIds.includes(id)) savedIds.push(id);
+        });
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  // 3. Fallback to active verse if no bookmarks
+  if (savedIds.length === 0 && settings.activeVerseId) {
+    savedIds.push(settings.activeVerseId);
+  }
+
+  const queue = savedIds.map(id => getVerseById(id)).filter(Boolean) as MemoryVerse[];
+  return queue.length > 0 ? queue : [getVerseById(settings.activeVerseId) || all[0]];
+};
+
+/**
+ * Returns the specific verse for a given daily reminder prompt index,
+ * rotating evenly across the user's saved training pool.
+ */
+export const getVerseForPromptIndex = (promptIndex: number): MemoryVerse => {
+  const queue = getTrainingVerseQueue();
+  const idx = Math.max(0, promptIndex - 1) % queue.length;
+  return queue[idx] || queue[0];
+};
+
+/**
+ * Saves custom scheduled time slots chosen by the user and syncs with SW
+ */
+export const saveCustomScheduledSlots = (newSlots: string[]): NotificationSettings => {
+  const current = getNotificationSettings();
+  const sorted = [...newSlots].sort((a, b) => timeStringToMinutes(a) - timeStringToMinutes(b));
+  const updated: NotificationSettings = {
+    ...current,
+    scheduledSlots: sorted,
+    frequencyPerDay: sorted.length
+  };
+  saveNotificationSettings(updated);
+  syncNextAlarmToServiceWorker();
+  return updated;
+};
+
+/**
  * Persists notification settings to localStorage and notifies listening components
  */
 export const saveNotificationSettings = (settings: NotificationSettings): void => {
@@ -526,8 +600,8 @@ export const syncNextAlarmToServiceWorker = async (): Promise<void> => {
   const nextReminder = getNextScheduledReminder();
   if (!nextReminder) return;
 
-  const verse = getVerseById(settings.activeVerseId) || getAllVerses()[0];
-  const promptIdx = (settings.notificationsSentToday % settings.frequencyPerDay) + 1;
+  const promptIdx = (settings.notificationsSentToday % Math.max(1, settings.frequencyPerDay)) + 1;
+  const verse = getVerseForPromptIndex(promptIdx);
   const { title, body } = formatRecallNotification(verse, settings.recallStyle, promptIdx, settings.frequencyPerDay);
 
   const targetUrl = `/?action=wordforge&verseId=${encodeURIComponent(verse.id)}`;
@@ -660,8 +734,8 @@ export const checkAndDispatchDueReminders = async (): Promise<boolean> => {
 
   // Deliver a reminder for the most recent due slot only
   const dueSlot = pendingDueSlots[pendingDueSlots.length - 1];
-  const verse = getVerseById(settings.activeVerseId) || getAllVerses()[0];
   const nextPromptIndex = settings.notificationsSentToday + 1;
+  const verse = getVerseForPromptIndex(nextPromptIndex);
   const { title, body } = formatRecallNotification(
     verse,
     settings.recallStyle,

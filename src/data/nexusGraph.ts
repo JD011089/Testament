@@ -25,7 +25,7 @@ export const NEXUS_NODES: Record<string, NexusNode> = {
   // Quests
   'david-journey': {
     id: 'david-journey',
-    title: 'David: The Wilderness Fugitive',
+    title: 'David: The Outlaw & The Giant',
     type: 'quest',
     label: 'Story Quest',
     description: 'David pursued by King Saul in the caves of En-gedi and Adullam.'
@@ -52,56 +52,64 @@ export const NEXUS_NODES: Record<string, NexusNode> = {
     description: 'Confronting Mount Carmel, crashing into burnout under the broom tree.'
   },
 
-  // Psalms (Field Medic)
-  'psalm-59': {
-    id: 'psalm-59',
-    title: 'Psalm 59 • When Saul Sent Men to Watch David\'s House',
+  // Psalms (Field Medic Prescriptions)
+  'psalm-27-light': {
+    id: 'psalm-27-light',
+    title: 'The Fortress in the Ambush • Psalm 27',
     type: 'psalm',
     label: 'Historical Prayer',
-    scriptureRef: 'Psalm 59:1-3, 16-17',
-    description: 'Composed when Saul dispatched execution squads to surround David’s home.'
+    scriptureRef: 'Psalm 27:1-3',
+    description: 'Composed while David was cornered against the sheer limestone drops of En-gedi.'
   },
-  'psalm-57': {
-    id: 'psalm-57',
-    title: 'Psalm 57 • When David Fled into the Cave',
+  'psalm-55-companion': {
+    id: 'psalm-55-companion',
+    title: 'Knife in the Back • Psalm 55',
     type: 'psalm',
-    label: 'Cave Sanctuary',
-    scriptureRef: 'Psalm 57:1-3',
-    description: 'Written in dark limestone while Saul\'s army passed outside the cave entrance.'
+    label: 'Betrayal Prayer',
+    scriptureRef: 'Psalm 55:12-14',
+    description: 'David agonizing when his most trusted advisor Ahithophel defected to the enemy.'
   },
-  'psalm-51': {
-    id: 'psalm-51',
-    title: 'Psalm 51 • David\'s Broken Heart & Renewal',
+  'psalm-51-clean-heart': {
+    id: 'psalm-51-clean-heart',
+    title: 'Heart Restoration • Psalm 51',
     type: 'psalm',
     label: 'Heart Restoration',
     scriptureRef: 'Psalm 51:10-12',
-    description: 'The agonizing cry for a clean heart after Nathan’s confrontation.'
+    description: 'The agonizing cry for a clean heart after Nathan confronted David on his moral crash.'
   },
-  'psalm-46': {
-    id: 'psalm-46',
-    title: 'Psalm 46 • God Is Our Refuge & Strength',
+  'psalm-42-soul-check': {
+    id: 'psalm-42-soul-check',
+    title: 'Insomnia & Soul Thirst • Psalm 42',
     type: 'psalm',
-    label: 'Fortress in Calamity',
-    scriptureRef: 'Psalm 46:1-3, 10',
-    description: 'The ancient fortress hymn: "Be still, and know that I am God."'
+    label: 'Fortress Anthem',
+    scriptureRef: 'Psalm 42:5, 11',
+    description: 'The tactical anthem for dark nights: "Why are you cast down, O my soul?"'
   },
 
-  // Proverbs
-  'proverb-15-1': {
-    id: 'proverb-15-1',
+  // Proverbs Scenarios
+  'proverb-gentle-answer': {
+    id: 'proverb-gentle-answer',
     title: 'Proverbs 15:1 • The Gentle Answer',
     type: 'proverb',
     label: 'Tactical Proverb',
     scriptureRef: 'Proverbs 15:1',
     description: 'A gentle answer turns away wrath, but a harsh word stirs up anger.'
   },
-  'proverb-22-29': {
-    id: 'proverb-22-29',
-    title: 'Proverbs 22:29 • Mastery Before Kings',
+  'proverb-pride-ruin': {
+    id: 'proverb-pride-ruin',
+    title: 'Proverbs 16:18 • Pride Before Destruction',
     type: 'proverb',
-    label: 'Workplace Principle',
-    scriptureRef: 'Proverbs 22:29',
-    description: 'Do you see someone skilled in their work? They will stand before kings.'
+    label: 'Warning Principle',
+    scriptureRef: 'Proverbs 16:18',
+    description: 'Pride goes before destruction, a haughty spirit before a fall.'
+  },
+  'proverb-debt-slave': {
+    id: 'proverb-debt-slave',
+    title: 'Proverbs 22:7 • The Borrower Is Servant',
+    type: 'proverb',
+    label: 'Economic Principle',
+    scriptureRef: 'Proverbs 22:7',
+    description: 'The rich rule over the poor, and the borrower is slave to the lender.'
   },
 
   // Dilemmas
@@ -120,84 +128,98 @@ export const NEXUS_NODES: Record<string, NexusNode> = {
     description: 'Exhausted from prolonged crisis and feeling completely depleted.'
   },
 
-  // Dossiers
-  'dossier-saul': {
-    id: 'dossier-saul',
-    title: 'King Saul • Psychological Profile',
+  // Character Dossiers
+  'david': {
+    id: 'david',
+    title: 'David • Profile & Background',
     type: 'dossier',
-    label: 'Field Dossier',
-    description: 'Paranoia, insecure authority, and tragic rejection of divine counsel.'
+    label: 'Character Dossier',
+    description: 'The underdog shepherd, wilderness fugitive, and relentless worshipper.'
   },
-  'dossier-jezebel': {
-    id: 'dossier-jezebel',
-    title: 'Queen Jezebel • Ruthless Manipulation',
+  'joseph': {
+    id: 'joseph',
+    title: 'Joseph • Profile & Background',
     type: 'dossier',
-    label: 'Field Dossier',
-    description: 'State terror, psychological intimidation, and counterfeit authority.'
+    label: 'Character Dossier',
+    description: 'Sold by family, framed in Egypt, forged into master statesman.'
+  },
+  'peter': {
+    id: 'peter',
+    title: 'Peter • Profile & Background',
+    type: 'dossier',
+    label: 'Character Dossier',
+    description: 'From impulsive fisherman to pillar of the early church.'
+  },
+  'elijah': {
+    id: 'elijah',
+    title: 'Elijah • Profile & Background',
+    type: 'dossier',
+    label: 'Character Dossier',
+    description: 'The uncompromising prophet who called down fire and battled burnout.'
   }
 };
 
 export const NEXUS_CONNECTIONS: NexusConnection[] = [
-  // David Connections
+  // David Quest Connections
   {
     sourceId: 'david-journey',
-    targetId: 'psalm-59',
+    targetId: 'psalm-27-light',
     relationship: 'written_during',
-    badgeLabel: 'Written During This Crisis',
-    contextNote: 'David prayed this psalm in real-time while Saul’s strike team staked out his bedroom.'
+    badgeLabel: 'Composed In This Crisis',
+    contextNote: 'David prayed this psalm in real-time while Saul’s royal squads staked out his location in the cliffs.'
   },
   {
     sourceId: 'david-journey',
-    targetId: 'psalm-57',
-    relationship: 'written_during',
-    badgeLabel: 'Composed In The Cave',
-    contextNote: 'Composed in the shadows of En-gedi while Saul relieved himself at the cave entrance.'
+    targetId: 'david',
+    relationship: 'theological_precedent',
+    badgeLabel: 'Protagonist Dossier',
+    contextNote: 'Examine David’s combat stats, temperament flaws, and divine calling.'
   },
   {
     sourceId: 'david-journey',
-    targetId: 'dossier-saul',
-    relationship: 'antagonist_profile',
-    badgeLabel: 'Adversary Intelligence',
-    contextNote: 'Saul’s insecurity made him lash out at anyone displaying anointed competence.'
+    targetId: 'proverb-gentle-answer',
+    relationship: 'wisdom_principle',
+    badgeLabel: 'Tactical Doctrine',
+    contextNote: 'De-escalating Saul’s psychotic rage required unmatched poise and restrained speech.'
   },
   {
     sourceId: 'david-journey',
     targetId: 'dilemma-credit-thief',
     relationship: 'modern_parallel',
     badgeLabel: 'Modern Workplace Precedent',
-    contextNote: 'How to handle superiors or colleagues who feel threatened by your excellence.'
+    contextNote: 'How to handle superiors or colleagues who feel threatened by your competence.'
   },
 
-  // Joseph Connections
+  // Joseph Quest Connections
   {
     sourceId: 'joseph-journey',
-    targetId: 'proverb-22-29',
-    relationship: 'wisdom_principle',
-    badgeLabel: 'Guiding Doctrine',
-    contextNote: 'Joseph’s technical competence in administration made him indispensable across Egypt.'
+    targetId: 'joseph',
+    relationship: 'theological_precedent',
+    badgeLabel: 'Protagonist Dossier',
+    contextNote: 'Study Joseph’s administrative genius, emotional resilience, and integrity under pressure.'
   },
   {
     sourceId: 'joseph-journey',
     targetId: 'dilemma-credit-thief',
     relationship: 'modern_parallel',
     badgeLabel: 'Direct Modern Parallel',
-    contextNote: 'Joseph was forgotten by the Chief Cupbearer yet never became toxic or bitter.'
+    contextNote: 'Joseph was forgotten by the Chief Cupbearer yet never became toxic or cynical.'
+  },
+  {
+    sourceId: 'joseph-journey',
+    targetId: 'proverb-debt-slave',
+    relationship: 'wisdom_principle',
+    badgeLabel: 'Economic Stewardship',
+    contextNote: 'Joseph stored grain during the seven abundant years to preserve nations in famine.'
   },
 
-  // Elijah Connections
+  // Elijah Quest Connections
   {
     sourceId: 'elijah-journey',
-    targetId: 'psalm-46',
-    relationship: 'written_during',
-    badgeLabel: 'Fortress Anthem',
-    contextNote: 'The antidote to panic: God is an ever-present help in trouble.'
-  },
-  {
-    sourceId: 'elijah-journey',
-    targetId: 'dossier-jezebel',
-    relationship: 'antagonist_profile',
-    badgeLabel: 'Adversary Intelligence',
-    contextNote: 'Jezebel weaponized fear and death threats to induce psychological paralysis.'
+    targetId: 'elijah',
+    relationship: 'theological_precedent',
+    badgeLabel: 'Protagonist Dossier',
+    contextNote: 'Inspect Elijah’s supernatural boldness on Carmel contrasted with his vulnerability under the broom tree.'
   },
   {
     sourceId: 'elijah-journey',
@@ -205,6 +227,29 @@ export const NEXUS_CONNECTIONS: NexusConnection[] = [
     relationship: 'modern_parallel',
     badgeLabel: 'Burnout Recovery Play',
     contextNote: 'God prescribes physical rest, nutrition, and quiet before giving the next mission.'
+  },
+  {
+    sourceId: 'elijah-journey',
+    targetId: 'psalm-42-soul-check',
+    relationship: 'written_during',
+    badgeLabel: 'Fortress Anthem',
+    contextNote: 'The antidote to mental depletion: "Why are you cast down, O my soul?"'
+  },
+
+  // Peter Quest Connections
+  {
+    sourceId: 'peter-journey',
+    targetId: 'peter',
+    relationship: 'theological_precedent',
+    badgeLabel: 'Protagonist Dossier',
+    contextNote: 'Examine Peter’s restoration after public failure by the fire.'
+  },
+  {
+    sourceId: 'peter-journey',
+    targetId: 'proverb-pride-ruin',
+    relationship: 'wisdom_principle',
+    badgeLabel: 'Warning Doctrine',
+    contextNote: '"Even if all fall away, I never will"—how spiritual overconfidence precedes a fall.'
   },
 
   // Dilemma reverse links
@@ -217,10 +262,17 @@ export const NEXUS_CONNECTIONS: NexusConnection[] = [
   },
   {
     sourceId: 'dilemma-credit-thief',
-    targetId: 'psalm-59',
+    targetId: 'psalm-27-light',
     relationship: 'written_during',
     badgeLabel: 'Battlefield Psalm',
-    contextNote: 'Pray Psalm 59 when facing office politics and deceitful colleagues.'
+    contextNote: 'Pray Psalm 27 when facing office politics, toxic bosses, and deceitful peers.'
+  },
+  {
+    sourceId: 'dilemma-burnout',
+    targetId: 'elijah-journey',
+    relationship: 'theological_precedent',
+    badgeLabel: 'Historical Recovery',
+    contextNote: 'How Elijah recovered after running into the desert and wanting to die.'
   }
 ];
 

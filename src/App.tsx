@@ -123,6 +123,9 @@ export function App() {
   });
 
   const [targetDilemmaId, setTargetDilemmaId] = useState<string | null>(null);
+  const [targetPsalmId, setTargetPsalmId] = useState<string | null>(null);
+  const [targetProverbId, setTargetProverbId] = useState<string | null>(null);
+  const [targetDossierId, setTargetDossierId] = useState<string | null>(null);
   const [campaignPrompt, setCampaignPrompt] = useState<{ completedStep: number; nextStep: DailyCampaignStep } | null>(null);
 
   const [streakCount, setStreakCount] = useState<number>(() => {
@@ -305,14 +308,17 @@ export function App() {
       return;
     }
     if (type === 'psalm') {
+      setTargetPsalmId(id);
       setIsPsalmsOpen(true);
       return;
     }
     if (type === 'proverb') {
+      setTargetProverbId(id);
       setIsProverbsOpen(true);
       return;
     }
     if (type === 'dossier') {
+      setTargetDossierId(id);
       setIsDossierOpen(true);
     }
   };
@@ -673,15 +679,23 @@ export function App() {
       {/* MODALS */}
       <DossierModal
         isOpen={isDossierOpen}
-        onClose={() => setIsDossierOpen(false)}
+        onClose={() => {
+          setIsDossierOpen(false);
+          setTargetDossierId(null);
+        }}
         onSelectCharacterQuest={handleSelectQuestById}
+        initialCharacterId={targetDossierId}
       />
 
       <ProverbsCodexModal
         isOpen={isProverbsOpen}
-        onClose={() => setIsProverbsOpen(false)}
+        onClose={() => {
+          setIsProverbsOpen(false);
+          setTargetProverbId(null);
+        }}
         onOpenWordForge={(verseId) => {
           setIsProverbsOpen(false);
+          setTargetProverbId(null);
           setTargetWordForgeVerseId(verseId);
           setCurrentTab('wordforge');
           window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -690,13 +704,18 @@ export function App() {
           setActiveMemoryVerse(verseId);
         }}
         onRewardXP={handleRewardXP}
+        initialScenarioId={targetProverbId}
       />
 
       <PsalmsFieldMedicModal
         isOpen={isPsalmsOpen}
-        onClose={() => setIsPsalmsOpen(false)}
+        onClose={() => {
+          setIsPsalmsOpen(false);
+          setTargetPsalmId(null);
+        }}
         onOpenWordForge={(verseId) => {
           setIsPsalmsOpen(false);
+          setTargetPsalmId(null);
           setTargetWordForgeVerseId(verseId);
           setCurrentTab('wordforge');
           window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -707,6 +726,7 @@ export function App() {
         currentAmbience={currentAmbience}
         onToggleAmbience={handleToggleAmbience}
         onRewardXP={handleRewardXP}
+        initialPsalmId={targetPsalmId}
       />
 
       {isDriveModeOpen && (

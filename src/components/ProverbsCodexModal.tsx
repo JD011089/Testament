@@ -33,6 +33,7 @@ interface ProverbsCodexModalProps {
   onOpenWordForge?: (verseId: string) => void;
   onSetMemoryVerse?: (verseId: string) => void;
   onRewardXP?: (xp: number) => void;
+  initialScenarioId?: string | null;
 }
 
 export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
@@ -40,13 +41,25 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
   onClose,
   onOpenWordForge,
   onSetMemoryVerse,
-  onRewardXP
+  onRewardXP,
+  initialScenarioId
 }) => {
   const { t, language } = useLanguage();
   const modalRef = useModalLock(isOpen);
   const [activeTab, setActiveTab] = useState<'simulator' | 'vault'>('simulator');
   const [selectedCategory, setSelectedCategory] = useState<ProverbCategory | 'all'>('all');
   const [currentScenarioIndex, setCurrentScenarioIndex] = useState(0);
+
+  useEffect(() => {
+    if (isOpen && initialScenarioId) {
+      const idx = PROVERB_SCENARIOS.findIndex(s => s.id === initialScenarioId);
+      if (idx !== -1) {
+        setSelectedCategory('all');
+        setCurrentScenarioIndex(idx);
+        setActiveTab('simulator');
+      }
+    }
+  }, [isOpen, initialScenarioId]);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [completedScenarios, setCompletedScenarios] = useState<Record<string, boolean>>(() => {
     try {

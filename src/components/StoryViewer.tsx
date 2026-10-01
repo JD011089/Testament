@@ -32,6 +32,8 @@ import { fetchBibleChapter, getDefaultTranslationForLanguage, type BibleVerse } 
 import { deriveConsequenceRipple, generateAfterActionReport } from '../utils/narrativeMomentum';
 import { TacticalNexusCard } from './TacticalNexusCard';
 import { useLanguage } from '../context/LanguageContext';
+import type { QuestCustomEvaluation } from '../utils/questInstinctEngine';
+import { evaluateQuestCustomResponseWithGemini } from '../utils/geminiDilemmaService';
 
 interface StoryViewerProps {
   quest: StoryQuest;
@@ -60,6 +62,10 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     return nextIndex === -1 ? 0 : nextIndex;
   });
   const [selectedChoiceId, setSelectedChoiceId] = useState<string | null>(null);
+  const [choiceMode, setChoiceMode] = useState<'options' | 'custom'>('options');
+  const [customResponseText, setCustomResponseText] = useState<string>('');
+  const [customEvaluation, setCustomEvaluation] = useState<QuestCustomEvaluation | null>(null);
+  const [isAnalyzingCustom, setIsAnalyzingCustom] = useState<boolean>(false);
   const [activeTermIndex, setActiveTermIndex] = useState<number | null>(null);
   const [isSpeakingScripture, setIsSpeakingScripture] = useState(false);
   const [isNarratingFullStory, setIsNarratingFullStory] = useState(false);
@@ -119,6 +125,9 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
         const choices = JSON.parse(storedChoices);
         if (choices[act.id]) {
           setSelectedChoiceId(choices[act.id]);
+          if (choices[act.id] === 'custom') {
+            setChoiceMode('custom');
+          }
         } else {
           setSelectedChoiceId(null);
         }
@@ -127,6 +136,26 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
       }
     } catch {
       setSelectedChoiceId(null);
+    }
+
+    try {
+      const storedCustom = localStorage.getItem('testament_act_custom_responses');
+      if (storedCustom) {
+        const customMap = JSON.parse(storedCustom);
+        if (customMap[act.id]) {
+          setCustomResponseText(customMap[act.id].text || '');
+          setCustomEvaluation(customMap[act.id].evaluation || null);
+        } else {
+          setCustomResponseText('');
+          setCustomEvaluation(null);
+        }
+      } else {
+        setCustomResponseText('');
+        setCustomEvaluation(null);
+      }
+    } catch {
+      setCustomResponseText('');
+      setCustomEvaluation(null);
     }
 
     try {
@@ -186,6 +215,33 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
       localStorage.setItem('testament_act_choices', JSON.stringify(choices));
     } catch (err) {
       console.warn('Failed to save choice to localStorage:', err);
+    }
+  };
+
+  const handleSubmitCustomResponse = async () => {
+    if (!customResponseText.trim() || isAnalyzingCustom) return;
+    soundEngine.playSnap();
+    setIsAnalyzingCustom(true);
+    try {
+      const evaluation = await evaluateQuestCustomResponseWithGemini(customResponseText, act, quest);
+      setCustomEvaluation(evaluation);
+      setSelectedChoiceId('custom');
+
+      try {
+        const storedChoices = localStorage.getItem('testament_act_choices');
+        const choices = storedChoices ? JSON.parse(storedChoices) : {};
+        choices[act.id] = 'custom';
+        localStorage.setItem('testament_act_choices', JSON.stringify(choices));
+
+        const storedCustom = localStorage.getItem('testament_act_custom_responses');
+        const customMap = storedCustom ? JSON.parse(storedCustom) : {};
+        customMap[act.id] = { text: customResponseText, evaluation };
+        localStorage.setItem('testament_act_custom_responses', JSON.stringify(customMap));
+      } catch (err) {
+        console.warn('Failed to save custom act response:', err);
+      }
+    } finally {
+      setIsAnalyzingCustom(false);
     }
   };
 
@@ -622,57 +678,171 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
               <Flame className="w-4 h-4 text-amber-800 dark:text-amber-500 animate-pulse" />
             </div>
 
-            <h3 className="text-base md:text-xl font-serif font-bold text-stone-900 dark:text-parchment-50 mb-4 leading-snug">
+            <h3 className="text-base md:text-xl font-serif font-bold text-stone-900 dark:text-parchment-50 mb-3 leading-snug">
               {act.perspectivePrompt}
             </h3>
 
-            {/* Choice Buttons */}
-            <div className="space-y-2.5 mb-3">
-              {act.choices.map((choice) => {
-                const isSelected = selectedChoiceId === choice.id;
-                return (
-                  <button
-                    key={choice.id}
-                    onClick={() => handleSelectChoice(choice.id)}
-                    className={`w-full text-left p-4 rounded-xl transition-all duration-200 border ${
-                      isSelected 
-                        ? 'bg-amber-100/70 dark:bg-amber-600/25 border-amber-500 text-stone-950 dark:text-parchment-50 ring-1 ring-amber-500 shadow-sm dark:shadow-glow' 
-                        : 'bg-white dark:bg-stone-900/90 border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:border-amber-400 dark:hover:border-amber-500/50 hover:bg-stone-100 dark:hover:bg-stone-800/80'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={`w-5 h-5 rounded-full mt-0.5 flex items-center justify-center text-xs font-bold shrink-0 ${
-                        isSelected ? 'bg-amber-500 text-stone-950' : 'bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-400'
-                      }`}>
-                        {isSelected ? '✓' : ''}
-                      </div>
-                      <span className="text-sm md:text-base font-medium leading-relaxed">{choice.text}</span>
-                    </div>
-                  </button>
-                );
-              })}
+            {/* Mode Switcher: Predefined Options vs Type Your Own */}
+            <div className="flex items-center gap-2 mb-4 p-1 bg-stone-100 dark:bg-stone-900/90 rounded-xl border border-stone-200 dark:border-stone-800 w-fit">
+              <button
+                type="button"
+                onClick={() => {
+                  soundEngine.playClick();
+                  setChoiceMode('options');
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  choiceMode === 'options'
+                    ? 'bg-white dark:bg-stone-800 text-stone-950 dark:text-parchment-50 shadow-sm border border-stone-200/80 dark:border-stone-700'
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'
+                }`}
+              >
+                Choose Scenario ({act.choices.length} Paths)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  soundEngine.playClick();
+                  setChoiceMode('custom');
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                  choiceMode === 'custom'
+                    ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'
+                }`}
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                <span>Type What You'd Do</span>
+              </button>
             </div>
 
-            {/* Reaction & Biblical Reality Reveal */}
-            <AnimatePresence>
-              {selectedChoice && (
-                <motion.div 
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="mt-4 pt-4 border-t border-amber-200 dark:border-amber-900/50 space-y-3"
-                >
-                  <div className="text-xs md:text-sm text-stone-700 dark:text-stone-300">
-                    <strong className="text-amber-800 dark:text-amber-400 font-bold">The Human Instinct: </strong> 
-                    {selectedChoice.reaction}
+            {choiceMode === 'options' ? (
+              <>
+                {/* Choice Buttons */}
+                <div className="space-y-2.5 mb-3">
+                  {act.choices.map((choice) => {
+                    const isSelected = selectedChoiceId === choice.id;
+                    return (
+                      <button
+                        key={choice.id}
+                        onClick={() => handleSelectChoice(choice.id)}
+                        className={`w-full text-left p-4 rounded-xl transition-all duration-200 border ${
+                          isSelected 
+                            ? 'bg-amber-100/70 dark:bg-amber-600/25 border-amber-500 text-stone-950 dark:text-parchment-50 ring-1 ring-amber-500 shadow-sm dark:shadow-glow' 
+                            : 'bg-white dark:bg-stone-900/90 border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:border-amber-400 dark:hover:border-amber-500/50 hover:bg-stone-100 dark:hover:bg-stone-800/80'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className={`w-5 h-5 rounded-full mt-0.5 flex items-center justify-center text-xs font-bold shrink-0 ${
+                            isSelected ? 'bg-amber-500 text-stone-950' : 'bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-400'
+                          }`}>
+                            {isSelected ? '✓' : ''}
+                          </div>
+                          <span className="text-sm md:text-base font-medium leading-relaxed">{choice.text}</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Reaction & Biblical Reality Reveal for Options */}
+                <AnimatePresence>
+                  {selectedChoice && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mt-4 pt-4 border-t border-amber-200 dark:border-amber-900/50 space-y-3"
+                    >
+                      <div className="text-xs md:text-sm text-stone-700 dark:text-stone-300">
+                        <strong className="text-amber-800 dark:text-amber-400 font-bold">The Human Instinct: </strong> 
+                        {selectedChoice.reaction}
+                      </div>
+                      <div className="text-xs md:text-sm text-stone-900 dark:text-parchment-100 bg-amber-50 dark:bg-amber-950/40 p-4 rounded-xl border border-amber-200 dark:border-amber-800/50 leading-relaxed">
+                        <strong className="text-amber-800 dark:text-amber-300 font-bold">The Historical Pivot: </strong> 
+                        {selectedChoice.historicalPivot}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </>
+            ) : (
+              /* Custom Typed Response Mode */
+              <div className="space-y-4">
+                <div className="p-4 rounded-xl bg-white dark:bg-stone-900/90 border border-stone-200 dark:border-stone-800 space-y-3">
+                  <label htmlFor="quest-custom-input" className="block text-xs font-semibold text-stone-600 dark:text-stone-400">
+                    Put yourself in their boots. In your honest words, what would you do in this exact situation?
+                  </label>
+                  <textarea
+                    id="quest-custom-input"
+                    rows={3}
+                    value={customResponseText}
+                    onChange={(e) => setCustomResponseText(e.target.value)}
+                    placeholder="E.g. I would keep my head down and not get involved / I'd grab a sword and challenge him / I'd pray and confront him using what I know / I'd negotiate a truce..."
+                    className="w-full p-3 text-sm rounded-xl bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-parchment-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
+                  />
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] text-stone-500 dark:text-stone-400 italic">
+                      Be authentic. We will evaluate your gut instinct against what Scripture recorded.
+                    </span>
+                    <button
+                      type="button"
+                      disabled={!customResponseText.trim() || isAnalyzingCustom}
+                      onClick={handleSubmitCustomResponse}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 ${
+                        isAnalyzingCustom
+                          ? 'bg-amber-500/80 text-stone-950 cursor-wait animate-pulse'
+                          : customResponseText.trim()
+                            ? 'bg-amber-500 hover:bg-amber-400 text-stone-950 cursor-pointer active:scale-95'
+                            : 'bg-stone-200 dark:bg-stone-800 text-stone-400 dark:text-stone-600 cursor-not-allowed'
+                      }`}
+                    >
+                      <Sparkles className={`w-3.5 h-3.5 ${isAnalyzingCustom ? 'animate-spin' : ''}`} />
+                      <span>{isAnalyzingCustom ? 'Discerning in Scripture...' : selectedChoiceId === 'custom' ? 'Update & Re-evaluate' : 'Evaluate My Instinct'}</span>
+                    </button>
                   </div>
-                  <div className="text-xs md:text-sm text-stone-900 dark:text-parchment-100 bg-amber-50 dark:bg-amber-950/40 p-4 rounded-xl border border-amber-200 dark:border-amber-800/50 leading-relaxed">
-                    <strong className="text-amber-800 dark:text-amber-300 font-bold">The Historical Pivot: </strong> 
-                    {selectedChoice.historicalPivot}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                </div>
+
+                {/* Custom Evaluation Dynamic Result */}
+                <AnimatePresence>
+                  {selectedChoiceId === 'custom' && customEvaluation && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 8 }}
+                      className="p-4 sm:p-5 rounded-xl bg-amber-50 dark:bg-gradient-to-b dark:from-amber-950/40 dark:to-stone-950 border border-amber-300 dark:border-amber-600/50 space-y-3.5"
+                    >
+                      <div className="flex items-center justify-between gap-2 border-b border-amber-200 dark:border-amber-900/50 pb-2.5">
+                        <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-900 dark:text-amber-300">
+                          {customEvaluation.stanceBadge}
+                        </span>
+                        <span className="text-xs font-serif font-bold text-stone-800 dark:text-stone-200">
+                          {customEvaluation.stanceTitle}
+                        </span>
+                      </div>
+
+                      <div className="text-xs md:text-sm text-stone-700 dark:text-stone-300 italic bg-white/70 dark:bg-stone-900/60 p-3 rounded-lg border border-amber-200/60 dark:border-stone-800">
+                        {customEvaluation.userSummary}
+                      </div>
+
+                      <div className="text-xs md:text-sm text-stone-700 dark:text-stone-300 leading-relaxed">
+                        <strong className="text-amber-800 dark:text-amber-400 font-bold block mb-0.5">The Human Instinct:</strong>
+                        {customEvaluation.humanInstinct}
+                      </div>
+
+                      <div className="text-xs md:text-sm text-stone-900 dark:text-parchment-100 bg-amber-100/70 dark:bg-amber-950/60 p-3.5 rounded-xl border border-amber-300 dark:border-amber-800/60 leading-relaxed">
+                        <strong className="text-amber-900 dark:text-amber-300 font-bold block mb-0.5">The Historical Pivot:</strong>
+                        {customEvaluation.historicalPivot}
+                      </div>
+
+                      <div className="text-xs md:text-sm text-stone-800 dark:text-stone-300">
+                        <strong className="text-amber-800 dark:text-amber-400 font-bold block mb-0.5">Tactical Takeaway For Today:</strong>
+                        {customEvaluation.practicalLesson}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
           </section>
 
 

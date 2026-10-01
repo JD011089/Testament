@@ -34,6 +34,7 @@ interface PsalmsFieldMedicModalProps {
   currentAmbience?: 'none' | 'campfire' | 'wind' | 'sanctuary';
   onToggleAmbience?: (type: 'campfire' | 'wind' | 'sanctuary') => void;
   onRewardXP?: (xp: number) => void;
+  initialPsalmId?: string | null;
 }
 
 export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
@@ -43,11 +44,21 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
   onSetMemoryVerse,
   currentAmbience = 'none',
   onToggleAmbience,
-  onRewardXP
+  onRewardXP,
+  initialPsalmId
 }) => {
   const { t, language } = useLanguage();
   const modalRef = useModalLock(isOpen);
   const [selectedMood, setSelectedMood] = useState<PsalmCrisisMood>('panic-fear');
+
+  useEffect(() => {
+    if (isOpen && initialPsalmId) {
+      const match = PSALM_PRESCRIPTIONS.find(p => p.id === initialPsalmId);
+      if (match) {
+        setSelectedMood(match.moodId);
+      }
+    }
+  }, [isOpen, initialPsalmId]);
   const [completedPrescriptions, setCompletedPrescriptions] = useState<Record<string, boolean>>(() => {
     try {
       const raw = localStorage.getItem('testament_psalm_completed');
