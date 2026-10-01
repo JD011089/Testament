@@ -73,9 +73,6 @@ function readRecommendedQuestId(): string | null {
 function resolveDilemmaId(id: string | undefined | null): string | null {
   if (!id) return null;
   if (REAL_LIFE_DILEMMAS.some(d => d.id === id)) return id;
-  if (id === 'dilemma-burnout' && REAL_LIFE_DILEMMAS.some(d => d.id === 'dilemma-burnout-home')) {
-    return 'dilemma-burnout-home';
-  }
   return null;
 }
 

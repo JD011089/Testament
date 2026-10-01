@@ -5,6 +5,23 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.16.0] - 2026-10-01
+
+### Added
+- **Story Quest Progressive 5-Step Stepper**: Eliminated the intimidating 3,430px vertical scroll stack in Story Viewer, transforming quests into a focused, bite-sized 5-step journey (*Decide First → What Actually Unfolded → Scripture Unlocked → Real Talk → Wisdom Check Drill*), with step navigation buttons, sticky stepper bar, and synchronized desktop Reading Roadmap.
+- **Compact Mobile Reader & Preferences Drawer**: Reduced reader modal top bar height by 53px on mobile, streamlined sticky reader bar, and added an accessible slide-up *Reading Preferences* drawer for Translation, Voice, and Font Size with full 44px touch targets.
+- **Tabbed Pastoral & Tactical Dilemmas**: Converted Dilemma evaluations into clean "Pastoral Diagnosis" vs "Tactical Playbook" tabs, reducing initial reading cognitive load while preserving depth. Made the Socratic counter-challenge an optional XP drill.
+- **Expandable Mobile Explore Drawer**: Collapsed the 7 mobile Explore sidebar modules behind an expandable gear drawer on the Dashboard, eliminating ~2,200px of mobile scrolling.
+- **Narrator Voice Parity**: Added the 4th voice profile `grace` (🙏 Rachel) across all narrator pickers in Story Viewer, Drive Mode, and Dashboard briefing.
+
+### Fixed
+- **Mobile Bottom Navigation Trim**: Reduced mobile bottom navigation from 6 to 5 columns (`grid-cols-5`), eliminating label truncation across English, Spanish, German, French, and Portuguese.
+- **Mobile Back-Button Deep-Linking**: Integrated browser `pushState`/`popstate` back-button navigation for active quests so users can smoothly exit a quest with native mobile back gestures without being trapped.
+- **Floating Banner Mutual Exclusion**: Ensured PWA install prompt and daily campaign banner never stack over each other.
+- **Touch Target Accessibility**: Enlarged BookSpine touch hit-areas with unclipped pseudo-elements to guarantee WCAG 44px compliance.
+- **Repaired Dilemma Key Mappings**: Resolved 4 broken and duplicated dilemma identifiers in Battlefield Check-In (`dilemma-burnout-home`, `dilemma-friend-betrayal`, `dilemma-group-chat-pressure`, `dilemma-envy-spiral`).
+- **Dead Code Purge**: Deleted 5 orphan files (~1,090 lines / ~50 KB) that were no longer referenced (`AppTourModal.tsx`, `TimelineModal.tsx`, `StreetTranslatorModal.tsx`, `timeline.ts`, `streetTranslator.ts`).
+
 ## [1.15.1] - 2026-10-01
 
 ### Added

@@ -200,7 +200,7 @@ export const Navigation: React.FC<NavigationProps> = ({
         aria-label="Mobile Navigation" 
         className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-ink/95 backdrop-blur-lg border-t border-stone-200 dark:border-stone-800/90 px-1 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg"
       >
-        <div className="grid grid-cols-6 items-center w-full max-w-lg mx-auto">
+        <div className="grid grid-cols-5 items-center w-full max-w-lg mx-auto">
           {navItems.map((item) => {
             const isActive = currentTab === item.tab;
             return (
@@ -226,21 +226,6 @@ export const Navigation: React.FC<NavigationProps> = ({
               </button>
             );
           })}
-
-          {/* Mobile Drive Audio button */}
-          <button
-            onClick={onOpenDriveMode}
-            title={t('nav.driveModeTooltip')}
-            aria-label={t('nav.driveModeTooltip')}
-            className="flex flex-col items-center justify-center min-h-[44px] py-1 px-0.5 rounded-lg text-stone-600 dark:text-stone-400 hover:text-amber-800 dark:hover:text-amber-300 transition-all focus-visible:ring-2 focus-visible:ring-amber-500 w-full min-w-0"
-          >
-            <div className="shrink-0">
-              <Car className="w-4 h-4" />
-            </div>
-            <span className="text-[10px] leading-tight font-medium truncate w-full text-center block mt-0.5">
-              {t('nav.driveAudio')}
-            </span>
-          </button>
         </div>
       </nav>
     </>

@@ -80,6 +80,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
   // Wisdom Quiz state
   const [selectedQuizOption, setSelectedQuizOption] = useState<number | null>(null);
   const [hasSubmittedQuiz, setHasSubmittedQuiz] = useState<boolean>(false);
+  const [activeStepIndex, setActiveStepIndex] = useState<number>(1);
 
   const act: StoryAct = quest.acts[currentActIndex];
   const isActFinished = completedActs.includes(act.id);
@@ -201,6 +202,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
       setIsNoteSaved(false);
       setShowNoteInput(false);
     }
+    setActiveStepIndex(1);
   }, [act.id]);
 
   const selectedChoice = act.choices.find(c => c.id === selectedChoiceId);
@@ -208,6 +210,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
   const handleSelectChoice = (choiceId: string) => {
     soundEngine.playSnap();
     setSelectedChoiceId(choiceId);
+    setActiveStepIndex(2);
     try {
       const stored = localStorage.getItem('testament_act_choices');
       const choices = stored ? JSON.parse(stored) : {};
@@ -226,6 +229,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
       const evaluation = await evaluateQuestCustomResponseWithGemini(customResponseText, act, quest);
       setCustomEvaluation(evaluation);
       setSelectedChoiceId('custom');
+      setActiveStepIndex(2);
 
       try {
         const storedChoices = localStorage.getItem('testament_act_choices');
@@ -447,7 +451,8 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             {[
               { id: 'cinematic', label: '🎬 Adam' },
               { id: 'brotherhood', label: '🤝 Antoni' },
-              { id: 'scholar', label: '📜 George' }
+              { id: 'scholar', label: '📜 George' },
+              { id: 'grace', label: '🙏 Rachel' }
             ].map(p => (
               <button
                 key={p.id}
@@ -580,7 +585,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
           </div>
 
           {/* Scene Illustration Visual Artwork */}
-          <div className="rounded-2xl overflow-hidden border border-stone-200 dark:border-stone-800 shadow-md bg-stone-100 dark:bg-stone-950">
+          <div className="rounded-2xl overflow-hidden border border-stone-200 dark:border-stone-800 shadow-md bg-stone-100 dark:bg-stone-950 max-h-48 sm:max-h-56 lg:max-h-none">
             <SceneIllustration theme={act.visualTheme} />
             <div className="p-3 text-xs text-stone-600 dark:text-stone-400 italic bg-stone-50 dark:bg-ink-raised flex items-center gap-2 border-t border-stone-200 dark:border-stone-850">
               <Compass className="w-3.5 h-3.5 text-amber-800 dark:text-amber-500 shrink-0" />
@@ -588,63 +593,57 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             </div>
           </div>
 
-          {/* Historical Reality Intel Card */}
+          {/* Historical Reality Intel Card (Collapsible on mobile) */}
           <div className="p-4 rounded-2xl bg-white dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 shadow-sm">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400 mb-1.5">
-              <ShieldAlert className="w-4 h-4 text-amber-800 dark:text-amber-500" />
-              <span>The Historical Reality</span>
-            </div>
-            <p className="text-xs text-stone-700 dark:text-stone-300 leading-relaxed">
-              {act.historicalContext}
-            </p>
+            <details className="group" open>
+              <summary className="flex items-center justify-between cursor-pointer list-none select-none">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400">
+                  <ShieldAlert className="w-4 h-4 text-amber-800 dark:text-amber-500" />
+                  <span>The Historical Reality</span>
+                </div>
+                <span className="lg:hidden text-xs text-stone-400 group-open:rotate-180 transition-transform">▾</span>
+              </summary>
+              <p className="text-xs text-stone-700 dark:text-stone-300 leading-relaxed mt-2">
+                {act.historicalContext}
+              </p>
+            </details>
           </div>
 
-          {/* Guided Reading Roadmap (Milestone Tracker) */}
-          <div className="p-4 rounded-2xl bg-white dark:bg-ink-raised border border-stone-200 dark:border-stone-800 shadow-sm">
+          {/* Guided Reading Roadmap (Milestone Tracker - Desktop only) */}
+          <div className="hidden lg:block p-4 rounded-2xl bg-white dark:bg-ink-raised border border-stone-200 dark:border-stone-800 shadow-sm">
             <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-stone-500 dark:text-stone-400 mb-3">
               <ListOrdered className="w-3.5 h-3.5 text-amber-800 dark:text-amber-500" />
               <span>Reading Roadmap</span>
             </div>
             <nav className="space-y-1 text-xs">
-              <button
-                onClick={() => scrollToSection('section-crossroads')}
-                className="w-full flex items-center gap-2 p-2 rounded-lg text-left text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-stone-100 dark:hover:bg-stone-850/60 transition-colors"
-              >
-                <span className="w-5 h-5 rounded-full bg-stone-100 dark:bg-stone-800 text-[11px] font-mono flex items-center justify-center font-bold text-amber-800 dark:text-amber-400 shrink-0">1</span>
-                <span>Decide First (What would you do?)</span>
-              </button>
-
-              <button
-                onClick={() => scrollToSection('section-narrative')}
-                className="w-full flex items-center gap-2 p-2 rounded-lg text-left text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-stone-100 dark:hover:bg-stone-850/60 transition-colors"
-              >
-                <span className="w-5 h-5 rounded-full bg-stone-100 dark:bg-stone-800 text-[11px] font-mono flex items-center justify-center font-bold text-amber-800 dark:text-amber-400 shrink-0">2</span>
-                <span>What Actually Unfolded</span>
-              </button>
-
-              <button
-                onClick={() => scrollToSection('section-scripture')}
-                className="w-full flex items-center gap-2 p-2 rounded-lg text-left text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-stone-100 dark:hover:bg-stone-850/60 transition-colors"
-              >
-                <span className="w-5 h-5 rounded-full bg-stone-100 dark:bg-stone-800 text-[11px] font-mono flex items-center justify-center font-bold text-amber-800 dark:text-amber-400 shrink-0">3</span>
-                <span>Scripture Unlocked</span>
-              </button>
-
-              <button
-                onClick={() => scrollToSection('section-realtalk')}
-                className="w-full flex items-center gap-2 p-2 rounded-lg text-left text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-stone-100 dark:hover:bg-stone-850/60 transition-colors"
-              >
-                <span className="w-5 h-5 rounded-full bg-stone-100 dark:bg-stone-800 text-[11px] font-mono flex items-center justify-center font-bold text-amber-800 dark:text-amber-400 shrink-0">4</span>
-                <span>Real Talk For Today</span>
-              </button>
-
-              <button
-                onClick={() => scrollToSection('section-quiz')}
-                className="w-full flex items-center gap-2 p-2 rounded-lg text-left text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-stone-100 dark:hover:bg-stone-850/60 transition-colors"
-              >
-                <span className="w-5 h-5 rounded-full bg-stone-100 dark:bg-stone-800 text-[11px] font-mono flex items-center justify-center font-bold text-amber-800 dark:text-amber-400 shrink-0">5</span>
-                <span>Wisdom Check Drill</span>
-              </button>
+              {[
+                { step: 1, id: 'section-crossroads', label: 'Decide First (What would you do?)' },
+                { step: 2, id: 'section-narrative', label: 'What Actually Unfolded' },
+                { step: 3, id: 'section-scripture', label: 'Scripture Unlocked' },
+                { step: 4, id: 'section-realtalk', label: 'Real Talk For Today' },
+                { step: 5, id: 'section-quiz', label: 'Wisdom Check Drill' }
+              ].map((item) => (
+                <button
+                  key={item.step}
+                  onClick={() => {
+                    soundEngine.playClick();
+                    setActiveStepIndex(item.step);
+                    scrollToSection(item.id);
+                  }}
+                  className={`w-full flex items-center gap-2 p-2 rounded-lg text-left transition-colors ${
+                    activeStepIndex === item.step
+                      ? 'bg-amber-100 dark:bg-amber-950/50 text-amber-900 dark:text-amber-300 font-bold border border-amber-300 dark:border-amber-800/60'
+                      : 'text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-stone-100 dark:hover:bg-stone-850/60'
+                  }`}
+                >
+                  <span className={`w-5 h-5 rounded-full text-[11px] font-mono flex items-center justify-center font-bold shrink-0 ${
+                    activeStepIndex === item.step
+                      ? 'bg-amber-500 text-stone-950'
+                      : 'bg-stone-100 dark:bg-stone-800 text-amber-800 dark:text-amber-400'
+                  }`}>{item.step}</span>
+                  <span>{item.label}</span>
+                </button>
+              ))}
             </nav>
           </div>
 
@@ -668,8 +667,49 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             </p>
           </div>
 
+          {/* PROGRESSIVE STEPPER NAVIGATOR */}
+          <div className="sticky top-2 sm:top-4 z-20 p-1.5 rounded-2xl bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-amber-500/40 shadow-md">
+            <div className="grid grid-cols-5 gap-1 text-center">
+              {[
+                { step: 1, label: 'Decide' },
+                { step: 2, label: 'Story' },
+                { step: 3, label: 'Scripture' },
+                { step: 4, label: 'Real Talk' },
+                { step: 5, label: 'Wisdom Drill' }
+              ].map((s) => {
+                const isCurrent = activeStepIndex === s.step;
+                const isPast = activeStepIndex > s.step;
+                return (
+                  <button
+                    key={s.step}
+                    type="button"
+                    onClick={() => {
+                      soundEngine.playClick();
+                      setActiveStepIndex(s.step);
+                    }}
+                    className={`py-2 px-1 rounded-xl text-xs font-mono transition-all flex flex-col items-center justify-center min-h-[44px] ${
+                      isCurrent
+                        ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                        : isPast
+                          ? 'text-amber-800 dark:text-amber-300 hover:bg-amber-500/10'
+                          : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
+                    }`}
+                  >
+                    <span className="text-[11px] font-bold">
+                      {isPast ? '✓' : `Step ${s.step}`}
+                    </span>
+                    <span className="text-[10px] sm:text-xs truncate w-full">
+                      {s.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* STEP 1: DECIDE FIRST (BEFORE THE LONG READ) */}
-          <section id="section-crossroads" className="p-5 md:p-6 rounded-2xl bg-stone-50 dark:bg-gradient-to-b dark:from-[#1c1612] dark:to-[#120f0d] border-2 border-amber-300 dark:border-amber-600/60 shadow-sm dark:shadow-glow scroll-mt-6">
+          {activeStepIndex === 1 && (
+            <section id="section-crossroads" className="p-5 md:p-6 rounded-2xl bg-stone-50 dark:bg-gradient-to-b dark:from-[#1c1612] dark:to-[#120f0d] border-2 border-amber-300 dark:border-amber-600/60 shadow-sm dark:shadow-glow scroll-mt-6">
             <div className="flex items-center justify-between gap-2 mb-2">
               <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400">
                 <span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30">Step 1 of 5</span>
@@ -843,384 +883,503 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                 </AnimatePresence>
               </div>
             )}
-          </section>
 
-
-          {selectedChoiceId ? (
-          <>
-          {/* STEP 2: WHAT ACTUALLY UNFOLDED */}
-          <section id="section-narrative" className="space-y-4 scroll-mt-6">
-            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400">
-              <span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30">Step 2 of 5</span>
-              <span>What Actually Unfolded</span>
-            </div>
-
-            {/* Paragraph Cards */}
-            <div className="space-y-4">
-              {act.narrativeParagraphs.map((paragraph, idx) => (
-                <motion.div 
-                  key={idx}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.08 }}
-                  className="p-5 md:p-6 rounded-2xl bg-white dark:bg-ink-raised border border-stone-200 dark:border-stone-800/90 shadow-sm hover:border-stone-300 dark:hover:border-stone-700 transition-colors"
+            {selectedChoiceId && (
+              <div className="pt-4 mt-4 border-t border-amber-200 dark:border-amber-900/50 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playClick();
+                    setActiveStepIndex(2);
+                  }}
+                  className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs sm:text-sm shadow-md flex items-center gap-2 transition-all cursor-pointer"
                 >
-                  <p className="font-reading text-base md:text-lg text-stone-800 dark:text-parchment-100 leading-relaxed">
-                    {paragraph}
-                  </p>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Tap-to-Explain Ancient Customs & Terms */}
-            {act.glossary.length > 0 && (
-              <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 mt-4">
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-3">
-                  <HelpCircle className="w-4 h-4 text-amber-800 dark:text-amber-500" />
-                  <span>Explain Like I'm 5: Tap Ancient Terms</span>
-                </div>
-
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {act.glossary.map((item, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => {
-                        soundEngine.playSnap();
-                        setActiveTermIndex(activeTermIndex === idx ? null : idx);
-                      }}
-                      className={`text-xs px-3 py-1.5 rounded-full font-medium transition-all ${
-                        activeTermIndex === idx
-                          ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
-                          : 'bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-300 dark:hover:bg-stone-700'
-                      }`}
-                    >
-                      {item.term} ℹ️
-                    </button>
-                  ))}
-                </div>
-
-                <AnimatePresence>
-                  {activeTermIndex !== null && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 5 }}
-                      className="p-3.5 rounded-xl bg-stone-100 dark:bg-stone-950/90 border border-amber-300/40 dark:border-amber-900/30 text-xs text-stone-800 dark:text-stone-300 space-y-1.5"
-                    >
-                      <div>
-                        <strong className="text-amber-800 dark:text-amber-400">Ancient Context: </strong>
-                        {act.glossary[activeTermIndex].ancientMeaning}
-                      </div>
-                      <div className="text-stone-800 dark:text-parchment-200">
-                        <strong className="text-amber-800 dark:text-amber-300">Everyday Translation: </strong>
-                        {act.glossary[activeTermIndex].modernAnalogy}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                  <span>Continue to Step 2: What Actually Unfolded</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
               </div>
             )}
           </section>
-          </>
-          ) : (
-            <section id="section-narrative" className="p-5 rounded-2xl bg-stone-50 dark:bg-stone-900/50 border border-dashed border-amber-300 dark:border-amber-700/50 scroll-mt-6 text-center">
-              <p className="text-sm text-stone-600 dark:text-stone-400">
-                Make your call above — then see how the story actually unfolded.
-              </p>
+          )}
+
+          {/* STEP 2: WHAT ACTUALLY UNFOLDED */}
+          {activeStepIndex === 2 && (
+            <section id="section-narrative" className="space-y-4 scroll-mt-6">
+              <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400">
+                <span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30">Step 2 of 5</span>
+                <span>What Actually Unfolded</span>
+              </div>
+
+              {!selectedChoiceId ? (
+                <div className="p-6 rounded-2xl bg-stone-50 dark:bg-stone-900/50 border border-dashed border-amber-300 dark:border-amber-700/50 text-center space-y-3">
+                  <p className="text-sm text-stone-600 dark:text-stone-400">
+                    Make your call in Step 1 first — then see how the story actually unfolded.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundEngine.playClick();
+                      setActiveStepIndex(1);
+                    }}
+                    className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-bold transition-all"
+                  >
+                    ← Go to Step 1: Make Your Call
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {/* Paragraph Cards */}
+                  <div className="space-y-4">
+                    {act.narrativeParagraphs.map((paragraph, idx) => (
+                      <motion.div 
+                        key={idx}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.08 }}
+                        className="p-5 md:p-6 rounded-2xl bg-white dark:bg-ink-raised border border-stone-200 dark:border-stone-800/90 shadow-sm hover:border-stone-300 dark:hover:border-stone-700 transition-colors"
+                      >
+                        <p className="font-reading text-base md:text-lg text-stone-800 dark:text-parchment-100 leading-relaxed">
+                          {paragraph}
+                        </p>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  {/* Tap-to-Explain Ancient Customs & Terms */}
+                  {act.glossary.length > 0 && (
+                    <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 mt-4">
+                      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-3">
+                        <HelpCircle className="w-4 h-4 text-amber-800 dark:text-amber-500" />
+                        <span>Explain Like I'm 5: Tap Ancient Terms</span>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {act.glossary.map((item, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => {
+                              soundEngine.playSnap();
+                              setActiveTermIndex(activeTermIndex === idx ? null : idx);
+                            }}
+                            className={`text-xs px-3 py-1.5 rounded-full font-medium transition-all ${
+                              activeTermIndex === idx
+                                ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                                : 'bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-300 dark:hover:bg-stone-700'
+                            }`}
+                          >
+                            {item.term} ℹ️
+                          </button>
+                        ))}
+                      </div>
+
+                      <AnimatePresence>
+                        {activeTermIndex !== null && (
+                          <motion.div 
+                            initial={{ opacity: 0, y: 5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 5 }}
+                            className="p-3.5 rounded-xl bg-stone-100 dark:bg-stone-950/90 border border-amber-300/40 dark:border-amber-900/30 text-xs text-stone-800 dark:text-stone-300 space-y-1.5"
+                          >
+                            <div>
+                              <strong className="text-amber-800 dark:text-amber-400">Ancient Context: </strong>
+                              {act.glossary[activeTermIndex].ancientMeaning}
+                            </div>
+                            <div className="text-stone-800 dark:text-parchment-200">
+                              <strong className="text-amber-800 dark:text-amber-300">Everyday Translation: </strong>
+                              {act.glossary[activeTermIndex].modernAnalogy}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )}
+
+                  {/* Step 2 Bottom Navigation */}
+                  <div className="flex items-center justify-between pt-4 border-t border-stone-200 dark:border-stone-800 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        soundEngine.playClick();
+                        setActiveStepIndex(1);
+                      }}
+                      className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-stone-700 dark:text-stone-300 hover:text-stone-950 dark:hover:text-white bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 transition-colors"
+                    >
+                      ← Step 1: Decision
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        soundEngine.playClick();
+                        setActiveStepIndex(3);
+                      }}
+                      className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs sm:text-sm shadow-md flex items-center gap-2 transition-all cursor-pointer"
+                    >
+                      <span>Continue to Step 3: Scripture</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </>
+              )}
             </section>
           )}
 
           {/* STEP 3: UNLOCKED SCRIPTURE CARD (Requirement 1: 1 memory verse applies to the quest) */}
-          <section id="section-scripture" className="p-5 md:p-6 rounded-2xl bg-white dark:bg-ink-overlay border-2 border-amber-300 dark:border-amber-500/50 shadow-sm dark:shadow-glow relative overflow-hidden scroll-mt-6">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30 text-xs font-mono font-bold">
-                  Step 3 of 5
-                </span>
-                <div className="flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold">
-                  <BookOpen className="w-4 h-4 text-amber-800 dark:text-amber-400" />
-                  <span>
-                    {act.actNumber === 1 
-                      ? `Quest Anchor Scripture • 1 Memory Verse For This Quest`
-                      : `Scene Scripture • Reinforces Quest Anchor: ${questAnchorVerse?.reference || quest.acts[0].unlockedScripture.reference}`}
+          {activeStepIndex === 3 && (
+            <section id="section-scripture" className="p-5 md:p-6 rounded-2xl bg-white dark:bg-ink-overlay border-2 border-amber-300 dark:border-amber-500/50 shadow-sm dark:shadow-glow relative overflow-hidden scroll-mt-6">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30 text-xs font-mono font-bold">
+                    Step 3 of 5
                   </span>
-                </div>
-              </div>
-
-              <button
-                onClick={handleToggleSpeakScripture}
-                disabled={!selectedChoiceId}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-850 hover:bg-amber-500 dark:hover:bg-amber-600 hover:text-stone-950 transition-colors disabled:opacity-40 disabled:pointer-events-none"
-              >
-                {isSpeakingScripture ? (
-                  <>
-                    <VolumeX className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 animate-pulse" />
-                    <span>Stop</span>
-                  </>
-                ) : (
-                  <>
-                    <Volume2 className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
-                    <span>Listen</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            <h3 className="text-base font-serif font-bold text-amber-800 dark:text-amber-300 mb-2">
-              {questAnchorVerse?.reference || act.unlockedScripture.reference}
-            </h3>
-
-            {!selectedChoiceId ? (
-              <p className="text-sm text-stone-600 dark:text-stone-400 italic">
-                Make your call above — then this passage opens from the Bible.
-              </p>
-            ) : passageStatus === 'loading' ? (
-              <p className="text-sm text-stone-500 dark:text-stone-400">Opening the passage…</p>
-            ) : passageStatus === 'ready' && passageVerses && scriptureRef ? (
-              <div className="space-y-2 my-3 pl-4 border-l-2 border-amber-500">
-                {passageVerses.map((v) => {
-                  const cited = v.verse >= scriptureRef.verseStart && v.verse <= scriptureRef.verseEnd;
-                  return (
-                    <p
-                      key={v.verse}
-                      className={`font-reading text-base md:text-lg leading-relaxed ${
-                        cited
-                          ? 'text-stone-950 dark:text-parchment-50 font-medium'
-                          : 'text-stone-500 dark:text-stone-400'
-                      }`}
-                    >
-                      <span className="text-[11px] font-mono font-bold text-amber-800 dark:text-amber-400 mr-2">{v.verse}</span>
-                      {v.text}
-                    </p>
-                  );
-                })}
-              </div>
-            ) : (
-              <blockquote className="font-reading text-lg md:text-xl text-stone-900 dark:text-parchment-50 italic my-3 pl-4 border-l-2 border-amber-500 leading-relaxed">
-                "{questAnchorVerse?.text || act.unlockedScripture.text}"
-              </blockquote>
-            )}
-
-            {selectedChoiceId && scriptureRef && onOpenBibleChapter && (
-              <button
-                type="button"
-                onClick={() => {
-                  soundEngine.playClick();
-                  onOpenBibleChapter(scriptureRef);
-                }}
-                className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/15 border border-amber-300 dark:border-amber-500/40 hover:bg-amber-500 hover:text-stone-950 transition-colors"
-              >
-                <BookOpen className="w-3.5 h-3.5" />
-                Read this chapter
-              </button>
-            )}
-
-            {selectedChoiceId && (
-              <p className="text-xs md:text-sm text-stone-700 dark:text-stone-300 mt-4 pt-3 border-t border-stone-200 dark:border-stone-800 leading-relaxed">
-                <strong className="text-amber-800 dark:text-amber-400">Context: </strong>
-                {act.unlockedScripture.deepDive}
-              </p>
-            )}
-
-            {/* Memory Pulse Reminders Call to Action */}
-            <div className="mt-4 pt-3 border-t border-amber-200 dark:border-amber-900/30 flex flex-wrap items-center justify-between gap-2.5">
-              <div className="flex items-center gap-1.5 text-xs text-stone-600 dark:text-stone-400">
-                <Bell className="w-3.5 h-3.5 text-amber-800 dark:text-amber-500 animate-pulse" />
-                <span>
-                  {act.actNumber === 1
-                    ? "Lock this quest's definitive memory verse into your daily recall:"
-                    : `Reinforce the quest's memory verse (${questAnchorVerse?.reference}):`}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    soundEngine.playClick();
-                    setIsMemoryPulseOpen(true);
-                  }}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs shadow-md transition-all"
-                >
-                  <Bell className="w-3.5 h-3.5" />
-                  <span>Train Quest Verse: {questAnchorVerse?.reference || act.unlockedScripture.reference}</span>
-                </button>
-              </div>
-            </div>
-          </section>
-
-          {/* STEP 4: REAL TALK FOR TODAY (TAKEAWAY FOR ADULTS) */}
-          <section id="section-realtalk" className="p-5 md:p-6 rounded-2xl bg-white dark:bg-gradient-to-br dark:from-[#17191e] dark:to-[#0e1014] border border-stone-200 dark:border-stone-700 shadow-sm scroll-mt-6">
-            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400 mb-2">
-              <span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30">Step 4 of 5</span>
-              <Sparkles className="w-4 h-4 text-amber-800 dark:text-amber-500" />
-              <span>Real Talk For Today</span>
-            </div>
-            
-            <h3 className="text-lg md:text-xl font-serif font-bold text-stone-900 dark:text-parchment-100 mb-2">
-              Dealing With: {act.realTalkTakeaway.coreChallenge}
-            </h3>
-
-            <p className="text-sm md:text-base text-stone-700 dark:text-stone-300 leading-relaxed mb-4">
-              {act.realTalkTakeaway.practicalLesson}
-            </p>
-
-            <div className="p-4 bg-amber-50 dark:bg-amber-950/40 rounded-xl border border-amber-200 dark:border-amber-800/40 text-xs md:text-sm text-amber-900 dark:text-amber-200 font-medium leading-relaxed">
-              <strong className="text-amber-800 dark:text-amber-300">Today's Tactical Action: </strong> 
-              {act.realTalkTakeaway.dailyAction}
-            </div>
-
-            {/* Quick Journal / Personal Reflection Note */}
-            <div className="mt-4 pt-3 border-t border-stone-200 dark:border-stone-800">
-              {!showNoteInput ? (
-                <button 
-                  onClick={() => setShowNoteInput(true)}
-                  className="text-xs text-stone-600 dark:text-stone-400 hover:text-amber-700 dark:hover:text-amber-400 flex items-center gap-1.5 transition-colors font-medium"
-                >
-                  <Edit3 className="w-3.5 h-3.5 text-amber-800 dark:text-amber-500" />
-                  <span>Jot a personal takeaway or battle reflection</span>
-                </button>
-              ) : (
-                <div className="space-y-2 mt-2">
-                  <textarea
-                    value={journalNote}
-                    onChange={(e) => setJournalNote(e.target.value)}
-                    placeholder="How does this story hit you personally? What's your own battle right now?"
-                    className="w-full text-xs md:text-sm p-3 rounded-xl bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-stone-200 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:border-amber-500"
-                    rows={3}
-                  />
-                  <div className="flex items-center justify-between">
-                    <button
-                      onClick={() => setShowNoteInput(false)}
-                      className="text-xs text-stone-500 hover:text-stone-700 dark:hover:text-stone-400"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleSaveNote}
-                      className="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold text-xs transition-colors flex items-center gap-1 shadow-sm"
-                    >
-                      {isNoteSaved ? <BookmarkCheck className="w-3.5 h-3.5" /> : null}
-                      <span>{isNoteSaved ? 'Saved to Arsenal' : 'Save Note'}</span>
-                    </button>
+                  <div className="flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold">
+                    <BookOpen className="w-4 h-4 text-amber-800 dark:text-amber-400" />
+                    <span>
+                      {act.actNumber === 1 
+                        ? `Quest Anchor Scripture • 1 Memory Verse For This Quest`
+                        : `Scene Scripture • Reinforces Quest Anchor: ${questAnchorVerse?.reference || quest.acts[0].unlockedScripture.reference}`}
+                    </span>
                   </div>
                 </div>
-              )}
-            </div>
-          </section>
 
-          {/* STEP 5: INTERACTIVE WISDOM CHECK DRILL */}
-          {act.wisdomQuiz && (
-            <section id="section-quiz" className="p-5 md:p-6 rounded-2xl bg-white dark:bg-ink-overlay border-2 border-stone-200 dark:border-stone-700 shadow-sm scroll-mt-6">
-              <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400 mb-2">
-                <span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30">Step 5 of 5</span>
-                <Award className="w-4 h-4 text-amber-800 dark:text-amber-500" />
-                <span>Wisdom Check Drill (+30 XP)</span>
+                <button
+                  onClick={handleToggleSpeakScripture}
+                  disabled={!selectedChoiceId}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-850 hover:bg-amber-500 dark:hover:bg-amber-600 hover:text-stone-950 transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                >
+                  {isSpeakingScripture ? (
+                    <>
+                      <VolumeX className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 animate-pulse" />
+                      <span>Stop</span>
+                    </>
+                  ) : (
+                    <>
+                      <Volume2 className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
+                      <span>Listen</span>
+                    </>
+                  )}
+                </button>
               </div>
 
-              <h3 className="text-base md:text-lg font-serif font-bold text-stone-900 dark:text-parchment-50 mb-3">
-                {act.wisdomQuiz.question}
+              <h3 className="text-base font-serif font-bold text-amber-800 dark:text-amber-300 mb-2">
+                {questAnchorVerse?.reference || act.unlockedScripture.reference}
               </h3>
 
-              <div className="space-y-2.5">
-                {act.wisdomQuiz.options.map((option, idx) => {
-                  const isSelected = selectedQuizOption === idx;
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => handleQuizAnswer(idx)}
-                      disabled={hasSubmittedQuiz}
-                      className={`w-full text-left p-3.5 rounded-xl text-xs md:text-sm font-medium transition-all border ${
-                        hasSubmittedQuiz
-                          ? option.isCorrect
-                            ? 'bg-emerald-50 dark:bg-emerald-950/70 border-emerald-500 text-emerald-900 dark:text-emerald-100'
-                            : isSelected
-                              ? 'bg-red-50 dark:bg-red-950/70 border-red-500 text-red-900 dark:text-red-200'
-                              : 'bg-stone-100 dark:bg-stone-900/60 border-stone-200 dark:border-stone-800 text-stone-400 dark:text-stone-500 opacity-60'
-                          : 'bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-800 dark:text-stone-300 hover:border-amber-500/60 hover:bg-stone-100 dark:hover:bg-stone-800'
-                      }`}
-                    >
-                      <div className="flex items-start gap-2.5">
-                        <span className="font-mono font-bold text-stone-400 dark:text-stone-500">{String.fromCharCode(65 + idx)}.</span>
-                        <span>{option.text}</span>
-                      </div>
-                    </button>
-                  );
-                })}
+              {!selectedChoiceId ? (
+                <p className="text-sm text-stone-600 dark:text-stone-400 italic">
+                  Make your call in Step 1 first — then this passage opens from the Bible.
+                </p>
+              ) : passageStatus === 'loading' ? (
+                <p className="text-sm text-stone-500 dark:text-stone-400">Opening the passage…</p>
+              ) : passageStatus === 'ready' && passageVerses && scriptureRef ? (
+                <div className="space-y-2 my-3 pl-4 border-l-2 border-amber-500">
+                  {passageVerses.map((v) => {
+                    const cited = v.verse >= scriptureRef.verseStart && v.verse <= scriptureRef.verseEnd;
+                    return (
+                      <p
+                        key={v.verse}
+                        className={`font-reading text-base md:text-lg leading-relaxed ${
+                          cited
+                            ? 'text-stone-950 dark:text-parchment-50 font-medium'
+                            : 'text-stone-500 dark:text-stone-400'
+                        }`}
+                      >
+                        <span className="text-[11px] font-mono font-bold text-amber-800 dark:text-amber-400 mr-2">{v.verse}</span>
+                        {v.text}
+                      </p>
+                    );
+                  })}
+                </div>
+              ) : (
+                <blockquote className="font-reading text-lg md:text-xl text-stone-900 dark:text-parchment-50 italic my-3 pl-4 border-l-2 border-amber-500 leading-relaxed">
+                  "{questAnchorVerse?.text || act.unlockedScripture.text}"
+                </blockquote>
+              )}
+
+              {selectedChoiceId && scriptureRef && onOpenBibleChapter && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playClick();
+                    onOpenBibleChapter(scriptureRef);
+                  }}
+                  className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/15 border border-amber-300 dark:border-amber-500/40 hover:bg-amber-500 hover:text-stone-950 transition-colors"
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  Read this chapter
+                </button>
+              )}
+
+              {selectedChoiceId && (
+                <p className="text-xs md:text-sm text-stone-700 dark:text-stone-300 mt-4 pt-3 border-t border-stone-200 dark:border-stone-800 leading-relaxed">
+                  <strong className="text-amber-800 dark:text-amber-400">Context: </strong>
+                  {act.unlockedScripture.deepDive}
+                </p>
+              )}
+
+              {/* Memory Pulse Reminders Call to Action */}
+              <div className="mt-4 pt-3 border-t border-amber-200 dark:border-amber-900/30 flex flex-wrap items-center justify-between gap-2.5">
+                <div className="flex items-center gap-1.5 text-xs text-stone-600 dark:text-stone-400">
+                  <Bell className="w-3.5 h-3.5 text-amber-800 dark:text-amber-500 animate-pulse" />
+                  <span>
+                    {act.actNumber === 1
+                      ? "Lock this quest's definitive memory verse into your daily recall:"
+                      : `Reinforce the quest's memory verse (${questAnchorVerse?.reference}):`}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      soundEngine.playClick();
+                      setIsMemoryPulseOpen(true);
+                    }}
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs shadow-md transition-all"
+                  >
+                    <Bell className="w-3.5 h-3.5" />
+                    <span>Train Quest Verse: {questAnchorVerse?.reference || act.unlockedScripture.reference}</span>
+                  </button>
+                </div>
               </div>
 
-              {hasSubmittedQuiz && selectedQuizOption !== null && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-3 p-3.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs md:text-sm text-stone-700 dark:text-stone-300 leading-relaxed"
+              {/* Step 3 Bottom Navigation */}
+              <div className="flex items-center justify-between pt-4 mt-6 border-t border-stone-200 dark:border-stone-800 gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playClick();
+                    setActiveStepIndex(2);
+                  }}
+                  className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-stone-700 dark:text-stone-300 hover:text-stone-950 dark:hover:text-white bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 transition-colors"
                 >
-                  <strong className={act.wisdomQuiz.options[selectedQuizOption].isCorrect ? "text-emerald-700 dark:text-emerald-400" : "text-amber-800 dark:text-amber-400"}>
-                    {act.wisdomQuiz.options[selectedQuizOption].isCorrect ? "Spot on! " : "Good try! "}
-                  </strong>
-                  {act.wisdomQuiz.options[selectedQuizOption].explanation}
-                </motion.div>
-              )}
+                  ← Step 2: Story
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playClick();
+                    setActiveStepIndex(4);
+                  }}
+                  className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs sm:text-sm shadow-md flex items-center gap-2 transition-all cursor-pointer"
+                >
+                  <span>Continue to Step 4: Real Talk</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
             </section>
           )}
 
-          {/* NEXT ACT TEASER */}
-          {act.teaserForNext && currentActIndex < quest.acts.length - 1 && (
-            <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 text-xs md:text-sm text-amber-900 dark:text-amber-200/90 italic">
-              <strong>Coming Up in Act {currentActIndex + 2}: </strong>
-              "{act.teaserForNext}"
-            </div>
-          )}
+          {/* STEP 4: REAL TALK FOR TODAY (TAKEAWAY FOR ADULTS) */}
+          {activeStepIndex === 4 && (
+            <section id="section-realtalk" className="p-5 md:p-6 rounded-2xl bg-white dark:bg-gradient-to-br dark:from-[#17191e] dark:to-[#0e1014] border border-stone-200 dark:border-stone-700 shadow-sm scroll-mt-6">
+              <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400 mb-2">
+                <span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30">Step 4 of 5</span>
+                <Sparkles className="w-4 h-4 text-amber-800 dark:text-amber-500" />
+                <span>Real Talk For Today</span>
+              </div>
+              
+              <h3 className="text-lg md:text-xl font-serif font-bold text-stone-900 dark:text-parchment-100 mb-2">
+                Dealing With: {act.realTalkTakeaway.coreChallenge}
+              </h3>
 
-          {/* LIVING CANON: TACTICAL NEXUS KNOWLEDGE GRAPH */}
-          <TacticalNexusCard entityId={quest.id} onOpenEntity={onOpenNexus} />
+              <p className="text-sm md:text-base text-stone-700 dark:text-stone-300 leading-relaxed mb-4">
+                {act.realTalkTakeaway.practicalLesson}
+              </p>
 
-          {/* Bottom Action Controls */}
-          <div className="flex flex-col sm:flex-row gap-3 items-center justify-between pt-6 border-t border-stone-200 dark:border-stone-800">
-            <button
-              onClick={handlePrevAct}
-              disabled={currentActIndex === 0}
-              className={`w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                currentActIndex === 0 
-                  ? 'opacity-30 cursor-not-allowed text-stone-400 dark:text-stone-600' 
-                  : 'text-stone-700 dark:text-stone-300 hover:text-stone-950 dark:hover:text-white bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800'
-              }`}
-            >
-              Previous Act
-            </button>
+              <div className="p-4 bg-amber-50 dark:bg-amber-950/40 rounded-xl border border-amber-200 dark:border-amber-800/40 text-xs md:text-sm text-amber-900 dark:text-amber-200 font-medium leading-relaxed">
+                <strong className="text-amber-800 dark:text-amber-300">Today's Tactical Action: </strong> 
+                {act.realTalkTakeaway.dailyAction}
+              </div>
 
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              {!isActFinished ? (
+              {/* Quick Journal / Personal Reflection Note */}
+              <div className="mt-4 pt-3 border-t border-stone-200 dark:border-stone-800">
+                {!showNoteInput ? (
+                  <button 
+                    onClick={() => setShowNoteInput(true)}
+                    className="text-xs text-stone-600 dark:text-stone-400 hover:text-amber-700 dark:hover:text-amber-400 flex items-center gap-1.5 transition-colors font-medium"
+                  >
+                    <Edit3 className="w-3.5 h-3.5 text-amber-800 dark:text-amber-500" />
+                    <span>Jot a personal takeaway or battle reflection</span>
+                  </button>
+                ) : (
+                  <div className="space-y-2 mt-2">
+                    <textarea
+                      value={journalNote}
+                      onChange={(e) => setJournalNote(e.target.value)}
+                      placeholder="How does this story hit you personally? What's your own battle right now?"
+                      className="w-full text-xs md:text-sm p-3 rounded-xl bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-stone-200 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:border-amber-500"
+                      rows={3}
+                    />
+                    <div className="flex items-center justify-between">
+                      <button
+                        onClick={() => setShowNoteInput(false)}
+                        className="text-xs text-stone-500 hover:text-stone-700 dark:hover:text-stone-400"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleSaveNote}
+                        className="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold text-xs transition-colors flex items-center gap-1 shadow-sm"
+                      >
+                        {isNoteSaved ? <BookmarkCheck className="w-3.5 h-3.5" /> : null}
+                        <span>{isNoteSaved ? 'Saved to Arsenal' : 'Save Note'}</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Step 4 Bottom Navigation */}
+              <div className="flex items-center justify-between pt-4 mt-6 border-t border-stone-200 dark:border-stone-800 gap-3">
                 <button
-                  onClick={handleFinishAct}
-                  disabled={!selectedChoiceId}
-                  className={`w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-bold shadow-md transition-all transform active:scale-95 flex items-center justify-center gap-2 ${
-                    selectedChoiceId
-                      ? 'bg-amber-500 hover:bg-amber-400 text-stone-950 cursor-pointer'
-                      : 'bg-stone-200 text-stone-500 cursor-not-allowed'
-                  }`}
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playClick();
+                    setActiveStepIndex(3);
+                  }}
+                  className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-stone-700 dark:text-stone-300 hover:text-stone-950 dark:hover:text-white bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 transition-colors"
                 >
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>{selectedChoiceId ? 'Complete Act (+50 XP)' : 'Choose a response first'}</span>
+                  ← Step 3: Scripture
                 </button>
-              ) : currentActIndex < quest.acts.length - 1 ? (
                 <button
-                  onClick={handleNextAct}
-                  className="w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-bold bg-amber-500 hover:bg-amber-400 text-stone-950 transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer"
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playClick();
+                    setActiveStepIndex(5);
+                  }}
+                  className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs sm:text-sm shadow-md flex items-center gap-2 transition-all cursor-pointer"
                 >
-                  <span>Advance to Act {currentActIndex + 2}</span>
+                  <span>Continue to Step 5: Wisdom Drill</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
-              ) : (
-                <button
-                  onClick={handleBack}
-                  className="w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all flex items-center justify-center gap-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-400 shadow-md"
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>{isQuestFullyCompleted ? '✓ Completed • Return to Quests' : 'Quest Finished • Return to Quests'}</span>
-                </button>
+              </div>
+            </section>
+          )}
+
+          {/* STEP 5: INTERACTIVE WISDOM CHECK DRILL & ACT FINISH */}
+          {activeStepIndex === 5 && (
+            <div className="space-y-6">
+              {act.wisdomQuiz && (
+                <section id="section-quiz" className="p-5 md:p-6 rounded-2xl bg-white dark:bg-ink-overlay border-2 border-stone-200 dark:border-stone-700 shadow-sm scroll-mt-6">
+                  <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400 mb-2">
+                    <span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30">Step 5 of 5</span>
+                    <Award className="w-4 h-4 text-amber-800 dark:text-amber-500" />
+                    <span>Wisdom Check Drill (+30 XP)</span>
+                  </div>
+
+                  <h3 className="text-base md:text-lg font-serif font-bold text-stone-900 dark:text-parchment-50 mb-3">
+                    {act.wisdomQuiz.question}
+                  </h3>
+
+                  <div className="space-y-2.5">
+                    {act.wisdomQuiz.options.map((option, idx) => {
+                      const isSelected = selectedQuizOption === idx;
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => handleQuizAnswer(idx)}
+                          disabled={hasSubmittedQuiz}
+                          className={`w-full text-left p-3.5 rounded-xl text-xs md:text-sm font-medium transition-all border ${
+                            hasSubmittedQuiz
+                              ? option.isCorrect
+                                ? 'bg-emerald-50 dark:bg-emerald-950/70 border-emerald-500 text-emerald-900 dark:text-emerald-100'
+                                : isSelected
+                                  ? 'bg-red-50 dark:bg-red-950/70 border-red-500 text-red-900 dark:text-red-200'
+                                  : 'bg-stone-100 dark:bg-stone-900/60 border-stone-200 dark:border-stone-800 text-stone-400 dark:text-stone-500 opacity-60'
+                              : 'bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-800 dark:text-stone-300 hover:border-amber-500/60 hover:bg-stone-100 dark:hover:bg-stone-800'
+                          }`}
+                        >
+                          <div className="flex items-start gap-2.5">
+                            <span className="font-mono font-bold text-stone-400 dark:text-stone-500">{String.fromCharCode(65 + idx)}.</span>
+                            <span>{option.text}</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {hasSubmittedQuiz && selectedQuizOption !== null && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-3 p-3.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs md:text-sm text-stone-700 dark:text-stone-300 leading-relaxed"
+                    >
+                      <strong className={act.wisdomQuiz.options[selectedQuizOption].isCorrect ? "text-emerald-700 dark:text-emerald-400" : "text-amber-800 dark:text-amber-400"}>
+                        {act.wisdomQuiz.options[selectedQuizOption].isCorrect ? "Spot on! " : "Good try! "}
+                      </strong>
+                      {act.wisdomQuiz.options[selectedQuizOption].explanation}
+                    </motion.div>
+                  )}
+                </section>
               )}
+
+              {/* NEXT ACT TEASER */}
+              {act.teaserForNext && currentActIndex < quest.acts.length - 1 && (
+                <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 text-xs md:text-sm text-amber-900 dark:text-amber-200/90 italic">
+                  <strong>Coming Up in Act {currentActIndex + 2}: </strong>
+                  "{act.teaserForNext}"
+                </div>
+              )}
+
+              {/* LIVING CANON: TACTICAL NEXUS KNOWLEDGE GRAPH */}
+              <TacticalNexusCard entityId={quest.id} onOpenEntity={onOpenNexus} />
+
+              {/* Bottom Action Controls */}
+              <div className="flex flex-col sm:flex-row gap-3 items-center justify-between pt-6 border-t border-stone-200 dark:border-stone-800">
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playClick();
+                    setActiveStepIndex(4);
+                  }}
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-stone-700 dark:text-stone-300 hover:text-stone-950 dark:hover:text-white bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 transition-colors"
+                >
+                  ← Back to Step 4: Real Talk
+                </button>
+
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                  {currentActIndex > 0 && (
+                    <button
+                      onClick={handlePrevAct}
+                      className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-medium text-stone-700 dark:text-stone-300 hover:text-stone-950 dark:hover:text-white bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 transition-colors"
+                    >
+                      Previous Act
+                    </button>
+                  )}
+
+                  {!isActFinished ? (
+                    <button
+                      onClick={handleFinishAct}
+                      disabled={!selectedChoiceId}
+                      className={`w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-bold shadow-md transition-all transform active:scale-95 flex items-center justify-center gap-2 ${
+                        selectedChoiceId
+                          ? 'bg-amber-500 hover:bg-amber-400 text-stone-950 cursor-pointer'
+                          : 'bg-stone-200 text-stone-500 cursor-not-allowed'
+                      }`}
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>{selectedChoiceId ? 'Complete Act (+50 XP)' : 'Choose a response first'}</span>
+                    </button>
+                  ) : currentActIndex < quest.acts.length - 1 ? (
+                    <button
+                      onClick={handleNextAct}
+                      className="w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-bold bg-amber-500 hover:bg-amber-400 text-stone-950 transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer"
+                    >
+                      <span>Advance to Act {currentActIndex + 2}</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleBack}
+                      className="w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all flex items-center justify-center gap-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-400 shadow-md"
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>{isQuestFullyCompleted ? '✓ Completed • Return to Quests' : 'Quest Finished • Return to Quests'}</span>
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
+          )}
 
         </div>
       </div>

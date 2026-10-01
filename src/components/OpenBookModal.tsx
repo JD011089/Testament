@@ -14,7 +14,8 @@ import {
   Shield,
   Loader2,
   ChevronDown,
-  Mic
+  Mic,
+  SlidersHorizontal
 } from 'lucide-react';
 import type { CanonBook } from '../data/canon';
 import { soundEngine, NARRATOR_VOICES, type NarratorProfile } from '../utils/audio';
@@ -94,6 +95,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
   const [lens, setLens] = useState<'street' | 'canonical'>('street');
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showReadingPrefs, setShowReadingPrefs] = useState<boolean>(false);
 
   // Full Scripture Reader State
   const [selectedChapter, setSelectedChapter] = useState<number>(initialChapter);
@@ -407,16 +409,16 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
           transition={{ duration: 0.2, ease: 'easeOut' }}
           className="relative z-10 w-full h-[100dvh] sm:h-auto sm:max-h-[94vh] max-w-5xl rounded-none sm:rounded-3xl bg-surface dark:bg-ink-raised border-0 sm:border border-amber-500/40 shadow-2xl dark:shadow-black/90 overflow-x-hidden flex flex-col focus:outline-none touch-pan-y"
         >
-          {/* Top Header Bar */}
-          <div className="flex items-center justify-between px-3.5 sm:px-6 py-2.5 sm:py-3 bg-stone-50 dark:bg-ink border-b border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 shrink-0">
-            <div className="flex items-center gap-2 min-w-0">
+          {/* Top Header Bar (Combined with Mode Selector on Mobile) */}
+          <div className="flex items-center justify-between px-3 sm:px-6 py-2 sm:py-3 bg-stone-50 dark:bg-ink border-b border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 shrink-0 gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
               {/* Mobile Back Button */}
               <button
                 onClick={() => {
                   soundEngine.playClick();
                   onClose();
                 }}
-                className="sm:hidden flex items-center gap-1 px-2.5 py-1 rounded-lg bg-stone-200/80 dark:bg-stone-850 hover:bg-stone-300 dark:hover:bg-stone-800 text-stone-800 dark:text-stone-200 text-xs font-semibold shrink-0 transition-colors"
+                className="sm:hidden flex items-center gap-1 px-2 py-1 rounded-lg bg-stone-200/80 dark:bg-stone-850 hover:bg-stone-300 dark:hover:bg-stone-800 text-stone-800 dark:text-stone-200 text-xs font-semibold shrink-0 transition-colors min-h-[36px]"
                 aria-label="Back to library"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -427,6 +429,36 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
               <span className="text-xs font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold truncate">
                 {book.name} <span className="hidden sm:inline">• Volume #{String(book.order).padStart(2, '0')} of 66</span>
               </span>
+            </div>
+
+            {/* Mobile Inline Mode Selector */}
+            <div className="flex sm:hidden items-center p-0.5 rounded-lg bg-stone-200/70 dark:bg-stone-900 border border-stone-300/60 dark:border-stone-800 shrink-0">
+              <button
+                onClick={() => {
+                  soundEngine.playClick();
+                  setActiveMode('briefing');
+                }}
+                className={`px-2 py-1 rounded-md text-[11px] font-bold transition-all ${
+                  activeMode === 'briefing'
+                    ? 'bg-amber-500 text-stone-950 shadow-xs'
+                    : 'text-stone-600 dark:text-stone-400'
+                }`}
+              >
+                {t('reader.briefing')}
+              </button>
+              <button
+                onClick={() => {
+                  soundEngine.playClick();
+                  setActiveMode('reader');
+                }}
+                className={`px-2 py-1 rounded-md text-[11px] font-bold transition-all ${
+                  activeMode === 'reader'
+                    ? 'bg-amber-500 text-stone-950 shadow-xs'
+                    : 'text-stone-600 dark:text-stone-400'
+                }`}
+              >
+                Read
+              </button>
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
@@ -447,8 +479,8 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
             </div>
           </div>
 
-          {/* MODE SELECTOR BAR: TACTICAL BRIEFING vs READ FULL SCRIPTURE */}
-          <div className="flex items-center justify-between gap-2 px-3 sm:px-6 py-2 bg-stone-100/70 dark:bg-ink-raised border-b border-stone-200 dark:border-stone-800/90 shrink-0">
+          {/* MODE SELECTOR BAR: TACTICAL BRIEFING vs READ FULL SCRIPTURE (Desktop only) */}
+          <div className="hidden sm:flex items-center justify-between gap-2 px-3 sm:px-6 py-2 bg-stone-100/70 dark:bg-ink-raised border-b border-stone-200 dark:border-stone-800/90 shrink-0">
             <div className="grid grid-cols-2 p-1 rounded-xl bg-white dark:bg-stone-900 border border-stone-250 dark:border-stone-800 shadow-xs w-full sm:w-auto sm:inline-flex">
               <button
                 onClick={() => {
@@ -765,7 +797,8 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                   </button>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
+                {/* Desktop Reader Controls (Hidden on mobile) */}
+                <div className="hidden sm:flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
                   {/* Translation Switcher */}
                   <select
                     value={selectedTranslation}
@@ -856,6 +889,44 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                     )}
                   </button>
                 </div>
+
+                {/* Mobile Right Controls: Audio + Settings Drawer Trigger */}
+                <div className="flex sm:hidden items-center gap-1.5">
+                  <button
+                    onClick={handleToggleChapterAudio}
+                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition-all min-h-[36px] ${
+                      isPlayingChapterAudio
+                        ? 'bg-amber-500 text-stone-950 border-amber-600 shadow-glow'
+                        : 'bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 text-stone-700 dark:text-stone-300 border-stone-250 dark:border-stone-800'
+                    }`}
+                    title="Listen to chapter"
+                  >
+                    {isPlayingChapterAudio ? (
+                      <>
+                        <VolumeX className="w-3.5 h-3.5 animate-pulse" />
+                        <span>Pause</span>
+                      </>
+                    ) : (
+                      <>
+                        <Volume2 className="w-3.5 h-3.5 text-amber-500" />
+                        <span>Listen</span>
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundEngine.playClick();
+                      setShowReadingPrefs(true);
+                    }}
+                    className="p-2 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-250 dark:border-stone-800 text-stone-700 dark:text-stone-300 min-h-[36px] min-w-[36px] flex items-center justify-center transition-colors"
+                    title="Reading Settings (Translation, Voice, Font Size, Layout)"
+                    aria-label="Reading Settings"
+                  >
+                    <SlidersHorizontal className="w-4 h-4 text-amber-800 dark:text-amber-500" />
+                  </button>
+                </div>
                 {readingLayout === 'flow' && selectedVerse != null && chapterData?.verses.some((verse) => verse.verse === selectedVerse) && (
                   <div className="w-full pt-1 border-t border-stone-200 dark:border-stone-800">
                     <p className="text-xs font-semibold text-amber-800 dark:text-amber-400 mb-1.5">
@@ -865,6 +936,135 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                   </div>
                 )}
               </div>
+
+              {/* MOBILE READING PREFERENCES SLIDE-UP DRAWER */}
+              {showReadingPrefs && (
+                <div 
+                  className="sm:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex flex-col justify-end"
+                  onClick={() => setShowReadingPrefs(false)}
+                >
+                  <div 
+                    className="bg-white dark:bg-ink-raised border-t-2 border-amber-500/50 rounded-t-3xl p-5 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto"
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <div className="flex items-center justify-between pb-2 border-b border-stone-200 dark:border-stone-800">
+                      <h4 className="font-serif font-bold text-sm text-stone-900 dark:text-parchment-100 flex items-center gap-2">
+                        <SlidersHorizontal className="w-4 h-4 text-amber-500" />
+                        <span>Reading Preferences</span>
+                      </h4>
+                      <button
+                        onClick={() => setShowReadingPrefs(false)}
+                        className="p-2 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                        aria-label="Close preferences"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {/* Translation & Voice */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[11px] font-mono text-stone-500 dark:text-stone-400 block mb-1">Translation</label>
+                        <select
+                          value={selectedTranslation}
+                          onChange={(e) => {
+                            soundEngine.playClick();
+                            setSelectedTranslation(e.target.value as TranslationId);
+                          }}
+                          className="w-full px-3 py-2.5 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-250 dark:border-stone-800 text-xs font-mono font-medium text-stone-800 dark:text-stone-200 min-h-[44px]"
+                        >
+                          {BIBLE_TRANSLATIONS.map(t => (
+                            <option key={t.id} value={t.id}>
+                              {t.id.toUpperCase()} ({t.language.toUpperCase()})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-[11px] font-mono text-stone-500 dark:text-stone-400 block mb-1">Narrator Voice</label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            soundEngine.playClick();
+                            setIsVoiceModalOpen(true);
+                          }}
+                          className="w-full px-3 py-2.5 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-250 dark:border-stone-800 text-xs font-mono font-bold text-stone-800 dark:text-stone-200 flex items-center justify-between min-h-[44px]"
+                        >
+                          <span className="flex items-center gap-1.5 truncate">
+                            <Mic className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                            <span className="truncate">{NARRATOR_VOICES[currentVoice]?.name.split(' ')[0] || 'Adam'}</span>
+                          </span>
+                          <ChevronRight className="w-4 h-4 text-stone-400 shrink-0" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Font Size with 44px tap targets */}
+                    <div>
+                      <label className="text-[11px] font-mono text-stone-500 dark:text-stone-400 block mb-1">Text Size</label>
+                      <div className="grid grid-cols-4 gap-2">
+                        {([
+                          ['sm', 'Small'],
+                          ['base', 'Normal'],
+                          ['lg', 'Large'],
+                          ['xl', 'XL'],
+                        ] as const).map(([size, label]) => (
+                          <button
+                            key={size}
+                            type="button"
+                            onClick={() => chooseFontSize(size)}
+                            className={`py-3 px-1 rounded-xl text-xs font-mono min-h-[44px] flex items-center justify-center transition-all ${
+                              readingFontSize === size
+                                ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                                : 'bg-stone-100 dark:bg-stone-900 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-800'
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Layout Mode with 44px tap targets */}
+                    <div>
+                      <label className="text-[11px] font-mono text-stone-500 dark:text-stone-400 block mb-1">Layout Mode</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => chooseLayout('verses')}
+                          className={`py-3 px-3 rounded-xl text-xs font-bold min-h-[44px] flex items-center justify-center transition-all ${
+                            readingLayout === 'verses'
+                              ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                              : 'bg-stone-100 dark:bg-stone-900 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-800'
+                          }`}
+                        >
+                          Numbered Verses
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => chooseLayout('flow')}
+                          className={`py-3 px-3 rounded-xl text-xs font-bold min-h-[44px] flex items-center justify-center transition-all ${
+                            readingLayout === 'flow'
+                              ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                              : 'bg-stone-100 dark:bg-stone-900 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-800'
+                          }`}
+                        >
+                          Continuous Flow
+                        </button>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowReadingPrefs(false)}
+                      className="w-full py-3 rounded-xl bg-amber-500 text-stone-950 font-bold text-xs uppercase tracking-wider shadow-sm mt-2"
+                    >
+                      Done
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* SCRIPTURE TEXT CANVAS */}
               <div className="p-3.5 sm:p-8 md:p-12 max-w-3xl mx-auto w-full text-left overflow-x-hidden">

@@ -7,7 +7,6 @@ import {
   Bell, 
   Wind, 
   Flame, 
-  Music, 
   Volume2, 
   CheckCircle2, 
   ShieldAlert,
@@ -168,18 +167,6 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
                     <span className="hidden sm:inline">{t('medic.atmosphere')}</span>
                   </span>
                   <button
-                    onClick={() => handleSwitchAmbience('wind')}
-                    className={`px-2 py-1 rounded-lg transition-all text-xs flex items-center gap-1 ${
-                      currentAmbience === 'wind' 
-                        ? 'bg-amber-100 dark:bg-amber-600/30 text-amber-900 dark:text-amber-300 border border-amber-400 dark:border-amber-500/60 font-bold' 
-                        : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
-                    }`}
-                    title={t('medic.wind')}
-                  >
-                    <Wind className="w-3 h-3" />
-                    <span>{t('medic.wind')}</span>
-                  </button>
-                  <button
                     onClick={() => handleSwitchAmbience('campfire')}
                     className={`px-2 py-1 rounded-lg transition-all text-xs flex items-center gap-1 ${
                       currentAmbience === 'campfire' 
@@ -192,6 +179,18 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
                     <span>{t('medic.fire')}</span>
                   </button>
                   <button
+                    onClick={() => handleSwitchAmbience('wind')}
+                    className={`px-2 py-1 rounded-lg transition-all text-xs flex items-center gap-1 ${
+                      currentAmbience === 'wind' 
+                        ? 'bg-amber-100 dark:bg-amber-600/30 text-amber-900 dark:text-amber-300 border border-amber-400 dark:border-amber-500/60 font-bold' 
+                        : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                    }`}
+                    title={t('medic.wind')}
+                  >
+                    <Wind className="w-3 h-3" />
+                    <span>{t('medic.wind')}</span>
+                  </button>
+                  <button
                     onClick={() => handleSwitchAmbience('sanctuary')}
                     className={`px-2 py-1 rounded-lg transition-all text-xs flex items-center gap-1 ${
                       currentAmbience === 'sanctuary' 
@@ -200,7 +199,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
                     }`}
                     title={t('medic.sanctuary')}
                   >
-                    <Music className="w-3 h-3 text-blue-500" />
+                    <Sparkles className="w-3 h-3 text-amber-500" />
                     <span>{t('medic.sanctuary')}</span>
                   </button>
                 </div>

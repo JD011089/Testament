@@ -251,11 +251,12 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
               <span>{t('drive.narrator')}</span>
             </div>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 flex-wrap">
               {[
                 { id: 'cinematic', label: '🎬 Adam' },
                 { id: 'brotherhood', label: '🤝 Antoni' },
-                { id: 'scholar', label: '📜 George' }
+                { id: 'scholar', label: '📜 George' },
+                { id: 'grace', label: '🙏 Rachel' }
               ].map(p => (
                 <button
                   key={p.id}
