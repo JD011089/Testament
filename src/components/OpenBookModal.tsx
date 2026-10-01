@@ -21,6 +21,8 @@ import type { CanonBook } from '../data/canon';
 import { soundEngine, NARRATOR_VOICES, type NarratorProfile } from '../utils/audio';
 import { useModalLock } from '../utils/useModalLock';
 import { VoiceSelectorModal } from './VoiceSelectorModal';
+import { isFeatureEnabled } from '../config/featureFlags';
+import { paraphraseVerseSimpler } from '../utils/geminiFeatures';
 import { 
   fetchBibleChapter, 
   getBookChapterCount, 
@@ -118,6 +120,9 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
   const [activeReadingVerse, setActiveReadingVerse] = useState<number | null>(null);
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [currentVoice, setCurrentVoice] = useState<NarratorProfile>(() => soundEngine.getNarratorProfile());
+  const [simplerVerseFor, setSimplerVerseFor] = useState<number | null>(null);
+  const [simplerVerseMap, setSimplerVerseMap] = useState<Record<number, string>>({});
+  const [isLoadingSimplerVerse, setIsLoadingSimplerVerse] = useState<boolean>(false);
 
   const modalRef = useModalLock(book !== null);
   const readerScrollRef = useRef<HTMLDivElement | null>(null);
@@ -373,12 +378,57 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
     setSelectedVerse(null);
   };
 
+  const handleRequestSimplerVerse = async (verseNum: number, text: string) => {
+    soundEngine.playSnap();
+    if (simplerVerseFor === verseNum) {
+      setSimplerVerseFor(null);
+      return;
+    }
+    setSimplerVerseFor(verseNum);
+    if (!simplerVerseMap[verseNum]) {
+      setIsLoadingSimplerVerse(true);
+      try {
+        const ref = `${book?.name || ''} ${selectedChapter}:${verseNum}`;
+        const res = await paraphraseVerseSimpler({ verseText: text, reference: ref });
+        setSimplerVerseMap(prev => ({ ...prev, [verseNum]: res }));
+      } catch (err) {
+        console.warn('Failed to simplify verse:', err);
+      } finally {
+        setIsLoadingSimplerVerse(false);
+      }
+    }
+  };
+
   const verseActions = (verseNum: number, text: string) => (
-    <div className="mt-2 flex flex-wrap gap-1.5" onClick={(event) => event.stopPropagation()}>
-      <button type="button" onClick={() => handleSendVerseToForge(verseNum, text)} className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold text-stone-700 dark:text-stone-200">Memorize</button>
-      <button type="button" onClick={() => handleSaveVerseToArsenal(verseNum, text)} className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold text-stone-700 dark:text-stone-200">Save</button>
-      <button type="button" onClick={() => handleSpeakSingleVerse(verseNum, text)} className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold text-stone-700 dark:text-stone-200">Listen</button>
-      <button type="button" onClick={() => handleCopyVerse(verseNum, text)} className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold text-stone-700 dark:text-stone-200">Copy</button>
+    <div className="mt-2 space-y-2" onClick={(event) => event.stopPropagation()}>
+      <div className="flex flex-wrap gap-1.5">
+        <button type="button" onClick={() => handleSendVerseToForge(verseNum, text)} className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold text-stone-700 dark:text-stone-200">Memorize</button>
+        <button type="button" onClick={() => handleSaveVerseToArsenal(verseNum, text)} className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold text-stone-700 dark:text-stone-200">Save</button>
+        <button type="button" onClick={() => handleSpeakSingleVerse(verseNum, text)} className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold text-stone-700 dark:text-stone-200">Listen</button>
+        <button type="button" onClick={() => handleCopyVerse(verseNum, text)} className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold text-stone-700 dark:text-stone-200">Copy</button>
+        {isFeatureEnabled('simplerVerse') && (
+          <button
+            type="button"
+            onClick={() => handleRequestSimplerVerse(verseNum, text)}
+            className="px-2.5 py-1.5 rounded-lg bg-amber-100 dark:bg-amber-500/20 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold text-amber-800 dark:text-amber-300 border border-amber-300/60 dark:border-amber-500/40 flex items-center gap-1 cursor-pointer transition-colors"
+          >
+            <Sparkles className="w-3 h-3 text-amber-500" />
+            <span>{simplerVerseFor === verseNum ? 'Hide simpler' : 'Say it simpler'}</span>
+          </button>
+        )}
+      </div>
+
+      {isFeatureEnabled('simplerVerse') && simplerVerseFor === verseNum && (
+        <div className="p-3 rounded-xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/60 text-left space-y-1 animate-fadeIn">
+          <div className="flex items-center gap-1 text-[10px] font-mono font-bold text-amber-800 dark:text-amber-400 uppercase tracking-wider">
+            <Sparkles className="w-3 h-3 text-amber-500" />
+            <span>Simpler Words • AI Reflection (Not Scripture)</span>
+          </div>
+          <p className="text-xs sm:text-sm font-reading text-stone-800 dark:text-stone-100 leading-relaxed font-medium">
+            {isLoadingSimplerVerse && !simplerVerseMap[verseNum] ? 'Translating into plain everyday words…' : simplerVerseMap[verseNum]}
+          </p>
+        </div>
+      )}
     </div>
   );
 

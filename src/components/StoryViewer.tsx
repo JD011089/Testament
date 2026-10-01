@@ -34,6 +34,10 @@ import { TacticalNexusCard } from './TacticalNexusCard';
 import { useLanguage } from '../context/LanguageContext';
 import type { QuestCustomEvaluation } from '../utils/questInstinctEngine';
 import { evaluateQuestCustomResponseWithGemini } from '../utils/geminiDilemmaService';
+import { isFeatureEnabled } from '../config/featureFlags';
+import { askPassageQuestion, generateActPrayer, paraphraseVerseSimpler } from '../utils/geminiFeatures';
+import { getTodayBattlefieldId } from '../utils/battlefield';
+import { BATTLEFIELD_OPTIONS } from './BattlefieldCheckInModal';
 
 const UNIVERSAL_BIBLICAL_TERMS: TermExplainer[] = [
   {
@@ -115,6 +119,21 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
   const [hasSubmittedQuiz, setHasSubmittedQuiz] = useState<boolean>(false);
   const [activeStepIndex, setActiveStepIndex] = useState<number>(1);
   const [actCompletionData, setActCompletionData] = useState<{ actNumber: number; isLastAct: boolean; relicName?: string } | null>(null);
+
+  // Feature 1: "What does this mean?" Passage Q&A
+  const [qaQuestion, setQaQuestion] = useState<string>('');
+  const [qaAnswer, setQaAnswer] = useState<string | null>(null);
+  const [isAnsweringQa, setIsAnsweringQa] = useState<boolean>(false);
+  const [showQaBox, setShowQaBox] = useState<boolean>(false);
+
+  // Feature 2: Personal Prayer after Act
+  const [actPrayer, setActPrayer] = useState<string | null>(null);
+  const [isLoadingPrayer, setIsLoadingPrayer] = useState<boolean>(false);
+
+  // Feature 3: Say it Simpler
+  const [simplerVerseText, setSimplerVerseText] = useState<string | null>(null);
+  const [isLoadingSimplerVerse, setIsLoadingSimplerVerse] = useState<boolean>(false);
+  const [showSimplerVerse, setShowSimplerVerse] = useState<boolean>(false);
 
   const act: StoryAct = quest.acts[currentActIndex];
   const actGlossary: TermExplainer[] = useMemo(() => [
@@ -249,6 +268,11 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
       setShowNoteInput(false);
     }
     setActiveStepIndex(1);
+    setQaQuestion('');
+    setQaAnswer(null);
+    setShowQaBox(false);
+    setSimplerVerseText(null);
+    setShowSimplerVerse(false);
   }, [act.id]);
 
   const selectedChoice = act.choices.find(c => c.id === selectedChoiceId);
@@ -372,6 +396,47 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     }
   };
 
+  const handleToggleSimplerVerse = async () => {
+    soundEngine.playSnap();
+    if (showSimplerVerse) {
+      setShowSimplerVerse(false);
+      return;
+    }
+    setShowSimplerVerse(true);
+    if (!simplerVerseText) {
+      setIsLoadingSimplerVerse(true);
+      try {
+        const verseText = questAnchorVerse?.text || act.unlockedScripture.text;
+        const reference = questAnchorVerse?.reference || act.unlockedScripture.reference;
+        const res = await paraphraseVerseSimpler({ verseText, reference });
+        setSimplerVerseText(res);
+      } catch (err) {
+        console.warn('Failed to paraphrase verse:', err);
+      } finally {
+        setIsLoadingSimplerVerse(false);
+      }
+    }
+  };
+
+  const handleAskQa = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!qaQuestion.trim() || isAnsweringQa) return;
+    soundEngine.playSnap();
+    setIsAnsweringQa(true);
+    try {
+      const passageText = passageVerses && passageVerses.length > 0
+        ? passageVerses.map(v => `${v.verse}. ${v.text}`).join(' ')
+        : (questAnchorVerse?.text || act.unlockedScripture.text);
+      const reference = questAnchorVerse?.reference || act.unlockedScripture.reference;
+      const res = await askPassageQuestion({ passageText, reference, userQuestion: qaQuestion });
+      setQaAnswer(res);
+    } catch (err) {
+      console.warn('Failed to answer passage question:', err);
+    } finally {
+      setIsAnsweringQa(false);
+    }
+  };
+
   // Present celebration screen with explicit choices upon completing an act
   const handleFinishAct = () => {
     if (!selectedChoiceId) return;
@@ -392,6 +457,28 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
       isLastAct,
       relicName: quest.relicReward?.name
     });
+
+    if (isFeatureEnabled('actPrayer')) {
+      setIsLoadingPrayer(true);
+      setActPrayer(null);
+      const todayBfId = getTodayBattlefieldId();
+      const bfOption = BATTLEFIELD_OPTIONS.find(b => b.id === todayBfId);
+      const struggleText = bfOption ? `${bfOption.title}: ${bfOption.subtitle}` : undefined;
+      generateActPrayer({
+        storyTitle: quest.title,
+        actNumber: currentActIndex + 1,
+        actTitle: act.actTitle,
+        verseText: questAnchorVerse?.text || act.unlockedScripture.text,
+        reference: questAnchorVerse?.reference || act.unlockedScripture.reference,
+        struggle: struggleText,
+      }).then(prayer => {
+        setActPrayer(prayer);
+      }).catch(err => {
+        console.warn('Failed to generate act prayer:', err);
+      }).finally(() => {
+        setIsLoadingPrayer(false);
+      });
+    }
   };
 
   // Stop audio on unmount
@@ -1074,28 +1161,55 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   </div>
                 </div>
 
-                <button
-                  onClick={handleToggleSpeakScripture}
-                  disabled={!selectedChoiceId}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-850 hover:bg-amber-500 dark:hover:bg-amber-600 hover:text-stone-950 transition-colors disabled:opacity-40 disabled:pointer-events-none"
-                >
-                  {isSpeakingScripture ? (
-                    <>
-                      <VolumeX className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 animate-pulse" />
-                      <span>Stop</span>
-                    </>
-                  ) : (
-                    <>
-                      <Volume2 className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
-                      <span>Listen</span>
-                    </>
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  {isFeatureEnabled('simplerVerse') && selectedChoiceId && (
+                    <button
+                      type="button"
+                      onClick={handleToggleSimplerVerse}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/15 border border-amber-300/70 dark:border-amber-500/30 hover:bg-amber-500 hover:text-stone-950 transition-colors cursor-pointer"
+                      title="Show 1-2 sentence plain language paraphrase"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                      <span>{showSimplerVerse ? 'Original words' : 'Say it simpler'}</span>
+                    </button>
                   )}
-                </button>
+
+                  <button
+                    onClick={handleToggleSpeakScripture}
+                    disabled={!selectedChoiceId}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-850 hover:bg-amber-500 dark:hover:bg-amber-600 hover:text-stone-950 transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                  >
+                    {isSpeakingScripture ? (
+                      <>
+                        <VolumeX className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 animate-pulse" />
+                        <span>Stop</span>
+                      </>
+                    ) : (
+                      <>
+                        <Volume2 className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
+                        <span>Listen</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
 
               <h3 className="text-base font-serif font-bold text-amber-800 dark:text-amber-300 mb-2">
                 {questAnchorVerse?.reference || act.unlockedScripture.reference}
               </h3>
+
+              {/* FEATURE 3: Plain-language verse paraphrase */}
+              {showSimplerVerse && (
+                <div className="my-3 p-3.5 rounded-xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/60 space-y-1.5 text-left animate-fadeIn">
+                  <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold text-amber-800 dark:text-amber-400 uppercase tracking-wider">
+                    <Sparkles className="w-3 h-3 text-amber-500" />
+                    <span>Simpler Words • AI Reflection (Not Scripture)</span>
+                  </div>
+                  <p className="text-sm md:text-base font-reading text-stone-900 dark:text-stone-100 leading-relaxed font-medium">
+                    {isLoadingSimplerVerse ? 'Translating into plain everyday words…' : simplerVerseText}
+                  </p>
+                </div>
+              )}
 
               {!selectedChoiceId ? (
                 <p className="text-sm text-stone-600 dark:text-stone-400 italic">
@@ -1147,6 +1261,56 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   <strong className="text-amber-800 dark:text-amber-400">Context: </strong>
                   {act.unlockedScripture.deepDive}
                 </p>
+              )}
+
+              {/* FEATURE 1: "What does this mean?" passage Q&A */}
+              {isFeatureEnabled('passageQA') && selectedChoiceId && (
+                <div className="mt-4 pt-3 border-t border-stone-200 dark:border-stone-800 text-left">
+                  <button
+                    type="button"
+                    onClick={() => setShowQaBox(prev => !prev)}
+                    className="flex items-center justify-between w-full py-1 text-xs font-bold text-amber-800 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors cursor-pointer"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <HelpCircle className="w-3.5 h-3.5 text-amber-500" />
+                      <span>What does this mean? Ask a question</span>
+                    </span>
+                    <span className="text-[11px] font-mono">{showQaBox ? '− Close' : '+ Ask'}</span>
+                  </button>
+
+                  {showQaBox && (
+                    <div className="mt-2.5 p-3.5 rounded-xl bg-stone-50 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 space-y-2.5 animate-fadeIn">
+                      <form onSubmit={handleAskQa} className="flex gap-2">
+                        <input
+                          type="text"
+                          value={qaQuestion}
+                          onChange={(e) => setQaQuestion(e.target.value)}
+                          placeholder="e.g. Why did Jesus sleep during a storm? What does peace mean here?"
+                          className="flex-1 px-3 py-2 rounded-lg text-xs bg-white dark:bg-stone-950 border border-stone-250 dark:border-stone-750 text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                        />
+                        <button
+                          type="submit"
+                          disabled={!qaQuestion.trim() || isAnsweringQa}
+                          className="px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs shrink-0 disabled:opacity-50 transition-all flex items-center gap-1 cursor-pointer"
+                        >
+                          {isAnsweringQa ? 'Thinking…' : 'Ask'}
+                        </button>
+                      </form>
+
+                      {qaAnswer && (
+                        <div className="pt-2 border-t border-stone-200/80 dark:border-stone-800 text-left space-y-1">
+                          <div className="text-[10px] font-mono font-bold text-amber-800 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1">
+                            <Sparkles className="w-3 h-3 text-amber-500" />
+                            <span>Grounded Answer • AI Reflection (Not Scripture)</span>
+                          </div>
+                          <p className="text-xs sm:text-sm text-stone-800 dark:text-stone-200 leading-relaxed font-sans">
+                            {qaAnswer}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               )}
 
               {/* Memory Pulse Reminders Call to Action */}
@@ -1437,6 +1601,23 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   : `Great job! You earned +50 XP and finished this part of the story.`}
               </p>
             </div>
+
+            {/* FEATURE 2: Personal Prayer After Each Act */}
+            {isFeatureEnabled('actPrayer') && (
+              <div className="p-4 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-800/80 text-left space-y-1.5 shadow-xs">
+                <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-amber-800 dark:text-amber-400 uppercase tracking-wider">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Personal Prayer (AI Reflection • Not Scripture)</span>
+                </div>
+                {isLoadingPrayer ? (
+                  <p className="text-xs text-stone-500 italic">Preparing your personal prayer…</p>
+                ) : actPrayer ? (
+                  <p className="text-xs sm:text-sm text-stone-800 dark:text-stone-200 font-serif italic leading-relaxed">
+                    "{actPrayer}"
+                  </p>
+                ) : null}
+              </div>
+            )}
 
             <div className="space-y-3 pt-2">
               {!actCompletionData.isLastAct ? (
