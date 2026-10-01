@@ -42,10 +42,38 @@ interface ReleaseMilestone {
 
 const ACTIVE_RELEASES: ReleaseMilestone[] = [
   {
-    version: 'v1.17.1',
-    tagline: 'Journey Stability, Memoized Scripture Loader & UX Polish',
+    version: 'v1.18.0',
+    tagline: 'Gemini-Powered Engagement: Plain-Language Reflections & Adaptive Study',
     dateBadge: 'Current Release',
     isLatest: true,
+    highlights: [
+      {
+        icon: <Brain className="w-4 h-4 text-amber-400" />,
+        title: '"What Does This Mean?" Passage Q&A',
+        description: 'Ask questions directly on story passages and get concise, plain-language answers grounded strictly in the Scripture text.'
+      },
+      {
+        icon: <Sparkles className="w-4 h-4 text-amber-400" />,
+        title: '"Say It Simpler" One-Tap Paraphrases',
+        description: 'Tap any verse across story quests and the full library reader for an instant 10-year-old friendly explanation without confusing terminology.'
+      },
+      {
+        icon: <Target className="w-4 h-4 text-amber-400" />,
+        title: 'Personal Act Prayers & Socratic Probing',
+        description: 'End each story act with an authentic prayer connecting Scripture imagery to your daily struggle, plus adaptive follow-ups in Dilemma Simulator.'
+      },
+      {
+        icon: <BookOpen className="w-4 h-4 text-amber-400" />,
+        title: 'Age & Life-Stage Dilemma Contexts',
+        description: 'Adapt ethical dilemmas between Student, Workplace, and Family settings while preserving the core moral tension and choices.'
+      }
+    ]
+  },
+  {
+    version: 'v1.17.1',
+    tagline: 'Journey Stability, Memoized Scripture Loader & UX Polish',
+    dateBadge: 'Previous Release',
+    isLatest: false,
     highlights: [
       {
         icon: <Sparkles className="w-4 h-4 text-amber-400" />,
@@ -564,7 +592,7 @@ const ARCHIVED_RELEASES: ReleaseMilestone[] = [
 
 export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose }) => {
   const modalRef = useModalLock(isOpen);
-  const [activeTab, setActiveTab] = useState<string>('v1.17.1');
+  const [activeTab, setActiveTab] = useState<string>('v1.18.0');
   const [showArchive, setShowArchive] = useState(false);
 
   const RELEASES = showArchive ? [...ACTIVE_RELEASES, ...ARCHIVED_RELEASES] : ACTIVE_RELEASES;
@@ -572,7 +600,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
   const handleDismiss = () => {
     soundEngine.playClick();
     try {
-      localStorage.setItem('testament_last_seen_version', '1.17.1');
+      localStorage.setItem('testament_last_seen_version', '1.18.0');
     } catch {
       // ignore
     }
@@ -615,7 +643,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
                   Field Update Dispatches
                 </h2>
                 <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 font-bold">
-                  v1.17.1 Live
+                  v1.18.0 Live
                 </span>
               </div>
 
@@ -729,7 +757,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
         {/* MODAL FOOTER */}
         <div className="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800/90 bg-stone-50 dark:bg-black/40 flex items-center justify-between gap-3 relative z-10">
           <div className="text-xs font-mono text-stone-500 dark:text-stone-400 hidden sm:block">
-            Testament v1.17.1 • The Living Word
+            Testament v1.18.0 • The Living Word
           </div>
 
 
