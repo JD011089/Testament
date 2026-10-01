@@ -9,7 +9,10 @@ import {
   Clock, 
   Brain, 
   Smartphone, 
-  Sparkles 
+  Sparkles,
+  Plus,
+  Trash2,
+  BookMarked
 } from 'lucide-react';
 import { useModalLock } from '../utils/useModalLock';
 import type { MemoryVerse, RecallPromptStyle, NotificationSettings } from '../types';
@@ -19,11 +22,12 @@ import {
   requestNotificationPermission, 
   getNotificationPermission, 
   sendTestMemoryNotification, 
-  calculateDailySlots,
   setActiveMemoryVerse,
   getNextScheduledReminder,
   formatSlot12h,
-  syncNextAlarmToServiceWorker
+  syncNextAlarmToServiceWorker,
+  saveCustomScheduledSlots,
+  getTrainingVerseQueue
 } from '../utils/notificationEngine';
 import { sendTestUpdateNotification } from '../utils/pwaUpdateEngine';
 import { getAllVerses, getVerseById } from '../utils/verseRegistry';
@@ -72,12 +76,6 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
     }
   }
 
-  // Update calculated slots live when frequency or hours change
-  const currentSlots = calculateDailySlots(
-    settings.frequencyPerDay,
-    settings.startHour,
-    settings.endHour
-  );
   const nextReminder = getNextScheduledReminder();
 
   const handleRequestPermission = async () => {
@@ -90,14 +88,32 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
     }
   };
 
-  const handleFrequencyChange = (freq: number) => {
+  const trainingQueue = getTrainingVerseQueue();
+
+  const handleUpdateSlotTime = (index: number, newTime: string) => {
+    if (!newTime) return;
     soundEngine.playSnap();
-    const updatedSlots = calculateDailySlots(freq, settings.startHour, settings.endHour);
-    setSettings(prev => ({
-      ...prev,
-      frequencyPerDay: freq,
-      scheduledSlots: updatedSlots
-    }));
+    const existing = [...(settings.scheduledSlots || [])];
+    existing[index] = newTime;
+    const updated = saveCustomScheduledSlots(existing);
+    setSettings(updated);
+  };
+
+  const handleAddCustomSlot = () => {
+    soundEngine.playSnap();
+    const existing = settings.scheduledSlots || [];
+    const newTime = existing.length > 0 ? '16:00' : '09:00';
+    const updated = saveCustomScheduledSlots([...existing, newTime]);
+    setSettings(updated);
+  };
+
+  const handleRemoveCustomSlot = (index: number) => {
+    soundEngine.playSnap();
+    const existing = settings.scheduledSlots || [];
+    if (existing.length <= 1) return;
+    const updated = existing.filter((_, i) => i !== index);
+    const updatedSettings = saveCustomScheduledSlots(updated);
+    setSettings(updatedSettings);
   };
 
   const handlePromptStyleChange = (style: RecallPromptStyle) => {
@@ -186,12 +202,6 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
     });
     await syncNextAlarmToServiceWorker();
     onClose();
-  };
-
-  const formatHour = (hour: number) => {
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    const h = hour % 12 === 0 ? 12 : hour % 12;
-    return `${h}:00 ${ampm}`;
   };
 
   useEffect(() => {
@@ -337,93 +347,113 @@ export const MemoryPulseModal: React.FC<MemoryPulseModalProps> = ({
               </div>
             )}
 
-            {/* Frequency Selector: How many times a day? */}
-            <div className="space-y-2">
-              <label className="text-xs font-mono font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300 flex items-center justify-between">
-                <span>Reminders Per Day</span>
-                <span className="text-amber-800 dark:text-amber-400 font-bold">{settings.frequencyPerDay} times daily</span>
-              </label>
-
-              <div className="grid grid-cols-4 gap-2">
-                {[2, 3, 4, 5].map(freq => (
-                  <button
-                    key={freq}
-                    onClick={() => handleFrequencyChange(freq)}
-                    className={`py-2 px-1 rounded-xl text-center text-xs font-bold transition-all ${
-                      settings.frequencyPerDay === freq
-                        ? 'bg-amber-500 text-stone-950 shadow-sm'
-                        : 'bg-stone-200/60 dark:bg-stone-900 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-800'
-                    }`}
-                  >
-                    <div className="text-sm font-black">{freq}x</div>
-                    <div className="text-[11px] font-normal opacity-80">
-                      {freq === 2 ? 'Morning/Eve' : freq === 3 ? 'Spaced (Rec)' : freq === 4 ? 'Steady' : 'Sprint'}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Waking Hours Span */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs font-mono text-stone-700 dark:text-stone-300">
-                <span className="font-bold uppercase tracking-wider">Waking Hours Window</span>
-                <span className="text-amber-800 dark:text-amber-400 font-semibold">
-                  {formatHour(settings.startHour)} – {formatHour(settings.endHour)}
+            {/* Custom Daily Reminder Schedule (User Freedom: No Forced Times) */}
+            <div className="space-y-3 p-4 rounded-2xl bg-stone-100/70 dark:bg-ink-overlay border border-stone-200/80 dark:border-stone-800">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h5 className="text-xs font-mono font-bold uppercase tracking-wider text-stone-900 dark:text-parchment-100 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                    <span>Your Custom Reminder Times</span>
+                  </h5>
+                  <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
+                    You choose the exact times you want to be reminded. No forced schedules.
+                  </p>
+                </div>
+                <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800/50">
+                  {(settings.scheduledSlots || []).length} Daily
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="p-2.5 rounded-xl bg-stone-100/70 dark:bg-stone-900">
-                  <label className="text-[11px] text-stone-500 dark:text-stone-400 block mb-1">Start Time</label>
-                  <select
-                    value={settings.startHour}
-                    onChange={(e) => {
-                      const val = Number(e.target.value);
-                      const updatedSlots = calculateDailySlots(settings.frequencyPerDay, val, settings.endHour);
-                      setSettings(prev => ({ ...prev, startHour: val, scheduledSlots: updatedSlots }));
-                    }}
-                    className="w-full bg-white dark:bg-stone-950 rounded-lg p-1.5 text-stone-800 dark:text-stone-200 text-xs focus:outline-none focus:ring-1 focus:ring-amber-500"
+              {/* Slot list with native time pickers */}
+              <div className="space-y-2">
+                {(settings.scheduledSlots || []).map((slot, idx) => (
+                  <div 
+                    key={idx}
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 shadow-xs"
                   >
-                    {[6, 7, 8, 9, 10].map(h => (
-                      <option key={h} value={h}>{formatHour(h)}</option>
-                    ))}
-                  </select>
-                </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono font-semibold text-stone-500 dark:text-stone-400 w-16">
+                        Slot {idx + 1}:
+                      </span>
+                      <input
+                        type="time"
+                        value={slot}
+                        onChange={(e) => handleUpdateSlotTime(idx, e.target.value)}
+                        className="bg-stone-100 dark:bg-stone-900 text-stone-900 dark:text-parchment-100 text-xs font-mono font-bold px-2.5 py-1.5 rounded-lg border border-stone-200 dark:border-stone-800 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                      />
+                      <span className="text-xs font-mono text-amber-800 dark:text-amber-400 font-bold ml-1">
+                        ({formatSlot12h(slot)})
+                      </span>
+                    </div>
 
-                <div className="p-2.5 rounded-xl bg-stone-100/70 dark:bg-stone-900">
-                  <label className="text-[11px] text-stone-500 dark:text-stone-400 block mb-1">Quiet Cutoff (End)</label>
-                  <select
-                    value={settings.endHour}
-                    onChange={(e) => {
-                      const val = Number(e.target.value);
-                      const updatedSlots = calculateDailySlots(settings.frequencyPerDay, settings.startHour, val);
-                      setSettings(prev => ({ ...prev, endHour: val, scheduledSlots: updatedSlots }));
-                    }}
-                    className="w-full bg-white dark:bg-stone-950 rounded-lg p-1.5 text-stone-800 dark:text-stone-200 text-xs focus:outline-none focus:ring-1 focus:ring-amber-500"
-                  >
-                    {[19, 20, 21, 22, 23].map(h => (
-                      <option key={h} value={h}>{formatHour(h)}</option>
-                    ))}
-                  </select>
-                </div>
+                    {(settings.scheduledSlots || []).length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveCustomSlot(idx)}
+                        title="Remove this reminder time"
+                        className="p-1.5 text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-900 transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                ))}
               </div>
 
-              {/* Real-time schedule badges */}
-              <div className="pt-1 flex items-center gap-1.5 flex-wrap">
-                <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400">Scheduled:</span>
-                {currentSlots.map((slot, idx) => (
-                  <span key={idx} className="text-[11px] font-mono px-2 py-0.5 rounded bg-stone-200/60 dark:bg-stone-850 text-amber-800 dark:text-amber-300">
-                    {formatSlot12h(slot)}
+              {/* Add Slot Button */}
+              <div className="flex items-center justify-between pt-1">
+                <button
+                  type="button"
+                  onClick={handleAddCustomSlot}
+                  className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-200/80 hover:bg-stone-300 dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-800 dark:text-stone-200 transition-colors flex items-center gap-1.5"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add Reminder Time</span>
+                </button>
+
+                {nextReminder && (
+                  <div className="flex items-center gap-1.5 text-[11px] font-mono text-amber-800 dark:text-amber-300">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>Next: <strong>{nextReminder.label}</strong></span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Verses in Daily Rotation (Multi-verse training queue) */}
+            <div className="space-y-2 p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <BookMarked className="w-4 h-4 text-amber-700 dark:text-amber-400" />
+                  <h5 className="text-xs font-mono font-bold uppercase tracking-wider text-amber-950 dark:text-amber-300">
+                    Verses in Rotation ({trainingQueue.length})
+                  </h5>
+                </div>
+                <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400">
+                  Rotates per prompt
+                </span>
+              </div>
+
+              <p className="text-[11px] text-stone-600 dark:text-stone-400 leading-relaxed">
+                Reminders rotate through all your saved training verses across your daily times, so each reminder tests a different scripture throughout the day.
+              </p>
+
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {trainingQueue.map((verse) => (
+                  <span
+                    key={verse.id}
+                    className="inline-flex items-center gap-1 text-[11px] font-mono font-bold px-2.5 py-1 rounded-lg bg-white dark:bg-stone-900 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60 shadow-xs"
+                  >
+                    <span>⚔️</span>
+                    <span>{verse.reference}</span>
                   </span>
                 ))}
               </div>
 
-              {nextReminder && (
-                <div className="flex items-center gap-1.5 text-[11px] font-mono text-amber-900 dark:text-amber-300/90 bg-amber-500/10 dark:bg-amber-950/40 rounded-lg px-2.5 py-1.5 mt-2">
-                  <Clock className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 shrink-0" />
-                  <span>Next scheduled pulse: <strong className="text-amber-800 dark:text-amber-200">{nextReminder.label}</strong> ({nextReminder.remainingFormatted})</span>
-                </div>
+              {trainingQueue.length <= 1 && (
+                <p className="text-[11px] text-stone-500 dark:text-stone-400 italic pt-1">
+                  Tip: Bookmark or practice verses in Word Forge or the 66-Book Canon to add them to your daily training rotation.
+                </p>
               )}
             </div>
 

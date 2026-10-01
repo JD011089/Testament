@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { REAL_LIFE_DILEMMAS } from '../data/dilemmas';
 import type { RealLifeDilemma } from '../data/dilemmas';
-import { evaluateUserPlay, evaluateSocraticTurn2 } from '../utils/heartEvaluation';
 import type { HeartEvaluationResult, TemperamentProfile } from '../utils/heartEvaluation';
 import { soundEngine } from '../utils/audio';
-import { getDailyDilemma } from '../utils/dailyEngine';
+import { getDailyDilemma, getTodayDateKey } from '../utils/dailyEngine';
+import { getDynamicDailyDilemma, evaluateUserPlayWithGemini, evaluateSocraticTurn2WithGemini } from '../utils/geminiDilemmaService';
 import confetti from 'canvas-confetti';
 import { TacticalNexusCard } from './TacticalNexusCard';
 import { 
@@ -41,9 +41,38 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
 }) => {
   const { t, language } = useLanguage();
   const dailyDilemma = getDailyDilemma(0, language);
-  const [selectedDilemmaId, setSelectedDilemmaId] = useState<string>(() => {
-    return targetDilemmaId || dailyDilemma.id;
+  const [dynamicDilemma, setDynamicDilemma] = useState<RealLifeDilemma>(() => {
+    try {
+      const todayKey = getTodayDateKey();
+      const cached = localStorage.getItem(`testament_gemini_dilemma_${todayKey}`);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.id) return parsed;
+      }
+    } catch {
+      // ignore
+    }
+    return dailyDilemma;
   });
+
+  const [selectedDilemmaId, setSelectedDilemmaId] = useState<string>(() => {
+    return targetDilemmaId || dynamicDilemma.id || dailyDilemma.id;
+  });
+
+  React.useEffect(() => {
+    let cancelled = false;
+    getDynamicDailyDilemma(dailyDilemma).then((res) => {
+      if (!cancelled && res && res.id) {
+        setDynamicDilemma(res);
+        if (!targetDilemmaId && (selectedDilemmaId === dailyDilemma.id || selectedDilemmaId.startsWith('gemini-'))) {
+          setSelectedDilemmaId(res.id);
+        }
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [language]);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [activeMode, setActiveMode] = useState<'heart_check' | 'playbook'>('heart_check');
   const [isCampaignFocus, setIsCampaignFocus] = useState<boolean>(() => !!targetDilemmaId);
@@ -53,6 +82,8 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
   const [selectedFeeling, setSelectedFeeling] = useState<string | null>(null);
   const [evaluationResult, setEvaluationResult] = useState<HeartEvaluationResult | null>(null);
   const [isSpeakingScripture, setIsSpeakingScripture] = useState<boolean>(false);
+  const [isEvaluating, setIsEvaluating] = useState<boolean>(false);
+  const [isEvaluatingTurn2, setIsEvaluatingTurn2] = useState<boolean>(false);
 
   // Persistence
   const [completedDilemmas, setCompletedDilemmas] = useState<string[]>(() => {
@@ -119,11 +150,16 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
     'Betrayal & Integrity'
   ];
 
-  const filteredDilemmas = REAL_LIFE_DILEMMAS.filter(d => 
+  const allAvailableDilemmas: RealLifeDilemma[] = [
+    ...(dynamicDilemma.id.startsWith('gemini-') && !REAL_LIFE_DILEMMAS.some(d => d.id === dynamicDilemma.id) ? [dynamicDilemma] : []),
+    ...REAL_LIFE_DILEMMAS
+  ];
+
+  const filteredDilemmas = allAvailableDilemmas.filter(d => 
     selectedCategory === 'All' || d.category === selectedCategory
   ).map(d => getLocalizedDilemma(d, language));
 
-  const rawDilemma: RealLifeDilemma = REAL_LIFE_DILEMMAS.find(d => d.id === selectedDilemmaId) || dailyDilemma;
+  const rawDilemma: RealLifeDilemma = allAvailableDilemmas.find(d => d.id === selectedDilemmaId) || dynamicDilemma || dailyDilemma;
   const dilemma: RealLifeDilemma = getLocalizedDilemma(rawDilemma, language);
 
   // Reset inputs when switching dilemmas
@@ -142,93 +178,150 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
     };
   }, []);
 
+  const bottomSentinelRef = useRef<HTMLDivElement | null>(null);
+  const dispatchedDilemmasRef = useRef<Set<string>>(new Set());
+
+  // Trigger campaign next task prompt ONLY when user scrolls down to the bottom of the evaluated dilemma
+  useEffect(() => {
+    if (!evaluationResult) return;
+
+    const checkAndDispatch = () => {
+      if (dispatchedDilemmasRef.current.has(dilemma.id)) return;
+      if (bottomSentinelRef.current) {
+        const rect = bottomSentinelRef.current.getBoundingClientRect();
+        if (rect.top <= window.innerHeight + 50 && rect.bottom >= 0) {
+          dispatchedDilemmasRef.current.add(dilemma.id);
+          window.dispatchEvent(
+            new CustomEvent('testament-dilemma-completed', { detail: { dilemmaId: dilemma.id } })
+          );
+        }
+      }
+    };
+
+    const sentinel = bottomSentinelRef.current;
+    let observer: IntersectionObserver | null = null;
+
+    if (sentinel && typeof IntersectionObserver !== 'undefined') {
+      observer = new IntersectionObserver(
+        (entries) => {
+          const [entry] = entries;
+          if (entry && entry.isIntersecting) {
+            checkAndDispatch();
+          }
+        },
+        {
+          root: null,
+          rootMargin: '0px 0px 50px 0px',
+          threshold: 0.1,
+        }
+      );
+      observer.observe(sentinel);
+    }
+
+    window.addEventListener('scroll', checkAndDispatch, { passive: true });
+
+    return () => {
+      if (observer) observer.disconnect();
+      window.removeEventListener('scroll', checkAndDispatch);
+    };
+  }, [evaluationResult, dilemma.id]);
+
   const handleQuickFeelingSelect = (feeling: string) => {
     soundEngine.playSnap();
     setSelectedFeeling(prev => prev === feeling ? null : feeling);
   };
 
-  const handleSubmitHeartCheck = (e: React.FormEvent) => {
+  const handleSubmitHeartCheck = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userText.trim() && !selectedFeeling) return;
+    if ((!userText.trim() && !selectedFeeling) || isEvaluating) return;
 
     soundEngine.playSnap();
-    const result = evaluateUserPlay(userText, selectedFeeling, dilemma);
-    setEvaluationResult(result);
+    setIsEvaluating(true);
 
-    // Save user's answer and evaluation so it's preserved on review (Requirement 3 & 4)
     try {
-      const stored = localStorage.getItem('testament_dilemma_answers');
-      const answers = stored ? JSON.parse(stored) : {};
-      answers[dilemma.id] = { userText, selectedFeeling, evaluationResult: result };
-      localStorage.setItem('testament_dilemma_answers', JSON.stringify(answers));
-    } catch (err) {
-      console.warn('Failed to save dilemma answer', err);
-    }
+      const result = await evaluateUserPlayWithGemini(userText, selectedFeeling, dilemma);
+      setEvaluationResult(result);
 
-    if (!completedDilemmas.includes(dilemma.id)) {
-      soundEngine.playVictory();
-      confetti({
-        particleCount: 65,
-        spread: 70,
-        origin: { y: 0.7 },
-        colors: ['#f59e0b', '#10b981', '#6366f1']
-      });
-      const updated = [...completedDilemmas, dilemma.id];
-      setCompletedDilemmas(updated);
-      localStorage.setItem('testament_completed_dilemmas', JSON.stringify(updated));
-      onRewardXP(50);
-    }
-
-    // Dispatch event to advance Daily Campaign and trigger Next Task prompt (Requirement 5)
-    window.dispatchEvent(new CustomEvent('testament-dilemma-completed', { detail: { dilemmaId: dilemma.id } }));
-  };
-
-  const handleSubmitSocraticTurn2 = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!turn2Text.trim()) return;
-
-    soundEngine.playSnap();
-    const { followUpFeedback, temperament } = evaluateSocraticTurn2(userText, turn2Text, dilemma);
-    setTurn2Feedback(followUpFeedback);
-    setTemperamentProfile(temperament);
-
-    const alreadyRewarded = (() => {
+      // Save user's answer and evaluation so it's preserved on review (Requirement 3 & 4)
       try {
         const stored = localStorage.getItem('testament_dilemma_answers');
         const answers = stored ? JSON.parse(stored) : {};
-        return Boolean(answers[dilemma.id]?.turn2Rewarded);
-      } catch {
-        return false;
+        answers[dilemma.id] = { userText, selectedFeeling, evaluationResult: result };
+        localStorage.setItem('testament_dilemma_answers', JSON.stringify(answers));
+      } catch (err) {
+        console.warn('Failed to save dilemma answer', err);
       }
-    })();
+
+      if (!completedDilemmas.includes(dilemma.id)) {
+        soundEngine.playVictory();
+        confetti({
+          particleCount: 65,
+          spread: 70,
+          origin: { y: 0.7 },
+          colors: ['#f59e0b', '#10b981', '#6366f1']
+        });
+        const updated = [...completedDilemmas, dilemma.id];
+        setCompletedDilemmas(updated);
+        localStorage.setItem('testament_completed_dilemmas', JSON.stringify(updated));
+        onRewardXP(50);
+      }
+    } finally {
+      setIsEvaluating(false);
+    }
+  };
+
+  const handleSubmitSocraticTurn2 = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!turn2Text.trim() || isEvaluatingTurn2) return;
+
+    soundEngine.playSnap();
+    setIsEvaluatingTurn2(true);
 
     try {
-      const stored = localStorage.getItem('testament_dilemma_answers');
-      const answers = stored ? JSON.parse(stored) : {};
-      answers[dilemma.id] = {
-        ...(answers[dilemma.id] || {}),
-        userText,
-        selectedFeeling,
-        evaluationResult,
-        turn2Text,
-        turn2Feedback: followUpFeedback,
-        temperamentProfile: temperament,
-        turn2Rewarded: true
-      };
-      localStorage.setItem('testament_dilemma_answers', JSON.stringify(answers));
-    } catch (err) {
-      console.warn('Failed to save turn 2 answer', err);
-    }
+      const { followUpFeedback, temperament } = await evaluateSocraticTurn2WithGemini(userText, turn2Text, dilemma);
+      setTurn2Feedback(followUpFeedback);
+      setTemperamentProfile(temperament);
 
-    soundEngine.playVictory();
-    if (!alreadyRewarded) {
-      confetti({
-        particleCount: 50,
-        spread: 60,
-        origin: { y: 0.6 },
-        colors: ['#38bdf8', '#fbbf24', '#34d399']
-      });
-      onRewardXP(40);
+      const alreadyRewarded = (() => {
+        try {
+          const stored = localStorage.getItem('testament_dilemma_answers');
+          const answers = stored ? JSON.parse(stored) : {};
+          return Boolean(answers[dilemma.id]?.turn2Rewarded);
+        } catch {
+          return false;
+        }
+      })();
+
+      try {
+        const stored = localStorage.getItem('testament_dilemma_answers');
+        const answers = stored ? JSON.parse(stored) : {};
+        answers[dilemma.id] = {
+          ...(answers[dilemma.id] || {}),
+          userText,
+          selectedFeeling,
+          evaluationResult,
+          turn2Text,
+          turn2Feedback: followUpFeedback,
+          temperamentProfile: temperament,
+          turn2Rewarded: true
+        };
+        localStorage.setItem('testament_dilemma_answers', JSON.stringify(answers));
+      } catch (err) {
+        console.warn('Failed to save turn 2 answer', err);
+      }
+
+      soundEngine.playVictory();
+      if (!alreadyRewarded) {
+        confetti({
+          particleCount: 50,
+          spread: 60,
+          origin: { y: 0.6 },
+          colors: ['#38bdf8', '#fbbf24', '#34d399']
+        });
+        onRewardXP(40);
+      }
+    } finally {
+      setIsEvaluatingTurn2(false);
     }
   };
 
@@ -541,15 +634,26 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
 
               <button
                 type="submit"
-                disabled={!userText.trim() && !selectedFeeling}
+                disabled={(!userText.trim() && !selectedFeeling) || isEvaluating}
                 className={`py-2.5 px-5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
-                  userText.trim() || selectedFeeling
-                    ? 'bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-sm cursor-pointer font-extrabold'
-                    : 'bg-stone-200 dark:bg-stone-800 text-stone-400 dark:text-stone-500 cursor-not-allowed'
+                  isEvaluating
+                    ? 'bg-amber-500/80 text-stone-950 cursor-wait animate-pulse'
+                    : userText.trim() || selectedFeeling
+                      ? 'bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-sm cursor-pointer font-extrabold'
+                      : 'bg-stone-200 dark:bg-stone-800 text-stone-400 dark:text-stone-500 cursor-not-allowed'
                 }`}
               >
-                <span>{t('dilemma.submitPlay')}</span>
-                <ArrowRight className="w-4 h-4" />
+                {isEvaluating ? (
+                  <>
+                    <Sparkles className="w-4 h-4 animate-spin text-stone-950" />
+                    <span>Discerning in Scripture...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>{t('dilemma.submitPlay')}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </button>
             </div>
           </form>
@@ -669,15 +773,26 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                       </span>
                       <button
                         type="submit"
-                        disabled={!turn2Text.trim()}
+                        disabled={!turn2Text.trim() || isEvaluatingTurn2}
                         className={`py-2 px-4 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                          turn2Text.trim()
-                            ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm cursor-pointer font-bold'
-                            : 'bg-stone-200 dark:bg-stone-800 text-stone-400 dark:text-stone-500 cursor-not-allowed'
+                          isEvaluatingTurn2
+                            ? 'bg-indigo-600/80 text-white cursor-wait animate-pulse'
+                            : turn2Text.trim()
+                              ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm cursor-pointer font-bold'
+                              : 'bg-stone-200 dark:bg-stone-800 text-stone-400 dark:text-stone-500 cursor-not-allowed'
                         }`}
                       >
-                        <span>Lock In Play & Evaluate Temperament (+40 XP)</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
+                        {isEvaluatingTurn2 ? (
+                          <>
+                            <Sparkles className="w-3.5 h-3.5 animate-spin text-white" />
+                            <span>Discerning Temperament...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>Lock In Play & Evaluate Temperament (+40 XP)</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </>
+                        )}
                       </button>
                     </div>
                   </form>
@@ -849,8 +964,21 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                     setEvaluationResult(null);
                     setUserText('');
                     setSelectedFeeling(null);
+                    setTurn2Text('');
+                    setTurn2Feedback(null);
+                    setTemperamentProfile(null);
+                    try {
+                      const stored = localStorage.getItem('testament_dilemma_answers');
+                      if (stored) {
+                        const answers = JSON.parse(stored);
+                        delete answers[dilemma.id];
+                        localStorage.setItem('testament_dilemma_answers', JSON.stringify(answers));
+                      }
+                    } catch {
+                      // ignore
+                    }
                   }}
-                  className="flex items-center gap-1.5 text-xs font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 transition-all"
+                  className="flex items-center gap-1.5 text-xs font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 transition-all cursor-pointer"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>Try Answering Again</span>
@@ -883,6 +1011,9 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                   </button>
                 </div>
               </div>
+
+              {/* Bottom Sentinel to trigger Campaign Next Task modal only when reaching the bottom */}
+              <div ref={bottomSentinelRef} className="h-4 w-full pointer-events-none" aria-hidden="true" />
             </div>
           )}
         </div>

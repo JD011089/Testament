@@ -10,15 +10,26 @@ interface DossierModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectCharacterQuest: (questId: string) => void;
+  initialCharacterId?: string | null;
 }
 
 export const DossierModal: React.FC<DossierModalProps> = ({
   isOpen,
   onClose,
-  onSelectCharacterQuest
+  onSelectCharacterQuest,
+  initialCharacterId
 }) => {
   const modalRef = useModalLock(isOpen);
   const [selectedCharIndex, setSelectedCharIndex] = useState<number>(0);
+
+  useEffect(() => {
+    if (isOpen && initialCharacterId) {
+      const idx = CHARACTER_DOSSIERS.findIndex(c => c.id === initialCharacterId);
+      if (idx !== -1) {
+        setSelectedCharIndex(idx);
+      }
+    }
+  }, [isOpen, initialCharacterId]);
 
   useEffect(() => {
     if (!isOpen) return;

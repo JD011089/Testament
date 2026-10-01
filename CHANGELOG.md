@@ -5,6 +5,22 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.15.0] - 2026-10-01
+
+### Added
+- **Gemini-Powered Discipleship & Dilemma AI**: Integrated Google Gemini Flash (`gemini-flash-lite-latest`, `gemini-3.5-flash-lite`) to dynamically generate real-life, non-political Christian daily dilemmas and evaluate user plays with ultra-fast latency (< 1s).
+- **Deeply Personalized Answer Dissection**: Dilemma and Quest crossroads responses are evaluated against the user's authentic words, named persons, and proposed tactics rather than static keyword templates. Provides bespoke stance titles, direct answers, biblical parallels, flesh traps, and 3 tailored morning battle moves.
+- **Multi-Turn Socratic AI (Turn 2)**: Added dynamic evaluation for the Mentor's Socratic Counter-Challenge, scoring Biblical Tactical Temperament (Grace, Truth, Prudence, Courage) based on the user's actual follow-up response.
+- **Custom Quest Crossroads Input**: Enabled open-ended, free-form text input in Quest Step 1 crossroads alongside standard multiple choice, evaluating authentic human instinct against what Scripture recorded for biblical heroes.
+- **Individualized Reminder Time Slots**: Granted complete user freedom over exact notification reminder times via custom time picker list (`<input type="time">`) without rigid system-forced math.
+- **Multi-Verse Training Queue Rotation**: System rotates scheduled memory notifications across all bookmarked and FSRS-trained verses rather than repeating a single verse.
+- **Direct-Intel Tactical Nexus**: Redesigned Tactical Nexus card with clean layout and direct "Open Intel" links jumping straight into linked Psalms, Proverbs, and Character Dossiers.
+
+### Fixed
+- **Delayed Campaign Next Task Prompt**: Repositioned the campaign completion event trigger in `DilemmaSimulator.tsx` using an intersection observer on a bottom sentinel element so the prompt modal appears only when the user finishes reading and reaches the bottom of the evaluation.
+- **Low-Latency Gemini Candidate Priority & Timeout**: Optimized model list with `gemini-flash-lite-latest` priority and 12-second abort timeout, preventing browser hang and fallback to static rules.
+- **Fresh Slate Reset**: Clicking "Try Answering Again" clears prior cached responses to ensure a fresh, live AI evaluation.
+
 ## [1.14.0] - 2026-09-28
 
 ### Added
