@@ -5,6 +5,18 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.15.1] - 2026-10-01
+
+### Added
+- **Interactive 12-Hour Custom Reminder Builder**: Added an intuitive, touch-friendly 12-hour Time Picker (Hour 1-12, Minute :00-:55, AM/PM toggle) allowing users to manually construct and preview the exact time before adding it to their reminder schedule.
+- **One-Tap Quick Presets**: Added quick time presets (7:00 AM, 12:00 PM, 6:30 PM, 9:30 PM) for effortless scheduling.
+- **Inline 12-Hour Slot Editing**: Each scheduled slot in the list now provides direct Hour, Minute, and AM/PM adjustment controls along with instant 12-hour formatted feedback.
+
+### Fixed
+- **Prevent Auto-Inserted Times**: Completely eliminated automatic placeholder insertion (e.g. `16:00`) when adding reminders. Users now have total manual control over their schedules.
+- **Deduplication & Chronological Alignment**: Scheduled slots are automatically deduplicated and sorted chronologically from morning to night.
+- **Cross-Platform Picker Compatibility**: Replaced problematic native `<input type="time">` wheels with reliable custom dropdowns and toggle buttons that operate seamlessly on iOS Safari, Android Chrome, and desktop PWAs.
+
 ## [1.15.0] - 2026-10-01
 
 ### Added

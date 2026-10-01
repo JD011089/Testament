@@ -60,6 +60,37 @@ export const formatMinutesTo12h = (totalMinutes: number): string => {
 };
 
 /**
+ * Parses a 24-hour "HH:mm" slot into 12-hour components: hour (1-12), minute string ("00"-"59"), and period ('AM' | 'PM')
+ */
+export const parseSlotTo12h = (timeStr: string): { hour: number; minute: string; ampm: 'AM' | 'PM' } => {
+  const [hStr, mStr] = (timeStr || '08:00').split(':');
+  const h24 = parseInt(hStr, 10) || 0;
+  const minute = (mStr || '00').padStart(2, '0');
+  const ampm: 'AM' | 'PM' = h24 >= 12 ? 'PM' : 'AM';
+  const hour = h24 % 12 === 0 ? 12 : h24 % 12;
+  return { hour, minute, ampm };
+};
+
+/**
+ * Builds a 24-hour "HH:mm" slot from 12-hour components
+ */
+export const build24hTime = (hour: number, minute: string | number, ampm: 'AM' | 'PM'): string => {
+  let h24 = (Number(hour) || 12) % 12;
+  if (ampm === 'PM') h24 += 12;
+  const m = String(minute ?? '00').padStart(2, '0');
+  return `${String(h24).padStart(2, '0')}:${m}`;
+};
+
+/**
+ * Formats 12-hour components into a friendly display string (e.g. "8:30 AM")
+ */
+export const formatTime12hDisplay = (hour: number, minute: string | number, ampm: 'AM' | 'PM'): string => {
+  const m = String(minute ?? '00').padStart(2, '0');
+  return `${hour}:${m} ${ampm}`;
+};
+
+
+/**
  * Evenly calculates daily time slots across waking hours
  */
 export const calculateDailySlots = (frequency: number, startHour: number, endHour: number): string[] => {
@@ -169,12 +200,14 @@ export const getVerseForPromptIndex = (promptIndex: number): MemoryVerse => {
  */
 export const saveCustomScheduledSlots = (newSlots: string[]): NotificationSettings => {
   const current = getNotificationSettings();
-  const sorted = [...newSlots].sort((a, b) => timeStringToMinutes(a) - timeStringToMinutes(b));
+  const unique = Array.from(new Set(newSlots.filter(Boolean)));
+  const sorted = unique.sort((a, b) => timeStringToMinutes(a) - timeStringToMinutes(b));
   const updated: NotificationSettings = {
     ...current,
     scheduledSlots: sorted,
     frequencyPerDay: sorted.length
   };
+
   saveNotificationSettings(updated);
   syncNextAlarmToServiceWorker();
   return updated;

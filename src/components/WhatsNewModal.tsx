@@ -41,10 +41,33 @@ interface ReleaseMilestone {
 
 const RELEASES: ReleaseMilestone[] = [
   {
-    version: 'v1.15.0',
-    tagline: 'Dynamic Gemini Discipleship AI & Authentic Custom Instincts',
+    version: 'v1.15.1',
+    tagline: 'Interactive 12-Hour Custom Reminder Controls & Anti-Forced Scheduling',
     dateBadge: 'Current Release',
     isLatest: true,
+    highlights: [
+      {
+        icon: <Bell className="w-4 h-4 text-amber-400" />,
+        title: 'Manual 12-Hour Time Picker with Live Previews',
+        description: 'Take full control over your reminder schedule. Explicitly choose Hour (1-12), Minute (:00-:55), and AM/PM before adding it to your schedule.'
+      },
+      {
+        icon: <Zap className="w-4 h-4 text-amber-400" />,
+        title: 'No Auto-Inserted Schedules & One-Tap Quick Presets',
+        description: 'Never get unwanted times forced onto your schedule. Tap quick presets (7 AM, 12 PM, 6:30 PM, 9:30 PM) or manually configure any exact time.'
+      },
+      {
+        icon: <Brain className="w-4 h-4 text-amber-400" />,
+        title: 'Inline Slot Adjustments & Clean Chronological Sync',
+        description: 'Fine-tune each existing reminder with inline Hour, Minute, and AM/PM controls. Times are automatically sorted and deduplicated.'
+      }
+    ]
+  },
+  {
+    version: 'v1.15.0',
+    tagline: 'Dynamic Gemini Discipleship AI & Authentic Custom Instincts',
+    dateBadge: 'Previous Release',
+    isLatest: false,
     highlights: [
       {
         icon: <Brain className="w-4 h-4 text-amber-400" />,
@@ -63,6 +86,7 @@ const RELEASES: ReleaseMilestone[] = [
       }
     ]
   },
+
   {
     version: 'v1.14.0',
     tagline: 'End-to-End Mission & Library Localization',
@@ -464,12 +488,12 @@ const RELEASES: ReleaseMilestone[] = [
 
 export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose }) => {
   const modalRef = useModalLock(isOpen);
-  const [activeTab, setActiveTab] = useState<string>('v1.15.0');
+  const [activeTab, setActiveTab] = useState<string>('v1.15.1');
 
   const handleDismiss = () => {
     soundEngine.playClick();
     try {
-      localStorage.setItem('testament_last_seen_version', '1.15.0');
+      localStorage.setItem('testament_last_seen_version', '1.15.1');
     } catch {
       // ignore
     }
@@ -512,9 +536,10 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
                   Field Update Dispatches
                 </h2>
                 <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 font-bold">
-                  v1.14.0 Live
+                  v1.15.1 Live
                 </span>
               </div>
+
               <p className="text-xs text-stone-500 dark:text-stone-400">
                 Chronological evolution and major features built in Testament
               </p>
@@ -602,8 +627,9 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
         {/* MODAL FOOTER */}
         <div className="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800/90 bg-stone-50 dark:bg-black/40 flex items-center justify-between gap-3 relative z-10">
           <div className="text-[11px] font-mono text-stone-500 dark:text-stone-400 hidden sm:block">
-            Testament v1.15.0 • The Living Word
+            Testament v1.15.1 • The Living Word
           </div>
+
 
           <button
             onClick={handleDismiss}
