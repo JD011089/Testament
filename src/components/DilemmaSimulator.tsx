@@ -5,6 +5,8 @@ import type { HeartEvaluationResult, TemperamentProfile } from '../utils/heartEv
 import { soundEngine } from '../utils/audio';
 import { getDailyDilemma, getTodayDateKey } from '../utils/dailyEngine';
 import { getDynamicDailyDilemma, evaluateUserPlayWithGemini, evaluateSocraticTurn2WithGemini } from '../utils/geminiDilemmaService';
+import { isFeatureEnabled } from '../config/featureFlags';
+import { generateSocraticFollowUp, generateAgeAwareDilemma } from '../utils/geminiFeatures';
 import confetti from 'canvas-confetti';
 import { TacticalNexusCard } from './TacticalNexusCard';
 import { 
@@ -109,9 +111,21 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
   const [isTurn2Expanded, setIsTurn2Expanded] = useState<boolean>(false);
   const [isAnalysisExpanded, setIsAnalysisExpanded] = useState<boolean>(false);
 
+  // Feature 5: Age-Aware Dilemma Variant state
+  const [currentStage, setCurrentStage] = useState<string>('standard');
+  const [currentStageLabel, setCurrentStageLabel] = useState<string>('Standard');
+  const [adaptedTitle, setAdaptedTitle] = useState<string | null>(null);
+  const [adaptedScenario, setAdaptedScenario] = useState<string | null>(null);
+  const [isAdaptingStage, setIsAdaptingStage] = useState<boolean>(false);
+
   // Load saved answers for the current dilemma on mount or when switching
   React.useEffect(() => {
     setIsAnalysisExpanded(false);
+    setCurrentStage('standard');
+    setCurrentStageLabel('Standard');
+    setAdaptedTitle(null);
+    setAdaptedScenario(null);
+    setIsAdaptingStage(false);
     try {
       const stored = localStorage.getItem('testament_dilemma_answers');
       if (stored) {
@@ -234,6 +248,35 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
     };
   }, [evaluationResult, dilemma.id]);
 
+  const handleSelectLifeStage = async (stageId: string, stageLabel: string) => {
+    soundEngine.playSnap();
+    if (stageId === currentStage || isAdaptingStage) return;
+    setCurrentStage(stageId);
+    setCurrentStageLabel(stageLabel);
+
+    if (stageId === 'standard') {
+      setAdaptedTitle(null);
+      setAdaptedScenario(null);
+      return;
+    }
+
+    setIsAdaptingStage(true);
+    try {
+      const res = await generateAgeAwareDilemma({
+        originalTitle: dilemma.title,
+        scenarioText: dilemma.situationSetup,
+        options: dilemma.plays ? dilemma.plays.map(p => p.name) : ['Furious / Want Payback', 'Walk Away / Ghost', 'Shut Down / Bottle It', 'Calm & Strategic'],
+        targetStage: stageLabel
+      });
+      setAdaptedTitle(res.adaptedTitle);
+      setAdaptedScenario(res.adaptedScenario);
+    } catch (err) {
+      console.warn('Failed to adapt dilemma stage:', err);
+    } finally {
+      setIsAdaptingStage(false);
+    }
+  };
+
   const handleQuickFeelingSelect = (feeling: string) => {
     soundEngine.playSnap();
     setSelectedFeeling(prev => prev === feeling ? null : feeling);
@@ -248,6 +291,21 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
 
     try {
       const result = await evaluateUserPlayWithGemini(userText, selectedFeeling, dilemma);
+      if (isFeatureEnabled('socraticFollowUp')) {
+        try {
+          const socraticQ = await generateSocraticFollowUp({
+            scenarioTitle: adaptedTitle || dilemma.title,
+            chosenReaction: selectedFeeling || 'neutral',
+            userText: userText.trim() || undefined,
+            ageOrStage: currentStageLabel || 'Adult'
+          });
+          if (socraticQ) {
+            result.socraticChallenge = socraticQ;
+          }
+        } catch (err) {
+          console.warn('Failed to generate adaptive Socratic follow-up:', err);
+        }
+      }
       setEvaluationResult(result);
 
       // Save user's answer and evaluation so it's preserved on review (Requirement 3 & 4)
@@ -514,16 +572,57 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
           )}
         </div>
 
-        <h2 className="text-xl md:text-3xl font-serif font-black text-stone-900 dark:text-parchment-50 mb-3">
-          {dilemma.title}
+        <h2 className="text-xl md:text-3xl font-serif font-black text-stone-900 dark:text-parchment-50 mb-2">
+          {adaptedTitle || dilemma.title}
         </h2>
+
+        {/* FEATURE 5: Age-Aware Dilemma Variant Selector */}
+        {isFeatureEnabled('ageAwareDilemmas') && (
+          <div className="mb-3.5 flex flex-wrap items-center gap-1.5 p-2 rounded-xl bg-stone-200/50 dark:bg-stone-950/50 border border-stone-200/80 dark:border-stone-800">
+            <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400 font-semibold pl-1">
+              Adapt for life stage:
+            </span>
+            {[
+              { id: 'standard', label: 'Standard' },
+              { id: 'student', label: 'Student / School' },
+              { id: 'workplace', label: 'Workplace / Career' },
+              { id: 'family', label: 'Family / Home' }
+            ].map(stage => (
+              <button
+                key={stage.id}
+                type="button"
+                onClick={() => handleSelectLifeStage(stage.id, stage.label)}
+                disabled={isAdaptingStage}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  currentStage === stage.id
+                    ? 'bg-amber-500 text-stone-950 font-bold shadow-xs'
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-950 dark:hover:text-stone-200'
+                }`}
+              >
+                {stage.label}
+              </button>
+            ))}
+            {isAdaptingStage && (
+              <span className="text-[11px] text-amber-800 dark:text-amber-400 font-mono animate-pulse ml-1">
+                Adapting…
+              </span>
+            )}
+          </div>
+        )}
 
         {/* The Situation */}
         <div className="p-4 rounded-xl bg-white/80 dark:bg-stone-950/70 text-sm text-stone-800 dark:text-stone-200 leading-relaxed font-reading mb-4">
-          <strong className="text-amber-800 dark:text-amber-400 block font-sans font-bold text-xs uppercase tracking-wider mb-1">
-            {t('dilemma.incident')}
-          </strong>
-          {dilemma.situationSetup}
+          <div className="flex items-center justify-between mb-1">
+            <strong className="text-amber-800 dark:text-amber-400 font-sans font-bold text-xs uppercase tracking-wider">
+              {t('dilemma.incident')}
+            </strong>
+            {adaptedScenario && currentStage !== 'standard' && (
+              <span className="text-[10px] font-mono font-bold text-amber-800 dark:text-amber-400 uppercase tracking-wider bg-amber-100 dark:bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-300 dark:border-amber-500/30">
+                ✨ Adapted for {currentStageLabel} (AI Reflection)
+              </span>
+            )}
+          </div>
+          {adaptedScenario || dilemma.situationSetup}
         </div>
 
         {/* Stakes & Ancient Parallel */}
@@ -857,8 +956,12 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                       </div>
 
                       {/* Socratic Probe */}
-                      <div className="p-3.5 rounded-xl bg-stone-50/80 dark:bg-black/40 text-xs sm:text-sm text-stone-800 dark:text-indigo-100 font-reading leading-relaxed italic">
-                        "{evaluationResult.socraticChallenge}"
+                      <div className="p-3.5 rounded-xl bg-stone-50/80 dark:bg-black/40 text-xs sm:text-sm text-stone-800 dark:text-indigo-100 font-reading leading-relaxed italic border-l-2 border-indigo-400 text-left space-y-1">
+                        <div className="text-[10px] font-mono font-bold text-indigo-700 dark:text-indigo-300 uppercase tracking-wider not-italic flex items-center gap-1">
+                          <Sparkles className="w-3 h-3 text-indigo-500" />
+                          <span>Mentor Socratic Question (AI Reflection • Not Scripture)</span>
+                        </div>
+                        <p className="mt-0.5">"{evaluationResult.socraticChallenge}"</p>
                       </div>
 
                       {/* Turn 2 Interactive Form */}
