@@ -42,10 +42,27 @@ interface ReleaseMilestone {
 
 const ACTIVE_RELEASES: ReleaseMilestone[] = [
   {
-    version: 'v1.17.0',
-    tagline: 'Persona-Based Usability Overhaul, Plain Language & Beginner On-Ramp',
+    version: 'v1.17.1',
+    tagline: 'Journey Stability, Memoized Scripture Loader & UX Polish',
     dateBadge: 'Current Release',
     isLatest: true,
+    highlights: [
+      {
+        icon: <Sparkles className="w-4 h-4 text-amber-400" />,
+        title: 'Beginner Journey Unresponsiveness Blocker Fixed',
+        description: 'Fixed an infinite render loop in the story flow that caused browser tabs to hang upon choice selection and scripture loading in the Jesus journey.'
+      },
+      {
+        icon: <BookOpen className="w-4 h-4 text-amber-400" />,
+        title: 'Beginner On-Ramp & Plain Language Foundation',
+        description: 'Full 3-act Life of Jesus journey with "Great for Beginners" badge, plain-language CTAs, and clear library shelves.'
+      }
+    ]
+  },
+  {
+    version: 'v1.17.0',
+    tagline: 'Persona-Based Usability Overhaul, Plain Language & Beginner On-Ramp',
+    dateBadge: 'Previous Release',
     highlights: [
       {
         icon: <Sparkles className="w-4 h-4 text-amber-400" />,
@@ -547,7 +564,7 @@ const ARCHIVED_RELEASES: ReleaseMilestone[] = [
 
 export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose }) => {
   const modalRef = useModalLock(isOpen);
-  const [activeTab, setActiveTab] = useState<string>('v1.17.0');
+  const [activeTab, setActiveTab] = useState<string>('v1.17.1');
   const [showArchive, setShowArchive] = useState(false);
 
   const RELEASES = showArchive ? [...ACTIVE_RELEASES, ...ARCHIVED_RELEASES] : ACTIVE_RELEASES;
@@ -555,7 +572,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
   const handleDismiss = () => {
     soundEngine.playClick();
     try {
-      localStorage.setItem('testament_last_seen_version', '1.17.0');
+      localStorage.setItem('testament_last_seen_version', '1.17.1');
     } catch {
       // ignore
     }
@@ -598,7 +615,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
                   Field Update Dispatches
                 </h2>
                 <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 font-bold">
-                  v1.17.0 Live
+                  v1.17.1 Live
                 </span>
               </div>
 
@@ -712,7 +729,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
         {/* MODAL FOOTER */}
         <div className="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800/90 bg-stone-50 dark:bg-black/40 flex items-center justify-between gap-3 relative z-10">
           <div className="text-xs font-mono text-stone-500 dark:text-stone-400 hidden sm:block">
-            Testament v1.17.0 • The Living Word
+            Testament v1.17.1 • The Living Word
           </div>
 
 
