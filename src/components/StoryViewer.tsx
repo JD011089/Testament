@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { StoryQuest, StoryAct, TermExplainer } from '../types';
 import { SceneIllustration } from './SceneIllustration';
@@ -117,16 +117,22 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
   const [actCompletionData, setActCompletionData] = useState<{ actNumber: number; isLastAct: boolean; relicName?: string } | null>(null);
 
   const act: StoryAct = quest.acts[currentActIndex];
-  const actGlossary: TermExplainer[] = [
+  const actGlossary: TermExplainer[] = useMemo(() => [
     ...(act.glossary || []),
     ...UNIVERSAL_BIBLICAL_TERMS.filter(
       u => !(act.glossary || []).some(g => g.term.toLowerCase() === u.term.toLowerCase())
     )
-  ];
+  ], [act.glossary]);
   const isActFinished = completedActs.includes(act.id);
   const isQuestFullyCompleted = quest.acts.every(a => completedActs.includes(a.id));
-  const questAnchorVerse = getStoryVerseForQuest(quest.id, language) || getStoryVerseForAct(quest.id, act.id, language);
-  const scriptureRef = parseScriptureReference(act.unlockedScripture.reference);
+  const questAnchorVerse = useMemo(
+    () => getStoryVerseForQuest(quest.id, language) || getStoryVerseForAct(quest.id, act.id, language),
+    [quest.id, act.id, language]
+  );
+  const scriptureRef = useMemo(
+    () => parseScriptureReference(act.unlockedScripture.reference),
+    [act.unlockedScripture.reference]
+  );
 
   useEffect(() => {
     if (!selectedChoiceId || !scriptureRef) {
