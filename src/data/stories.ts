@@ -335,24 +335,35 @@ export const STORY_QUESTS: StoryQuest[] = [
         sceneAtmosphere: 'Damp limestone caves at Adullam. Smoke from a small fire stinging your eyes. 400 desperate, broken, broke men looking to David for survival.',
         historicalContext: "After killing Goliath, David became a folk hero. King Saul grew intensely jealous and launched a full military manhunt. David went from celebrated warrior to a wanted fugitive living in caves.",
         narrativeParagraphs: [
-          'Most people know the Goliath story, but they forget what happened next: David’s life got harder, not easier. The paranoid King Saul sent death squads after him.',
-          'David ended up hiding in the Cave of Adullam. And look who showed up to join him: not elite royal guards, but "all those who were in distress or in debt or discontented"—about 400 broken men.',
-          'Imagine being responsible for feeding, organizing, and keeping morale high among 400 angry, broke outlaws while 3,000 royal soldiers are hunting you down like wild dogs.',
-          'Yet in that dark cave, instead of turning into a bitter warlord, David wrote songs of gut-honest prayer. He trained those 400 misfits into the fiercest, most loyal brotherhood in Israel’s history—men who would later risk their lives just to bring David a drink of water.'
+          "Most people know the Goliath story, but they forget what happened next: David's life got harder, not easier. The paranoid King Saul sent death squads after him, turning Israel's hero into a hunted fugitive.",
+          "David ended up hiding in the dark limestone caves of Adullam. And look who showed up at his door: not elite royal bodyguards, but 400 desperate, broken, and bankrupt outlaws looking to him for survival.",
+          "Instead of turning into a bitter warlord or shutting down in despair, David poured his gut-level raw grief into honest prayers. Then he started training those 400 broken misfits into the fiercest, most loyal brotherhood in Israel's history."
         ],
-        perspectivePrompt: 'When your career or plans collapse and you find yourself in rock bottom surrounded by chaos, what is your instinct?',
+        perspectivePrompt: "Your plans just collapsed and you're surrounded by chaos. What's your move?",
         choices: [
           {
-            id: 'choice-cave-1',
-            text: 'Resent everyone and ask why God allowed you to fall so hard.',
-            reaction: 'Honest reaction. David felt that agony too—read Psalm 142: "Look and see, there is no one at my right hand; no one is concerned for me."',
-            historicalPivot: "David didn't bottle up his anger or pretend everything was fine. He dumped his raw despair right onto God, but then decided: \"I will trust you anyway.\""
+            id: 'choice-cave-shutdown',
+            text: 'Shut down and cut everyone off until the dust settles.',
+            reaction: 'That is the natural survival instinct when exhausted—hiding behind thick limestone walls to protect yourself.',
+            historicalPivot: "David was tempted to retreat completely into silence. In Psalm 142 he cried, 'No one is concerned for me.' But he didn't stay locked away."
           },
           {
-            id: 'choice-cave-2',
-            text: 'Look at the broken people around you and start building something together.',
-            reaction: 'True leadership is never proven on the palace throne; it is forged when you have nothing left to offer except integrity and grit.',
-            historicalPivot: 'Those 400 indebted outlaws became the legendary "Mighty Men." Greatness isn’t born in easy seasons; it’s forged in the cave.'
+            id: 'choice-cave-lashout',
+            text: 'Lash out at the people and systems that let you down.',
+            reaction: 'Anger often masks deep betrayal. David had served King Saul faithfully, only to be rewarded with spears and exile.',
+            historicalPivot: "Instead of becoming a bitter warlord raiding innocent villages, David brought his fury directly to God and chose self-control."
+          },
+          {
+            id: 'choice-cave-run',
+            text: 'Run as far from this mess as you can get.',
+            reaction: 'When everything breaks at once, running feels like the only viable option.',
+            historicalPivot: "David fled across the desert until there was nowhere left to run. That rock-bottom cave was where running stopped and rebuilding began."
+          },
+          {
+            id: 'choice-cave-reachout',
+            text: 'Reach out to the misfits around you and rebuild together.',
+            reaction: 'This takes supreme internal grit—looking past your own pain to serve others who are hurting.',
+            historicalPivot: "David welcomed 400 indebted outlaws. Over years in the wilderness, they forged Israel's legendary Mighty Men."
           }
         ],
         unlockedScripture: {
