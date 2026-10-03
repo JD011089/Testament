@@ -5,6 +5,29 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.19.0] - 2026-10-03
+
+### Added
+- **Decision-First Homepage (1 Card, 1 Clear Action)**: Replaced the quest-style dashboard with a single decision card above the fold featuring today's provocative scenario question and a single primary CTA (*Make today's call* / *Review today's call*). Eliminates triple-named confusion (*TODAY'S PLAN*, *Start Today's Mission*, *Daily Mission*).
+- **The 3-Screen Mission Core Loop**: Replaced the 5-step stepper with a fast 3-screen core mission (*Screen 1: Decide → Screen 2: Story → Screen 3: Live It*) completing in ≤5 taps with zero typing and zero interrupting modals.
+- **Daily AI Generation Pipeline**: Hybrid architecture featuring vetted daily biblical passage rotation (`CURATED_DAILY_PASSAGES`), in-context Gemini generation with strict no-invention faithfulness guardrails (≤140 words, verbatim scripture copy, plain English narrative, and AI reflection badges), plus instant 0ms offline fallback.
+- **Per-User Decision Mirror-Back**: Tailors a single punchy mirror-back connection (*"You said you'd shut everyone out — Jesus fought that exact urge..."*) and a concrete action line based on the user's authentic choice.
+- **Unified Memory Verse Loop**: Today's key verse automatically locks into the memory system and FSRS spaced repetition with a one-tap confirmation on the Live It screen. The next day displays a single *"Yesterday's verse — still got it?"* flip-recall card before joining the regular rotation.
+- **Simplified 1-Round Drills**: Replaced multi-step word tile dragging with a quick fill-in-the-blank recall drill: tap missing key words from candidate chips, one round, then done.
+- **Weekly Streak Forgiveness**: Integrated an automatic grace day per calendar week protecting users from losing their daily streak if a single day is missed.
+- **Prominent Rank Promotion Fanfare**: Announced rank advancements (*Seeker → Story Explorer → Mighty Man of Adullam → Iron Pillar*) with animated celebration banners on the completion screen.
+- **Shareable Mission Cards**: Added 1-tap shareable completion card generating clean summary text for native mobile sharing and clipboard export.
+
+### Changed
+- **Plain Language Navigation Labels**: Renamed cryptic gamified badges (*"2 Due"* → *"2 verses to review"*, *"Arsenal"* → *"Scripture library"*).
+- **Progress Framing Overhaul**: Eliminated *"0/4 completed"* progress pressure; post-mission review items and explore tools are framed as optional bonuses.
+- **Subtle PWA Update Toast**: Converted persistent *"Update Ready"* banner into a subtle, borderless toast that automatically dismisses after 7 seconds and remembers dismissal in `sessionStorage`.
+- **First-Run Direct Landing**: New users land directly on today's mission with zero popup modals; beginner journey (*"Jesus: The Living Word"*) anchors the first-week rotation.
+
+### Retired
+- Retired standalone morning briefing modal and its separate voice picker; its 3-part structure (*Real Moment → Truth for the Pocket → Your Call Today*) is now the mission itself.
+- Retired standalone daily check-in modal (*"What are you facing today?"*); the Decide screen's answer now serves as the check-in and is recorded to `testament_daily_checkin`.
+
 ## [1.16.0] - 2026-10-01
 
 ### Added

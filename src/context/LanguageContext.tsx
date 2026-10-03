@@ -52,7 +52,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.rankStoryExplorer': 'Story Explorer',
     'dashboard.rankMightyMan': 'Mighty Man of Adullam',
     'dashboard.rankIronPillar': 'Iron Pillar',
-    'dashboard.versionTooltip': 'What changed in v1.18.1',
+    'dashboard.versionTooltip': 'What changed in v1.19.0',
     'dashboard.declareBattlefield': 'Daily check-in',
     'dashboard.battlefieldPrefix': 'Check-in: {name}',
     'dashboard.declareBattlefieldTooltip': "Daily check-in",
@@ -104,10 +104,10 @@ export const translations: Record<Language, Record<string, string>> = {
     'nexus.collapse': 'Collapse tactical nexus',
     'nexus.expand': 'Expand tactical nexus',
 
-    // Arsenal View
-    'arsenal.badge': 'Saved • Mastered & Bookmarked',
-    'arsenal.title': 'Your Arsenal',
-    'arsenal.subtitle': "Verses you've mastered or bookmarked. Practice due reviews in Word Forge — this is your personal stash, not the full catalog.",
+    // Arsenal View (Scripture Library)
+    'arsenal.badge': 'Saved Verses • Mastered & Bookmarked',
+    'arsenal.title': 'Scripture Library',
+    'arsenal.subtitle': "Verses you've mastered or bookmarked. Practice due reviews in Scripture Memory — this is your personal library, not the full catalog.",
     'arsenal.searchPlaceholder': 'Search your saved verses...',
     'arsenal.allSaved': 'All Saved',
     'arsenal.mastered': 'Mastered',
@@ -578,7 +578,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.rankStoryExplorer': 'Explorador de Historias',
     'dashboard.rankMightyMan': 'Valiente de Adulam',
     'dashboard.rankIronPillar': 'Columna de Hierro',
-    'dashboard.versionTooltip': 'Novedades en v1.18.1',
+    'dashboard.versionTooltip': 'Novedades en v1.19.0',
     'dashboard.declareBattlefield': 'Declarar Campo de Batalla',
     'dashboard.battlefieldPrefix': 'Campo: {name}',
     'dashboard.declareBattlefieldTooltip': 'Declara la prueba de hoy',
@@ -630,10 +630,10 @@ export const translations: Record<Language, Record<string, string>> = {
     'nexus.collapse': 'Colapsar nexo táctico',
     'nexus.expand': 'Expandir nexo táctico',
 
-    // Arsenal View
-    'arsenal.badge': 'Guardado • Dominados y Favoritos',
-    'arsenal.title': 'Tu Arsenal',
-    'arsenal.subtitle': 'Versículos dominados o guardados. Practica los repasos pendientes en Word Forge — este es tu arsenal personal.',
+    // Arsenal View (Scripture Library)
+    'arsenal.badge': 'Versículos Guardados • Dominados y Favoritos',
+    'arsenal.title': 'Biblioteca de Escrituras',
+    'arsenal.subtitle': 'Versículos dominados o guardados. Practica los repasos pendientes en Memoria Bíblica — esta es tu biblioteca personal.',
     'arsenal.searchPlaceholder': 'Buscar versículos guardados...',
     'arsenal.allSaved': 'Todos los Guardados',
     'arsenal.mastered': 'Dominados',
@@ -1103,7 +1103,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.rankStoryExplorer': 'Explorateur de Récits',
     'dashboard.rankMightyMan': 'Vaillant d\'Adullam',
     'dashboard.rankIronPillar': 'Pilier de Fer',
-    'dashboard.versionTooltip': 'Nouveautés de la v1.18.1',
+    'dashboard.versionTooltip': 'Nouveautés de la v1.19.0',
     'dashboard.declareBattlefield': 'Déclarer le Champ de Bataille',
     'dashboard.battlefieldPrefix': 'Bataille : {name}',
     'dashboard.declareBattlefieldTooltip': 'Déclarez votre épreuve du jour',
@@ -1155,10 +1155,10 @@ export const translations: Record<Language, Record<string, string>> = {
     'nexus.collapse': 'Réduire le nexus tactique',
     'nexus.expand': 'Développer le nexus tactique',
 
-    // Arsenal View
-    'arsenal.badge': 'Enregistré • Maîtrisés & Favoris',
-    'arsenal.title': 'Votre Arsenal',
-    'arsenal.subtitle': 'Versets maîtrisés ou mis en favoris. Révisez les versets dus dans Word Forge — ceci est votre arsenal personnel.',
+    // Arsenal View (Scripture Library)
+    'arsenal.badge': 'Versets Enregistrés • Maîtrisés & Favoris',
+    'arsenal.title': 'Bibliothèque des Écritures',
+    'arsenal.subtitle': 'Versets maîtrisés ou mis en favoris. Révisez les versets dus dans Mémoire — ceci est votre bibliothèque personnelle.',
     'arsenal.searchPlaceholder': 'Rechercher vos versets enregistrés...',
     'arsenal.allSaved': 'Tous les Enregistrés',
     'arsenal.mastered': 'Maîtrisés',

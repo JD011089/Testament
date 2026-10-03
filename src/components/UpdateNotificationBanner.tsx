@@ -7,12 +7,27 @@ import { useLanguage } from '../context/LanguageContext';
 
 export const UpdateNotificationBanner: React.FC = () => {
   const { t } = useLanguage();
-  const [showBanner, setShowBanner] = useState<boolean>(() => isUpdateAvailable());
+  const [showBanner, setShowBanner] = useState<boolean>(() => {
+    try {
+      if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('testament_update_toast_dismissed')) {
+        return false;
+      }
+      return isUpdateAvailable();
+    } catch {
+      return false;
+    }
+  });
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
 
   useEffect(() => {
     const handleUpdateFound = () => {
-      setShowBanner(true);
+      try {
+        if (!sessionStorage.getItem('testament_update_toast_dismissed')) {
+          setShowBanner(true);
+        }
+      } catch {
+        setShowBanner(true);
+      }
     };
 
     window.addEventListener('testament-update-available', handleUpdateFound);
@@ -20,6 +35,20 @@ export const UpdateNotificationBanner: React.FC = () => {
       window.removeEventListener('testament-update-available', handleUpdateFound);
     };
   }, []);
+
+  // One-time auto-dismiss after 7 seconds so it never persists across screens
+  useEffect(() => {
+    if (!showBanner) return;
+    const timer = setTimeout(() => {
+      try {
+        sessionStorage.setItem('testament_update_toast_dismissed', 'true');
+      } catch {
+        // ignore
+      }
+      setShowBanner(false);
+    }, 7000);
+    return () => clearTimeout(timer);
+  }, [showBanner]);
 
   const handleApplyUpdate = () => {
     soundEngine.playClick();
@@ -29,6 +58,11 @@ export const UpdateNotificationBanner: React.FC = () => {
 
   const handleDismiss = () => {
     soundEngine.playSnap();
+    try {
+      sessionStorage.setItem('testament_update_toast_dismissed', 'true');
+    } catch {
+      // ignore
+    }
     setShowBanner(false);
   };
 
@@ -36,37 +70,34 @@ export const UpdateNotificationBanner: React.FC = () => {
     <AnimatePresence>
       {showBanner && (
         <motion.div
-          initial={{ y: -60, opacity: 0 }}
+          initial={{ y: -40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -60, opacity: 0 }}
+          exit={{ y: -40, opacity: 0 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="fixed top-4 left-4 right-4 z-50 max-w-xl mx-auto"
+          className="fixed top-4 left-4 right-4 z-50 max-w-lg mx-auto pointer-events-auto"
         >
-          <div className="p-3 sm:p-3.5 rounded-2xl bg-white dark:bg-ink-overlay border border-amber-500/70 shadow-xl dark:shadow-2xl flex items-center justify-between gap-3 text-left transition-colors">
-            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-100 dark:bg-amber-500/20 border border-amber-300 dark:border-amber-500/40 flex items-center justify-center text-amber-800 dark:text-amber-400 shrink-0">
+          <div className="p-3 rounded-2xl bg-stone-900/95 text-parchment-100 shadow-xl backdrop-blur-md flex items-center justify-between gap-3 text-left transition-colors">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
                 <Sparkles className="w-4 h-4 animate-pulse" />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-50">
+                  <span className="text-xs font-serif font-bold text-stone-100">
                     {t('update.ready')}
                   </span>
-                  <span className="text-[11px] font-mono uppercase px-1.5 py-0.2 rounded bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 font-bold hidden sm:inline-block">
-                    {t('update.newVersion')}
-                  </span>
                 </div>
-                <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
+                <p className="text-[11px] text-stone-400 truncate">
                   {t('update.desc')}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <div className="flex items-center gap-1.5 shrink-0">
               <button
                 onClick={handleApplyUpdate}
                 disabled={isUpdating}
-                className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isUpdating ? 'animate-spin' : ''}`} />
                 <span>{isUpdating ? t('update.updating') : t('update.reload')}</span>
@@ -75,8 +106,8 @@ export const UpdateNotificationBanner: React.FC = () => {
 
               <button
                 onClick={handleDismiss}
-                aria-label="Dismiss update notification banner"
-                className="p-1.5 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 transition-colors"
+                aria-label="Dismiss update notification toast"
+                className="p-1.5 text-stone-400 hover:text-stone-200 transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>

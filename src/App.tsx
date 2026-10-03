@@ -22,6 +22,7 @@ import type { DailyCampaignStep } from './data/dailyCampaigns';
 import { getComposedDailyMission } from './utils/missionComposer';
 import { pathForTab, tabFromPath } from './utils/routes';
 import { loadReadingPlace } from './utils/readingPlace';
+import type { GeneratedDailyMission } from './utils/dailyMissionPipeline';
 
 const WordForge = lazy(() => import('./components/WordForge').then((m) => ({ default: m.WordForge })));
 const DilemmaSimulator = lazy(() => import('./components/DilemmaSimulator').then((m) => ({ default: m.DilemmaSimulator })));
@@ -68,6 +69,7 @@ export function App() {
     }
   };
   const [activeQuest, setActiveQuest] = useState<StoryQuest | null>(null);
+  const [activeDailyMission, setActiveDailyMission] = useState<GeneratedDailyMission | null>(null);
   const [libraryPassage, setLibraryPassage] = useState<{
     book: string;
     chapter: number;
@@ -82,14 +84,8 @@ export function App() {
   const [isPsalmsOpen, setIsPsalmsOpen] = useState(false);
   const [isDriveModeOpen, setIsDriveModeOpen] = useState(false);
   const [isWhatsNewOpen, setIsWhatsNewOpen] = useState<boolean>(false);
-  const [isOnboardingOpen, setIsOnboardingOpen] = useState<boolean>(() => {
-    try {
-      if (sessionStorage.getItem('testament_onboarding_snoozed')) return false;
-      return !localStorage.getItem('testament_onboarding_completed');
-    } catch {
-      return false;
-    }
-  });
+  // Part 9: First-run experience drops the user straight into the mission with zero popup modals
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState<boolean>(false);
 
   const [userProfile, setUserProfile] = useState<UserCalibrationProfile | null>(() => {
     try {
@@ -139,7 +135,25 @@ export function App() {
       const diffDays = lastActive
         ? Math.round((new Date(today).getTime() - new Date(lastActive).getTime()) / (1000 * 60 * 60 * 24))
         : 0;
-      const next = lastActive && diffDays === 1 ? stored + 1 : 1;
+
+      // Part 7: Streak forgiveness — 1 grace day per week so a single missed day doesn't reset the streak
+      const now = new Date();
+      const currentWeekKey = `${now.getFullYear()}-W${Math.ceil((now.getDate() + new Date(now.getFullYear(), now.getMonth(), 1).getDay()) / 7)}`;
+      const lastGraceWeek = localStorage.getItem('testament_last_grace_week');
+
+      let next = 1;
+      if (!lastActive) {
+        next = 1;
+      } else if (diffDays === 1) {
+        next = stored + 1;
+      } else if (diffDays === 2 && lastGraceWeek !== currentWeekKey) {
+        // Missed yesterday, but protected by weekly grace day!
+        localStorage.setItem('testament_last_grace_week', currentWeekKey);
+        next = stored + 1;
+      } else {
+        next = 1;
+      }
+
       localStorage.setItem('testament_streak', String(next));
       localStorage.setItem('testament_last_active', today);
       setStreakCount(next);
@@ -148,11 +162,16 @@ export function App() {
     }
   };
 
-  // Keep activeQuestRef in sync with state for popstate listener closure
+  // Keep activeQuestRef & activeDailyMissionRef in sync with state for popstate listener closure
   const activeQuestRef = useRef(activeQuest);
   useEffect(() => {
     activeQuestRef.current = activeQuest;
   }, [activeQuest]);
+
+  const activeDailyMissionRef = useRef(activeDailyMission);
+  useEffect(() => {
+    activeDailyMissionRef.current = activeDailyMission;
+  }, [activeDailyMission]);
 
   // Initialize client-side notification scheduler
   useEffect(() => {
@@ -163,6 +182,10 @@ export function App() {
   // Handle URL deep links cleanup and listen for Service Worker messages
   useEffect(() => {
     const onPop = (e: PopStateEvent) => {
+      if (activeDailyMissionRef.current) {
+        setActiveDailyMission(null);
+        return;
+      }
       if (activeQuestRef.current) {
         setActiveQuest(null);
         return;
@@ -182,6 +205,7 @@ export function App() {
       if (event.data?.type === 'TESTAMENT_NAVIGATE_VERSE' && event.data.verseId) {
         setTargetWordForgeVerseId(event.data.verseId);
         setCurrentTab('wordforge');
+        setActiveDailyMission(null);
         setActiveQuest(null);
       }
     };
@@ -338,12 +362,33 @@ export function App() {
     handleLaunchCampaignStep(nextStep);
   };
 
+  const handleStartDailyMission = (mission: GeneratedDailyMission) => {
+    try {
+      window.history.pushState({ modal: 'mission', missionId: mission.id, tab: currentTab }, '', window.location.pathname + window.location.search);
+    } catch {
+      // ignore
+    }
+    setActiveQuest(null);
+    setActiveDailyMission(mission);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleBackFromDailyMission = () => {
+    soundEngine.playClick();
+    if (window.history.state?.modal === 'mission') {
+      window.history.back();
+    } else {
+      setActiveDailyMission(null);
+    }
+  };
+
   const handleSelectQuest = (quest: StoryQuest) => {
     try {
       window.history.pushState({ modal: 'quest', questId: quest.id, tab: currentTab }, '', window.location.pathname + window.location.search);
     } catch {
       // ignore
     }
+    setActiveDailyMission(null);
     setActiveQuest(quest);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -535,7 +580,26 @@ export function App() {
   return (
     <div className="min-h-screen bg-surface dark:bg-iron-950 text-stone-900 dark:text-parchment-100 transition-colors duration-200 w-full relative">
       <main className="w-full pt-3 sm:pt-4 md:pt-16 pb-28 sm:pb-32 md:pb-12">
-        {activeQuest ? (
+        {activeDailyMission ? (
+          <StoryViewer 
+            key={activeDailyMission.id}
+            dailyMission={activeDailyMission}
+            onBack={handleBackFromDailyMission}
+            onCompleteAct={handleCompleteAct}
+            completedActs={completedActs}
+            onRewardXP={handleRewardXP}
+            currentXp={xp}
+            onOpenWordForge={handlePracticeVerseFromArsenal}
+            onOpenNexus={handleOpenNexus}
+            onOpenBibleChapter={(target) => {
+              soundEngine.stopSpeaking();
+              setLibraryPassage(target);
+              setActiveDailyMission(null);
+              setCurrentTab('library');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        ) : activeQuest ? (
           <StoryViewer 
             key={activeQuest.id}
             quest={activeQuest}
@@ -543,6 +607,7 @@ export function App() {
             onCompleteAct={handleCompleteAct}
             completedActs={completedActs}
             onRewardXP={handleRewardXP}
+            currentXp={xp}
             onOpenWordForge={handlePracticeVerseFromArsenal}
             onOpenNexus={handleOpenNexus}
             onOpenBibleChapter={(target) => {
@@ -558,6 +623,7 @@ export function App() {
             {currentTab === 'dashboard' && (
               <Dashboard 
                 onSelectQuest={handleSelectQuest}
+                onStartDailyMission={handleStartDailyMission}
                 onOpenWordForge={(verseId?: string) => {
                   soundEngine.stopSpeaking();
                   if (verseId) setTargetWordForgeVerseId(verseId);
@@ -678,7 +744,7 @@ export function App() {
       </main>
 
       {/* Persistent Responsive Nav (Desktop Top Nav & Mobile Bottom Nav) */}
-      {!activeQuest && (
+      {!activeQuest && !activeDailyMission && (
         <Navigation 
           currentTab={currentTab}
           onSelectTab={(tab) => {
@@ -780,7 +846,7 @@ export function App() {
       />
 
       {/* PWA Home-Screen Install Prompt (Mutually exclusive with CampaignNextTaskPrompt and readers/modals) */}
-      {!campaignPrompt && !activeQuest && !isDossierOpen && !isProverbsOpen && !isPsalmsOpen && !isDriveModeOpen && !isOnboardingOpen && (
+      {!campaignPrompt && !activeQuest && !activeDailyMission && !isDossierOpen && !isProverbsOpen && !isPsalmsOpen && !isDriveModeOpen && !isOnboardingOpen && (
         <PWAInstallPrompt />
       )}
 
