@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { StoryQuest, StoryAct } from '../types';
 import { soundEngine } from '../utils/audio';
@@ -132,52 +132,58 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     };
   });
 
-  const [hasCompletedCurrentAct, setHasCompletedCurrentAct] = useState<boolean>(false);
+  // Track previous mission to prevent resetting currentScreen on parent re-renders/completedActs updates
+  const prevMissionIdRef = useRef(missionIdentifier);
+
+  const [hasCompletedCurrentAct, setHasCompletedCurrentAct] = useState<boolean>(() => completedActs.includes(missionIdentifier));
   const [isVerseLocked, setIsVerseLocked] = useState<boolean>(() => isVerseLockedIn(keyVerseRef));
   const [rankPromotion, setRankPromotion] = useState<string | null>(null);
   const [copiedShareCard, setCopiedShareCard] = useState<boolean>(false);
 
-  // Load existing decisions if reviewed
+  // Only reset screen & decision state if the actual mission/act changes
   useEffect(() => {
-    setIsVerseLocked(isVerseLockedIn(keyVerseRef));
-    setRankPromotion(null);
-    setCopiedShareCard(false);
-    try {
-      const storedChoices = localStorage.getItem('testament_act_choices');
-      if (storedChoices) {
-        const parsed = JSON.parse(storedChoices);
-        if (parsed[missionIdentifier]) {
-          setSelectedChoiceId(parsed[missionIdentifier]);
+    if (prevMissionIdRef.current !== missionIdentifier) {
+      prevMissionIdRef.current = missionIdentifier;
+      setCurrentScreen(1);
+      setIsSkipped(false);
+      setIsCustomMode(false);
+      setCustomText('');
+      setQuizSubmitted(false);
+      setSelectedQuizIndex(null);
+      setShowGoDeeper(false);
+      setIsPlayingAudio(false);
+      soundEngine.stopSpeaking();
+      setRankPromotion(null);
+      setCopiedShareCard(false);
+      setIsVerseLocked(isVerseLockedIn(keyVerseRef));
+      setHasCompletedCurrentAct(completedActs.includes(missionIdentifier));
+
+      try {
+        const storedChoices = localStorage.getItem('testament_act_choices');
+        if (storedChoices) {
+          const parsed = JSON.parse(storedChoices);
+          setSelectedChoiceId(parsed[missionIdentifier] || null);
+        } else {
+          setSelectedChoiceId(null);
         }
+      } catch {
+        setSelectedChoiceId(null);
       }
-    } catch {
-      // ignore
-    }
 
-    setHasCompletedCurrentAct(completedActs.includes(missionIdentifier));
-    setCurrentScreen(1);
-    setIsSkipped(false);
-    setIsCustomMode(false);
-    setCustomText('');
-    setQuizSubmitted(false);
-    setSelectedQuizIndex(null);
-    setShowGoDeeper(false);
-    setIsPlayingAudio(false);
-    soundEngine.stopSpeaking();
-
-    // Default initialization
-    if (dailyMission) {
-      const p = getLocalDecisionPersonalization(null, dailyMission);
-      setPersonalization({
-        mirrorBack: p.mirrorBack,
-        actionLine: p.actionLine,
-        verseReference: dailyMission.keyVerseReference,
-        verseText: dailyMission.keyVerseText,
-        kjvVerseText: dailyMission.kjvVerseText,
-        source: 'default'
-      });
-    } else if (act && quest) {
-      setPersonalization(getLocalPersonalization(null, act, quest));
+      // Default initialization
+      if (dailyMission) {
+        const p = getLocalDecisionPersonalization(null, dailyMission);
+        setPersonalization({
+          mirrorBack: p.mirrorBack,
+          actionLine: p.actionLine,
+          verseReference: dailyMission.keyVerseReference,
+          verseText: dailyMission.keyVerseText,
+          kjvVerseText: dailyMission.kjvVerseText,
+          source: 'default'
+        });
+      } else if (act && quest) {
+        setPersonalization(getLocalPersonalization(null, act, quest));
+      }
     }
   }, [missionIdentifier, completedActs, quest, dailyMission, keyVerseRef, act]);
 
@@ -317,11 +323,15 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     }
 
     // Trigger celebration state
-    confetti({
-      particleCount: 50,
-      spread: 70,
-      origin: { y: 0.6 }
-    });
+    try {
+      confetti({
+        particleCount: 50,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    } catch {
+      // safe fallback if confetti worker encounters restrictions
+    }
     soundEngine.playVictory();
 
     // Reward XP & mark progress if not already completed
