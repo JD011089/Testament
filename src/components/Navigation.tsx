@@ -4,7 +4,7 @@ import {
   BookOpen, 
   Brain, 
   Shield, 
-  ShieldAlert, 
+  GitFork, 
   Car, 
   Volume2, 
   VolumeX, 
@@ -67,7 +67,7 @@ export const Navigation: React.FC<NavigationProps> = ({
       label: t('nav.dilemmas'), 
       mobileLabel: language === 'fr' ? 'Dilemmes' : language === 'es' ? 'Dilemas' : t('nav.dilemmas'),
       tooltip: t('nav.dilemmasTooltip'), 
-      icon: <ShieldAlert className="w-4 h-4 md:w-4 md:h-4" /> 
+      icon: <GitFork className="w-4 h-4 md:w-4 md:h-4" /> 
     },
     { 
       tab: 'arsenal', 
@@ -99,7 +99,7 @@ export const Navigation: React.FC<NavigationProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-serif font-extrabold text-base tracking-widest text-stone-900 dark:text-parchment-50 group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-colors">
+                <span className="font-display font-extrabold text-base tracking-widest text-stone-900 dark:text-parchment-50 group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-colors">
                   {t('nav.brand')}
                 </span>
                 <span className="text-xs font-mono uppercase bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 px-1.5 py-0.5 rounded-full font-bold">

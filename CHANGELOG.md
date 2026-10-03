@@ -5,6 +5,16 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.19.1] - 2026-10-03
+
+### Refined
+- **Sentence Case Display Typography**: Shifted `font-serif` to `Lora` for headlines and narrative titles, eliminating all-caps shouting on questions, story retellings, action lines, and takeaways while preserving small letterspaced kickers.
+- **Thinned Core Loop Kickers**: Removed duplicate and restating kickers across Decide, Story, and Live It, capping simultaneously visible letterspaced-caps labels at maximum 2 per screen.
+- **Unified AI Reflection Badge**: Standardized all AI badges across the app to the canonical copy: `✨ AI reflection • Not Scripture`.
+- **Consolidated Completion Moment**: Combined memory-verse confirmation into the single `MISSION COMPLETE` celebration card (`Mark 4:39 locked in as today's memory verse`) and renamed the primary CTA button from "Finish today's mission" to "Done".
+- **Distinct Navigation Icons**: Replaced the duplicate shield icon on Dilemmas with `GitFork`, visually distinguishing the Dilemmas crossroad simulator from Saved Scripture/relics (`Shield`).
+- **Decluttered Top Header**: Streamlined the Dashboard header to avatar/title, version, streak, XP, and a single settings dropdown entry for Theme and Language.
+
 ## [1.19.0] - 2026-10-03
 
 ### Added
