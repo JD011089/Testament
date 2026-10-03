@@ -91,7 +91,36 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
   onNextVerse
 }) => {
   const { t, language } = useLanguage();
-  const [forgeMode, setForgeMode] = useState<'phrases' | 'full' | 'reveal'>('phrases');
+  const [forgeMode, setForgeMode] = useState<'recall' | 'phrases' | 'reveal' | 'full'>('recall');
+
+  // Part 7: Simplified drill — 1 quick fill-in-the-blank recall round per session
+  const verseWords = useMemo(() => verse.text.split(/\s+/), [verse.text]);
+  const blankIndices = useMemo(() => {
+    const STOP_WORDS = new Set(['the', 'and', 'a', 'an', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'up', 'about', 'into', 'over', 'after', 'is', 'was', 'are', 'were', 'be', 'been', 'being', 'he', 'she', 'it', 'they', 'we', 'you', 'his', 'her', 'their', 'my', 'your', 'our', 'that', 'this', 'then', 'so', 'as', 'but', 'or', 'if']);
+    const eligible: number[] = [];
+    verseWords.forEach((w, idx) => {
+      const clean = w.replace(/[^\w]/g, '').toLowerCase();
+      if (clean.length >= 4 && !STOP_WORDS.has(clean)) {
+        eligible.push(idx);
+      }
+    });
+    if (eligible.length <= 2) return eligible.length > 0 ? eligible : [0];
+    const half = Math.floor(eligible.length / 2);
+    return [eligible[Math.floor(half / 2)], eligible[half + Math.floor((eligible.length - half) / 2)]];
+  }, [verseWords]);
+
+  const [filledBlanks, setFilledBlanks] = useState<Record<number, string>>({});
+  const [activeBlankStep, setActiveBlankStep] = useState<number>(0);
+  const [recallError, setRecallError] = useState<string | null>(null);
+
+  const candidateChips = useMemo(() => {
+    const missing = blankIndices.map(idx => verseWords[idx]?.replace(/[^\w]/g, '')).filter(Boolean);
+    const pool = ['strength', 'courage', 'peace', 'grace', 'wisdom', 'heart', 'light', 'truth'];
+    const distractors = pool.filter(p => !missing.some(m => m.toLowerCase() === p.toLowerCase()));
+    const combined = [...missing, ...distractors.slice(0, Math.max(0, 4 - missing.length))];
+    return combined.sort(() => 0.5 - Math.random());
+  }, [blankIndices, verseWords]);
+
   const phrases = useMemo(() => splitIntoPhrases(verse.text), [verse.text]);
   const [currentPhraseIdx, setCurrentPhraseIdx] = useState<number>(0);
   const [completedPhrases, setCompletedPhrases] = useState<string[]>([]);
@@ -116,6 +145,39 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
   const [fsrsRated, setFsrsRated] = useState<boolean>(false);
   const [scheduledNextDays, setScheduledNextDays] = useState<number | null>(null);
+
+  const handleSelectRecallChip = (word: string) => {
+    const targetIdx = blankIndices[activeBlankStep];
+    const expectedWord = verseWords[targetIdx]?.replace(/[^\w]/g, '').toLowerCase();
+    if (word.toLowerCase() === expectedWord) {
+      soundEngine.playSnap();
+      const nextFilled = { ...filledBlanks, [targetIdx]: verseWords[targetIdx] };
+      setFilledBlanks(nextFilled);
+      setRecallError(null);
+      if (activeBlankStep + 1 < blankIndices.length) {
+        setActiveBlankStep(prev => prev + 1);
+      } else {
+        // All blanks filled! 1 round, done!
+        setIsCompleted(true);
+        soundEngine.playVictory();
+        confetti({
+          particleCount: 50,
+          spread: 70,
+          origin: { y: 0.7 }
+        });
+        if (!fsrsRated) {
+          const updated = recordFSRSReview(verse.id, 3);
+          setFsrsRated(true);
+          setScheduledNextDays(updated.stability);
+        }
+        onVerseMastered(verse.id);
+      }
+    } else {
+      soundEngine.playClick();
+      setRecallError(`Try again for blank #${activeBlankStep + 1}`);
+      setTimeout(() => setRecallError(null), 2000);
+    }
+  };
 
   const currentFsrs = getFSRSCard(verse.id);
   const [useFirstLetters] = useState(() => getFSRSCard(verse.id).reps === 0);
@@ -151,6 +213,9 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
     setRevealedPhraseCount(1);
     setAssembledWords([]);
     setIsCompleted(false);
+    setFilledBlanks({});
+    setActiveBlankStep(0);
+    setRecallError(null);
     setHintLevel(0);
     setIsPeeking(false);
     setHasPeeked(false);
@@ -380,23 +445,34 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
 
       {/* RIGHT COLUMN: WORKBENCH & WORD BANK */}
       <div className="lg:col-span-7 space-y-6 relative">
-        {/* Memorization Mode Selector (M-10: chunking ≤8 taps or progressive reveal) */}
+        {/* Memorization Mode Selector (Part 7: 1 quick fill-in-the-blank round by default) */}
         <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-stone-200/60 dark:bg-stone-900 self-start text-xs font-medium">
           <button
             type="button"
+            onClick={() => setForgeMode('recall')}
+            className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
+              forgeMode === 'recall' 
+                ? 'bg-amber-500 text-stone-950 font-bold shadow-xs' 
+                : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+            }`}
+          >
+            ⚡ Quick Recall (1 Round)
+          </button>
+          <button
+            type="button"
             onClick={() => setForgeMode('phrases')}
-            className={`px-3 py-1.5 rounded-lg text-xs transition-all ${
+            className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
               forgeMode === 'phrases' 
                 ? 'bg-amber-500 text-stone-950 font-bold shadow-xs' 
                 : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
             }`}
           >
-            By Phrase (Chunked)
+            By Phrase
           </button>
           <button
             type="button"
             onClick={() => setForgeMode('reveal')}
-            className={`px-3 py-1.5 rounded-lg text-xs transition-all ${
+            className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
               forgeMode === 'reveal' 
                 ? 'bg-amber-500 text-stone-950 font-bold shadow-xs' 
                 : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
@@ -407,7 +483,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
           <button
             type="button"
             onClick={() => setForgeMode('full')}
-            className={`px-3 py-1.5 rounded-lg text-xs transition-all ${
+            className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
               forgeMode === 'full' 
                 ? 'bg-amber-500 text-stone-950 font-bold shadow-xs' 
                 : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
@@ -417,7 +493,96 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
           </button>
         </div>
 
-        {forgeMode === 'reveal' ? (
+        {forgeMode === 'recall' ? (
+          /* QUICK RECALL DRILL (1 ROUND MAX, FILL-IN-THE-BLANK) */
+          <div className="space-y-4">
+            <div className="p-5 md:p-6 rounded-2xl bg-stone-100/70 dark:bg-stone-900/60 space-y-5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-mono uppercase font-bold text-amber-800 dark:text-amber-400">
+                  Quick Recall Drill • 1 Round
+                </span>
+                <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400">
+                  {isCompleted ? '✓ Complete' : `Blank ${activeBlankStep + 1} of ${blankIndices.length}`}
+                </span>
+              </div>
+
+              <div className="p-5 rounded-xl bg-white dark:bg-ink min-h-[120px] flex items-center">
+                <p className="font-reading text-base sm:text-lg leading-relaxed text-stone-900 dark:text-parchment-50">
+                  {verseWords.map((w, idx) => {
+                    const isBlank = blankIndices.includes(idx);
+                    if (!isBlank) return <span key={idx}>{w} </span>;
+                    const filled = filledBlanks[idx];
+                    const isCurrent = blankIndices[activeBlankStep] === idx && !isCompleted;
+                    if (filled) {
+                      return (
+                        <span key={idx} className="px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 font-bold underline decoration-emerald-500 underline-offset-4 mr-1.5">
+                          {filled}{' '}
+                        </span>
+                      );
+                    }
+                    return (
+                      <span
+                        key={idx}
+                        className={`inline-block px-3 py-0.5 rounded-lg font-mono text-xs sm:text-sm mr-1.5 transition-all ${
+                          isCurrent
+                            ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300 ring-2 ring-amber-500 animate-pulse'
+                            : 'bg-stone-200 dark:bg-stone-800 text-stone-400'
+                        }`}
+                      >
+                        [ ______ ]
+                      </span>
+                    );
+                  })}
+                </p>
+              </div>
+
+              {/* Word Bank Chips */}
+              {!isCompleted ? (
+                <div className="space-y-2.5">
+                  <span className="text-xs text-stone-500 dark:text-stone-400 block font-medium">
+                    Tap the missing word for the highlighted blank:
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {candidateChips.map((chip, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => handleSelectRecallChip(chip)}
+                        className="px-4 py-2.5 rounded-xl bg-white dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 dark:hover:bg-amber-400 dark:hover:text-stone-950 text-stone-900 dark:text-parchment-100 font-semibold text-xs sm:text-sm shadow-xs transition-all cursor-pointer"
+                      >
+                        {chip}
+                      </button>
+                    ))}
+                  </div>
+                  {recallError && (
+                    <p className="text-xs text-rose-500 dark:text-rose-400 font-medium">
+                      {recallError}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="p-4 rounded-xl bg-emerald-500/15 text-stone-900 dark:text-parchment-50 flex items-center justify-between gap-3">
+                  <div>
+                    <span className="text-xs font-mono uppercase font-bold text-emerald-800 dark:text-emerald-400 block">
+                      ✓ Recall round complete
+                    </span>
+                    <p className="text-xs text-stone-600 dark:text-stone-300 mt-0.5">
+                      +20 XP • Verse memory locked in.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={onNextVerse}
+                    className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer shrink-0"
+                  >
+                    <span>Next Verse</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : forgeMode === 'reveal' ? (
           /* PROGRESSIVE REVEAL MODE */
           <div className="space-y-4">
             <div className="p-5 md:p-6 rounded-2xl bg-stone-100/70 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 space-y-4">

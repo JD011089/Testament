@@ -19,6 +19,9 @@ export interface ComposedDailyMission extends DailyCampaign {
   reason: string;
   battlefieldId: string | null;
   cadence: '3min' | '10min' | 'deep';
+  scenarioQuestion?: string;
+  questId?: string;
+  actId?: string;
 }
 
 const HERO_ICONS: Record<string, string> = {
@@ -93,6 +96,10 @@ function pickQuest(completed: string[], preferredId: string | null): { quest: St
     seen.add(id);
     const quest = STORY_QUESTS.find(q => q.id === id);
     if (!quest) continue;
+    if (quest.id === 'david-journey' && !completed.includes('david-act-2')) {
+      const act2 = quest.acts.find(a => a.id === 'david-act-2');
+      if (act2) return { quest, act: act2 };
+    }
     const act = nextIncompleteAct(quest, completed);
     if (act) return { quest, act };
   }
@@ -255,6 +262,9 @@ function buildMission(): ComposedDailyMission {
     reason: reasons.join(' · '),
     battlefieldId,
     cadence,
+    scenarioQuestion: act.perspectivePrompt,
+    questId: quest.id,
+    actId: act.id,
   };
 }
 
