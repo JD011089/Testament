@@ -72,7 +72,7 @@ export function buildStaticFallbackMission(passage: CuratedPassage, dateKey: str
     kjvVerseText: passage.kjvKeyVerseText,
     actionLine: passage.staticFallback.actionLine,
     isAiGenerated: false,
-    reflectionBadge: 'AI reflection • Not Scripture'
+    reflectionBadge: '✨ AI reflection • Not Scripture'
   };
 }
 
@@ -245,7 +245,7 @@ Return ONLY a valid JSON object matching this structure:
           kjvVerseText: passage.kjvKeyVerseText,
           actionLine: parsed.actionLine.trim(),
           isAiGenerated: true,
-          reflectionBadge: 'AI reflection • Not Scripture'
+          reflectionBadge: '✨ AI reflection • Not Scripture'
         };
 
         try {
@@ -292,7 +292,7 @@ export function getLocalDecisionPersonalization(
       mirrorBack: passage.staticFallback.defaultMirrorBack,
       actionLine: mission.actionLine,
       source: 'default',
-      reflectionBadge: 'AI reflection • Not Scripture'
+      reflectionBadge: '✨ AI reflection • Not Scripture'
     };
   }
 
@@ -304,7 +304,7 @@ export function getLocalDecisionPersonalization(
       mirrorBack: passage.staticFallback.mirrorBackRules[clean],
       actionLine: mission.actionLine,
       source: 'local_rule',
-      reflectionBadge: 'AI reflection • Not Scripture'
+      reflectionBadge: '✨ AI reflection • Not Scripture'
     };
   }
 
@@ -316,7 +316,7 @@ export function getLocalDecisionPersonalization(
       mirrorBack: passage.staticFallback.mirrorBackRules[matchedChoice.id],
       actionLine: mission.actionLine,
       source: 'local_rule',
-      reflectionBadge: 'AI reflection • Not Scripture'
+      reflectionBadge: '✨ AI reflection • Not Scripture'
     };
   }
 
@@ -327,7 +327,7 @@ export function getLocalDecisionPersonalization(
       mirrorBack: `You said you'd shut everyone out — ${mission.heroName} fought that exact temptation under pressure.`,
       actionLine: `Send one honest text to someone in your corner today instead of disappearing.`,
       source: 'local_rule',
-      reflectionBadge: 'AI reflection • Not Scripture'
+      reflectionBadge: '✨ AI reflection • Not Scripture'
     };
   }
   if (/lash|angry|yell|scream|fight|blame|retaliate/i.test(lower)) {
@@ -335,7 +335,7 @@ export function getLocalDecisionPersonalization(
       mirrorBack: `You said you'd lash out — ${mission.heroName} felt that anger too, but chose self-control over revenge.`,
       actionLine: `Take a ten-minute breather before responding to that irritating message today.`,
       source: 'local_rule',
-      reflectionBadge: 'AI reflection • Not Scripture'
+      reflectionBadge: '✨ AI reflection • Not Scripture'
     };
   }
   if (/run|flee|escape|quit|leave|give\s*up/i.test(lower)) {
@@ -343,7 +343,7 @@ export function getLocalDecisionPersonalization(
       mirrorBack: `You said you'd run — ${mission.heroName} fled into the wilderness, but learned you can't outrun God's calling.`,
       actionLine: `Pick the one hard task you've been running from and tackle five minutes of it.`,
       source: 'local_rule',
-      reflectionBadge: 'AI reflection • Not Scripture'
+      reflectionBadge: '✨ AI reflection • Not Scripture'
     };
   }
 
@@ -351,7 +351,7 @@ export function getLocalDecisionPersonalization(
     mirrorBack: `You said you'd face this directly — ${mission.heroName} had to make that same hard choice when tested.`,
     actionLine: mission.actionLine,
     source: 'local_rule',
-    reflectionBadge: 'AI reflection • Not Scripture'
+    reflectionBadge: '✨ AI reflection • Not Scripture'
   };
 }
 

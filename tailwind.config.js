@@ -51,7 +51,8 @@ export default {
         }
       },
       fontFamily: {
-        serif: ['Cinzel', 'Georgia', 'Cambria', 'serif'],
+        serif: ['Lora', 'Georgia', 'Cambria', 'serif'],
+        display: ['Cinzel', 'Georgia', 'Cambria', 'serif'],
         reading: ['Lora', 'Merriweather', 'Georgia', 'serif'],
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },

@@ -11,7 +11,8 @@ import {
   Compass,
   Play,
   Pause,
-  ChevronDown
+  ChevronDown,
+  Settings
 } from 'lucide-react';
 import type { UserCalibrationProfile } from './OnboardingModal';
 import { ThemeToggle } from './ThemeToggle';
@@ -121,6 +122,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [yesterdayVerse, setYesterdayVerse] = useState<MemoryVerseData | null>(() => getYesterdayRecallVerse());
   const [isYesterdayFlipped, setIsYesterdayFlipped] = useState<boolean>(false);
   const [yesterdayRecalled, setYesterdayRecalled] = useState<boolean>(false);
+  const [showSettings, setShowSettings] = useState<boolean>(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -271,11 +273,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
 
-        {/* Right: Language, Theme, Streak, XP */}
-        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-          <LanguageToggle compact />
-          <ThemeToggle compact />
-
+        {/* Right: Streak, XP, Single Settings Entry */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 relative">
           <div 
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/60 dark:bg-stone-900 text-xs font-mono font-bold text-orange-700 dark:text-orange-300"
             title="Daily Streak"
@@ -290,6 +289,48 @@ export const Dashboard: React.FC<DashboardProps> = ({
           >
             <Award className="w-3.5 h-3.5 text-amber-500" />
             <span>{xp}</span>
+          </div>
+
+          {/* Single Settings Entry */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => {
+                soundEngine.playClick();
+                setShowSettings(!showSettings);
+              }}
+              className={`p-2 rounded-xl transition-all cursor-pointer ${
+                showSettings 
+                  ? 'bg-amber-500 text-stone-950 font-bold' 
+                  : 'bg-stone-200/60 dark:bg-stone-900 text-stone-600 dark:text-stone-300 hover:text-stone-950 dark:hover:text-parchment-50'
+              }`}
+              title="Settings"
+              aria-label="Settings"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+
+            {showSettings && (
+              <>
+                <div 
+                  className="fixed inset-0 z-30" 
+                  onClick={() => setShowSettings(false)} 
+                />
+                <div className="absolute right-0 top-full mt-2 z-40 p-3 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-xl flex flex-col gap-2 min-w-[160px]">
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-stone-600 dark:text-stone-400 font-bold px-1">
+                    Settings
+                  </div>
+                  <div className="flex items-center justify-between gap-2 px-1">
+                    <span className="text-xs font-medium text-stone-800 dark:text-stone-200">Language</span>
+                    <LanguageToggle compact />
+                  </div>
+                  <div className="flex items-center justify-between gap-2 px-1">
+                    <span className="text-xs font-medium text-stone-800 dark:text-stone-200">Theme</span>
+                    <ThemeToggle compact />
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

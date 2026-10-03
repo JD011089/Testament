@@ -29,7 +29,6 @@ import {
 } from '../utils/dailyMissionPipeline';
 import { 
   lockInMemoryVerse, 
-  isVerseLockedIn, 
   checkRankPromotion 
 } from '../utils/memoryVerseEngine';
 import { getTodayDateKey } from '../utils/dailyEngine';
@@ -136,7 +135,6 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
   const prevMissionIdRef = useRef(missionIdentifier);
 
   const [hasCompletedCurrentAct, setHasCompletedCurrentAct] = useState<boolean>(() => completedActs.includes(missionIdentifier));
-  const [isVerseLocked, setIsVerseLocked] = useState<boolean>(() => isVerseLockedIn(keyVerseRef));
   const [rankPromotion, setRankPromotion] = useState<string | null>(null);
   const [copiedShareCard, setCopiedShareCard] = useState<boolean>(false);
 
@@ -155,7 +153,6 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
       soundEngine.stopSpeaking();
       setRankPromotion(null);
       setCopiedShareCard(false);
-      setIsVerseLocked(isVerseLockedIn(keyVerseRef));
       setHasCompletedCurrentAct(completedActs.includes(missionIdentifier));
 
       try {
@@ -313,7 +310,6 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
       text: keyVerseText,
       heroName
     });
-    setIsVerseLocked(true);
 
     // 2. Check rank promotion (Part 8)
     const prevPoints = currentXp ?? 0;
@@ -342,17 +338,6 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
       onCompleteAct(missionIdentifier, quest ? quest.id : 'daily-campaign', relicId);
       onRewardXP?.(50);
     }
-  };
-
-  const handleLockInVerse = () => {
-    soundEngine.playSnap();
-    lockInMemoryVerse({
-      id: keyVerseRef,
-      reference: keyVerseRef,
-      text: keyVerseText,
-      heroName
-    });
-    setIsVerseLocked(true);
   };
 
   const handleShareCard = async () => {
@@ -480,7 +465,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   {missionTitle}
                 </span>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300">
-                  ✨ Reflection, not Scripture
+                  ✨ AI reflection • Not Scripture
                 </span>
               </div>
               <h1 className="text-xl sm:text-2xl font-serif font-black text-stone-900 dark:text-parchment-50 leading-snug mt-1">
@@ -612,10 +597,10 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent text-left">
               <div className="flex items-start gap-2.5">
                 <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                <div className="min-w-0">
-                  <div className="flex items-center justify-between gap-2 mb-0.5">
-                    <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400">
-                      Your Call Connected
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <span className="text-xs font-semibold text-amber-800 dark:text-amber-400">
+                      Your call connected
                     </span>
                     <span className="text-[10px] font-mono text-amber-700 dark:text-amber-400">
                       ✨ AI reflection • Not Scripture
@@ -630,17 +615,14 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
 
             {/* Story Header */}
             <div>
-              <div className="flex items-center justify-between gap-2 mb-0.5">
-                <span className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
-                  {heroName}'s Story
-                </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-stone-200/50 dark:bg-stone-800 text-stone-500 dark:text-stone-400">
-                  ✨ Plain modern retelling • Not Scripture
+              <div className="flex items-center justify-between gap-2 mb-1">
+                <h2 className="text-lg sm:text-xl font-serif font-bold text-stone-900 dark:text-parchment-50">
+                  What actually happened
+                </h2>
+                <span className="text-[10px] font-mono text-stone-600 dark:text-stone-400">
+                  ✨ AI reflection • Not Scripture
                 </span>
               </div>
-              <h2 className="text-lg sm:text-xl font-serif font-bold text-stone-900 dark:text-parchment-50">
-                What Actually Happened
-              </h2>
             </div>
 
             {/* Modern Plain English Story Narrative (≤150 words, short paragraphs) */}
@@ -658,9 +640,6 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                 <div className="flex items-center gap-1.5">
                   <span className="font-mono font-bold text-amber-800 dark:text-amber-400">
                     {keyVerseRef}
-                  </span>
-                  <span className="text-[10px] font-mono uppercase font-bold text-emerald-700 dark:text-emerald-400 px-1.5 py-0.2 rounded bg-emerald-500/10">
-                    Scripture (Verbatim)
                   </span>
                 </div>
 
@@ -815,41 +794,21 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
           >
             {/* Header */}
             <div>
-              <span className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
-                Today's Takeaway
-              </span>
-              <h2 className="text-xl sm:text-2xl font-serif font-black text-stone-900 dark:text-parchment-50 leading-tight mt-0.5">
-                Take This Into Your Day
+              <h2 className="text-xl sm:text-2xl font-serif font-bold text-stone-900 dark:text-parchment-50 leading-tight">
+                Take this into your day
               </h2>
             </div>
 
             {/* The Verse verbatim */}
             <div className="p-4 rounded-2xl bg-stone-100/70 dark:bg-stone-900/60">
               <div className="flex items-center justify-between gap-2 mb-1">
-                <span className="text-[11px] font-mono font-bold text-amber-800 dark:text-amber-400 uppercase tracking-wider">
+                <span className="font-mono font-bold text-amber-800 dark:text-amber-400 text-xs">
                   {keyVerseRef}
                 </span>
-                <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-400 font-bold">
-                  Scripture (Verbatim)
-                </span>
               </div>
-              <p className="text-xs sm:text-sm font-serif italic text-stone-900 dark:text-parchment-50 leading-relaxed mb-3">
+              <p className="text-xs sm:text-sm font-serif italic text-stone-900 dark:text-parchment-50 leading-relaxed">
                 "{keyVerseText}"
               </p>
-
-              {/* One-tap Lock-in Button (Part 7: Memory Verse Unification) */}
-              <button
-                type="button"
-                onClick={handleLockInVerse}
-                className={`text-xs font-mono font-bold px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 ${
-                  isVerseLocked
-                    ? 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300'
-                    : 'bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-xs cursor-pointer'
-                }`}
-              >
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>{isVerseLocked ? "✓ Locked in as today's memory verse" : "Lock it in as memory verse"}</span>
-              </button>
             </div>
 
             {/* The Tailored Concrete Action Line */}
@@ -882,7 +841,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   <span className="text-[10px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold block">
                     Rank Promotion Earned!
                   </span>
-                  <p className="text-sm font-serif font-black text-stone-900 dark:text-parchment-50">
+                  <p className="text-sm font-serif font-bold text-stone-900 dark:text-parchment-50">
                     You advanced to {rankPromotion}!
                   </p>
                   <p className="text-[11px] text-stone-600 dark:text-stone-300">
@@ -892,7 +851,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
               </motion.div>
             )}
 
-            {/* Inline Completion & Reward State (ZERO MODALS) */}
+            {/* Inline Consolidated Celebration Card (ZERO MODALS) */}
             <div className="p-4 rounded-2xl bg-emerald-500/15 dark:bg-emerald-950/40 text-stone-900 dark:text-parchment-100 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-xl shrink-0">
@@ -904,6 +863,9 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   </div>
                   <p className="text-xs text-stone-700 dark:text-parchment-200 mt-0.5">
                     +50 Scripture XP earned • Streak updated!
+                  </p>
+                  <p className="text-[11px] text-emerald-700 dark:text-emerald-400 mt-0.5 font-medium">
+                    {keyVerseRef} locked in as today's memory verse
                   </p>
                 </div>
               </div>
@@ -948,7 +910,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                 onClick={handleFinishMission}
                 className="w-full py-3.5 px-6 rounded-2xl font-bold text-xs sm:text-sm bg-amber-500 hover:bg-amber-400 text-stone-950 flex items-center justify-center gap-2 shadow-md transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
               >
-                <span>Finish today's mission</span>
+                <span>Done</span>
                 <CheckCircle2 className="w-4 h-4" />
               </button>
             </div>
