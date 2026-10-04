@@ -23,7 +23,7 @@ export const LanguageToggle: React.FC<LanguageToggleProps> = ({ className = '', 
       onClick={handleToggle}
       type="button"
       title={t('lang.tooltip')}
-      aria-label={t('lang.tooltip')}
+      aria-label={`Language: ${language === 'en' ? 'English' : language === 'es' ? 'Español' : 'Français'}`}
       className={`relative inline-flex items-center justify-center rounded-xl transition-all duration-200 focus-visible:ring-2 focus-visible:ring-amber-500 cursor-pointer select-none shrink-0 min-h-[32px] ${
         compact
           ? 'px-2 py-1 gap-1 text-xs font-mono font-bold text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800'

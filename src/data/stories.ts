@@ -343,13 +343,13 @@ export const STORY_QUESTS: StoryQuest[] = [
         choices: [
           {
             id: 'choice-cave-shutdown',
-            text: 'Shut down and cut everyone off until the dust settles.',
+            text: 'Go quiet and wait for it to pass alone.',
             reaction: 'That is the natural survival instinct when exhausted—hiding behind thick limestone walls to protect yourself.',
             historicalPivot: "David was tempted to retreat completely into silence. In Psalm 142 he cried, 'No one is concerned for me.' But he didn't stay locked away."
           },
           {
             id: 'choice-cave-lashout',
-            text: 'Lash out at the people and systems that let you down.',
+            text: 'Get angry at the people around you.',
             reaction: 'Anger often masks deep betrayal. David had served King Saul faithfully, only to be rewarded with spears and exile.',
             historicalPivot: "Instead of becoming a bitter warlord raiding innocent villages, David brought his fury directly to God and chose self-control."
           },
