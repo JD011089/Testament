@@ -601,7 +601,11 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-surface dark:bg-iron-950 text-stone-900 dark:text-parchment-100 transition-colors duration-200 w-full relative">
-      <main className="w-full pt-3 sm:pt-4 md:pt-16 pb-28 sm:pb-32 md:pb-12">
+      <main className={`w-full pt-3 sm:pt-4 md:pt-16 ${
+        activeQuest || activeDailyMission
+          ? 'pb-4 md:pb-8'
+          : 'pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:pb-10'
+      }`}>
         {activeDailyMission ? (
           <StoryViewer 
             key={activeDailyMission.id}
