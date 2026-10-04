@@ -3,7 +3,7 @@ import { getAllVerses } from '../utils/verseRegistry';
 import { STORY_QUESTS } from '../data/stories';
 import type { MemoryVerse } from '../types';
 import { soundEngine } from '../utils/audio';
-import { MemoryPulseModal } from './MemoryPulseModal';
+import { CalendarRemindersModal } from './CalendarRemindersModal';
 import { 
   Shield, 
   Bookmark, 
@@ -14,7 +14,7 @@ import {
   Search, 
   Brain,
   FileText,
-  Bell
+  Calendar
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { LanguageToggle } from './LanguageToggle';
@@ -255,7 +255,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
                       className="flex items-center gap-1 text-xs font-semibold text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-300 py-1.5 px-2.5 rounded-lg bg-stone-200/60 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 transition-colors"
                       title={t('arsenal.reminders')}
                     >
-                      <Bell className="w-3.5 h-3.5 text-amber-500" />
+                      <Calendar className="w-3.5 h-3.5 text-amber-500" />
                       <span>{t('arsenal.reminders')}</span>
                     </button>
 
@@ -295,9 +295,10 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
         </div>
       )}
 
-      <MemoryPulseModal
+      <CalendarRemindersModal
         isOpen={pulseModalVerse !== null}
         onClose={() => setPulseModalVerse(null)}
+        initialType="recall"
         targetVerse={pulseModalVerse}
         onOpenWordForge={(verseId) => {
           setPulseModalVerse(null);

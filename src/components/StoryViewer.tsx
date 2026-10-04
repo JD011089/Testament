@@ -17,8 +17,10 @@ import {
   HelpCircle, 
   Lock,
   Share2,
-  Download
+  Download,
+  Calendar
 } from 'lucide-react';
+import { CalendarRemindersModal } from './CalendarRemindersModal';
 import { BackstoryCard } from './BackstoryCard';
 import { saveOrShareVerseCard } from '../utils/verseCardGenerator';
 import { saveDecisionJournalEntry } from '../utils/decisionJournal';
@@ -190,6 +192,9 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
 
   // M-9: Content issue report modal state
   const [isReportOpen, setIsReportOpen] = useState<boolean>(false);
+
+  // Feature 8: Daily calendar reminders modal state
+  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState<boolean>(false);
 
   // Audio narrator state (secondary option)
   const [isPlayingAudio, setIsPlayingAudio] = useState<boolean>(false);
@@ -1326,6 +1331,30 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
               </button>
             </div>
 
+            {/* Feature 8: Calendar Reminders */}
+            <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-950/30 border border-amber-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <span className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100 flex items-center gap-1.5">
+                  <Calendar aria-hidden="true" className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  <span>Want a reminder for tomorrow?</span>
+                </span>
+                <p className="text-xs text-stone-600 dark:text-stone-300 mt-0.5">
+                  Add tomorrow's mission to your calendar. No spam, zero guilt.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  soundEngine.playClick();
+                  setIsCalendarModalOpen(true);
+                }}
+                className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 shadow-xs"
+              >
+                <Calendar aria-hidden="true" className="w-3.5 h-3.5" />
+                <span>Add to calendar</span>
+              </button>
+            </div>
+
             {/* Exit CTA */}
             <div className="pt-1">
               <button
@@ -1361,6 +1390,13 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
           heroName,
           screenName: currentScreen === 1 ? 'Decide' : currentScreen === 2 ? 'Story' : 'Live It'
         }}
+      />
+
+      {/* Feature 8: Calendar Reminders Modal */}
+      <CalendarRemindersModal 
+        isOpen={isCalendarModalOpen}
+        onClose={() => setIsCalendarModalOpen(false)}
+        initialType="morning"
       />
     </div>
   );
