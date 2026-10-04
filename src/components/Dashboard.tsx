@@ -378,7 +378,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       }}
                       className="w-full text-left text-xs px-1 py-1 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition-colors cursor-pointer"
                     >
-                      Daily reminders
+                      Reminders
                     </button>
                     <button
                       type="button"
