@@ -5,6 +5,20 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.19.2] - 2026-10-03
+
+### Fixed & Accessibility (Persona QA Round 2)
+- **C-1 & C-2 Decide Screen Screen-Reader Operability**: Rebuilt Decide interaction with semantic `<fieldset>` and `<legend>` containing the scenario question, `role="radiogroup"`, real `<label>`s with `<input type="radio">`, an explicitly labeled "In your own words" text field with linked privacy note (`aria-describedby`), and perceivable disabled state helper text ("Choose an option above to continue").
+- **M-1 & M-2 Plain-Language Primary CTA & Idiom Guardrails**: Renamed primary action button to *"Start today's mission"* / *"Review today's mission"*. Rewrote decision options in plain words (*"Go quiet and wait for it to pass alone"*, *"Get angry at the people around you"*), and added strict prompt guardrails across Gemini generation pipelines ("Use plain, concrete words. No idioms, slang, or figures of speech.").
+- **M-3 Inline ESL Assistance**: Integrated tap-to-define on difficult biblical vocabulary (e.g. *"rebuked"*, *"squall"*, *"stocks"*) with 1-tap explanations, plus an inline *"Say it simpler"* toggle on key verse cards.
+- **M-4 Screen-Reader Decorative Cleanliness**: Added `aria-hidden="true"` to all decorative emoji and icons; streamlined badge announcement to `"AI reflection • Not Scripture"` without noise.
+- **M-5 Verbatim Mirror-Back**: Quoted the user's authentic choice verbatim (*"You chose: '...'*), with the AI connection rendered in a distinct, badged sentence.
+- **M-6 & M-10 Network & Interruption Resilience**: Added progress feedback for slow 3G connections with automatic ~8s fallback to curated backup content. Persisted in-progress mission state to `localStorage` so PWA backgrounding resumes the exact step and selection.
+- **M-7 Jargon Removal**: Renamed *"Calibrate"* to *"Set up my plan"*, *"Relics"* to *"Collection"*, and updated rank title to *"Profile"*.
+- **M-8 Transparency Page**: Added *"How Testament works"* trust page accessible within 2 taps from Home (explaining default CSB translation, KJV toggle, strict AI guardrails, passage vetting, and local-only privacy).
+- **M-9 Content Issue Flagging**: Added low-friction *"Report an issue with today's reflection"* link on AI screens logging to `localStorage` and offering direct email reporting.
+- **Minor Enhancements (N-1 to N-12)**: Removed kicker truncation on 390px screens (N-1), renamed recall card to *"Remember yesterday's verse?"* (N-2), saved verse pill to *"Saved as today's memory verse"* (N-3), answer connection to *"Here's how your answer connects"* (N-4), Live It heading to *"Your one thing today"* (N-5), accessible step position text (N-6), language selector `aria-label` (N-7), streak and XP accessible status labels (N-8), clear audio labels (N-9), prefers-reduced-motion honor in confetti (N-10), and one-line Collection explainer on first view (N-12).
+
 ## [1.19.1] - 2026-10-03
 
 ### Refined
