@@ -230,6 +230,66 @@ export function generateIcsContent(
 }
 
 /**
+ * Detects if current environment is Android.
+ */
+export function isAndroid(): boolean {
+  return typeof navigator !== 'undefined' && /android/i.test(navigator.userAgent);
+}
+
+/**
+ * Detects if current environment is iOS (iPhone/iPad/iPod).
+ */
+export function isIOS(): boolean {
+  return typeof navigator !== 'undefined' && /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+
+/**
+ * Builds an Android Calendar Intent URL using the Android intent:#Intent syntax.
+ * Directly targets CalendarContract.Events with ACTION_INSERT.
+ * Opens the device's default calendar app (Samsung Calendar, Google Calendar, etc.)
+ * with the new event pre-filled (title, description, dates, RRULE:FREQ=DAILY).
+ */
+export function getAndroidCalendarIntentUrl(
+  type: ReminderType, 
+  options?: { time?: string; verseRef?: string }
+): string {
+  const config = getReminderConfig(type, options?.time, options?.verseRef ? { reference: options.verseRef } : undefined);
+  const { start, end } = calculateNextEventDates(config.time24, config.durationMinutes);
+  
+  const title = encodeURIComponent(config.title);
+  const description = encodeURIComponent(config.description);
+  const location = encodeURIComponent(config.url);
+  const beginTime = start.getTime();
+  const endTime = end.getTime();
+
+  return `intent:#Intent;action=android.intent.action.INSERT;type=vnd.android.cursor.item/event;S.title=${title};S.description=${description};S.eventLocation=${location};l.beginTime=${beginTime};l.endTime=${endTime};S.rrule=FREQ%3DDAILY;end`;
+}
+
+/**
+ * Adds recurring event directly to the device's native calendar app without opening a browser:
+ * - Android (primary): Fires Android Calendar Intent (ACTION_INSERT) opening default calendar app prefilled
+ * - Universal fallback (iOS, desktop): Generates client-side .ics file download with RRULE:FREQ=DAILY
+ */
+export function addEventToNativeCalendar(
+  type: ReminderType, 
+  options?: { time?: string; verseRef?: string }
+): 'android_intent' | 'ics' {
+  if (isAndroid()) {
+    try {
+      const intentUrl = getAndroidCalendarIntentUrl(type, options);
+      window.location.href = intentUrl;
+      return 'android_intent';
+    } catch {
+      downloadCalendarIcs(type, options);
+      return 'ics';
+    }
+  } else {
+    downloadCalendarIcs(type, options);
+    return 'ics';
+  }
+}
+
+/**
  * Triggers a download of the .ics file in the browser.
  */
 export function downloadCalendarIcs(
@@ -249,3 +309,4 @@ export function downloadCalendarIcs(
   document.body.removeChild(link);
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+

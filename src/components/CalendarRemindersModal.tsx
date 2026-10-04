@@ -18,6 +18,8 @@ import {
   saveCalendarReminderPrefs, 
   getGoogleCalendarUrl, 
   downloadCalendarIcs,
+  addEventToNativeCalendar,
+  isAndroid,
   formatTime12h,
   type ReminderType 
 } from '../utils/calendarReminders';
@@ -42,7 +44,8 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
   const [activeTab, setActiveTab] = useState<ReminderType>(initialType);
   const [morningTime, setMorningTime] = useState<string>('07:00');
   const [recallTime, setRecallTime] = useState<string>('12:30');
-  const [feedback, setFeedback] = useState<{ type: 'google' | 'ics'; message: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ type: 'native' | 'google' | 'ics'; message: string } | null>(null);
+  const isAndroidDevice = isAndroid();
 
   useEffect(() => {
     if (isOpen) {
@@ -67,6 +70,27 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
     }
   };
 
+  const handleAddToCalendar = (type: ReminderType) => {
+    soundEngine.playVictory();
+    const time = type === 'morning' ? morningTime : recallTime;
+    const method = addEventToNativeCalendar(type, { 
+      time, 
+      verseRef: targetVerse?.reference 
+    });
+
+    if (method === 'android_intent') {
+      setFeedback({
+        type: 'native',
+        message: 'Opening your calendar app with the daily reminder prefilled. Tap Save to confirm.'
+      });
+    } else {
+      setFeedback({
+        type: 'native',
+        message: 'Calendar file ready (.ics). Open it to add to Apple or Outlook Calendar.'
+      });
+    }
+  };
+
   const handleAddToGoogle = (type: ReminderType) => {
     soundEngine.playClick();
     const time = type === 'morning' ? morningTime : recallTime;
@@ -76,7 +100,7 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
     });
     setFeedback({
       type: 'google',
-      message: 'Opening Google Calendar to save your recurring reminder.'
+      message: 'Opening Google Calendar web to save your daily reminder.'
     });
     window.open(url, '_blank', 'noopener,noreferrer');
   };
@@ -90,7 +114,7 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
     });
     setFeedback({
       type: 'ics',
-      message: 'Downloaded calendar file (.ics). Open it to add to Apple or Outlook Calendar.'
+      message: 'Downloaded calendar file (.ics). Open it to import into your calendar.'
     });
   };
 
@@ -108,7 +132,7 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.96, y: 12 }}
           transition={{ duration: 0.18 }}
-          className="relative w-full max-w-lg bg-parchment-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-3xl shadow-2xl p-5 sm:p-6 overflow-hidden text-stone-900 dark:text-parchment-100 my-auto"
+          className="relative w-full max-w-lg bg-parchment-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-3xl shadow-2xl p-5 sm:p-6 overflow-hidden text-stone-900 dark:text-parchment-100 my-auto text-left"
         >
           {/* Header */}
           <div className="flex items-start justify-between gap-3 mb-4">
@@ -118,10 +142,10 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
               </div>
               <div>
                 <h2 id="calendar-reminders-title" className="text-base sm:text-lg font-serif font-bold text-stone-900 dark:text-parchment-50 leading-tight">
-                  Daily Calendar Reminders
+                  Reminders
                 </h2>
                 <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5">
-                  Calm, recurring calendar slots. No push spam, zero guilt.
+                  Native calendar reminders on your device. Zero push spam, zero guilt.
                 </p>
               </div>
             </div>
@@ -139,7 +163,7 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
             </button>
           </div>
 
-          {/* Tab Selector */}
+          {/* Tab Selector: Two toggleable reminders */}
           <div className="flex p-1 bg-stone-200/70 dark:bg-stone-800/80 rounded-2xl mb-5 text-xs font-semibold" role="tablist">
             <button
               type="button"
@@ -157,7 +181,7 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
               }`}
             >
               <Sun aria-hidden="true" className="w-3.5 h-3.5 text-amber-500" />
-              <span>Today's Mission</span>
+              <span>Morning Mission</span>
             </button>
 
             <button
@@ -187,7 +211,7 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
                 <div className="flex items-center justify-between">
                   <div>
                     <span className="text-[10px] font-mono uppercase tracking-wider text-amber-700 dark:text-amber-400 font-bold block">
-                      Daily Morning Routine
+                      Daily Morning Mission
                     </span>
                     <h3 className="text-sm font-bold text-stone-900 dark:text-parchment-100 mt-0.5">
                       Today's Mission — Testament
@@ -202,11 +226,11 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
                   &ldquo;No 40-minute reading plans. Just today's mission.&rdquo;
                 </p>
 
-                {/* Time Picker */}
+                {/* User-pickable Time */}
                 <div className="pt-2 border-t border-stone-200/60 dark:border-stone-800/60 flex items-center justify-between gap-2">
                   <label htmlFor="morning-time-input" className="text-xs font-medium text-stone-700 dark:text-stone-300 flex items-center gap-1.5">
                     <Clock aria-hidden="true" className="w-3.5 h-3.5 text-stone-400" />
-                    <span>Reminder time:</span>
+                    <span>Your time:</span>
                   </label>
                   <input
                     id="morning-time-input"
@@ -217,7 +241,7 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
                   />
                 </div>
 
-                {/* Quick Preset Buttons */}
+                {/* Quick Presets */}
                 <div className="flex items-center gap-1.5 pt-1">
                   <span className="text-[10px] text-stone-500 dark:text-stone-400">Presets:</span>
                   {['06:30', '07:00', '08:00', '09:00'].map((preset) => (
@@ -237,25 +261,39 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+              {/* Primary Action Button: No browser involved on device */}
+              <div className="space-y-2 pt-1">
                 <button
                   type="button"
-                  onClick={() => handleAddToGoogle('morning')}
-                  className="py-3 px-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
+                  onClick={() => handleAddToCalendar('morning')}
+                  className="w-full py-3.5 px-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
                 >
-                  <ExternalLink aria-hidden="true" className="w-4 h-4" />
-                  <span>Add to Google Calendar</span>
+                  <Calendar aria-hidden="true" className="w-4 h-4" />
+                  <span>
+                    {isAndroidDevice ? 'Add to Calendar (opens calendar app)' : 'Add to Calendar'}
+                  </span>
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => handleDownloadIcs('morning')}
-                  className="py-3 px-4 rounded-2xl bg-stone-200 hover:bg-stone-300 dark:bg-stone-800 dark:hover:bg-stone-750 text-stone-900 dark:text-parchment-100 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
-                >
-                  <Download aria-hidden="true" className="w-4 h-4" />
-                  <span>Apple / Outlook (.ics)</span>
-                </button>
+                {/* Secondary Fallback Options */}
+                <div className="flex items-center justify-center gap-3 text-[11px] text-stone-500 dark:text-stone-400 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => handleAddToGoogle('morning')}
+                    className="hover:text-stone-900 dark:hover:text-stone-200 underline-offset-2 hover:underline cursor-pointer inline-flex items-center gap-1"
+                  >
+                    <ExternalLink aria-hidden="true" className="w-3 h-3" />
+                    <span>Google Calendar web</span>
+                  </button>
+                  <span>•</span>
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadIcs('morning')}
+                    className="hover:text-stone-900 dark:hover:text-stone-200 underline-offset-2 hover:underline cursor-pointer inline-flex items-center gap-1"
+                  >
+                    <Download aria-hidden="true" className="w-3 h-3" />
+                    <span>Download .ics</span>
+                  </button>
+                </div>
               </div>
             </div>
           ) : (
@@ -290,11 +328,11 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
                   &ldquo;Take 30 seconds to recall yesterday's verse.&rdquo;
                 </p>
 
-                {/* Time Picker */}
+                {/* User-pickable Time */}
                 <div className="pt-2 border-t border-stone-200/60 dark:border-stone-800/60 flex items-center justify-between gap-2">
                   <label htmlFor="recall-time-input" className="text-xs font-medium text-stone-700 dark:text-stone-300 flex items-center gap-1.5">
                     <Clock aria-hidden="true" className="w-3.5 h-3.5 text-stone-400" />
-                    <span>Reminder time:</span>
+                    <span>Your time:</span>
                   </label>
                   <input
                     id="recall-time-input"
@@ -305,7 +343,7 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
                   />
                 </div>
 
-                {/* Quick Preset Buttons */}
+                {/* Quick Presets */}
                 <div className="flex items-center gap-1.5 pt-1">
                   <span className="text-[10px] text-stone-500 dark:text-stone-400">Presets:</span>
                   {['12:00', '12:30', '13:00', '18:00'].map((preset) => (
@@ -325,25 +363,39 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+              {/* Primary Action Button: No browser involved on device */}
+              <div className="space-y-2 pt-1">
                 <button
                   type="button"
-                  onClick={() => handleAddToGoogle('recall')}
-                  className="py-3 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
+                  onClick={() => handleAddToCalendar('recall')}
+                  className="w-full py-3.5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
                 >
-                  <ExternalLink aria-hidden="true" className="w-4 h-4" />
-                  <span>Add to Google Calendar</span>
+                  <Calendar aria-hidden="true" className="w-4 h-4" />
+                  <span>
+                    {isAndroidDevice ? 'Add to Calendar (opens calendar app)' : 'Add to Calendar'}
+                  </span>
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => handleDownloadIcs('recall')}
-                  className="py-3 px-4 rounded-2xl bg-stone-200 hover:bg-stone-300 dark:bg-stone-800 dark:hover:bg-stone-750 text-stone-900 dark:text-parchment-100 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
-                >
-                  <Download aria-hidden="true" className="w-4 h-4" />
-                  <span>Apple / Outlook (.ics)</span>
-                </button>
+                {/* Secondary Fallback Options */}
+                <div className="flex items-center justify-center gap-3 text-[11px] text-stone-500 dark:text-stone-400 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => handleAddToGoogle('recall')}
+                    className="hover:text-stone-900 dark:hover:text-stone-200 underline-offset-2 hover:underline cursor-pointer inline-flex items-center gap-1"
+                  >
+                    <ExternalLink aria-hidden="true" className="w-3 h-3" />
+                    <span>Google Calendar web</span>
+                  </button>
+                  <span>•</span>
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadIcs('recall')}
+                    className="hover:text-stone-900 dark:hover:text-stone-200 underline-offset-2 hover:underline cursor-pointer inline-flex items-center gap-1"
+                  >
+                    <Download aria-hidden="true" className="w-3 h-3" />
+                    <span>Download .ics</span>
+                  </button>
+                </div>
               </div>
 
               {targetVerse && onOpenWordForge && (
@@ -379,7 +431,7 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
           {/* Calming Zero-Guilt Philosophy Note */}
           <div className="mt-4 pt-3 border-t border-stone-200/60 dark:border-stone-800/60 flex items-center gap-2 text-[11px] text-stone-500 dark:text-stone-400">
             <Sparkles aria-hidden="true" className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-            <span>Recurring daily event. You can edit, adjust, or delete it anytime right inside your calendar app.</span>
+            <span>Recurring daily reminder. You can edit, snooze, or remove it anytime directly in your calendar app.</span>
           </div>
         </motion.div>
       </div>
