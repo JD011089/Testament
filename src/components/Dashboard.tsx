@@ -249,7 +249,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-3 sm:pt-4 pb-28 md:pb-12 text-left transition-colors">
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-3 sm:pt-4 pb-2 md:pb-6 text-left transition-colors">
       
       {/* =========================================================================
           TOP BAR: Streamlined Brand & Status (Seamless, borderless)

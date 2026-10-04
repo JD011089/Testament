@@ -176,7 +176,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
     && selectedTheme === 'All Themes';
 
   return (
-    <div className="min-h-screen bg-surface dark:bg-ink text-stone-900 dark:text-parchment-100 transition-colors pb-36 pt-4 sm:pt-6 overflow-x-hidden w-full max-w-full">
+    <div className="min-h-screen bg-surface dark:bg-ink text-stone-900 dark:text-parchment-100 transition-colors pb-2 md:pb-6 pt-4 sm:pt-6 overflow-x-hidden w-full max-w-full">
       <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 overflow-x-hidden w-full">
         
         {/* TOP NAVIGATION / BREADCRUMB HEADER */}
@@ -421,7 +421,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
         {/* MODE A: THE 3D INTERACTIVE BOOKSHELF SCRIPTORIUM              */}
         {/* ============================================================ */}
         {viewMode === 'shelf' && (
-          <div className="space-y-12 pb-16">
+          <div className="space-y-12 pb-2">
             {shelvedDivisions.map((shelfGroup, shelfIndex) => (
               <div 
                 key={shelfGroup.division.id}
@@ -504,7 +504,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
         )}
 
         {viewMode === 'list' && (
-          <div className="space-y-8 pb-16">
+          <div className="space-y-8 pb-2">
             {shelvedDivisions.map((shelfGroup) => (
               <section key={shelfGroup.division.id}>
                 <div className="mb-3">

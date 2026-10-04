@@ -630,7 +630,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
   const isDecisionReady = Boolean(selectedChoiceId || (isCustomMode && customText.trim().length > 0));
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-28 md:pb-16 text-left transition-colors">
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-4 md:pb-8 text-left transition-colors">
       
       {/* TOP STREAMLINED NAVIGATION / PROGRESS BAR */}
       <div className="flex items-center justify-between gap-3 mb-6">
