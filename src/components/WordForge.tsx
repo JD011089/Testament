@@ -4,7 +4,7 @@ import type { MemoryVerse } from '../types';
 import { getAllVerses } from '../utils/verseRegistry';
 import { soundEngine } from '../utils/audio';
 import { getDailyVerse } from '../utils/dailyEngine';
-import { MemoryPulseModal } from './MemoryPulseModal';
+import { CalendarRemindersModal } from './CalendarRemindersModal';
 import confetti from 'canvas-confetti';
 import { recordFSRSReview, getFSRSCard, previewFSRSDays } from '../utils/fsrsEngine';
 import { 
@@ -17,9 +17,9 @@ import {
   Flame, 
   ArrowRight, 
   Sparkles, 
-  Bell,
   Brain,
-  Clock
+  Clock,
+  Calendar
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { LanguageToggle } from './LanguageToggle';
@@ -850,7 +850,7 @@ export const WordForge: React.FC<WordForgeProps> = ({
   const { t, language } = useLanguage();
   const allVerses = getAllVerses(language);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [isMemoryPulseOpen, setIsMemoryPulseOpen] = useState<boolean>(false);
+  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState<boolean>(false);
 
   const findVerseIndex = (targetId: string | null | undefined, list: MemoryVerse[]): number => {
     if (!targetId) return -1;
@@ -950,13 +950,13 @@ export const WordForge: React.FC<WordForgeProps> = ({
           <button
             onClick={() => {
               soundEngine.playClick();
-              setIsMemoryPulseOpen(true);
+              setIsCalendarModalOpen(true);
             }}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-500/15 text-amber-800 dark:text-amber-300 text-xs font-semibold hover:bg-amber-500 hover:text-stone-950 transition-all"
-            title={t('forge.trainVerse')}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-500/15 text-amber-800 dark:text-amber-300 text-xs font-semibold hover:bg-amber-500 hover:text-stone-950 transition-all cursor-pointer"
+            title="Daily reminders"
           >
-            <Bell className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 animate-pulse" />
-            <span>{t('forge.trainVerse')}</span>
+            <Calendar className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
+            <span>Daily Reminders</span>
           </button>
         </div>
       </div>
@@ -1024,10 +1024,11 @@ export const WordForge: React.FC<WordForgeProps> = ({
         </button>
       </div>
 
-      {/* Memory Pulse Modal */}
-      <MemoryPulseModal
-        isOpen={isMemoryPulseOpen}
-        onClose={() => setIsMemoryPulseOpen(false)}
+      {/* Calendar Reminders Modal */}
+      <CalendarRemindersModal
+        isOpen={isCalendarModalOpen}
+        onClose={() => setIsCalendarModalOpen(false)}
+        initialType="recall"
         targetVerse={currentVerse}
       />
     </div>
