@@ -1,3 +1,9 @@
+export interface CuratedPassageBackstory {
+  category: 'Author' | 'People' | 'Culture' | 'Parable';
+  title: string;
+  content: string; // 3-5 sentences max, historically grounded
+}
+
 export interface CuratedPassage {
   id: string;
   heroName: string;
@@ -10,6 +16,8 @@ export interface CuratedPassage {
   keyVerseReference: string;
   keyVerseText: string;
   kjvKeyVerseText: string;
+  teaserHook: string; // 1-2 sentences, tension only, NO resolution!
+  backstory: CuratedPassageBackstory;
   staticFallback: {
     scenarioQuestion: string;
     presetChoices: { id: string; text: string; stance: string }[];
@@ -33,6 +41,12 @@ export const CURATED_DAILY_PASSAGES: CuratedPassage[] = [
     keyVerseReference: '1 Samuel 22:2',
     keyVerseText: 'All those who were in distress or in debt or discontented gathered to him, and he became their commander. About four hundred men were with him.',
     kjvKeyVerseText: 'And every one that was in distress, and every one that was in debt, and every one that was discontented, gathered themselves unto him; and he became a captain over them: and there were with him about four hundred men. — 1 Samuel 22:2 (KJV)',
+    teaserHook: "Tomorrow: King Saul's hunters have David trapped in a limestone cave — with four hundred desperate outlaws looking to him for answers.",
+    backstory: {
+      category: 'People',
+      title: 'Who were the four hundred?',
+      content: "David was hiding in the Judean desert, hunted by King Saul's royal forces. The men who joined him were bankrupt debtors, runaway laborers, and desperate outcasts who had nowhere else left to go. In ancient times, an outlaw band like this almost always turned into violent mercenaries. Instead, David led them with strict character and brotherhood, forging broken men into Israel's most loyal defenders."
+    },
     staticFallback: {
       scenarioQuestion: "Your plans just collapsed and you're surrounded by chaos. What's your move?",
       presetChoices: [
@@ -68,6 +82,12 @@ export const CURATED_DAILY_PASSAGES: CuratedPassage[] = [
     keyVerseReference: 'Mark 4:39',
     keyVerseText: 'He got up, rebuked the wind and said to the waves, "Quiet! Be still!" Then the wind died down and it was completely calm.',
     kjvKeyVerseText: 'And he arose, and rebuked the wind, and said unto the sea, Peace, be still. And the wind ceased, and there was a great calm. — Mark 4:39 (KJV)',
+    teaserHook: "Tomorrow: A sudden squall is swamping the boat in the middle of the lake, and the Master is sound asleep on a cushion.",
+    backstory: {
+      category: 'Culture',
+      title: 'Why seasoned fishermen were terrified',
+      content: "The Sea of Galilee sits nearly seven hundred feet below sea level, surrounded by steep hills. Sudden cold air rushing down from the north collides with warm lake air, unleashing violent windstorms within minutes. Four of Jesus' disciples were veteran commercial fishermen who had worked these waters their whole lives. For men with decades of sea experience to panic that the boat was sinking, this was an extreme life-or-death surge."
+    },
     staticFallback: {
       scenarioQuestion: "A sudden crisis is flooding your boat and panic is taking over. What's your move?",
       presetChoices: [
@@ -103,6 +123,12 @@ export const CURATED_DAILY_PASSAGES: CuratedPassage[] = [
     keyVerseReference: '1 Samuel 17:45',
     keyVerseText: 'David said to the Philistine, "You come against me with sword and spear and javelin, but I come against you in the name of the Lord Almighty."',
     kjvKeyVerseText: 'Then said David to the Philistine, Thou comest to me with a sword, and with a spear, and with a shield: but I come to thee in the name of the LORD of hosts... — 1 Samuel 17:45 (KJV)',
+    teaserHook: "Tomorrow: A towering warrior taunts the battle lines at sunrise, and seasoned soldiers refuse to step onto the field.",
+    backstory: {
+      category: 'Culture',
+      title: 'Why David refused the heavy bronze armor',
+      content: "Ancient slingers were not children playing with toys; in ancient armies, elite slingers fired stones with the kinetic force of a bullet from great distance. King Saul tried to dress David in his royal armor, but the bronze coat was so heavy the young shepherd could barely walk. David understood his real tactical strength: he was not playing Goliath's hand-to-hand broadsword game. Speed, mobility, and deep faith in God mattered far more than borrowed armor."
+    },
     staticFallback: {
       scenarioQuestion: "An intimidating obstacle is towering over you and everyone else is backing down. What's your move?",
       presetChoices: [
@@ -138,6 +164,12 @@ export const CURATED_DAILY_PASSAGES: CuratedPassage[] = [
     keyVerseReference: '1 Kings 19:12',
     keyVerseText: 'After the earthquake came a fire, but the Lord was not in the fire. And after the fire came a gentle whisper.',
     kjvKeyVerseText: 'And after the earthquake a fire; but the LORD was not in the fire: and after the fire a still small voice. — 1 Kings 19:12 (KJV)',
+    teaserHook: "Tomorrow: After running forty days through the desert in total exhaustion, a hunted prophet buries himself inside a mountain cave.",
+    backstory: {
+      category: 'People',
+      title: 'Who Elijah was running from',
+      content: "Just one chapter earlier, Elijah had faced down hundreds of false prophets on Mount Carmel in a high-stakes showdown. But when Queen Jezebel sent a personal death threat, his adrenaline crashed into severe emotional and biological shock. He ran over a hundred miles into the Sinai wilderness and collapsed under a bush, asking to die. Instead of scolding him, God sent an angel with hot baked bread and fresh water, telling him to rest."
+    },
     staticFallback: {
       scenarioQuestion: "You are burned out, mentally exhausted, and convinced you're fighting completely alone. What's your move?",
       presetChoices: [
@@ -173,6 +205,12 @@ export const CURATED_DAILY_PASSAGES: CuratedPassage[] = [
     keyVerseReference: 'Luke 22:61',
     keyVerseText: 'The Lord turned and looked straight at Peter. Then Peter remembered the word the Lord had spoken to him... And he went outside and wept bitterly.',
     kjvKeyVerseText: 'And the Lord turned, and looked upon Peter. And Peter remembered the word of the Lord... And Peter went out, and wept bitterly. — Luke 22:61-62 (KJV)',
+    teaserHook: "Tomorrow: A charcoal fire in the dead of night, and a bystander looks Peter straight in the eyes.",
+    backstory: {
+      category: 'People',
+      title: 'The courtyard fire before dawn',
+      content: "Peter had boldly promised just hours earlier that even if everyone else deserted Jesus, he would gladly die for Him. He had even drawn a blade in the garden to defend his Master against an armed mob. But huddled over a charcoal fire among temple guards in the cold night, fear stripped away his bravado. The early church preserved this painful failure because Peter himself shared it openly as proof of Christ's restoring mercy."
+    },
     staticFallback: {
       scenarioQuestion: "You cracked under pressure and failed someone who trusted you. What's your move?",
       presetChoices: [
@@ -208,6 +246,12 @@ export const CURATED_DAILY_PASSAGES: CuratedPassage[] = [
     keyVerseReference: 'Genesis 45:5',
     keyVerseText: '"And now, do not be distressed and do not be angry with yourselves for selling me here, because it was to save lives that God sent me ahead of you."',
     kjvKeyVerseText: 'Now therefore be not grieved, nor angry with yourselves, that ye sold me hither: for God did send me before you to preserve life. — Genesis 45:5 (KJV)',
+    teaserHook: "Tomorrow: The brothers who sold him into slavery walk into Pharaoh's court — completely unaware of who sits on the throne.",
+    backstory: {
+      category: 'Culture',
+      title: 'The supreme power Joseph held',
+      content: "In ancient Egypt, the Grand Vizier was second only to Pharaoh, controlling all grain reserves during severe famine. When Joseph's ten older brothers arrived starving from Canaan, foreign travelers were required to bow with their faces to the stone floor. Joseph was dressed in royal Egyptian linen, shaved according to court custom, and spoke through an interpreter. He had absolute legal power to execute them on the spot, but chose a radically different path."
+    },
     staticFallback: {
       scenarioQuestion: "Someone who wounded and betrayed you is suddenly at your mercy. What's your move?",
       presetChoices: [
@@ -243,6 +287,12 @@ export const CURATED_DAILY_PASSAGES: CuratedPassage[] = [
     keyVerseReference: 'Acts 16:25',
     keyVerseText: 'About midnight Paul and Silas were praying and singing hymns to God, and the other prisoners were listening to them.',
     kjvKeyVerseText: 'And at midnight Paul and Silas prayed, and sang praises unto God: and the prisoners heard them. — Acts 16:25 (KJV)',
+    teaserHook: "Tomorrow: Beaten with wooden rods and clamped in dungeon stocks at midnight, two prisoners face total darkness.",
+    backstory: {
+      category: 'Culture',
+      title: 'Why Roman stocks were brutal',
+      content: "Roman inner dungeons were pitch-black underground chambers with no sanitation and zero airflow. The heavy wooden stocks forced prisoners' legs spread painfully wide apart, causing intense cramping and joint strain. In addition, Roman guards faced immediate execution if any prisoner escaped under their custody. That explains why the Philippian jailer drew his sword ready to kill himself the moment the earthquake flung the heavy gates open."
+    },
     staticFallback: {
       scenarioQuestion: "You've been treated unfairly and locked into a miserable situation. What's your move?",
       presetChoices: [
@@ -278,6 +328,12 @@ export const CURATED_DAILY_PASSAGES: CuratedPassage[] = [
     keyVerseReference: 'John 1:5',
     keyVerseText: 'The light shines in the darkness, and the darkness has not overcome it.',
     kjvKeyVerseText: 'And the light shineth in darkness; and the darkness comprehended it not. — John 1:5 (KJV)',
+    teaserHook: "Tomorrow: Darkness presses in from every side, but an unquenchable light is about to break through.",
+    backstory: {
+      category: 'Author',
+      title: "Why John wrote 'The Word'",
+      content: "John wrote his Gospel decades after the others, addressing a world of Greek thinkers and Jewish rabbis who debated the 'Logos' — the supreme cosmic reason behind the universe. Jewish teachers also spoke in awe of the 'Memra' (God's creative spoken word). John connected both worlds by announcing that the ultimate foundation of reality is not a cold equation or abstract thought, but a person who entered human history with grace, truth, and life."
+    },
     staticFallback: {
       scenarioQuestion: "Darkness and heavy thoughts are pressing in around you today. What's your move?",
       presetChoices: [

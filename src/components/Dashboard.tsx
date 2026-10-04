@@ -12,7 +12,9 @@ import {
   Play,
   Pause,
   ChevronDown,
-  Settings
+  Settings,
+  RotateCw,
+  Check
 } from 'lucide-react';
 import type { UserCalibrationProfile } from './OnboardingModal';
 import { ThemeToggle } from './ThemeToggle';
@@ -40,7 +42,11 @@ import {
   markYesterdayRecallComplete, 
   type MemoryVerseData 
 } from '../utils/memoryVerseEngine';
-import { RotateCw, Check } from 'lucide-react';
+import { TomorrowTeaserCard } from './TomorrowTeaserCard';
+import { DecisionJournalModal } from './DecisionJournalModal';
+import { WeeklyRecapCard } from './WeeklyRecapCard';
+import { CharacterArcModal } from './CharacterArcModal';
+import { CHARACTER_ARCS } from '../data/characterArcs';
 
 interface DashboardProps {
   onSelectQuest: (quest: StoryQuest) => void;
@@ -125,6 +131,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [isYesterdayFlipped, setIsYesterdayFlipped] = useState<boolean>(false);
   const [yesterdayRecalled, setYesterdayRecalled] = useState<boolean>(false);
   const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [showJournalModal, setShowJournalModal] = useState<boolean>(false);
+  const [showPeopleModal, setShowPeopleModal] = useState<boolean>(false);
+  const [selectedCharacterArcId, setSelectedCharacterArcId] = useState<string | undefined>(undefined);
+  const [selectedMomentIndex, setSelectedMomentIndex] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     let isMounted = true;
@@ -179,6 +189,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
     || featuredQuest.acts[0];
 
   const isTodayMissionDone = completedActs.includes(dailyMission.id) || completedActs.includes(featuredAct.id);
+
+  // Feature 6: Cross-link today's mission with character arcs
+  const matchedCharacterArc = CHARACTER_ARCS.find(arc => 
+    arc.name.toLowerCase() === dailyMission.heroName.toLowerCase() ||
+    dailyMission.heroName.toLowerCase().includes(arc.name.toLowerCase()) ||
+    arc.moments.some(m => m.passageReference.toLowerCase().includes(dailyMission.passageReference.toLowerCase()) || dailyMission.passageReference.toLowerCase().includes(m.passageReference.toLowerCase()))
+  );
+  const matchedMomentIndex = matchedCharacterArc 
+    ? matchedCharacterArc.moments.findIndex(m => m.passageReference.toLowerCase().includes(dailyMission.passageReference.toLowerCase()) || dailyMission.passageReference.toLowerCase().includes(m.passageReference.toLowerCase()))
+    : -1;
 
   const handleStartMission = () => {
     soundEngine.playClick();
@@ -266,7 +286,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 className="text-[11px] font-mono px-1.5 py-0.2 rounded-full text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-amber-300 transition-colors"
                 title={t('dashboard.versionTooltip')}
               >
-                v1.19.2
+                v1.20.0
               </button>
             </div>
             {/* N-1: No truncated kicker on 390px screens */}
@@ -335,9 +355,33 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     <span className="text-xs font-medium text-stone-800 dark:text-stone-200">Theme</span>
                     <ThemeToggle compact />
                   </div>
-                  {/* M-8: Transparency Page link */}
-                  {onOpenHowItWorks && (
-                    <div className="pt-1 border-t border-stone-200 dark:border-stone-800">
+                  <div className="pt-1 border-t border-stone-200 dark:border-stone-800 space-y-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        soundEngine.playClick();
+                        setShowSettings(false);
+                        setShowJournalModal(true);
+                      }}
+                      className="w-full text-left text-xs px-1 py-1 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition-colors"
+                    >
+                      Decision journal
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        soundEngine.playClick();
+                        setShowSettings(false);
+                        setSelectedCharacterArcId(undefined);
+                        setSelectedMomentIndex(undefined);
+                        setShowPeopleModal(true);
+                      }}
+                      className="w-full text-left text-xs px-1 py-1 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition-colors"
+                    >
+                      People & character arcs
+                    </button>
+                    {/* M-8: Transparency Page link */}
+                    {onOpenHowItWorks && (
                       <button
                         type="button"
                         onClick={() => {
@@ -349,8 +393,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       >
                         How Testament works
                       </button>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </>
             )}
@@ -395,12 +439,36 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <ArrowRight aria-hidden="true" className="w-4 h-4" />
           </button>
         </div>
+
+        {/* Feature 6: Cross-link to character arc if matched */}
+        {matchedCharacterArc && (
+          <div className="mt-4 pt-3 border-t border-amber-500/20">
+            <button
+              type="button"
+              onClick={() => {
+                soundEngine.playClick();
+                setSelectedCharacterArcId(matchedCharacterArc.id);
+                if (matchedMomentIndex >= 0) setSelectedMomentIndex(matchedMomentIndex);
+                setShowPeopleModal(true);
+              }}
+              className="inline-flex items-center gap-1.5 text-xs text-amber-900 dark:text-amber-300 hover:underline font-medium cursor-pointer"
+            >
+              <span>Part of {matchedCharacterArc.name}'s story arc {matchedMomentIndex >= 0 ? `(Moment ${matchedMomentIndex + 1} of ${matchedCharacterArc.moments.length})` : ''} →</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* =========================================================================
           BELOW THE FOLD: Plain-language secondary tools & sections
           ========================================================================= */}
       <div className="mt-8 space-y-5">
+
+        {/* Feature 1: Locked Tomorrow Teaser Card ("Can't peek") */}
+        <TomorrowTeaserCard />
+
+        {/* Feature 5: "Previously On..." Weekly Recap Card */}
+        <WeeklyRecapCard />
 
         {/* =========================================================================
             PART 7: YESTERDAY'S VERSE RECALL CARD (N-2: "Remember yesterday's verse?")
@@ -580,6 +648,28 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 Set up my plan
               </button>
             )}
+            <button
+              type="button"
+              onClick={() => {
+                soundEngine.playClick();
+                setShowJournalModal(true);
+              }}
+              className="text-xs text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
+            >
+              Decision journal
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                soundEngine.playClick();
+                setSelectedCharacterArcId(undefined);
+                setSelectedMomentIndex(undefined);
+                setShowPeopleModal(true);
+              }}
+              className="text-xs text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
+            >
+              Character arcs
+            </button>
             {/* M-8: Transparency Page link */}
             {onOpenHowItWorks && (
               <button
@@ -710,6 +800,20 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
       </div>
+
+      {/* Feature 3: Decision Journal Modal */}
+      <DecisionJournalModal
+        isOpen={showJournalModal}
+        onClose={() => setShowJournalModal(false)}
+      />
+
+      {/* Feature 6: Character Arcs Modal */}
+      <CharacterArcModal
+        isOpen={showPeopleModal}
+        onClose={() => setShowPeopleModal(false)}
+        initialCharacterId={selectedCharacterArcId}
+        initialMomentIndex={selectedMomentIndex}
+      />
     </div>
   );
 };

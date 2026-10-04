@@ -42,10 +42,53 @@ interface ReleaseMilestone {
 
 const ACTIVE_RELEASES: ReleaseMilestone[] = [
   {
-    version: 'v1.19.2',
-    tagline: 'Persona QA Round 2 — Screen Reader, ESL, Network Resilience & Trust',
+    version: 'v1.20.0',
+    tagline: 'Engagement Spec v2 — 7 Retention & Scripture Depth Features',
     dateBadge: 'Current Release',
     isLatest: true,
+    highlights: [
+      {
+        icon: <Target className="w-4 h-4 text-amber-400" />,
+        title: 'Locked Tomorrow Teaser ("Can\'t peek")',
+        description: 'Curiosity-gap tension hook locked until tomorrow. Builds genuine anticipation without spoilers or breaking today\'s focus.'
+      },
+      {
+        icon: <BookOpen className="w-4 h-4 text-amber-400" />,
+        title: 'Historical Backstory Layer',
+        description: 'Collapsed-by-default historical grounding: who wrote it, who these people were, and why it mattered then in 3–5 concrete sentences.'
+      },
+      {
+        icon: <Layers className="w-4 h-4 text-amber-400" />,
+        title: 'Private Decision Journal',
+        description: 'Reverse-chronological timeline of your exact decisions and takeaways. Saved strictly on your device—nobody sees this but you.'
+      },
+      {
+        icon: <Award className="w-4 h-4 text-amber-400" />,
+        title: 'Anonymous Decision Stats (100% Real)',
+        description: 'See how other believers weighed today\'s decision after you choose. Zero fake numbers—strictly honest aggregate counts.'
+      },
+      {
+        icon: <Compass className="w-4 h-4 text-amber-400" />,
+        title: '"Previously On..." Weekly Recap',
+        description: 'A 60-second read summarizing the 7-day arc, overarching biblical thread, and what you\'ve explored—with zero guilt language.'
+      },
+      {
+        icon: <Flame className="w-4 h-4 text-amber-400" />,
+        title: 'Follow a Person: Character Arcs',
+        description: 'Deep dive into 6 foundational figures (Jesus, Peter, David, Mary, Paul, Esther) across 10–12 pivotal moments each.'
+      },
+      {
+        icon: <Sparkles className="w-4 h-4 text-amber-400" />,
+        title: '"Carry It With You" Lock-Screen Card',
+        description: 'Generate high-res 1080×1920 phone lock-screen scripture cards directly on-device with one tap to save or share.'
+      }
+    ]
+  },
+  {
+    version: 'v1.19.2',
+    tagline: 'Persona QA Round 2 — Screen Reader, ESL, Network Resilience & Trust',
+    dateBadge: 'Previous Release',
+    isLatest: false,
     highlights: [
       {
         icon: <Target className="w-4 h-4 text-amber-400" />,
@@ -671,7 +714,7 @@ const ARCHIVED_RELEASES: ReleaseMilestone[] = [
 
 export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose }) => {
   const modalRef = useModalLock(isOpen);
-  const [activeTab, setActiveTab] = useState<string>('v1.19.2');
+  const [activeTab, setActiveTab] = useState<string>('v1.20.0');
   const [showArchive, setShowArchive] = useState(false);
 
   const RELEASES = showArchive ? [...ACTIVE_RELEASES, ...ARCHIVED_RELEASES] : ACTIVE_RELEASES;
@@ -679,7 +722,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
   const handleDismiss = () => {
     soundEngine.playClick();
     try {
-      localStorage.setItem('testament_last_seen_version', '1.19.2');
+      localStorage.setItem('testament_last_seen_version', '1.20.0');
     } catch {
       // ignore
     }
@@ -722,7 +765,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
                   Field Update Dispatches
                 </h2>
                 <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 font-bold">
-                  v1.19.2 Live
+                  v1.20.0 Live
                 </span>
               </div>
 
@@ -836,7 +879,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
         {/* MODAL FOOTER */}
         <div className="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800/90 bg-stone-50 dark:bg-black/40 flex items-center justify-between gap-3 relative z-10">
           <div className="text-xs font-mono text-stone-500 dark:text-stone-400 hidden sm:block">
-            Testament v1.19.2 • The Living Word
+            Testament v1.20.0 • The Living Word
           </div>
 
 

@@ -1,7 +1,8 @@
 import { 
   CURATED_DAILY_PASSAGES, 
   getDailyCuratedPassage, 
-  type CuratedPassage 
+  type CuratedPassage,
+  type CuratedPassageBackstory
 } from '../data/dailyPassages';
 import { getTodayDateKey } from './dailyEngine';
 
@@ -20,6 +21,7 @@ export interface GeneratedDailyMission {
   actionLine: string;
   isAiGenerated: boolean;
   reflectionBadge: string;
+  backstory?: CuratedPassageBackstory;
 }
 
 export interface PersonalizedMissionResult {
@@ -72,7 +74,8 @@ export function buildStaticFallbackMission(passage: CuratedPassage, dateKey: str
     kjvVerseText: passage.kjvKeyVerseText,
     actionLine: passage.staticFallback.actionLine,
     isAiGenerated: false,
-    reflectionBadge: '✨ AI reflection • Not Scripture'
+    reflectionBadge: '✨ AI reflection • Not Scripture',
+    backstory: passage.backstory
   };
 }
 
@@ -246,7 +249,8 @@ Return ONLY a valid JSON object matching this structure:
           kjvVerseText: passage.kjvKeyVerseText,
           actionLine: parsed.actionLine.trim(),
           isAiGenerated: true,
-          reflectionBadge: '✨ AI reflection • Not Scripture'
+          reflectionBadge: '✨ AI reflection • Not Scripture',
+          backstory: passage.backstory
         };
 
         try {

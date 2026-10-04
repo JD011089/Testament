@@ -16,8 +16,12 @@ import {
   ShieldAlert, 
   HelpCircle, 
   Lock,
-  Share2
+  Share2,
+  Download
 } from 'lucide-react';
+import { BackstoryCard } from './BackstoryCard';
+import { saveOrShareVerseCard } from '../utils/verseCardGenerator';
+import { saveDecisionJournalEntry } from '../utils/decisionJournal';
 import { 
   getLocalPersonalization, 
   fetchGeminiPersonalization, 
@@ -35,6 +39,7 @@ import {
 import { getTodayDateKey } from '../utils/dailyEngine';
 import { paraphraseVerseSimpler } from '../utils/geminiFeatures';
 import { ReportIssueModal } from './ReportIssueModal';
+import { fetchDecisionStats, submitAnonymousDecisionVote } from '../utils/decisionStatsClient';
 
 interface StoryViewerProps {
   quest?: StoryQuest | null;
@@ -194,6 +199,13 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
   const [selectedQuizIndex, setSelectedQuizIndex] = useState<number | null>(null);
   const [quizSubmitted, setQuizSubmitted] = useState<boolean>(false);
 
+  // Feature 7: Verse card export state
+  const [isSavingVerseCard, setIsSavingVerseCard] = useState<boolean>(false);
+  const [verseCardFeedback, setVerseCardFeedback] = useState<string | null>(null);
+
+  // Feature 4: Real Anonymous Decision Stats state
+  const [decisionStats, setDecisionStats] = useState<{ totalVotes: number; topChoicePercentage: number } | null>(null);
+
   // Personalization state
   const [personalization, setPersonalization] = useState<MissionPersonalization>(() => {
     if (dailyMission) {
@@ -252,6 +264,19 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
       soundEngine.stopSpeaking();
     };
   }, []);
+
+  // Feature 4: Fetch real anonymous stats for today's passage
+  useEffect(() => {
+    if (dailyMission?.dateKey && dailyMission?.passageId) {
+      fetchDecisionStats(dailyMission.dateKey, dailyMission.passageId)
+        .then((res) => {
+          if (res) setDecisionStats(res);
+        })
+        .catch(() => {
+          // ignore network failure
+        });
+    }
+  }, [dailyMission?.dateKey, dailyMission?.passageId]);
 
   const handleSelectPresetChoice = (choiceId: string) => {
     soundEngine.playSnap();
@@ -329,6 +354,33 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     setCurrentScreen(2);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
+    // Feature 3: Save to private on-device journal
+    try {
+      saveDecisionJournalEntry({
+        dateKey: dailyMission?.dateKey || getTodayDateKey(),
+        passageReference: dailyMission?.passageReference || keyVerseRef,
+        heroName,
+        scenarioQuestion,
+        chosenText: isCustomMode && customText.trim() ? customText.trim() : (decisionString || 'Faced today\'s crossroad'),
+        userCustomText: isCustomMode && customText.trim() ? customText.trim() : undefined,
+        actionLine: personalization.actionLine || dailyMission?.actionLine,
+        storyTakeaway: personalization.mirrorBack
+      });
+    } catch {
+      // ignore
+    }
+
+    // Feature 4: Submit anonymous vote (choice identifier only, strictly no free text or personal data)
+    if (dailyMission?.dateKey && dailyMission?.passageId && selectedChoiceId) {
+      submitAnonymousDecisionVote(dailyMission.dateKey, dailyMission.passageId, selectedChoiceId)
+        .then((res) => {
+          if (res) setDecisionStats(res);
+        })
+        .catch(() => {
+          // ignore
+        });
+    }
+
     // 2. M-6: Slow network handling for Gemini refinement
     if (decisionString) {
       setIsRefiningAi(true);
@@ -392,6 +444,22 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
       text: keyVerseText,
       heroName
     });
+
+    // Feature 3: Update private journal entry with final actionLine and takeaway
+    try {
+      saveDecisionJournalEntry({
+        dateKey: dailyMission?.dateKey || getTodayDateKey(),
+        passageReference: dailyMission?.passageReference || keyVerseRef,
+        heroName,
+        scenarioQuestion,
+        chosenText: recordedDecisionText || getDecisionString() || 'Faced today\'s crossroad',
+        userCustomText: isCustomMode && customText.trim() ? customText.trim() : undefined,
+        actionLine: personalization.actionLine || dailyMission?.actionLine,
+        storyTakeaway: personalization.mirrorBack
+      });
+    } catch {
+      // ignore
+    }
 
     // 2. Check rank promotion
     const prevPoints = currentXp ?? 0;
@@ -500,6 +568,24 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
       } finally {
         setIsLoadingSimplerVerse(false);
       }
+    }
+  };
+
+  // Feature 7: Carry It With You — Save lock-screen card or native share
+  const handleSaveVerseCard = async () => {
+    soundEngine.playSnap();
+    setIsSavingVerseCard(true);
+    setVerseCardFeedback(null);
+    try {
+      const activeText = useKjv ? personalization.kjvVerseText : keyVerseText;
+      const res = await saveOrShareVerseCard(keyVerseRef, activeText);
+      setVerseCardFeedback(res === 'shared' ? 'Shared verse card!' : 'Saved verse card to downloads!');
+      setTimeout(() => setVerseCardFeedback(null), 3500);
+    } catch {
+      setVerseCardFeedback('Could not save card. Try again.');
+      setTimeout(() => setVerseCardFeedback(null), 3000);
+    } finally {
+      setIsSavingVerseCard(false);
     }
   };
 
@@ -711,7 +797,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                       {/* Privacy Note */}
                       <p id="custom-decision-privacy" className="text-[11px] text-stone-500 dark:text-stone-400 mt-2 flex items-center gap-1.5">
                         <Lock aria-hidden="true" className="w-3 h-3 text-stone-400 shrink-0" />
-                        <span>Responses stay private and are only used to shape today's mission.</span>
+                        <span>Your words stay on this device. Only anonymous vote counts are shared.</span>
                       </p>
                     </div>
                   </div>
@@ -832,6 +918,18 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
               </div>
             </div>
 
+            {/* Feature 4: Real Anonymous Decision Stats (The Honesty Rule: Zero Fabricated Numbers) */}
+            <div className="px-3.5 py-2 rounded-xl bg-stone-100/60 dark:bg-stone-900/40 border border-stone-200/50 dark:border-stone-800/50 text-[11px] text-stone-600 dark:text-stone-400 flex items-center justify-between">
+              <span>
+                {!decisionStats || decisionStats.totalVotes === 0
+                  ? "Be the first to weigh in today."
+                  : decisionStats.totalVotes === 1
+                  ? "1 person wrestled with this today."
+                  : `${decisionStats.totalVotes} people wrestled with this today${decisionStats.topChoicePercentage > 0 ? ` — ${decisionStats.topChoicePercentage}% chose this path.` : '.'}`}
+              </span>
+              <span className="font-mono text-[10px] text-stone-400 dark:text-stone-500">Anonymous</span>
+            </div>
+
             {/* Story Header */}
             <div>
               <div className="flex items-center justify-between gap-2 mb-1">
@@ -886,6 +984,18 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   >
                     {useKjv ? 'Showing KJV' : 'CSB (Tap for KJV)'}
                   </button>
+
+                  {/* Feature 7: Save lock-screen verse card */}
+                  <button
+                    type="button"
+                    disabled={isSavingVerseCard}
+                    onClick={handleSaveVerseCard}
+                    className="text-[11px] font-mono px-2 py-0.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-900 dark:text-amber-200 transition-colors inline-flex items-center gap-1 cursor-pointer"
+                    title="Save as phone lock-screen card or share"
+                  >
+                    <Download aria-hidden="true" className="w-3 h-3" />
+                    <span>{isSavingVerseCard ? 'Saving…' : 'Save card'}</span>
+                  </button>
                 </div>
               </div>
 
@@ -907,6 +1017,37 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                 </div>
               )}
             </div>
+
+            {/* Feature 7: Verse card feedback toast */}
+            {verseCardFeedback && (
+              <div 
+                role="status"
+                aria-live="polite"
+                className="p-3 rounded-xl bg-amber-500/15 border border-amber-500/30 text-xs font-mono text-amber-900 dark:text-amber-200 flex items-center justify-between animate-in fade-in duration-200"
+              >
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 aria-hidden="true" className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                  <span>{verseCardFeedback}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setVerseCardFeedback(null)}
+                  className="text-[10px] text-amber-700 dark:text-amber-300 uppercase tracking-wider"
+                >
+                  Dismiss
+                </button>
+              </div>
+            )}
+
+            {/* Feature 2: Backstory Layer (Collapsed by default, opt-in depth) */}
+            {dailyMission?.backstory && (
+              <BackstoryCard
+                backstory={dailyMission.backstory}
+                passageReference={keyVerseRef}
+                heroName={heroName}
+                onReportIssue={() => setIsReportOpen(true)}
+              />
+            )}
 
             {/* M-3: Word Definition Card if hard word tapped */}
             {selectedHardWord && (
