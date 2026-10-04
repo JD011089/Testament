@@ -98,20 +98,9 @@ export interface MemoryVerse {
   actTitle?: string;
 }
 
-export type RecallPromptStyle = 'cue' | 'cloze' | 'stealth';
-
-export interface NotificationSettings {
-  enabled: boolean;
-  activeVerseId: string;
-  frequencyPerDay: number; // e.g. 2, 3, 4, 5
-  startHour: number; // 0-23, default 8 (8 AM)
-  endHour: number; // 0-23, default 21 (9 PM)
-  recallStyle: RecallPromptStyle;
-  lastNotifiedDate: string; // YYYY-MM-DD
-  notificationsSentToday: number;
-  scheduledSlots: string[]; // e.g. ["09:00", "14:30", "20:00"]
-  firedSlotsToday: string[]; // e.g. ["09:00"]
-  lastNotifiedTimestamp?: number; // epoch ms
+export interface CalendarReminderPreferences {
+  morningTime: string; // HH:MM (24h)
+  recallTime: string;  // HH:MM (24h)
 }
 
 export interface UserProgress {

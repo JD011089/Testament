@@ -47,6 +47,7 @@ import { TomorrowTeaserCard } from './TomorrowTeaserCard';
 import { DecisionJournalModal } from './DecisionJournalModal';
 import { WeeklyRecapCard } from './WeeklyRecapCard';
 import { CharacterArcModal } from './CharacterArcModal';
+import { CalendarRemindersModal } from './CalendarRemindersModal';
 import { CHARACTER_ARCS } from '../data/characterArcs';
 
 interface DashboardProps {
@@ -129,6 +130,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [isYesterdayFlipped, setIsYesterdayFlipped] = useState<boolean>(false);
   const [yesterdayRecalled, setYesterdayRecalled] = useState<boolean>(false);
   const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [showCalendarModal, setShowCalendarModal] = useState<boolean>(false);
   const [showJournalModal, setShowJournalModal] = useState<boolean>(false);
   const [showPeopleModal, setShowPeopleModal] = useState<boolean>(false);
   const [selectedCharacterArcId, setSelectedCharacterArcId] = useState<string | undefined>(undefined);
@@ -284,7 +286,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 className="text-[11px] font-mono px-1.5 py-0.2 rounded-full text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-amber-300 transition-colors"
                 title={t('dashboard.versionTooltip')}
               >
-                v1.20.0
+                v1.21.0
               </button>
             </div>
             {/* N-1: No truncated kicker on 390px screens */}
@@ -367,6 +369,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         Set up my plan
                       </button>
                     )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        soundEngine.playClick();
+                        setShowSettings(false);
+                        setShowCalendarModal(true);
+                      }}
+                      className="w-full text-left text-xs px-1 py-1 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition-colors cursor-pointer"
+                    >
+                      Daily reminders
+                    </button>
                     <button
                       type="button"
                       onClick={() => {
@@ -796,6 +809,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
         onClose={() => setShowPeopleModal(false)}
         initialCharacterId={selectedCharacterArcId}
         initialMomentIndex={selectedMomentIndex}
+      />
+
+      {/* Feature 8: Calendar Reminders Modal */}
+      <CalendarRemindersModal
+        isOpen={showCalendarModal}
+        onClose={() => setShowCalendarModal(false)}
       />
     </div>
   );

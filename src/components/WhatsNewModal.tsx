@@ -20,7 +20,9 @@ import {
   Compass,
   Swords,
   Languages,
-  Clock
+  Clock,
+  Calendar,
+  ShieldCheck
 } from 'lucide-react';
 
 interface WhatsNewModalProps {
@@ -42,10 +44,33 @@ interface ReleaseMilestone {
 
 const ACTIVE_RELEASES: ReleaseMilestone[] = [
   {
-    version: 'v1.20.0',
-    tagline: 'Engagement Spec v2 — 7 Retention & Scripture Depth Features',
+    version: 'v1.21.0',
+    tagline: 'Calendar Reminders — Replaces Push Notifications',
     dateBadge: 'Current Release',
     isLatest: true,
+    highlights: [
+      {
+        icon: <Calendar className="w-4 h-4 text-amber-400" />,
+        title: 'Zero-Guilt Calendar Reminders',
+        description: 'Morning mission (7:00 AM) and verse recall (12:30 PM) reminders directly in your phone\'s calendar. No push spam, zero server tracking.'
+      },
+      {
+        icon: <Calendar className="w-4 h-4 text-amber-400" />,
+        title: '1-Tap Google Calendar & Apple/Outlook (.ics)',
+        description: 'Instant Google Calendar web links and RFC 5545 recurring .ics downloads with standard alarms and direct links back into today\'s mission.'
+      },
+      {
+        icon: <ShieldCheck className="w-4 h-4 text-amber-400" />,
+        title: 'Cleaner, Lighter Experience',
+        description: 'Removed legacy web push notification prompts, service worker alarm overhead, and background polling for a calm, distraction-free app.'
+      }
+    ]
+  },
+  {
+    version: 'v1.20.0',
+    tagline: 'Engagement Spec v2 — 7 Retention & Scripture Depth Features',
+    dateBadge: 'Previous Release',
+    isLatest: false,
     highlights: [
       {
         icon: <Target className="w-4 h-4 text-amber-400" />,
@@ -714,7 +739,7 @@ const ARCHIVED_RELEASES: ReleaseMilestone[] = [
 
 export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose }) => {
   const modalRef = useModalLock(isOpen);
-  const [activeTab, setActiveTab] = useState<string>('v1.20.0');
+  const [activeTab, setActiveTab] = useState<string>('v1.21.0');
   const [showArchive, setShowArchive] = useState(false);
 
   const RELEASES = showArchive ? [...ACTIVE_RELEASES, ...ARCHIVED_RELEASES] : ACTIVE_RELEASES;
@@ -722,7 +747,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
   const handleDismiss = () => {
     soundEngine.playClick();
     try {
-      localStorage.setItem('testament_last_seen_version', '1.20.0');
+      localStorage.setItem('testament_last_seen_version', '1.21.0');
     } catch {
       // ignore
     }
@@ -765,7 +790,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
                   Field Update Dispatches
                 </h2>
                 <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 font-bold">
-                  v1.20.0 Live
+                  v1.21.0 Live
                 </span>
               </div>
 
@@ -879,7 +904,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
         {/* MODAL FOOTER */}
         <div className="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800/90 bg-stone-50 dark:bg-black/40 flex items-center justify-between gap-3 relative z-10">
           <div className="text-xs font-mono text-stone-500 dark:text-stone-400 hidden sm:block">
-            Testament v1.20.0 • The Living Word
+            Testament v1.21.0 • The Living Word
           </div>
 
 

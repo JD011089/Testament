@@ -16,7 +16,7 @@ import { UpdateNotificationBanner } from './components/UpdateNotificationBanner'
 import { CampaignNextTaskPrompt } from './components/CampaignNextTaskPrompt';
 import { soundEngine } from './utils/audio';
 import { recordVerseMasteryDate, setTodayBattlefieldId } from './utils/dailyEngine';
-import { initNotificationScheduler, setActiveMemoryVerse } from './utils/notificationEngine';
+import { setActiveMemoryVerse } from './utils/calendarReminders';
 import { markCampaignStepCompleted } from './data/dailyCampaigns';
 import type { DailyCampaignStep } from './data/dailyCampaigns';
 import { getComposedDailyMission } from './utils/missionComposer';
@@ -176,11 +176,6 @@ export function App() {
     activeDailyMissionRef.current = activeDailyMission;
   }, [activeDailyMission]);
 
-  // Initialize client-side notification scheduler
-  useEffect(() => {
-    const cleanup = initNotificationScheduler();
-    return () => cleanup();
-  }, []);
 
   // M-10: Restore in-progress daily mission on return if user was interrupted mid-mission
   useEffect(() => {

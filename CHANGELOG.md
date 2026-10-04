@@ -5,6 +5,19 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.21.0] - 2026-10-04
+
+### Added (Feature 8: Calendar Reminders — Replaces Push Notifications)
+- **Zero-Guilt Calendar Reminders**: Added recurring daily calendar events (`Today's Mission — Testament` at 7:00 AM, `Still got yesterday's verse? — Testament` at 12:30 PM) replacing broken and intrusive web push notifications.
+- **Client-Side Google Calendar Links**: Generates instant `calendar.google.com` recurring event URLs prefilled with daily recurrence (`RRULE:FREQ=DAILY`), device local timezone, event details, and direct links to the Testament web app.
+- **RFC 5545 `.ics` File Generation**: Clean client-side `.ics` generator with standard daily recurrence rule (`RRULE:FREQ=DAILY`), local timezone offset, and event reminder alarms (`VALARM:DISPLAY`) for seamless native import into Apple Calendar (iOS/macOS) and Microsoft Outlook.
+- **Zero Guilt Copy & Flow Integration**:
+  - Live It (Screen 3) completion card: *"Want a reminder for tomorrow? Add to calendar."*
+  - Profile & Settings: Dedicated *"Daily reminders"* entry in the header Settings dropdown.
+  - WordForge & Saved Scriptures (Arsenal): 1-tap verse recall calendar reminder generator attached to practice workbench items.
+  - Zero guilt tone (*"Still got yesterday's verse?"*, never *"Don't forget!"* or guilt-tripping streak warnings).
+- **Push Notification Cleanup**: Removed legacy Web Push permission prompts, IndexedDB alarm sync, PeriodicSync background listeners, and notification engine overhead (`notificationEngine.ts` safely removed).
+
 ## [1.20.0] - 2026-10-03
 
 ### Added (Engagement Spec v2 — 7 Retention & Scripture Depth Features)
