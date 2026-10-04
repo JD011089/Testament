@@ -8,10 +8,8 @@ import {
   ArrowRight, 
   BookOpen, 
   Brain, 
-  Compass,
-  Play,
-  Pause,
-  ChevronDown,
+  Play, 
+  Pause, 
   Settings,
   RotateCw,
   Check
@@ -101,8 +99,6 @@ const ALL_RELICS = STORY_QUESTS.filter(q => q.relicReward).map(q => ({
 export const Dashboard: React.FC<DashboardProps> = ({
   onSelectQuest,
   onOpenWordForge,
-  onOpenArsenal,
-  onOpenDilemmas,
   onOpenLibrary,
   onContinueReading,
   completedActs,
@@ -123,7 +119,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
     getDailyMissionSync(getTodayDateKey(), 0, activeBattlefieldId)
   );
   const [isPlayingBriefing, setIsPlayingBriefing] = useState<boolean>(false);
-  const [showExploreJourneys, setShowExploreJourneys] = useState<boolean>(false);
   const [showRelics, setShowRelics] = useState<boolean>(false);
 
   // Part 7: Memory verse unification — Yesterday's recall card
@@ -356,6 +351,19 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     <ThemeToggle compact />
                   </div>
                   <div className="pt-1 border-t border-stone-200 dark:border-stone-800 space-y-1">
+                    {onOpenOnboarding && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          soundEngine.playClick();
+                          setShowSettings(false);
+                          onOpenOnboarding();
+                        }}
+                        className="w-full text-left text-xs px-1 py-1 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition-colors cursor-pointer"
+                      >
+                        Set up my plan
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => {
@@ -363,7 +371,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         setShowSettings(false);
                         setShowJournalModal(true);
                       }}
-                      className="w-full text-left text-xs px-1 py-1 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition-colors"
+                      className="w-full text-left text-xs px-1 py-1 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition-colors cursor-pointer"
                     >
                       Decision journal
                     </button>
@@ -376,9 +384,20 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         setSelectedMomentIndex(undefined);
                         setShowPeopleModal(true);
                       }}
-                      className="w-full text-left text-xs px-1 py-1 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition-colors"
+                      className="w-full text-left text-xs px-1 py-1 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition-colors cursor-pointer"
                     >
                       People & character arcs
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        soundEngine.playSnap();
+                        setShowSettings(false);
+                        setShowRelics(true);
+                      }}
+                      className="w-full text-left text-xs px-1 py-1 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition-colors cursor-pointer"
+                    >
+                      Collection ({unlockedRelics.length}/{ALL_RELICS.length})
                     </button>
                     {/* M-8: Transparency Page link */}
                     {onOpenHowItWorks && (
@@ -428,15 +447,34 @@ export const Dashboard: React.FC<DashboardProps> = ({
           No 40-minute reading plans. Just today's decision: what would you do before seeing what {dailyMission.heroName} did?
         </p>
 
-        {/* Single Primary CTA: Plain language (M-1) */}
-        <div>
+        {/* Action Row: Start mission CTA + 45s audio story */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
           <button
             type="button"
             onClick={handleStartMission}
-            className="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-sm sm:text-base flex items-center justify-center gap-2 shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+            className="flex-1 sm:flex-initial px-7 py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-sm sm:text-base flex items-center justify-center gap-2 shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
           >
             <span>{isTodayMissionDone ? "Review today's mission" : "Start today's mission"}</span>
             <ArrowRight aria-hidden="true" className="w-4 h-4" />
+          </button>
+
+          <button
+            type="button"
+            onClick={handlePlayBriefing}
+            className="px-5 py-3.5 rounded-2xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-950 dark:text-amber-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer"
+            aria-label={isPlayingBriefing ? "Pause 45-second audio story" : "Listen to today's 45-second audio story"}
+          >
+            {isPlayingBriefing ? (
+              <>
+                <Pause aria-hidden="true" className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                <span>Pause story</span>
+              </>
+            ) : (
+              <>
+                <Play aria-hidden="true" className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                <span>Listen (45 sec)</span>
+              </>
+            )}
           </button>
         </div>
 
@@ -589,213 +627,91 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </button>
         )}
 
-        {/* Secondary Quick Links Row */}
-        <div className="flex flex-wrap items-center justify-between gap-2 px-1 pt-1">
-          {/* N-9: Plain language audio description */}
-          <button
-            type="button"
-            onClick={handlePlayBriefing}
-            className="inline-flex items-center gap-1.5 text-xs text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-amber-400 py-1"
-          >
-            {isPlayingBriefing ? (
-              <>
-                <Pause aria-hidden="true" className="w-3.5 h-3.5 text-amber-500" />
-                <span>Playing 45s story...</span>
-              </>
-            ) : (
-              <>
-                <Play aria-hidden="true" className="w-3.5 h-3.5 text-amber-500" />
-                <span>Listen: today's story (45 sec)</span>
-              </>
-            )}
-          </button>
-
-          <div className="flex items-center gap-3 flex-wrap">
-            {onOpenArsenal && (
-              <button
-                type="button"
-                onClick={() => {
-                  soundEngine.playClick();
-                  onOpenArsenal();
-                }}
-                className="text-xs text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
-              >
-                Scripture library
-              </button>
-            )}
-            {onOpenDilemmas && (
-              <button
-                type="button"
-                onClick={() => {
-                  soundEngine.playClick();
-                  onOpenDilemmas();
-                }}
-                className="text-xs text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
-              >
-                Dilemmas
-              </button>
-            )}
-            {/* M-7: Plain language "Set up my plan" instead of "Calibrate" */}
-            {onOpenOnboarding && (
-              <button
-                type="button"
-                onClick={() => {
-                  soundEngine.playClick();
-                  onOpenOnboarding();
-                }}
-                className="text-xs text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
-              >
-                Set up my plan
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => {
-                soundEngine.playClick();
-                setShowJournalModal(true);
-              }}
-              className="text-xs text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
-            >
-              Decision journal
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                soundEngine.playClick();
-                setSelectedCharacterArcId(undefined);
-                setSelectedMomentIndex(undefined);
-                setShowPeopleModal(true);
-              }}
-              className="text-xs text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
-            >
-              Character arcs
-            </button>
-            {/* M-8: Transparency Page link */}
-            {onOpenHowItWorks && (
-              <button
-                type="button"
-                onClick={() => {
-                  soundEngine.playClick();
-                  onOpenHowItWorks();
-                }}
-                className="text-xs text-amber-700 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-300 font-medium"
-              >
-                How Testament works
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* =========================================================================
-            EXPLORE JOURNEYS DRAWER: Borderless list of all biblical journeys
-            ========================================================================= */}
-        <div className="pt-2">
-          <div className="flex items-center justify-between mb-3">
-            <button
-              type="button"
-              onClick={() => {
-                soundEngine.playSnap();
-                setShowExploreJourneys(prev => !prev);
-              }}
-              className="flex items-center gap-1.5 text-xs font-bold text-stone-700 dark:text-stone-300 hover:text-stone-900 dark:hover:text-parchment-50 py-1"
-            >
-              <Compass aria-hidden="true" className="w-3.5 h-3.5 text-amber-500" />
-              <span>Explore all journeys ({STORY_QUESTS.length})</span>
-              <ChevronDown aria-hidden="true" className={`w-3.5 h-3.5 transition-transform ${showExploreJourneys ? 'rotate-180' : ''}`} />
-            </button>
-
-            {/* M-7: "Collection" instead of "Relics" */}
-            <button
-              type="button"
-              onClick={() => {
-                soundEngine.playSnap();
-                setShowRelics(prev => !prev);
-              }}
-              className="text-xs text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
-            >
-              Collection ({unlockedRelics.length}/{ALL_RELICS.length})
-            </button>
-          </div>
-
-          {/* Relics / Collection Drawer (N-12: one-line explainer on first view) */}
-          {showRelics && (
-            <div className="p-4 rounded-2xl bg-stone-100/50 dark:bg-stone-900/30 mb-4 space-y-2">
+        {/* Relics / Collection Drawer */}
+        {showRelics && (
+          <div className="p-4 rounded-2xl bg-stone-100/60 dark:bg-stone-900/40 space-y-2.5">
+            <div className="flex items-center justify-between">
               <span className="text-[11px] font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold block">
-                Unlocked Collection
+                Unlocked Collection ({unlockedRelics.length}/{ALL_RELICS.length})
               </span>
-              <p className="text-[11px] text-stone-600 dark:text-stone-400 leading-relaxed mb-2">
-                Collection are milestones you unlock as you complete missions.
-              </p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {ALL_RELICS.map((relic) => {
-                  const isUnlocked = unlockedRelics.includes(relic.id);
-                  return (
-                    <div
-                      key={relic.id}
-                      className={`p-2.5 rounded-xl text-xs ${
-                        isUnlocked
-                          ? 'bg-amber-500/15 text-stone-900 dark:text-parchment-50 font-medium'
-                          : 'bg-stone-200/40 dark:bg-stone-800/40 text-stone-400 dark:text-stone-600 opacity-60'
-                      }`}
-                    >
-                      <div className="text-lg mb-0.5">{relic.icon}</div>
-                      <span className="font-bold block truncate">{relic.name}</span>
-                      <span className="text-[10px] text-stone-500 dark:text-stone-400 block truncate">{relic.character}</span>
-                    </div>
-                  );
-                })}
-              </div>
+              <button
+                type="button"
+                onClick={() => setShowRelics(false)}
+                className="text-xs text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 cursor-pointer"
+              >
+                Close
+              </button>
             </div>
-          )}
-
-          {/* Explore Journeys List */}
-          {showExploreJourneys && (
-            <div className="space-y-2.5 pt-1">
-              {STORY_QUESTS.map((quest) => {
-                const questActsDone = quest.acts.filter(a => completedActs.includes(a.id)).length;
-                const isFullyDone = questActsDone === quest.acts.length;
-
+            <p className="text-[11px] text-stone-600 dark:text-stone-400 leading-relaxed">
+              Milestones you unlock as you complete daily missions.
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
+              {ALL_RELICS.map((relic) => {
+                const isUnlocked = unlockedRelics.includes(relic.id);
                 return (
-                  <button
-                    key={quest.id}
-                    type="button"
-                    onClick={() => {
-                      soundEngine.playClick();
-                      onSelectQuest(quest);
-                    }}
-                    className="w-full p-4 rounded-2xl bg-stone-100/60 dark:bg-stone-900/50 hover:bg-stone-200/60 dark:hover:bg-stone-850/80 transition-all text-left"
+                  <div
+                    key={relic.id}
+                    className={`p-2.5 rounded-xl text-xs transition-colors ${
+                      isUnlocked
+                        ? 'bg-amber-500/15 text-stone-900 dark:text-parchment-50 font-medium'
+                        : 'bg-stone-200/40 dark:bg-stone-800/40 text-stone-400 dark:text-stone-600 opacity-60'
+                    }`}
                   >
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-[10px] font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold">
-                            {quest.testament} • {quest.heroName}
-                          </span>
-                          {isFullyDone && (
-                            <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-400 font-bold">
-                              ✓ Completed
-                            </span>
-                          )}
-                        </div>
-                        <h4 className="text-sm font-serif font-bold text-stone-900 dark:text-parchment-50">
-                          {quest.title}
-                        </h4>
-                        <p className="text-xs text-stone-600 dark:text-stone-400 line-clamp-1 mt-0.5">
-                          {quest.subtitle}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-xs font-mono text-stone-500 dark:text-stone-400">
-                          {questActsDone}/{quest.acts.length} acts
-                        </span>
-                        <ArrowRight className="w-3.5 h-3.5 text-stone-400" />
-                      </div>
-                    </div>
-                  </button>
+                    <div className="text-lg mb-0.5">{relic.icon}</div>
+                    <span className="font-bold block truncate">{relic.name}</span>
+                    <span className="text-[10px] text-stone-500 dark:text-stone-400 block truncate">{relic.character}</span>
+                  </div>
                 );
               })}
             </div>
+          </div>
+        )}
+
+        {/* Quiet footer utility links */}
+        <div className="pt-6 pb-2 border-t border-stone-200/60 dark:border-stone-800/60 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-stone-500 dark:text-stone-400">
+          <button
+            type="button"
+            onClick={() => {
+              soundEngine.playClick();
+              setShowJournalModal(true);
+            }}
+            className="hover:text-stone-800 dark:hover:text-stone-200 transition-colors cursor-pointer"
+          >
+            Decision journal
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              soundEngine.playClick();
+              setSelectedCharacterArcId(undefined);
+              setSelectedMomentIndex(undefined);
+              setShowPeopleModal(true);
+            }}
+            className="hover:text-stone-800 dark:hover:text-stone-200 transition-colors cursor-pointer"
+          >
+            Character arcs
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              soundEngine.playSnap();
+              setShowRelics(prev => !prev);
+            }}
+            className="hover:text-stone-800 dark:hover:text-stone-200 transition-colors cursor-pointer"
+          >
+            Collection ({unlockedRelics.length}/{ALL_RELICS.length})
+          </button>
+          {onOpenHowItWorks && (
+            <button
+              type="button"
+              onClick={() => {
+                soundEngine.playClick();
+                onOpenHowItWorks();
+              }}
+              className="text-amber-800 dark:text-amber-400 hover:underline font-medium transition-colors cursor-pointer"
+            >
+              How Testament works
+            </button>
           )}
         </div>
 
