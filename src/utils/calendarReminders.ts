@@ -244,49 +244,49 @@ export function isIOS(): boolean {
 }
 
 /**
- * Builds an Android Calendar Intent URL using the Android intent:#Intent syntax.
- * Directly targets CalendarContract.Events with ACTION_INSERT.
- * Opens the device's default calendar app (Samsung Calendar, Google Calendar, etc.)
- * with the new event pre-filled (title, description, dates, RRULE:FREQ=DAILY).
+ * Opens Google Calendar URL. On mobile Android devices, Android App Links
+ * will automatically route this to the native Google Calendar app.
  */
-export function getAndroidCalendarIntentUrl(
+export function openGoogleCalendar(
   type: ReminderType, 
   options?: { time?: string; verseRef?: string }
-): string {
-  const config = getReminderConfig(type, options?.time, options?.verseRef ? { reference: options.verseRef } : undefined);
-  const { start, end } = calculateNextEventDates(config.time24, config.durationMinutes);
-  
-  const title = encodeURIComponent(config.title);
-  const description = encodeURIComponent(config.description);
-  const location = encodeURIComponent(config.url);
-  const beginTime = start.getTime();
-  const endTime = end.getTime();
-
-  return `intent:#Intent;action=android.intent.action.INSERT;type=vnd.android.cursor.item/event;S.title=${title};S.description=${description};S.eventLocation=${location};l.beginTime=${beginTime};l.endTime=${endTime};S.rrule=FREQ%3DDAILY;end`;
+): void {
+  const url = getGoogleCalendarUrl(type, options);
+  window.open(url, '_blank', 'noopener,noreferrer');
 }
 
 /**
- * Adds recurring event directly to the device's native calendar app without opening a browser:
- * - Android (primary): Fires Android Calendar Intent (ACTION_INSERT) opening default calendar app prefilled
- * - Universal fallback (iOS, desktop): Generates client-side .ics file download with RRULE:FREQ=DAILY
+ * Shares or downloads the .ics file.
+ * Uses Web Share API if the device supports native file sharing to calendar apps,
+ * otherwise triggers a clean RFC 5545 .ics download.
  */
-export function addEventToNativeCalendar(
+export async function shareOrDownloadCalendarIcs(
   type: ReminderType, 
   options?: { time?: string; verseRef?: string }
-): 'android_intent' | 'ics' {
-  if (isAndroid()) {
+): Promise<'shared' | 'downloaded'> {
+  const config = getReminderConfig(type, options?.time, options?.verseRef ? { reference: options.verseRef } : undefined);
+  const ics = generateIcsContent(type, options);
+  const filename = type === 'morning' ? 'testament-morning-mission.ics' : 'testament-verse-recall.ics';
+
+  if (typeof navigator !== 'undefined' && typeof navigator.share === 'function' && typeof File !== 'undefined') {
     try {
-      const intentUrl = getAndroidCalendarIntentUrl(type, options);
-      window.location.href = intentUrl;
-      return 'android_intent';
-    } catch {
-      downloadCalendarIcs(type, options);
-      return 'ics';
+      const file = new File([ics], filename, { type: 'text/calendar' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: config.title,
+        });
+        return 'shared';
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        return 'shared';
+      }
     }
-  } else {
-    downloadCalendarIcs(type, options);
-    return 'ics';
   }
+
+  downloadCalendarIcs(type, options);
+  return 'downloaded';
 }
 
 /**
