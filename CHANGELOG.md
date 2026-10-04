@@ -5,6 +5,17 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.20.0] - 2026-10-03
+
+### Added (Engagement Spec v2 — 7 Retention & Scripture Depth Features)
+- **Feature 1: Locked Tomorrow Teaser ("Can't peek")**: Displays tomorrow's curated passage tension hook locked until midnight, building genuine curiosity and anticipation with zero spoilers.
+- **Feature 2: Backstory Layer ("Who was this guy?")**: Collapsed-by-default historical grounding card on Story step (who wrote it, who these people were, cultural context, and ancient meaning) in 3–5 concrete sentences.
+- **Feature 3: "Your Words" — Private Decision Journal**: Reverse-chronological timeline of daily decisions, verbatim custom words, questions, passages, and takeaways saved strictly to device storage (`testament_decision_journal`). Includes clear-journal management.
+- **Feature 4: Anonymous Decision Stats (100% Real)**: Real-time aggregate tallying of choices per date/passage via serverless API (`api/decision-stats.ts`). Strictly follows the Honesty Rule: zero fabricated numbers or social-proof illusions.
+- **Feature 5: "Previously On..." Weekly Narrative Recap**: 60-second read summarizing the 7-day arc, overarching story thread, and passages completed with zero guilt language.
+- **Feature 6: Follow a Person — Character Arcs**: Deep-dive character arc explorer for 6 foundational figures (Jesus, Peter, David, Mary, Paul, Esther) with 10–12 moments each, cross-linked directly from daily missions.
+- **Feature 7: "Carry It With You" Lock-Screen Verse Card Generator**: High-resolution 1080×1920 canvas phone wallpaper generator producing clean, verbatim scripture cards with native share sheet and download fallback.
+
 ## [1.19.2] - 2026-10-03
 
 ### Fixed & Accessibility (Persona QA Round 2)
