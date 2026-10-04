@@ -62,6 +62,7 @@ interface DashboardProps {
   userProfile?: UserCalibrationProfile | null;
   onOpenOnboarding?: () => void;
   onOpenWhatsNew?: () => void;
+  onOpenHowItWorks?: () => void;
   onRewardXP?: (points: number) => void;
   onLaunchCampaignStep?: (step: DailyCampaignStep) => void;
 }
@@ -104,6 +105,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   xp,
   onOpenWhatsNew,
   onOpenOnboarding,
+  onOpenHowItWorks,
   onStartDailyMission,
   onRewardXP
 }) => {
@@ -212,7 +214,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
     if (points >= 500) return 'Iron Pillar';
     if (points >= 300) return 'Mighty Man of Adullam';
     if (points >= 150) return 'Story Explorer';
-    return 'Seeker';
+    return 'Profile';
   };
 
   const handleYesterdayRecallResponse = (rating: 'got_it' | 'need_review') => {
@@ -267,27 +269,32 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 v1.19
               </button>
             </div>
-            <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
+            {/* N-1: No truncated kicker on 390px screens */}
+            <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-tight">
               <span className="text-amber-700 dark:text-amber-400 font-medium">{todayFormatted}</span> • Daily mission
             </p>
           </div>
         </div>
 
-        {/* Right: Streak, XP, Single Settings Entry */}
+        {/* Right: Streak, XP, Single Settings Entry (N-8: Accessible labels and roles) */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 relative">
           <div 
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/60 dark:bg-stone-900 text-xs font-mono font-bold text-orange-700 dark:text-orange-300"
             title="Daily Streak"
+            role="status"
+            aria-label={`${streakCount} day streak`}
           >
-            <Flame className="w-3.5 h-3.5 fill-orange-500/20 text-orange-500" />
+            <Flame aria-hidden="true" className="w-3.5 h-3.5 fill-orange-500/20 text-orange-500" />
             <span>{streakCount}d</span>
           </div>
 
           <div 
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/60 dark:bg-stone-900 text-xs font-mono font-bold text-amber-800 dark:text-amber-300"
             title="Scripture XP"
+            role="status"
+            aria-label={`${xp} Scripture XP`}
           >
-            <Award className="w-3.5 h-3.5 text-amber-500" />
+            <Award aria-hidden="true" className="w-3.5 h-3.5 text-amber-500" />
             <span>{xp}</span>
           </div>
 
@@ -307,7 +314,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               title="Settings"
               aria-label="Settings"
             >
-              <Settings className="w-4 h-4" />
+              <Settings aria-hidden="true" className="w-4 h-4" />
             </button>
 
             {showSettings && (
@@ -316,7 +323,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   className="fixed inset-0 z-30" 
                   onClick={() => setShowSettings(false)} 
                 />
-                <div className="absolute right-0 top-full mt-2 z-40 p-3 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-xl flex flex-col gap-2 min-w-[160px]">
+                <div className="absolute right-0 top-full mt-2 z-40 p-3 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-xl flex flex-col gap-2 min-w-[180px]">
                   <div className="text-[10px] font-mono uppercase tracking-wider text-stone-600 dark:text-stone-400 font-bold px-1">
                     Settings
                   </div>
@@ -328,6 +335,22 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     <span className="text-xs font-medium text-stone-800 dark:text-stone-200">Theme</span>
                     <ThemeToggle compact />
                   </div>
+                  {/* M-8: Transparency Page link */}
+                  {onOpenHowItWorks && (
+                    <div className="pt-1 border-t border-stone-200 dark:border-stone-800">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          soundEngine.playClick();
+                          setShowSettings(false);
+                          onOpenHowItWorks();
+                        }}
+                        className="w-full text-left text-xs px-1 py-1 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition-colors"
+                      >
+                        How Testament works
+                      </button>
+                    </div>
+                  )}
                 </div>
               </>
             )}
@@ -341,13 +364,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
           One scenario question, one clear CTA ("Make today's call").
           ========================================================================= */}
       <div className="p-6 sm:p-7 rounded-3xl bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-stone-100/50 dark:to-stone-900/40 shadow-xs transition-colors">
-        {/* Micro-tag with AI Reflection Badge */}
-        <div className="flex items-center justify-between gap-2 mb-3">
-          <span className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold truncate">
+        {/* Micro-tag with AI Reflection Badge (N-1: wrap instead of truncate) */}
+        <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+          <span className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
             Today's Mission • {dailyMission.heroName} ({dailyMission.passageReference})
           </span>
-          <span className="text-[10px] font-mono text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full shrink-0">
-            ✨ AI reflection • Not Scripture
+          <span className="text-[10px] font-mono text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full shrink-0" role="note" aria-label="AI reflection, Not Scripture">
+            <span aria-hidden="true">✨ </span>AI reflection • Not Scripture
           </span>
         </div>
 
@@ -356,20 +379,20 @@ export const Dashboard: React.FC<DashboardProps> = ({
           "{dailyMission.scenarioQuestion}"
         </h2>
 
-        {/* Plain, encouraging subtext */}
+        {/* Plain, encouraging subtext (M-1) */}
         <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed mb-6 max-w-lg">
-          No 40-minute reading plans. Just today's call: what would you do before seeing what {dailyMission.heroName} did?
+          No 40-minute reading plans. Just today's decision: what would you do before seeing what {dailyMission.heroName} did?
         </p>
 
-        {/* Single Primary CTA: One name, one button, clear verb */}
+        {/* Single Primary CTA: Plain language (M-1) */}
         <div>
           <button
             type="button"
             onClick={handleStartMission}
             className="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-sm sm:text-base flex items-center justify-center gap-2 shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
           >
-            <span>{isTodayMissionDone ? "Review today's call" : "Make today's call"}</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>{isTodayMissionDone ? "Review today's mission" : "Start today's mission"}</span>
+            <ArrowRight aria-hidden="true" className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -380,15 +403,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <div className="mt-8 space-y-5">
 
         {/* =========================================================================
-            PART 7: YESTERDAY'S VERSE RECALL CARD ("Yesterday's verse — still got it?")
-            Tap to flip and check, then joins the spaced rotation.
+            PART 7: YESTERDAY'S VERSE RECALL CARD (N-2: "Remember yesterday's verse?")
             ========================================================================= */}
         {yesterdayVerse && !yesterdayRecalled && (
           <div className="p-5 rounded-2xl bg-stone-100/70 dark:bg-stone-900/60 transition-all">
             <div className="flex items-center justify-between gap-2 mb-2">
               <span className="text-[11px] font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold flex items-center gap-1.5">
-                <RotateCw className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                <span>Yesterday's verse — still got it?</span>
+                <RotateCw aria-hidden="true" className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                <span>Remember yesterday's verse?</span>
               </span>
               <span className="text-[10px] font-mono text-stone-500 dark:text-stone-400">
                 1-tap recall
@@ -501,6 +523,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         {/* Secondary Quick Links Row */}
         <div className="flex flex-wrap items-center justify-between gap-2 px-1 pt-1">
+          {/* N-9: Plain language audio description */}
           <button
             type="button"
             onClick={handlePlayBriefing}
@@ -508,18 +531,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
           >
             {isPlayingBriefing ? (
               <>
-                <Pause className="w-3.5 h-3.5 text-amber-500" />
-                <span>Playing 45s summary...</span>
+                <Pause aria-hidden="true" className="w-3.5 h-3.5 text-amber-500" />
+                <span>Playing 45s story...</span>
               </>
             ) : (
               <>
-                <Play className="w-3.5 h-3.5 text-amber-500" />
-                <span>Listen to 45s summary</span>
+                <Play aria-hidden="true" className="w-3.5 h-3.5 text-amber-500" />
+                <span>Listen: today's story (45 sec)</span>
               </>
             )}
           </button>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             {onOpenArsenal && (
               <button
                 type="button"
@@ -544,6 +567,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 Dilemmas
               </button>
             )}
+            {/* M-7: Plain language "Set up my plan" instead of "Calibrate" */}
             {onOpenOnboarding && (
               <button
                 type="button"
@@ -553,7 +577,20 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 }}
                 className="text-xs text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
               >
-                Calibrate
+                Set up my plan
+              </button>
+            )}
+            {/* M-8: Transparency Page link */}
+            {onOpenHowItWorks && (
+              <button
+                type="button"
+                onClick={() => {
+                  soundEngine.playClick();
+                  onOpenHowItWorks();
+                }}
+                className="text-xs text-amber-700 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-300 font-medium"
+              >
+                How Testament works
               </button>
             )}
           </div>
@@ -572,11 +609,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
               }}
               className="flex items-center gap-1.5 text-xs font-bold text-stone-700 dark:text-stone-300 hover:text-stone-900 dark:hover:text-parchment-50 py-1"
             >
-              <Compass className="w-3.5 h-3.5 text-amber-500" />
+              <Compass aria-hidden="true" className="w-3.5 h-3.5 text-amber-500" />
               <span>Explore all journeys ({STORY_QUESTS.length})</span>
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showExploreJourneys ? 'rotate-180' : ''}`} />
+              <ChevronDown aria-hidden="true" className={`w-3.5 h-3.5 transition-transform ${showExploreJourneys ? 'rotate-180' : ''}`} />
             </button>
 
+            {/* M-7: "Collection" instead of "Relics" */}
             <button
               type="button"
               onClick={() => {
@@ -585,16 +623,19 @@ export const Dashboard: React.FC<DashboardProps> = ({
               }}
               className="text-xs text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
             >
-              Relics ({unlockedRelics.length}/{ALL_RELICS.length})
+              Collection ({unlockedRelics.length}/{ALL_RELICS.length})
             </button>
           </div>
 
-          {/* Relics Drawer */}
+          {/* Relics / Collection Drawer (N-12: one-line explainer on first view) */}
           {showRelics && (
             <div className="p-4 rounded-2xl bg-stone-100/50 dark:bg-stone-900/30 mb-4 space-y-2">
               <span className="text-[11px] font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold block">
-                Unlocked Relics
+                Unlocked Collection
               </span>
+              <p className="text-[11px] text-stone-600 dark:text-stone-400 leading-relaxed mb-2">
+                Collection are milestones you unlock as you complete missions.
+              </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {ALL_RELICS.map((relic) => {
                   const isUnlocked = unlockedRelics.includes(relic.id);

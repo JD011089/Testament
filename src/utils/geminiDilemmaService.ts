@@ -111,7 +111,8 @@ STRICT CRITERIA:
 1. NON-POLITICAL: Strictly avoid partisan politics, government elections, culture wars, or legal debates.
 2. LIFE-DRIVEN & RELATABLE: Focus exclusively on real everyday situations people face: workplace integrity, deceitful colleagues, financial strain, family estrangement, forgiving unrepentant relatives, pride vs humility, setting boundaries with grace, or handling burnout.
 3. GROUNDED IN SCRIPTURE: Must feature a solid biblical anchor, a historical biblical parallel (e.g. David, Joseph, Daniel, Abigail, Nehemiah, Peter, Ruth, or Paul), and actionable biblical wisdom.
-4. JSON FORMAT ONLY: Output ONLY valid, raw JSON matching this TypeScript structure, with no markdown, no backticks, no preamble:
+4. PLAIN LANGUAGE: Use plain, concrete words. No idioms, slang, or figures of speech.
+5. JSON FORMAT ONLY: Output ONLY valid, raw JSON matching this TypeScript structure, with no markdown, no backticks, no preamble:
 
 {
   "id": "gemini-dilemma-${todayKey}",

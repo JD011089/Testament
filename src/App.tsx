@@ -22,7 +22,9 @@ import type { DailyCampaignStep } from './data/dailyCampaigns';
 import { getComposedDailyMission } from './utils/missionComposer';
 import { pathForTab, tabFromPath } from './utils/routes';
 import { loadReadingPlace } from './utils/readingPlace';
-import type { GeneratedDailyMission } from './utils/dailyMissionPipeline';
+import { getDailyMission, type GeneratedDailyMission } from './utils/dailyMissionPipeline';
+import { getTodayDateKey } from './utils/dailyEngine';
+import { HowTestamentWorksModal } from './components/HowTestamentWorksModal';
 
 const WordForge = lazy(() => import('./components/WordForge').then((m) => ({ default: m.WordForge })));
 const DilemmaSimulator = lazy(() => import('./components/DilemmaSimulator').then((m) => ({ default: m.DilemmaSimulator })));
@@ -84,6 +86,7 @@ export function App() {
   const [isPsalmsOpen, setIsPsalmsOpen] = useState(false);
   const [isDriveModeOpen, setIsDriveModeOpen] = useState(false);
   const [isWhatsNewOpen, setIsWhatsNewOpen] = useState<boolean>(false);
+  const [isHowItWorksOpen, setIsHowItWorksOpen] = useState<boolean>(false);
   // Part 9: First-run experience drops the user straight into the mission with zero popup modals
   const [isOnboardingOpen, setIsOnboardingOpen] = useState<boolean>(false);
 
@@ -178,6 +181,25 @@ export function App() {
     const cleanup = initNotificationScheduler();
     return () => cleanup();
   }, []);
+
+  // M-10: Restore in-progress daily mission on return if user was interrupted mid-mission
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('testament_in_progress_mission');
+      if (raw) {
+        const inProg = JSON.parse(raw);
+        if (inProg && inProg.dateKey === getTodayDateKey() && inProg.missionId && !completedActs.includes(inProg.missionId)) {
+          getDailyMission(getTodayDateKey()).then((m) => {
+            if (m && m.id === inProg.missionId) {
+              setActiveDailyMission(m);
+            }
+          });
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, [completedActs]);
 
   // Handle URL deep links cleanup and listen for Service Worker messages
   useEffect(() => {
@@ -671,6 +693,7 @@ export function App() {
                 userProfile={userProfile}
                 onOpenOnboarding={() => setIsOnboardingOpen(true)}
                 onOpenWhatsNew={() => setIsWhatsNewOpen(true)}
+                onOpenHowItWorks={() => setIsHowItWorksOpen(true)}
                 onRewardXP={handleRewardXP}
                 onLaunchCampaignStep={handleLaunchCampaignStep}
               />
@@ -828,6 +851,12 @@ export function App() {
       <WhatsNewModal
         isOpen={isWhatsNewOpen}
         onClose={() => setIsWhatsNewOpen(false)}
+      />
+
+      {/* M-8: How Testament Works Transparency Modal */}
+      <HowTestamentWorksModal
+        isOpen={isHowItWorksOpen}
+        onClose={() => setIsHowItWorksOpen(false)}
       />
 
       <OnboardingModal

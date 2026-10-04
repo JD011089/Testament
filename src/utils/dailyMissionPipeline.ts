@@ -164,16 +164,17 @@ STRICT GROUNDING RULES (NON-NEGOTIABLE):
 3. The key verse MUST be copied verbatim from the passage text; never paraphrase scripture text itself.
 4. Reading level: plain modern English (say it simpler by default).
 5. The story retelling must be max 140 words total across 2 to 3 short paragraphs.
-6. The decision scenario question must ask what the USER would do in a similar high-stakes crossroad BEFORE seeing what happened. Provide 3-4 nuanced preset choices reflecting real human responses (e.g. shut down, lash out, run, reach out), NEVER a binary right/wrong pair.
+6. The decision scenario question must ask what the USER would do in a similar high-stakes crossroad BEFORE seeing what happened. Provide 3-4 nuanced preset choices reflecting real human responses (e.g. go quiet and wait alone, get angry, run away, reach out for help), NEVER a binary right/wrong pair.
+7. Use plain, concrete words. No idioms, slang, or figures of speech.
 
 Return ONLY a valid JSON object matching this structure:
 {
   "scenarioQuestion": "string (the provocative scenario question)",
   "presetChoices": [
-    { "id": "choice-1", "text": "Nuanced human reaction (shut down/isolate)" },
-    { "id": "choice-2", "text": "Nuanced human reaction (lash out/anger)" },
-    { "id": "choice-3", "text": "Nuanced human reaction (run/flee)" },
-    { "id": "choice-4", "text": "Nuanced human reaction (reach out/courage)" }
+    { "id": "choice-1", "text": "Nuanced human reaction (go quiet/isolate - plain words, no idioms)" },
+    { "id": "choice-2", "text": "Nuanced human reaction (get angry/frustration - plain words, no idioms)" },
+    { "id": "choice-3", "text": "Nuanced human reaction (run away/avoid - plain words, no idioms)" },
+    { "id": "choice-4", "text": "Nuanced human reaction (reach out for help - plain words, no idioms)" }
   ],
   "storyRetelling": [
     "Paragraph 1 (short plain English narrative)",
@@ -324,15 +325,15 @@ export function getLocalDecisionPersonalization(
   const lower = clean.toLowerCase();
   if (/shut|isolate|hide|alone|cut|quiet|bed/i.test(lower)) {
     return {
-      mirrorBack: `You said you'd shut everyone out — ${mission.heroName} fought that exact temptation under pressure.`,
-      actionLine: `Send one honest text to someone in your corner today instead of disappearing.`,
+      mirrorBack: `You chose to go quiet and wait — ${mission.heroName} fought that exact urge under pressure.`,
+      actionLine: `Send one honest text to someone in your corner today instead of staying alone.`,
       source: 'local_rule',
       reflectionBadge: '✨ AI reflection • Not Scripture'
     };
   }
   if (/lash|angry|yell|scream|fight|blame|retaliate/i.test(lower)) {
     return {
-      mirrorBack: `You said you'd lash out — ${mission.heroName} felt that anger too, but chose self-control over revenge.`,
+      mirrorBack: `You chose to express your anger — ${mission.heroName} felt that anger too, but chose self-control over revenge.`,
       actionLine: `Take a ten-minute breather before responding to that irritating message today.`,
       source: 'local_rule',
       reflectionBadge: '✨ AI reflection • Not Scripture'
@@ -340,15 +341,15 @@ export function getLocalDecisionPersonalization(
   }
   if (/run|flee|escape|quit|leave|give\s*up/i.test(lower)) {
     return {
-      mirrorBack: `You said you'd run — ${mission.heroName} fled into the wilderness, but learned you can't outrun God's calling.`,
-      actionLine: `Pick the one hard task you've been running from and tackle five minutes of it.`,
+      mirrorBack: `You chose to run away — ${mission.heroName} fled into the wilderness, but learned peace isn't found in running away.`,
+      actionLine: `Pick the one hard task you've been avoiding and tackle five minutes of it.`,
       source: 'local_rule',
       reflectionBadge: '✨ AI reflection • Not Scripture'
     };
   }
 
   return {
-    mirrorBack: `You said you'd face this directly — ${mission.heroName} had to make that same hard choice when tested.`,
+    mirrorBack: `You chose to face this directly — ${mission.heroName} had to make that same hard choice when tested.`,
     actionLine: mission.actionLine,
     source: 'local_rule',
     reflectionBadge: '✨ AI reflection • Not Scripture'
@@ -373,8 +374,9 @@ USER'S DECISION: "${userDecision.replace(/"/g, '\\"')}"
 
 STRICT GROUNDING RULES:
 1. Retell ONLY what connects to ${mission.heroName}'s recorded response in this passage.
-2. Produce a single punchy mirror-back line: "You said you'd [user action] — ${mission.heroName} [what hero did]..." (under 20 words).
+2. Produce a single punchy mirror-back line: "You chose to face this — ${mission.heroName} [what hero did]..." (under 20 words).
 3. Tailor the action line for the user's day (starts with a strong verb, under 20 words).
+4. Use plain, concrete words. No idioms, slang, or figures of speech.
 
 Return ONLY JSON:
 {

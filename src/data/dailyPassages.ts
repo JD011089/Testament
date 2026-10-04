@@ -36,8 +36,8 @@ export const CURATED_DAILY_PASSAGES: CuratedPassage[] = [
     staticFallback: {
       scenarioQuestion: "Your plans just collapsed and you're surrounded by chaos. What's your move?",
       presetChoices: [
-        { id: 'choice-cave-shutdown', text: 'Shut down and cut everyone off until the dust settles.', stance: 'shut_down' },
-        { id: 'choice-cave-lashout', text: 'Lash out at the people and systems that let you down.', stance: 'lash_out' },
+        { id: 'choice-cave-shutdown', text: 'Go quiet and wait for it to pass alone.', stance: 'shut_down' },
+        { id: 'choice-cave-lashout', text: 'Get angry at the people around you.', stance: 'lash_out' },
         { id: 'choice-cave-run', text: 'Run as far from this mess as you can get.', stance: 'run' },
         { id: 'choice-cave-reachout', text: 'Reach out to the misfits around you and rebuild together.', stance: 'reach_out' }
       ],
@@ -48,10 +48,10 @@ export const CURATED_DAILY_PASSAGES: CuratedPassage[] = [
       ],
       actionLine: "Send one honest text to someone in your corner today instead of disappearing into your cave.",
       mirrorBackRules: {
-        'choice-cave-shutdown': "You said you'd shut everyone out — David fought that exact urge when hiding in the caves.",
-        'choice-cave-lashout': "You said you'd lash out — David was furious, but channeled his energy into discipline instead of revenge.",
-        'choice-cave-run': "You said you'd run — David fled into the desert, but found running never solves the calling.",
-        'choice-cave-reachout': "You said you'd reach out — that exact choice turned David's cave into a legendary brotherhood."
+        'choice-cave-shutdown': "You chose to go quiet and wait — David fought that exact urge when hiding in the caves.",
+        'choice-cave-lashout': "You chose to express your anger — David was furious, but channeled his energy into discipline instead of revenge.",
+        'choice-cave-run': "You chose to run — David fled into the desert, but found running never solves the calling.",
+        'choice-cave-reachout': "You chose to reach out — that exact choice turned David's cave into a legendary brotherhood."
       },
       defaultMirrorBack: "Here is what unfolded in the Cave of Adullam when David's entire world collapsed."
     }

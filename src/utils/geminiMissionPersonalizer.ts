@@ -24,33 +24,33 @@ const ACT_FALLBACK_RULES: Record<string, ActFallbackRule> = {
   'david-act-2': {
     presetResponses: {
       'choice-cave-shutdown': {
-        mirrorBack: "You said you'd shut everyone out — David felt that exact urge in the cave, too.",
-        actionLine: "Send one honest text to someone in your corner today instead of disappearing into your cave.",
+        mirrorBack: "You chose to go quiet and wait — David felt that exact urge in the cave, too.",
+        actionLine: "Send one honest text to someone in your corner today instead of staying alone in your cave.",
         storyBeat: "When 400 broken men found David hiding in Adullam, his first challenge was fighting the instinct to lock the doors and stay alone."
       },
       'choice-cave-lashout': {
-        mirrorBack: "You said you'd lash out — David was hunted and angry, but poured his fury into raw prayer instead of revenge.",
+        mirrorBack: "You chose to express your anger — David was hunted and angry, but poured his fury into raw prayer instead of revenge.",
         actionLine: "Take a ten-minute breather before responding to that irritating message today.",
         storyBeat: "Surrounded by 400 angry, armed outlaws, David had every reason to unleash wrath. Instead, he channeled that energy into purpose."
       },
       'choice-cave-run': {
-        mirrorBack: "You said you'd run — David fled into the desert, but discovered you can't outrun where God is calling you.",
+        mirrorBack: "You chose to run — David fled into the desert, but discovered you can't outrun where God is calling you.",
         actionLine: "Pick the one hard task you've been putting off all week and tackle just five minutes of it.",
         storyBeat: "David had run as far as he could until there were no more hiding spots. That rock-bottom cave was where running stopped and building began."
       },
       'choice-cave-reachout': {
-        mirrorBack: "You said you'd reach out — that's the exact move that turned David's cave into a legendary brotherhood.",
+        mirrorBack: "You chose to reach out — that's the exact move that turned David's cave into a legendary brotherhood.",
         actionLine: "Check in on someone you know is carrying a heavy load right now and offer a word of strength.",
         storyBeat: "Instead of rejecting the broken misfits at his door, David welcomed them, fed them, and gave them back their dignity."
       }
     },
     stanceRules: {
       shut_down: {
-        mirrorBack: "You said you'd shut everyone out — David fought that exact urge when he retreated into the limestone caves.",
-        actionLine: "Send one honest text to someone in your corner today instead of disappearing into your cave."
+        mirrorBack: "You chose to go quiet and wait — David fought that exact urge when he retreated into the limestone caves.",
+        actionLine: "Send one honest text to someone in your corner today instead of staying alone in your cave."
       },
       lash_out: {
-        mirrorBack: "You said you'd lash out — David had every reason to be bitter, but chose discipline over retaliation.",
+        mirrorBack: "You chose to express your anger — David had every reason to be bitter, but chose discipline over retaliation.",
         actionLine: "Take a ten-minute breather before responding to that irritating message today."
       },
       run: {
@@ -268,9 +268,10 @@ KEY VERSE: "${act.unlockedScripture.text}" (${act.unlockedScripture.reference})
 USER'S DECISION: "${userDecision.replace(/"/g, '\\"')}"
 
 INSTRUCTIONS:
-1. "mirrorBack": A single punchy sentence connecting what the user said to what ${quest.heroName} did (e.g. "You said you'd shut everyone out — David did too, at first."). Under 20 words.
+1. "mirrorBack": A single punchy sentence connecting what the user chose to what ${quest.heroName} did. Under 20 words.
 2. "actionLine": One hyper-specific, doable daily action line for today starting with a strong verb. Under 20 words. No clichés.
-3. Return ONLY valid JSON:
+3. Use plain, concrete words. No idioms, slang, or figures of speech.
+4. Return ONLY valid JSON:
 {
   "mirrorBack": "string",
   "actionLine": "string"
