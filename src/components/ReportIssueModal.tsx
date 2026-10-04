@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, AlertCircle, CheckCircle2, Mail } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
+import { useModalLock } from '../utils/useModalLock';
 
 interface ReportIssueModalProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ export const ReportIssueModal: React.FC<ReportIssueModalProps> = ({
   onClose,
   contextInfo
 }) => {
+  const modalRef = useModalLock(isOpen);
   const [selectedReason, setSelectedReason] = useState<string>(REPORT_REASONS[0]);
   const [userComment, setUserComment] = useState<string>('');
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
@@ -73,13 +75,17 @@ export const ReportIssueModal: React.FC<ReportIssueModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs transition-opacity"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-xs transition-opacity overscroll-contain"
+      onClick={handleClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="report-issue-title"
     >
       <div 
-        className="w-full max-w-md rounded-3xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-2xl p-6 space-y-4 text-left transition-colors"
+        ref={modalRef}
+        tabIndex={-1}
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-3xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-2xl p-6 space-y-4 text-left transition-colors outline-none"
       >
         <div className="flex items-start justify-between gap-3 border-b border-stone-200 dark:border-stone-800 pb-3">
           <div className="flex items-center gap-2">

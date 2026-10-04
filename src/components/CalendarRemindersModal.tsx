@@ -116,18 +116,21 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
   return (
     <AnimatePresence>
       <div 
-        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-950/70 backdrop-blur-xs overflow-y-auto"
+        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-950/70 backdrop-blur-xs overflow-y-auto overscroll-contain"
+        onClick={onClose}
         role="dialog"
         aria-modal="true"
         aria-labelledby="calendar-reminders-title"
       >
         <motion.div
           ref={modalRef}
+          tabIndex={-1}
+          onClick={(e) => e.stopPropagation()}
           initial={{ opacity: 0, scale: 0.96, y: 12 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.96, y: 12 }}
           transition={{ duration: 0.18 }}
-          className="relative w-full max-w-lg bg-parchment-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-3xl shadow-2xl p-5 sm:p-6 overflow-hidden text-stone-900 dark:text-parchment-100 my-auto text-left"
+          className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-parchment-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-3xl shadow-2xl p-5 sm:p-6 text-stone-900 dark:text-parchment-100 my-auto text-left outline-none"
         >
           {/* Header */}
           <div className="flex items-start justify-between gap-3 mb-4">
