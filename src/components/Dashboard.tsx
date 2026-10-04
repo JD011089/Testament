@@ -109,7 +109,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onStartDailyMission,
   onRewardXP
 }) => {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   const [readingPlace, setReadingPlace] = useState(() => loadReadingPlace());
   const [activeBattlefieldId, setActiveBattlefieldId] = useState<string | null>(() => getTodayBattlefieldId());
@@ -264,9 +264,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   onOpenWhatsNew?.();
                 }}
                 className="text-[11px] font-mono px-1.5 py-0.2 rounded-full text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-amber-300 transition-colors"
-                title="What's new"
+                title={t('dashboard.versionTooltip')}
               >
-                v1.19
+                v1.19.2
               </button>
             </div>
             {/* N-1: No truncated kicker on 390px screens */}

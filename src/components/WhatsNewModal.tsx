@@ -42,10 +42,38 @@ interface ReleaseMilestone {
 
 const ACTIVE_RELEASES: ReleaseMilestone[] = [
   {
-    version: 'v1.19.0',
-    tagline: 'Decision-First Redesign, Daily AI Pipeline & Unified Verse Recall',
+    version: 'v1.19.2',
+    tagline: 'Persona QA Round 2 — Screen Reader, ESL, Network Resilience & Trust',
     dateBadge: 'Current Release',
     isLatest: true,
+    highlights: [
+      {
+        icon: <Target className="w-4 h-4 text-amber-400" />,
+        title: 'Screen Reader & VoiceOver Precision',
+        description: 'Decide interaction refactored with semantic fieldset, radiogroup, plain-language options, and clear disabled state hints with zero emoji noise.'
+      },
+      {
+        icon: <Languages className="w-4 h-4 text-amber-400" />,
+        title: 'Plain Language & ESL Vocabulary Support',
+        description: 'Eliminated idioms from generation prompts, added tap-to-define on difficult biblical terms, and instant "Say it simpler" toggles.'
+      },
+      {
+        icon: <Clock className="w-4 h-4 text-amber-400" />,
+        title: 'Network Resilience & In-Progress Save',
+        description: '3G slow-connection loading indicators with ~8s fallback, plus automatic mission step recovery when backgrounding the app.'
+      },
+      {
+        icon: <BookOpen className="w-4 h-4 text-amber-400" />,
+        title: 'Trust & Transparency Center',
+        description: '"How Testament works" transparency page within 2 taps of Home, plus one-tap issue reporting for AI reflections.'
+      }
+    ]
+  },
+  {
+    version: 'v1.19.0',
+    tagline: 'Decision-First Redesign, Daily AI Pipeline & Unified Verse Recall',
+    dateBadge: 'Previous Release',
+    isLatest: false,
     highlights: [
       {
         icon: <Target className="w-4 h-4 text-amber-400" />,
@@ -643,7 +671,7 @@ const ARCHIVED_RELEASES: ReleaseMilestone[] = [
 
 export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose }) => {
   const modalRef = useModalLock(isOpen);
-  const [activeTab, setActiveTab] = useState<string>('v1.19.0');
+  const [activeTab, setActiveTab] = useState<string>('v1.19.2');
   const [showArchive, setShowArchive] = useState(false);
 
   const RELEASES = showArchive ? [...ACTIVE_RELEASES, ...ARCHIVED_RELEASES] : ACTIVE_RELEASES;
@@ -651,7 +679,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
   const handleDismiss = () => {
     soundEngine.playClick();
     try {
-      localStorage.setItem('testament_last_seen_version', '1.19.0');
+      localStorage.setItem('testament_last_seen_version', '1.19.2');
     } catch {
       // ignore
     }
@@ -694,7 +722,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
                   Field Update Dispatches
                 </h2>
                 <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 font-bold">
-                  v1.19.0 Live
+                  v1.19.2 Live
                 </span>
               </div>
 
@@ -808,7 +836,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
         {/* MODAL FOOTER */}
         <div className="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800/90 bg-stone-50 dark:bg-black/40 flex items-center justify-between gap-3 relative z-10">
           <div className="text-xs font-mono text-stone-500 dark:text-stone-400 hidden sm:block">
-            Testament v1.19.0 • The Living Word
+            Testament v1.19.2 • The Living Word
           </div>
 
 
