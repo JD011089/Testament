@@ -221,6 +221,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   return (
     <div 
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/60 dark:bg-black/85 backdrop-blur-md overflow-y-auto overscroll-contain"
+      onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="onboarding-modal-title"
