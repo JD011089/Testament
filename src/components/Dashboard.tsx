@@ -309,7 +309,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 className="text-[11px] font-mono px-1.5 py-0.2 rounded-full text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-amber-300 transition-colors"
                 title={t('dashboard.versionTooltip')}
               >
-                v1.21.0
+                v1.22.1
               </button>
             </div>
             {/* N-1: No truncated kicker on 390px screens */}
@@ -321,15 +321,27 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         {/* Right: Streak, XP, Single Settings Entry (N-8: Accessible labels and roles) */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 relative">
-          <div 
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/60 dark:bg-stone-900 text-xs font-mono font-bold text-orange-700 dark:text-orange-300"
-            title="Daily Streak"
-            role="status"
-            aria-label={`${streakCount} day streak`}
-          >
-            <Flame aria-hidden="true" className="w-3.5 h-3.5 fill-orange-500/20 text-orange-500" />
-            <span>{streakCount}d</span>
-          </div>
+          {streakCount > 0 ? (
+            <div 
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/60 dark:bg-stone-900 text-xs font-mono font-bold text-orange-700 dark:text-orange-300"
+              title="Daily Streak"
+              role="status"
+              aria-label={`${streakCount} day streak`}
+            >
+              <Flame aria-hidden="true" className="w-3.5 h-3.5 fill-orange-500/20 text-orange-500" />
+              <span>{streakCount}d</span>
+            </div>
+          ) : (
+            <div 
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/40 dark:bg-stone-900/60 text-xs font-mono font-medium text-stone-500 dark:text-stone-400"
+              title="Start your streak today"
+              role="status"
+              aria-label="Fresh start"
+            >
+              <Flame aria-hidden="true" className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500" />
+              <span>Fresh start</span>
+            </div>
+          )}
 
           <div 
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/60 dark:bg-stone-900 text-xs font-mono font-bold text-amber-800 dark:text-amber-300"
