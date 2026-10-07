@@ -334,21 +334,6 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     }
 
     // Save decision to localStorage
-    if (decisionString) {
-      try {
-        const checkInRecord = {
-          dateKey: getTodayDateKey(),
-          decision: decisionString,
-          heroName,
-          scenarioQuestion,
-          timestamp: Date.now()
-        };
-        localStorage.setItem('testament_daily_checkin', JSON.stringify(checkInRecord));
-      } catch {
-        // ignore
-      }
-    }
-
     if (selectedChoiceId) {
       try {
         const stored = localStorage.getItem('testament_act_choices');
