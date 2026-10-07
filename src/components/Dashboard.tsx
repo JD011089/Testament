@@ -49,6 +49,15 @@ import { WeeklyRecapCard } from './WeeklyRecapCard';
 import { CharacterArcModal } from './CharacterArcModal';
 import { CalendarRemindersModal } from './CalendarRemindersModal';
 import { CHARACTER_ARCS } from '../data/characterArcs';
+import { ModeSelectorModal } from './ModeSelectorModal';
+import { ReciterModal } from './ReciterModal';
+import { StorytellerModal } from './StorytellerModal';
+import { 
+  loadLearnerModesState, 
+  setLearnerMode, 
+  getOrInitReciterVerse 
+} from '../utils/learnerModes';
+import type { LearnerModesState } from '../types/learnerModes';
 
 interface DashboardProps {
   onSelectQuest: (quest: StoryQuest) => void;
@@ -135,6 +144,20 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [showPeopleModal, setShowPeopleModal] = useState<boolean>(false);
   const [selectedCharacterArcId, setSelectedCharacterArcId] = useState<string | undefined>(undefined);
   const [selectedMomentIndex, setSelectedMomentIndex] = useState<number | undefined>(undefined);
+
+  // Learner Modes State (Builder, Reciter, Storyteller)
+  const [learnerModesState, setLearnerModesState] = useState<LearnerModesState>(() => loadLearnerModesState());
+  const [showModeModal, setShowModeModal] = useState<boolean>(false);
+  const [showReciterModal, setShowReciterModal] = useState<boolean>(false);
+  const [showStorytellerModal, setShowStorytellerModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleModeUpdate = () => {
+      setLearnerModesState(loadLearnerModesState());
+    };
+    window.addEventListener('testament-mode-changed', handleModeUpdate);
+    return () => window.removeEventListener('testament-mode-changed', handleModeUpdate);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -356,6 +379,20 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     <ThemeToggle compact />
                   </div>
                   <div className="pt-1 border-t border-stone-200 dark:border-stone-800 space-y-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        soundEngine.playClick();
+                        setShowSettings(false);
+                        setShowModeModal(true);
+                      }}
+                      className="w-full text-left text-xs px-1 py-1 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition-colors cursor-pointer flex items-center justify-between"
+                    >
+                      <span>Learner mode</span>
+                      <span className="text-[10px] font-mono uppercase bg-amber-500/15 text-amber-800 dark:text-amber-400 font-bold px-1.5 py-0.2 rounded-md">
+                        {learnerModesState.activeMode}
+                      </span>
+                    </button>
                     {onOpenOnboarding && (
                       <button
                         type="button"
@@ -463,7 +500,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           No 40-minute reading plans. Just today's decision: what would you do before seeing what {dailyMission.heroName} did?
         </p>
 
-        {/* Action Row: Start mission CTA + 45s audio story */}
+          {/* Action Row: Start mission CTA + 45s audio story */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
           <button
             type="button"
@@ -473,6 +510,33 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <span>{isTodayMissionDone ? "Review today's mission" : "Start today's mission"}</span>
             <ArrowRight aria-hidden="true" className="w-4 h-4" />
           </button>
+
+          {/* Mode-specific primary lens CTA */}
+          {learnerModesState.activeMode === 'reciter' && (
+            <button
+              type="button"
+              onClick={() => {
+                soundEngine.playSnap();
+                setShowReciterModal(true);
+              }}
+              className="px-5 py-3.5 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-950 dark:text-amber-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer"
+            >
+              <span>Recite Verse of Week (Day {getOrInitReciterVerse(getTodayDateKey()).dayNumber})</span>
+            </button>
+          )}
+
+          {learnerModesState.activeMode === 'storyteller' && (
+            <button
+              type="button"
+              onClick={() => {
+                soundEngine.playSnap();
+                setShowStorytellerModal(true);
+              }}
+              className="px-5 py-3.5 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-950 dark:text-amber-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer"
+            >
+              <span>Tell story in your words</span>
+            </button>
+          )}
 
           <button
             type="button"
@@ -815,6 +879,38 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <CalendarRemindersModal
         isOpen={showCalendarModal}
         onClose={() => setShowCalendarModal(false)}
+      />
+
+      {/* Learner Modes: Mode Selector Modal */}
+      <ModeSelectorModal
+        isOpen={showModeModal}
+        onClose={() => setShowModeModal(false)}
+        currentMode={learnerModesState.activeMode}
+        onSelectMode={(mode) => {
+          const updated = setLearnerMode(mode);
+          setLearnerModesState(updated);
+        }}
+      />
+
+      {/* Mode B: Reciter Modal */}
+      <ReciterModal
+        isOpen={showReciterModal}
+        onClose={() => setShowReciterModal(false)}
+        verseState={getOrInitReciterVerse(getTodayDateKey())}
+        knownVerses={learnerModesState.reciter.knownVerses}
+        onProgressUpdated={() => setLearnerModesState(loadLearnerModesState())}
+        onRewardXP={onRewardXP}
+        todayDateStr={getTodayDateKey()}
+      />
+
+      {/* Mode C: Storyteller Modal */}
+      <StorytellerModal
+        isOpen={showStorytellerModal}
+        onClose={() => setShowStorytellerModal(false)}
+        passageReference={dailyMission.passageReference}
+        heroName={dailyMission.heroName}
+        faithfulRetelling={dailyMission.storyRetelling}
+        todayDateKey={getTodayDateKey()}
       />
     </div>
   );

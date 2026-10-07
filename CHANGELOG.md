@@ -5,6 +5,25 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.22.0] - 2026-10-06
+
+### Added (Learner Modes: Builder, Reciter & Storyteller)
+- **Learner Mode Architecture**: Built unified lens system on top of the decision-first daily mission core. Default mode remains Builder with zero regression. Progress across all modes is kept preserved and local-first on-device (`testament_learner_modes_state`).
+- **Mode Selector**: Added intuitive 1-screen modal to choose among Builder, Reciter, and Storyteller. Integrated into Settings dropdown and Step 5 of the Onboarding calibration flow.
+- **Mode B — Reciter (Flagship Cumulative Chaining)**:
+  - Rolling 7-day verse-of-the-week practice based on natural clause-boundary phrase splitting (punctuation-aware).
+  - Day 1: Full verse read aloud with `Scripture (Verbatim)` badge.
+  - Day 2: First phrase revealed from memory with self-grading (`Got it` / `Missed it`).
+  - Days 3–6: Cumulative out-loud chaining from phrase 1 through N.
+  - Day 7: Full recitation test retiring the mastered verse into the on-device **Known Verses** collection and issuing the next verse in rotation.
+  - Automatic loop-back insertion on subsequent days for any phrase marked `Missed it`.
+  - Native daily calendar reminder integration using the zero-guilt calendar system.
+- **Mode C — Storyteller (Retell & Teach)**:
+  - "Tell the story back in your own words" reflection input prompt upon completing daily mission.
+  - Side-by-side comparison with the app's faithful retelling badged with `✨ AI reflection • Not Scripture`.
+  - Interactive self-marking of captured vs. missed narrative beats saved on-device.
+- **Testing**: Added Playwright test specification verifying verbatim scripture preservation, punctuation clause splitting, multi-mode persistence, 7-day progression advancement under test-clock dates, loop-back queues, and AI reflection badging.
+
 ## [1.21.0] - 2026-10-04
 
 ### Added (Feature 8: Calendar Reminders — Replaces Push Notifications)

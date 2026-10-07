@@ -42,6 +42,7 @@ import { getTodayDateKey } from '../utils/dailyEngine';
 import { paraphraseVerseSimpler } from '../utils/geminiFeatures';
 import { ReportIssueModal } from './ReportIssueModal';
 import { fetchDecisionStats, submitAnonymousDecisionVote } from '../utils/decisionStatsClient';
+import { StorytellerModal } from './StorytellerModal';
 
 interface StoryViewerProps {
   quest?: StoryQuest | null;
@@ -195,6 +196,9 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
 
   // Feature 8: Daily calendar reminders modal state
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState<boolean>(false);
+
+  // Learner Mode: Storyteller retelling modal state
+  const [isStorytellerOpen, setIsStorytellerOpen] = useState<boolean>(false);
 
   // Audio narrator state (secondary option)
   const [isPlayingAudio, setIsPlayingAudio] = useState<boolean>(false);
@@ -1355,6 +1359,29 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
               </button>
             </div>
 
+            {/* Mode C: Storyteller "Tell the story back in your own words" (Prompted right after mission resolves) */}
+            <div className="p-3.5 sm:p-4 rounded-2xl bg-stone-100/80 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <span className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-100 flex items-center gap-1.5">
+                  <Sparkles aria-hidden="true" className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  <span>Tell the story back in your own words</span>
+                </span>
+                <p className="text-xs text-stone-600 dark:text-stone-300 mt-0.5">
+                  Lock this mission in: retell what happened, then compare side-by-side with faithful reflection.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  soundEngine.playSnap();
+                  setIsStorytellerOpen(true);
+                }}
+                className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 shadow-xs"
+              >
+                <span>Tell it back</span>
+              </button>
+            </div>
+
             {/* Exit CTA */}
             <div className="pt-1">
               <button
@@ -1397,6 +1424,16 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
         isOpen={isCalendarModalOpen}
         onClose={() => setIsCalendarModalOpen(false)}
         initialType="morning"
+      />
+
+      {/* Mode C: Storyteller Retelling Modal */}
+      <StorytellerModal 
+        isOpen={isStorytellerOpen}
+        onClose={() => setIsStorytellerOpen(false)}
+        passageReference={keyVerseRef}
+        heroName={heroName}
+        faithfulRetelling={storyRetelling}
+        todayDateKey={getTodayDateKey()}
       />
     </div>
   );

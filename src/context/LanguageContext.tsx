@@ -52,7 +52,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.rankStoryExplorer': 'Story Explorer',
     'dashboard.rankMightyMan': 'Mighty Man of Adullam',
     'dashboard.rankIronPillar': 'Iron Pillar',
-    'dashboard.versionTooltip': 'What changed in v1.21.0',
+    'dashboard.versionTooltip': 'What changed in v1.22.0',
     'dashboard.declareBattlefield': 'Daily check-in',
     'dashboard.battlefieldPrefix': 'Check-in: {name}',
     'dashboard.declareBattlefieldTooltip': "Daily check-in",
