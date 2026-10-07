@@ -13,6 +13,8 @@ import {
 import { soundEngine } from '../utils/audio';
 import { useModalLock } from '../utils/useModalLock';
 import confetti from 'canvas-confetti';
+import type { LearnerMode } from '../types/learnerModes';
+import { loadLearnerModesState, setLearnerMode } from '../utils/learnerModes';
 
 export interface UserCalibrationProfile {
   battleId: string;
@@ -21,6 +23,7 @@ export interface UserCalibrationProfile {
   learningStyle: 'visual' | 'audio' | 'tactical' | 'plain';
   familiarity: 'new' | 'disconnected' | 'sharp';
   dailyCadence: '3min' | '10min' | 'deep';
+  learnerMode?: LearnerMode;
   completedAt: string;
 }
 
@@ -43,6 +46,9 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   const [learningStyle, setLearningStyle] = useState<'visual' | 'audio' | 'tactical' | 'plain'>(initialProfile?.learningStyle || 'visual');
   const [familiarity, setFamiliarity] = useState<'new' | 'disconnected' | 'sharp'>(initialProfile?.familiarity || 'new');
   const [dailyCadence, setDailyCadence] = useState<'3min' | '10min' | 'deep'>(initialProfile?.dailyCadence || '10min');
+  const [learnerMode, setSelectedLearnerMode] = useState<LearnerMode>(() => {
+    return initialProfile?.learnerMode || loadLearnerModesState().activeMode;
+  });
 
   useEffect(() => {
     if (!isOpen) return;
@@ -211,8 +217,10 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
       learningStyle,
       familiarity,
       dailyCadence,
+      learnerMode,
       completedAt: new Date().toISOString()
     };
+    setLearnerMode(learnerMode);
     localStorage.setItem('testament_user_profile', JSON.stringify(profile));
     localStorage.setItem('testament_onboarding_completed', 'true');
     onComplete(profile, startQuest, openTour);
@@ -565,7 +573,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
                   <div className="grid grid-cols-2 gap-2 pt-1 text-[11px] text-stone-600 dark:text-stone-400 font-mono">
                     <div>
-                      <span className="text-stone-500">Mode: </span>
+                      <span className="text-stone-500">Style: </span>
                       <span className="text-amber-800 dark:text-amber-300 font-bold uppercase">{learningStyle}</span>
                     </div>
                     <div>
@@ -573,6 +581,51 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       <span className="text-amber-800 dark:text-amber-300 font-bold">{dailyCadence === '3min' ? '3 Min / Day' : dailyCadence === '10min' ? '7-10 Min / Day' : 'Deep Study'}</span>
                     </div>
                   </div>
+                </div>
+              </div>
+
+              {/* Mode Selection on Onboarding */}
+              <div className="space-y-2 pt-1">
+                <div className="text-left">
+                  <div className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
+                    Learner Mode Lens
+                  </div>
+                  <p className="text-xs text-stone-600 dark:text-stone-400">
+                    Pick how you want today's mission framed. Always changeable in Settings.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-left">
+                  {[
+                    { id: 'builder' as const, title: 'Builder', sub: 'Decision-first core', badge: 'Default' },
+                    { id: 'reciter' as const, title: 'Reciter', sub: 'Cumulative out-loud reps', badge: 'New' },
+                    { id: 'storyteller' as const, title: 'Storyteller', sub: 'Retell & teach back', badge: 'New' },
+                  ].map((m) => {
+                    const isSelected = learnerMode === m.id;
+                    return (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => {
+                          soundEngine.playSnap();
+                          setSelectedLearnerMode(m.id);
+                        }}
+                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                          isSelected
+                            ? 'border-amber-500 bg-amber-500/15 dark:bg-amber-950/40 text-stone-950 dark:text-parchment-50 ring-1 ring-amber-500'
+                            : 'border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/60 text-stone-700 dark:text-stone-300 hover:border-amber-500/30'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-0.5">
+                          <span className="font-serif font-bold text-xs sm:text-sm">{m.title}</span>
+                          <span className="text-[9px] font-mono uppercase font-bold text-amber-800 dark:text-amber-400 px-1 py-0.2 rounded-sm bg-amber-500/10">
+                            {m.badge}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-stone-500 dark:text-stone-400 block leading-tight">{m.sub}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
