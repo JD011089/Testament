@@ -63,9 +63,8 @@ export const DecisionJournalModal: React.FC<DecisionJournalModalProps> = ({
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-5 bg-black/60 dark:bg-black/85 backdrop-blur-md overflow-y-auto overscroll-contain"
           onClick={handleDismiss}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="journal-modal-title"
+          role="region"
+          aria-label="Decision Journal"
         >
           <motion.div
             ref={modalRef}

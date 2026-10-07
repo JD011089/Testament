@@ -5,11 +5,10 @@ import {
   X, 
   Clock, 
   Check, 
-  ExternalLink, 
   Download, 
-  Sparkles,
-  Sun,
-  Brain
+  Sparkles, 
+  Sun, 
+  Brain 
 } from 'lucide-react';
 import { useModalLock } from '../utils/useModalLock';
 import type { MemoryVerse } from '../types';
@@ -69,16 +68,37 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
     }
   };
 
-  const handleAddToGoogle = (type: ReminderType) => {
+  const handleAddToCalendar = async (type: ReminderType) => {
     soundEngine.playVictory();
     const time = type === 'morning' ? morningTime : recallTime;
+    
+    // On Android/mobile, attempt Web Share .ics first so default calendar (Samsung, Google, etc.) opens directly
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function' && typeof File !== 'undefined') {
+      try {
+        const result = await shareOrDownloadCalendarIcs(type, { 
+          time, 
+          verseRef: targetVerse?.reference 
+        });
+        if (result === 'shared') {
+          setFeedback({
+            type: 'ics',
+            message: 'Opening your calendar app. Tap Save to confirm your recurring daily reminder.'
+          });
+          return;
+        }
+      } catch {
+        // continue to openGoogleCalendar or download
+      }
+    }
+
+    // Default handoff: Open calendar web link (routes to native Calendar app on Android / mobile)
     openGoogleCalendar(type, { 
       time, 
       verseRef: targetVerse?.reference 
     });
     setFeedback({
       type: 'google',
-      message: 'Opening Google Calendar. Tap "Save" in your calendar app to confirm your recurring daily reminder.'
+      message: 'Opening calendar. Tap "Save" in your calendar app to confirm your recurring daily reminder.'
     });
   };
 
@@ -118,9 +138,8 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
       <div 
         className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-950/70 backdrop-blur-xs overflow-y-auto overscroll-contain"
         onClick={onClose}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="calendar-reminders-title"
+        role="region"
+        aria-label="Calendar Reminders"
       >
         <motion.div
           ref={modalRef}
@@ -263,11 +282,11 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
               <div className="space-y-2.5 pt-1">
                 <button
                   type="button"
-                  onClick={() => handleAddToGoogle('morning')}
+                  onClick={() => handleAddToCalendar('morning')}
                   className="w-full py-3.5 px-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
                 >
-                  <ExternalLink aria-hidden="true" className="w-4 h-4" />
-                  <span>Add to Google Calendar</span>
+                  <Calendar aria-hidden="true" className="w-4 h-4" />
+                  <span>Add to calendar</span>
                 </button>
 
                 <button
@@ -276,7 +295,7 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
                   className="w-full py-3 px-4 rounded-2xl bg-stone-200 hover:bg-stone-300 dark:bg-stone-800 dark:hover:bg-stone-750 text-stone-900 dark:text-parchment-100 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
                 >
                   <Download aria-hidden="true" className="w-4 h-4" />
-                  <span>Apple / Samsung / Outlook (.ics)</span>
+                  <span>Download .ics file</span>
                 </button>
               </div>
             </div>
@@ -351,11 +370,11 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
               <div className="space-y-2.5 pt-1">
                 <button
                   type="button"
-                  onClick={() => handleAddToGoogle('recall')}
+                  onClick={() => handleAddToCalendar('recall')}
                   className="w-full py-3.5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
                 >
-                  <ExternalLink aria-hidden="true" className="w-4 h-4" />
-                  <span>Add to Google Calendar</span>
+                  <Calendar aria-hidden="true" className="w-4 h-4" />
+                  <span>Add to calendar</span>
                 </button>
 
                 <button
@@ -364,7 +383,7 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
                   className="w-full py-3 px-4 rounded-2xl bg-stone-200 hover:bg-stone-300 dark:bg-stone-800 dark:hover:bg-stone-750 text-stone-900 dark:text-parchment-100 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
                 >
                   <Download aria-hidden="true" className="w-4 h-4" />
-                  <span>Apple / Samsung / Outlook (.ics)</span>
+                  <span>Download .ics file</span>
                 </button>
               </div>
 

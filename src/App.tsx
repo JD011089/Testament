@@ -125,6 +125,12 @@ export function App() {
   const [campaignPrompt, setCampaignPrompt] = useState<{ completedStep: number; nextStep: DailyCampaignStep } | null>(null);
 
   const [streakCount, setStreakCount] = useState<number>(() => {
+    // One-time cleanup for dead legacy checkin key
+    try {
+      localStorage.removeItem('testament_daily_checkin');
+    } catch {
+      // ignore
+    }
     const stored = Number(localStorage.getItem('testament_streak'));
     return Number.isFinite(stored) && stored > 0 ? stored : 0;
   });

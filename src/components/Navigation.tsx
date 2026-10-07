@@ -166,13 +166,23 @@ export const Navigation: React.FC<NavigationProps> = ({
             </button>
 
             {/* Streak Pill */}
-            <div 
-              title={t('nav.dailyStreak')} 
-              className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs font-mono font-bold text-orange-800 dark:text-orange-300"
-            >
-              <Flame className="w-3.5 h-3.5 fill-orange-500/20 text-orange-500" />
-              <span>{streakCount}d</span>
-            </div>
+            {streakCount > 0 ? (
+              <div 
+                title={t('nav.dailyStreak')} 
+                className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs font-mono font-bold text-orange-800 dark:text-orange-300"
+              >
+                <Flame className="w-3.5 h-3.5 fill-orange-500/20 text-orange-500" />
+                <span>{streakCount}d</span>
+              </div>
+            ) : (
+              <div 
+                title={t('nav.dailyStreak')} 
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs font-mono font-medium text-stone-500 dark:text-stone-400"
+              >
+                <Flame className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500" />
+                <span>Fresh start</span>
+              </div>
+            )}
 
             {/* XP Badge */}
             <div 
