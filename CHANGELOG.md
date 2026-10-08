@@ -5,6 +5,19 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.23.0] - 2026-10-08
+
+### Added (Weekly Study Series)
+- **Weekly Themed Study Series**: Added 7-day character-driven series (Monday to Sunday) allowing learners to go deep on one biblical figure through 7 decision-moments instead of meeting someone new every day.
+- **Seed Set of 6 Character Arcs**: Shipped comprehensive 7-moment journeys for **David** (Seven Decisions That Made a King), **Peter** (The Bravado, The Collapse, and The Rock), **Esther** (Courage in the Palace of Shadows), **Paul** (From Inquisitor to Ambassador), **Jesus** (The Road to the Cross & Kingdom), and **Mary** (The Trust That Changed History).
+- **ADHD Safeguard & Zero-Modal Flow**: Every single moment features a unique, standalone dilemma with high narrative tension, decision question, 4 preset choices with stances, and concise story retelling under 140 words. No filler days; mid-week opens stand on their own.
+- **Series Engine & Calendar Anchoring**: Local-first on-device tracking (`testament_active_series_state`) with Day 1–7 progression. Switching mid-week cleanly restarts the new series at Day 1. Missed days remain neutral with zero guilt language. If no series is picked, standard daily rotation continues unchanged.
+- **Dual UI Entry Points**:
+  - Library (`CanonLibraryPage`): Prominent Weekly Study Series shelf section showing active series status and 1-tap management.
+  - Home (`Dashboard`): Active series indicator badge directly above Today's Mission with instant series switching.
+  - `SeriesPickerModal`: 1-screen modal showing all 6 series, 1-line hooks, 7-moment timeline overviews, and progress bars.
+- **Weekly Recap Payoff**: Automatically integrates active series ("Your week with David — at Ziklag you chose to wait…"), summarizing the user's actual choices across the 7 days without guilt language for skipped days.
+
 ## [1.22.2] - 2026-10-08
 
 ### Changed

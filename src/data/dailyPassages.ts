@@ -359,11 +359,20 @@ export const CURATED_DAILY_PASSAGES: CuratedPassage[] = [
   }
 ];
 
+import { getActiveSeriesMoment } from '../utils/weeklySeriesEngine';
+
 /**
  * Deterministically picks today's passage from the curated rotation.
+ * If user has chosen an active Weekly Series, serves today's series moment.
  * Guarantees that day N and day N+1 produce different passages.
  */
 export function getDailyCuratedPassage(dayOffset = 0, battlefieldId?: string | null): CuratedPassage {
+  // If user has an active weekly series selected, theme today's mission to the series moment!
+  const seriesMoment = getActiveSeriesMoment(dayOffset);
+  if (seriesMoment) {
+    return seriesMoment;
+  }
+
   const now = new Date();
   const localMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   const dayIndex = Math.floor(localMidnight / (1000 * 60 * 60 * 24)) + dayOffset;

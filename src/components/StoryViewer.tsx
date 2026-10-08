@@ -24,6 +24,7 @@ import { CalendarRemindersModal } from './CalendarRemindersModal';
 import { BackstoryCard } from './BackstoryCard';
 import { saveOrShareVerseCard } from '../utils/verseCardGenerator';
 import { saveDecisionJournalEntry } from '../utils/decisionJournal';
+import { markSeriesMomentCompleted } from '../utils/weeklySeriesEngine';
 import { 
   getLocalPersonalization, 
   fetchGeminiPersonalization, 
@@ -484,6 +485,9 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
       const isLastAct = quest && currentActIndex === quest.acts.length - 1;
       const relicId = isLastAct ? quest.relicReward?.id : undefined;
       onCompleteAct(missionIdentifier, quest ? quest.id : 'daily-campaign', relicId);
+      if (dailyMission?.passageId) {
+        markSeriesMomentCompleted(dailyMission.passageId);
+      }
       onRewardXP?.(50);
     }
   };

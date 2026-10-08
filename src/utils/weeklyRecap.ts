@@ -18,11 +18,19 @@ export interface WeeklyRecapData {
   nextTeaserHook: string;
   isMonday: boolean;
   completedCount: number;
+  seriesHeroName?: string;
+  seriesTitle?: string;
 }
+
+import { getActiveSeriesState } from './weeklySeriesEngine';
+import { getWeeklySeriesById, type SeriesMoment } from '../data/weeklySeries';
 
 export function getWeeklyRecap(): WeeklyRecapData {
   const today = new Date();
   const isMonday = today.getDay() === 1;
+
+  const activeSeriesState = getActiveSeriesState();
+  const activeSeries = activeSeriesState ? getWeeklySeriesById(activeSeriesState.seriesId) : undefined;
 
   const journal = getDecisionJournalEntries();
   const journalMap = new Map<string, DecisionJournalEntry>();
@@ -51,14 +59,24 @@ export function getWeeklyRecap(): WeeklyRecapData {
     if (isCompleted) completedCount++;
 
     let summaryLine = '';
+    const seriesMoment = ('momentTitle' in passage) ? (passage as SeriesMoment) : undefined;
+
     if (userEntry) {
       const rawText = userEntry.userCustomText
         ? `"${userEntry.userCustomText}"`
         : userEntry.chosenText;
       const choiceSnippet = truncateAtWordBoundary(rawText, 45, '…');
-      summaryLine = `${dayName} — You chose: ${choiceSnippet} · ${passage.reference}`;
+      if (seriesMoment) {
+        summaryLine = `${dayName} — At ${seriesMoment.momentTitle} you chose: ${choiceSnippet} · ${passage.reference}`;
+      } else {
+        summaryLine = `${dayName} — You chose: ${choiceSnippet} · ${passage.reference}`;
+      }
     } else {
-      summaryLine = `${dayName} — ${passage.heroName} under pressure · ${passage.reference}`;
+      if (seriesMoment) {
+        summaryLine = `${dayName} — Day ${seriesMoment.dayNumber}: ${seriesMoment.momentTitle} · ${passage.reference}`;
+      } else {
+        summaryLine = `${dayName} — ${passage.heroName} under pressure · ${passage.reference}`;
+      }
     }
 
     days.push({
@@ -75,14 +93,17 @@ export function getWeeklyRecap(): WeeklyRecapData {
   const tomorrowPassage = getDailyCuratedPassage(1);
   const nextTeaserHook = tomorrowPassage?.teaserHook || "Tomorrow's mission is ready. Come back to unlock it.";
 
-  const narrativeThread =
-    "Across this past week's arc, we watched fear collide with faith — from outlaws in desert caves to fishermen panicking on stormy waters. In every crisis, the real turning point was releasing self-reliance and leaning on God.";
+  const narrativeThread = activeSeries
+    ? `Your week with ${activeSeries.heroName}: ${activeSeries.tagline}. Across these seven defining decisions under real pressure, you witnessed how faith holds when everything is on the line.`
+    : "Across this past week's arc, we watched fear collide with faith — from outlaws in desert caves to fishermen panicking on stormy waters. In every crisis, the real turning point was releasing self-reliance and leaning on God.";
 
   return {
     days,
     narrativeThread,
     nextTeaserHook,
     isMonday,
-    completedCount
+    completedCount,
+    seriesHeroName: activeSeries?.heroName,
+    seriesTitle: activeSeries?.title
   };
 }
