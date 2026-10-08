@@ -6,8 +6,8 @@ import confetti from 'canvas-confetti';
 import { 
   ArrowLeft, 
   ArrowRight, 
-  Volume2, 
-  VolumeX, 
+  Play,
+  Pause,
   CheckCircle2, 
   Sparkles, 
   Award, 
@@ -39,6 +39,7 @@ import {
   checkRankPromotion 
 } from '../utils/memoryVerseEngine';
 import { getTodayDateKey } from '../utils/dailyEngine';
+import { sanitizeGrammarArticles } from '../utils/textUtils';
 import { paraphraseVerseSimpler } from '../utils/geminiFeatures';
 import { ReportIssueModal } from './ReportIssueModal';
 import { fetchDecisionStats, submitAnonymousDecisionVote } from '../utils/decisionStatsClient';
@@ -122,9 +123,9 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
   const presetChoices = dailyMission 
     ? dailyMission.presetChoices 
     : (act?.choices || []);
-  const storyRetelling = dailyMission 
+  const storyRetelling = (dailyMission 
     ? dailyMission.storyRetelling 
-    : (act?.narrativeParagraphs || []);
+    : (act?.narrativeParagraphs || [])).map(p => sanitizeGrammarArticles(p));
   const keyVerseRef = dailyMission ? dailyMission.keyVerseReference : (act?.unlockedScripture.reference || '');
   const keyVerseText = dailyMission ? dailyMission.keyVerseText : (act?.unlockedScripture.text || '');
   const kjvVerseText = dailyMission 
@@ -1069,15 +1070,16 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                 type="button"
                 onClick={handleToggleAudio}
                 className="inline-flex items-center gap-2 text-xs font-semibold text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-amber-300 py-1.5 px-3 rounded-xl bg-stone-100 dark:bg-stone-900 transition-colors"
+                aria-label={isPlayingAudio ? "Pause narration" : "Listen to this story instead of reading"}
               >
                 {isPlayingAudio ? (
                   <>
-                    <VolumeX aria-hidden="true" className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
-                    <span>Stop audio</span>
+                    <Pause aria-hidden="true" className="w-3.5 h-3.5 text-amber-500 fill-amber-500/20" />
+                    <span>Pause narration</span>
                   </>
                 ) : (
                   <>
-                    <Volume2 aria-hidden="true" className="w-3.5 h-3.5 text-amber-500" />
+                    <Play aria-hidden="true" className="w-3.5 h-3.5 text-amber-500 fill-amber-500/20" />
                     <span>Listen to this story instead of reading</span>
                   </>
                 )}

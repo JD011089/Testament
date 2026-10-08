@@ -19,6 +19,8 @@ import {
   Mic
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { getDailyCuratedPassage } from '../data/dailyPassages';
+import { getTodayBattlefieldId } from '../utils/battlefield';
 
 interface DriveModePlayerProps {
   isOpen: boolean;
@@ -35,9 +37,29 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
 }) => {
   const { t, language } = useLanguage();
   const modalRef = useModalLock(isOpen);
-  const [currentQuestIndex, setCurrentQuestIndex] = useState(0);
-  const [currentActIndex, setCurrentActIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
+
+  // Default to today's active mission quest rather than a hardcoded track
+  const [currentQuestIndex, setCurrentQuestIndex] = useState<number>(() => {
+    try {
+      const activeBattlefieldId = getTodayBattlefieldId();
+      const todayPassage = getDailyCuratedPassage(0, activeBattlefieldId);
+      if (todayPassage) {
+        // Find quest matching today's mission hero or reference
+        const matchedIdx = STORY_QUESTS.findIndex(q => 
+          q.heroName.toLowerCase() === todayPassage.heroName.toLowerCase() ||
+          q.title.toLowerCase().includes(todayPassage.heroName.toLowerCase()) ||
+          q.acts.some(a => a.unlockedScripture.reference.includes(todayPassage.book))
+        );
+        if (matchedIdx >= 0) return matchedIdx;
+      }
+    } catch {
+      // fallback
+    }
+    return 0;
+  });
+
+  const [currentActIndex, setCurrentActIndex] = useState<number>(0);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [narratorProfile, setNarratorProfile] = useState<NarratorProfile>(soundEngine.getNarratorProfile());
 
   useEffect(() => {
@@ -169,11 +191,12 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
             <span id="drive-mode-title">{t('drive.title')}</span>
           </div>
           <button 
+            type="button"
             onClick={() => {
               soundEngine.stopSpeaking();
               onClose();
             }}
-            aria-label="Close Drive Mode"
+            aria-label={t('drive.close')}
             className="p-2 rounded-xl bg-white dark:bg-stone-900 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white border border-stone-200 dark:border-stone-800 focus-visible:ring-2 focus-visible:ring-amber-500"
           >
             <X className="w-5 h-5" />
