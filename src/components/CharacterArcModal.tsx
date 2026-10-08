@@ -166,7 +166,7 @@ export const CharacterArcModal: React.FC<CharacterArcModalProps> = ({
                       {activeArc.name}
                     </h3>
                     <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 font-semibold">
-                      {moments.length} moments
+                      {moments.length}{' '}moments
                     </span>
                   </div>
                   <p className="text-xs text-stone-600 dark:text-stone-300 font-reading leading-relaxed">
@@ -203,7 +203,7 @@ export const CharacterArcModal: React.FC<CharacterArcModalProps> = ({
                   {/* Step Tracker */}
                   <div className="flex items-center justify-between text-xs text-stone-500 dark:text-stone-400">
                     <span className="font-mono text-amber-800 dark:text-amber-400 font-bold uppercase tracking-wider">
-                      Moment {currentMoment.order} of {moments.length}
+                      Moment{' '}{currentMoment.order}{' '}of{' '}{moments.length}
                     </span>
                     <span className="font-mono text-[11px] bg-stone-200/70 dark:bg-stone-800 px-2 py-0.5 rounded-md text-stone-800 dark:text-stone-200">
                       {currentMoment.passageReference}

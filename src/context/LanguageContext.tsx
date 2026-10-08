@@ -539,6 +539,33 @@ export const translations: Record<Language, Record<string, string>> = {
     'lifeTheme.integrity': 'Integrity in Toxic Cultures',
     'lifeTheme.family': 'Family & Conflict Resolution',
     'lifeTheme.courage': 'Courage Under Fire',
+
+    // Decision Journal
+    'journal.title': 'Your Journey • Decision Journal',
+    'journal.subtitle': 'A personal spiritual record of what you chose and carried',
+    'journal.privacyPromise': 'Private to this device. Nobody sees this but you.',
+    'journal.noDecisions': 'No decisions recorded yet',
+    'journal.noDecisionsDesc': "Complete today's mission on the Home screen or write a reflection above.",
+    'journal.inYourOwnWords': 'In your own words',
+    'journal.yourDecision': 'Your decision',
+    'journal.clear': 'Clear my journal',
+    'journal.wipeConfirm': 'Wipe all entries?',
+    'journal.yesClear': 'Yes, clear',
+    'journal.cancel': 'Cancel',
+    'journal.close': 'Close',
+    'journal.writePrompt': 'Write a personal reflection or prayer...',
+    'journal.saveReflection': 'Save Reflection',
+    'journal.deleteEntry': 'Delete entry',
+    'journal.reflectionType': 'Personal Reflection',
+
+    // Drive Mode
+    'drive.commuteAudio': 'Commute & Travel Audio',
+    'drive.handsFree': 'Hands-free Scripture & Story Narration',
+    'drive.audioVoice': 'Audio Voice',
+    'drive.nowPlaying': 'Now Playing',
+    'drive.ambientBed': 'Ambient Audio Bed',
+    'drive.soundOff': 'Sound Off',
+    'drive.close': 'Close Drive Mode',
   },
   es: {
     // Navigation
@@ -1068,6 +1095,33 @@ export const translations: Record<Language, Record<string, string>> = {
     'lifeTheme.integrity': 'Integridad en Culturas Tóxicas',
     'lifeTheme.family': 'Familia y Resolución de Conflictos',
     'lifeTheme.courage': 'Valentía Bajo Fuego',
+
+    // Decision Journal
+    'journal.title': 'Tu Camino • Diario de Decisiones',
+    'journal.subtitle': 'Un registro espiritual de lo que elegiste y guardaste',
+    'journal.privacyPromise': 'Privado en este dispositivo. Nadie más lo ve.',
+    'journal.noDecisions': 'Sin decisiones registradas todavía',
+    'journal.noDecisionsDesc': 'Completa la misión de hoy en Inicio o escribe una reflexión arriba.',
+    'journal.inYourOwnWords': 'En tus propias palabras',
+    'journal.yourDecision': 'Tu decisión',
+    'journal.clear': 'Borrar mi diario',
+    'journal.wipeConfirm': '¿Borrar todas las entradas?',
+    'journal.yesClear': 'Sí, borrar',
+    'journal.cancel': 'Cancelar',
+    'journal.close': 'Cerrar',
+    'journal.writePrompt': 'Escribe una reflexión personal o plegaria...',
+    'journal.saveReflection': 'Guardar Reflexión',
+    'journal.deleteEntry': 'Eliminar entrada',
+    'journal.reflectionType': 'Reflexión Personal',
+
+    // Drive Mode
+    'drive.commuteAudio': 'Audio para Conducir y Viajes',
+    'drive.handsFree': 'Narración Bíblica Manos Libres',
+    'drive.audioVoice': 'Voz de Audio',
+    'drive.nowPlaying': 'Reproduciendo Ahora',
+    'drive.ambientBed': 'Fondo Sonoro Ambiental',
+    'drive.soundOff': 'Sin Sonido',
+    'drive.close': 'Cerrar Modo Conducción',
   },
   fr: {
     // Navigation
@@ -1595,8 +1649,35 @@ export const translations: Record<Language, Record<string, string>> = {
     'lifeTheme.pain': 'Douleur Injuste & Trahison',
     'lifeTheme.action': 'Action sur les Discours Creux',
     'lifeTheme.integrity': 'Intu00e9gritu00e9 dans les Cultures Toxiques',
-    'lifeTheme.family': 'Famille & Ru00e9solution de Conflits',
+    'lifeTheme.family': 'Famille & Résolution de Conflits',
     'lifeTheme.courage': 'Courage Sous le Feu',
+
+    // Decision Journal
+    'journal.title': 'Votre Parcours • Journal de Décisions',
+    'journal.subtitle': 'Un registre spirituel personnel de vos choix et engagements',
+    'journal.privacyPromise': 'Privé sur cet appareil. Personne ne voit ceci sauf vous.',
+    'journal.noDecisions': 'Aucune décision enregistrée pour le moment',
+    'journal.noDecisionsDesc': "Complétez la mission du jour sur l'Accueil ou écrivez une réflexion ci-dessus.",
+    'journal.inYourOwnWords': 'Dans vos propres mots',
+    'journal.yourDecision': 'Votre décision',
+    'journal.clear': 'Effacer mon journal',
+    'journal.wipeConfirm': 'Effacer toutes les entrées ?',
+    'journal.yesClear': 'Oui, effacer',
+    'journal.cancel': 'Annuler',
+    'journal.close': 'Fermer',
+    'journal.writePrompt': 'Écrivez une réflexion personnelle ou une prière...',
+    'journal.saveReflection': 'Enregistrer la Réflexion',
+    'journal.deleteEntry': 'Supprimer l’entrée',
+    'journal.reflectionType': 'Réflexion Personnelle',
+
+    // Drive Mode
+    'drive.commuteAudio': 'Audio pour Trajets & Conduite',
+    'drive.handsFree': 'Narration Biblique Mains Libres',
+    'drive.audioVoice': 'Voix Audio',
+    'drive.nowPlaying': 'Lecture en Cours',
+    'drive.ambientBed': 'Ambiance Sonore',
+    'drive.soundOff': 'Son Coupé',
+    'drive.close': 'Fermer le Mode Conduite',
   }
 };
 

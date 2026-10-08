@@ -98,10 +98,13 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
     }
   };
 
+  const masteredVerses = savedVerses.filter((v) => memorizedVerses.includes(v.id));
+  const bookmarkedList = savedVerses.filter((v) => bookmarkedVerses.includes(v.id));
+
   const filters: { id: ArsenalFilter; label: string; count: number }[] = [
     { id: 'saved', label: t('arsenal.allSaved'), count: savedVerses.length },
-    { id: 'mastered', label: t('arsenal.mastered'), count: memorizedVerses.length },
-    { id: 'bookmarked', label: t('arsenal.bookmarked'), count: bookmarkedVerses.length },
+    { id: 'mastered', label: t('arsenal.mastered'), count: masteredVerses.length },
+    { id: 'bookmarked', label: t('arsenal.bookmarked'), count: bookmarkedList.length },
   ];
 
   return (
@@ -200,8 +203,10 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
 
                     <div className="flex items-center gap-1.5">
                       <button
+                        type="button"
                         onClick={() => handleSpeak(verse)}
-                        title={t('arsenal.audioRecital')}
+                        title={isSpeakingThis ? t('dashboard.pauseAudio') : t('arsenal.audioRecital')}
+                        aria-label={isSpeakingThis ? t('dashboard.pauseAudio') : t('arsenal.audioRecital')}
                         className="p-1.5 rounded-lg text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-200/50 dark:hover:bg-stone-800 transition-colors"
                       >
                         {isSpeakingThis ? (

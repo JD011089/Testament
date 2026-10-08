@@ -58,6 +58,7 @@ import {
   setLearnerMode, 
   getOrInitReciterVerse 
 } from '../utils/learnerModes';
+import { formatSpaced } from '../utils/textUtils';
 import type { LearnerModesState } from '../types/learnerModes';
 
 interface DashboardProps {
@@ -316,7 +317,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
             {/* N-1: No truncated kicker on 390px screens */}
             <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-tight">
-              <span className="text-amber-700 dark:text-amber-400 font-medium">{todayFormatted}</span> • Daily mission
+              <span className="text-amber-700 dark:text-amber-400 font-medium">{todayFormatted}</span>
+              {' '}•{' '}
+              <span>Daily mission</span>
             </p>
           </div>
         </div>
@@ -509,7 +512,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {/* Micro-tag with AI Reflection Badge (N-1: wrap instead of truncate) */}
         <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
           <span className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
-            Today's Mission • {dailyMission.heroName} ({dailyMission.passageReference})
+            {formatSpaced(["Today's Mission", "•", `${dailyMission.heroName} (${dailyMission.passageReference})`])}
           </span>
           <span className="text-[10px] font-mono text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full shrink-0" role="note" aria-label="AI reflection, Not Scripture">
             <span aria-hidden="true">✨ </span>AI reflection • Not Scripture
@@ -597,7 +600,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
               }}
               className="inline-flex items-center gap-1.5 text-xs text-amber-900 dark:text-amber-300 hover:underline font-medium cursor-pointer"
             >
-              <span>Part of {matchedCharacterArc.name}'s story arc {matchedMomentIndex >= 0 ? `(Moment ${matchedMomentIndex + 1} of ${matchedCharacterArc.moments.length})` : ''} →</span>
+              <span>
+                Part of {matchedCharacterArc.name}'s story arc {matchedMomentIndex >= 0 ? `(Moment ${matchedMomentIndex + 1} of ${matchedCharacterArc.moments.length})` : ''} →
+              </span>
             </button>
           </div>
         )}

@@ -510,27 +510,40 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                 <p className="font-reading text-base sm:text-lg leading-relaxed text-stone-900 dark:text-parchment-50">
                   {verseWords.map((w, idx) => {
                     const isBlank = blankIndices.includes(idx);
-                    if (!isBlank) return <span key={idx}>{w} </span>;
+                    const isLast = idx === verseWords.length - 1;
+                    if (!isBlank) {
+                      return (
+                        <React.Fragment key={idx}>
+                          <span>{w}</span>
+                          {!isLast && ' '}
+                        </React.Fragment>
+                      );
+                    }
                     const filled = filledBlanks[idx];
                     const isCurrent = blankIndices[activeBlankStep] === idx && !isCompleted;
                     if (filled) {
                       return (
-                        <span key={idx} className="px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 font-bold underline decoration-emerald-500 underline-offset-4 mr-1.5">
-                          {filled}{' '}
-                        </span>
+                        <React.Fragment key={idx}>
+                          <span className="px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 font-bold underline decoration-emerald-500 underline-offset-4">
+                            {filled}
+                          </span>
+                          {!isLast && ' '}
+                        </React.Fragment>
                       );
                     }
                     return (
-                      <span
-                        key={idx}
-                        className={`inline-block px-3 py-0.5 rounded-lg font-mono text-xs sm:text-sm mr-1.5 transition-all ${
-                          isCurrent
-                            ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300 ring-2 ring-amber-500 animate-pulse'
-                            : 'bg-stone-200 dark:bg-stone-800 text-stone-400'
-                        }`}
-                      >
-                        [ ______ ]
-                      </span>
+                      <React.Fragment key={idx}>
+                        <span
+                          className={`inline-block px-3 py-0.5 rounded-lg font-mono text-xs sm:text-sm transition-all ${
+                            isCurrent
+                              ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300 ring-2 ring-amber-500 animate-pulse'
+                              : 'bg-stone-200 dark:bg-stone-800 text-stone-400'
+                          }`}
+                        >
+                          [ ______ ]
+                        </span>
+                        {!isLast && ' '}
+                      </React.Fragment>
                     );
                   })}
                 </p>

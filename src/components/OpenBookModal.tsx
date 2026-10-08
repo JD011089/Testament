@@ -477,7 +477,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
 
               <BookOpen className="w-4 h-4 text-amber-800 dark:text-amber-500 shrink-0 hidden sm:inline" />
               <span className="text-xs font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold truncate">
-                {book.name} <span className="hidden sm:inline">• Volume #{String(book.order).padStart(2, '0')} of 66</span>
+                {book.name}{' '}<span className="hidden sm:inline">•{' '}Volume #{String(book.order).padStart(2, '0')}{' '}of 66</span>
               </span>
             </div>
 

@@ -9,6 +9,7 @@ export interface DecisionJournalEntry {
   userCustomText?: string;
   actionLine?: string;
   storyTakeaway?: string;
+  entryType?: 'mission_decision' | 'free_reflection';
 }
 
 const STORAGE_KEY = 'testament_decision_journal';
@@ -29,6 +30,7 @@ export function saveDecisionJournalEntry(
 
     const newEntry: DecisionJournalEntry = {
       ...entry,
+      entryType: entry.entryType || 'mission_decision',
       id: `journal-${entry.dateKey}-${Date.now()}`,
       timestamp: Date.now()
     };
@@ -37,6 +39,52 @@ export function saveDecisionJournalEntry(
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
   } catch {
     // ignore local storage errors
+  }
+}
+
+/**
+ * Saves a free-text personal reflection or prayer directly to the journal.
+ */
+export function saveUserFreeTextJournalEntry(text: string): DecisionJournalEntry | null {
+  const clean = text.trim();
+  if (!clean) return null;
+
+  try {
+    if (typeof localStorage === 'undefined') return null;
+
+    const todayKey = new Date().toISOString().split('T')[0];
+    const newEntry: DecisionJournalEntry = {
+      id: `journal-free-${Date.now()}`,
+      dateKey: todayKey,
+      timestamp: Date.now(),
+      passageReference: 'Personal Reflection',
+      heroName: 'You',
+      scenarioQuestion: 'Personal reflection on your walk & scripture',
+      chosenText: clean,
+      userCustomText: clean,
+      entryType: 'free_reflection'
+    };
+
+    const existing = getDecisionJournalEntries();
+    const updated = [newEntry, ...existing];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    return newEntry;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Deletes a single journal entry by ID.
+ */
+export function deleteDecisionJournalEntry(id: string): void {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    const existing = getDecisionJournalEntries();
+    const updated = existing.filter(e => e.id !== id);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  } catch {
+    // ignore
   }
 }
 
