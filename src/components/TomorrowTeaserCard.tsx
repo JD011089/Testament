@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Lock, Clock, CheckCircle2 } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
 import { getTomorrowTeaser, type TomorrowTeaserData } from '../utils/tomorrowTeaser';
+import { formatSpaced } from '../utils/textUtils';
 
 export const TomorrowTeaserCard: React.FC = () => {
   const [teaser] = useState<TomorrowTeaserData>(() => getTomorrowTeaser());
@@ -35,7 +36,7 @@ export const TomorrowTeaserCard: React.FC = () => {
             <Lock aria-hidden="true" className="w-3.5 h-3.5" />
           </div>
           <span className="text-[11px] font-mono uppercase tracking-wider text-stone-700 dark:text-stone-300 font-bold">
-            Tomorrow • {teaser.heroName}
+            {formatSpaced(['Tomorrow', '•', teaser.heroName])}
           </span>
           <span className="inline-flex items-center gap-1 text-[10px] font-mono text-stone-500 dark:text-stone-400 bg-stone-200/60 dark:bg-stone-800 px-2 py-0.5 rounded-full">
             <Clock aria-hidden="true" className="w-2.5 h-2.5" />

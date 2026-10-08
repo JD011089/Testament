@@ -5,6 +5,7 @@ import {
   type CuratedPassageBackstory
 } from '../data/dailyPassages';
 import { getTodayDateKey } from './dailyEngine';
+import { sanitizeGrammarArticles } from './textUtils';
 
 export interface GeneratedDailyMission {
   id: string;
@@ -68,7 +69,7 @@ export function buildStaticFallbackMission(passage: CuratedPassage, dateKey: str
     heroName: passage.heroName,
     scenarioQuestion: passage.staticFallback.scenarioQuestion,
     presetChoices: passage.staticFallback.presetChoices,
-    storyRetelling: passage.staticFallback.storyRetelling,
+    storyRetelling: passage.staticFallback.storyRetelling.map(p => sanitizeGrammarArticles(p)),
     keyVerseReference: passage.keyVerseReference,
     keyVerseText: passage.keyVerseText,
     kjvVerseText: passage.kjvKeyVerseText,
@@ -226,10 +227,10 @@ Return ONLY a valid JSON object matching this structure:
         Array.isArray(parsed.storyRetelling) &&
         parsed.actionLine
       ) {
-        // Enforce word count limit (≤150 words)
-        let cleanRetelling = parsed.storyRetelling as string[];
+        // Enforce word count limit (≤150 words) and sanitize grammar
+        let cleanRetelling = (parsed.storyRetelling as string[]).map(p => sanitizeGrammarArticles(p));
         if (wordCount(cleanRetelling) > 150) {
-          cleanRetelling = passage.staticFallback.storyRetelling;
+          cleanRetelling = passage.staticFallback.storyRetelling.map(p => sanitizeGrammarArticles(p));
         }
 
         const generatedMission: GeneratedDailyMission = {

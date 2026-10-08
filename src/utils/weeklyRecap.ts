@@ -1,5 +1,6 @@
 import { getDailyCuratedPassage, type CuratedPassage } from '../data/dailyPassages';
 import { getDecisionJournalEntries, type DecisionJournalEntry } from './decisionJournal';
+import { truncateAtWordBoundary } from './textUtils';
 
 export interface WeeklyRecapDay {
   dayOffset: number;
@@ -51,9 +52,10 @@ export function getWeeklyRecap(): WeeklyRecapData {
 
     let summaryLine = '';
     if (userEntry) {
-      const choiceSnippet = userEntry.userCustomText
-        ? `"${userEntry.userCustomText.slice(0, 40)}..."`
-        : userEntry.chosenText.slice(0, 45);
+      const rawText = userEntry.userCustomText
+        ? `"${userEntry.userCustomText}"`
+        : userEntry.chosenText;
+      const choiceSnippet = truncateAtWordBoundary(rawText, 45, '…');
       summaryLine = `${dayName} — You chose: ${choiceSnippet} · ${passage.reference}`;
     } else {
       summaryLine = `${dayName} — ${passage.heroName} under pressure · ${passage.reference}`;
