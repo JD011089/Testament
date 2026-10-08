@@ -48,6 +48,7 @@ import { DecisionJournalModal } from './DecisionJournalModal';
 import { WeeklyRecapCard } from './WeeklyRecapCard';
 import { CharacterArcModal } from './CharacterArcModal';
 import { CalendarRemindersModal } from './CalendarRemindersModal';
+import { SettingsModal } from './SettingsModal';
 import { CHARACTER_ARCS } from '../data/characterArcs';
 import { ModeSelectorModal } from './ModeSelectorModal';
 import { ReciterModal } from './ReciterModal';
@@ -139,6 +140,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [isYesterdayFlipped, setIsYesterdayFlipped] = useState<boolean>(false);
   const [yesterdayRecalled, setYesterdayRecalled] = useState<boolean>(false);
   const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
   const [showCalendarModal, setShowCalendarModal] = useState<boolean>(false);
   const [showJournalModal, setShowJournalModal] = useState<boolean>(false);
   const [showPeopleModal, setShowPeopleModal] = useState<boolean>(false);
@@ -391,6 +393,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     <ThemeToggle compact />
                   </div>
                   <div className="pt-1 border-t border-stone-200 dark:border-stone-800 space-y-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        soundEngine.playClick();
+                        setShowSettings(false);
+                        setShowSettingsModal(true);
+                      }}
+                      className="w-full text-left text-xs px-2 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-950 dark:text-amber-200 font-bold transition-colors cursor-pointer flex items-center justify-between"
+                    >
+                      <span>Text size & voice</span>
+                      <span className="text-[10px] font-mono">⚙</span>
+                    </button>
                     <button
                       type="button"
                       onClick={() => {
@@ -923,6 +937,25 @@ export const Dashboard: React.FC<DashboardProps> = ({
         heroName={dailyMission.heroName}
         faithfulRetelling={dailyMission.storyRetelling}
         todayDateKey={getTodayDateKey()}
+      />
+
+      {/* Settings Modal (Text Size Scale, Voice Preview & Selection, Quick Nav) */}
+      <SettingsModal
+        isOpen={showSettingsModal}
+        onClose={() => setShowSettingsModal(false)}
+        onOpenOnboarding={onOpenOnboarding}
+        onOpenReminders={() => setShowCalendarModal(true)}
+        onOpenJournal={() => setShowJournalModal(true)}
+        onOpenPeople={() => {
+          setSelectedCharacterArcId(undefined);
+          setSelectedMomentIndex(undefined);
+          setShowPeopleModal(true);
+        }}
+        onOpenRelics={() => setShowRelics(true)}
+        onOpenHowItWorks={onOpenHowItWorks}
+        onOpenLearnerMode={() => setShowModeModal(true)}
+        activeLearnerMode={learnerModesState.activeMode}
+        relicsCount={{ unlocked: unlockedRelics.length, total: ALL_RELICS.length }}
       />
     </div>
   );

@@ -4,16 +4,20 @@ const MAX_REQUESTS = 20;
 
 const VOICES: Record<string, { voiceId: string; settings: { stability: number; similarity_boost: number; style: number; use_speaker_boost: boolean } }> = {
   cinematic: {
-    voiceId: 'pNInz6obpgDQGcFmaJgB',
-    settings: { stability: 0.45, similarity_boost: 0.85, style: 0.2, use_speaker_boost: true },
+    voiceId: 'pNInz6obpgDQGcFmaJgB', // Adam: Deep, calm resonant narration
+    settings: { stability: 0.70, similarity_boost: 0.85, style: 0.0, use_speaker_boost: true },
   },
   brotherhood: {
-    voiceId: 'ErXwobaYiN019PkySvjV',
-    settings: { stability: 0.55, similarity_boost: 0.8, style: 0.1, use_speaker_boost: true },
+    voiceId: 'ErXwobaYiN019PkySvjV', // Antoni: Warm, grounded natural conversational cadence
+    settings: { stability: 0.72, similarity_boost: 0.80, style: 0.0, use_speaker_boost: true },
   },
   scholar: {
-    voiceId: 'JBFqnCBsd6RMkjVDRZzb',
-    settings: { stability: 0.65, similarity_boost: 0.82, style: 0.05, use_speaker_boost: true },
+    voiceId: 'JBFqnCBsd6RMkjVDRZzb', // George: Wise, articulate UK reader
+    settings: { stability: 0.75, similarity_boost: 0.82, style: 0.0, use_speaker_boost: true },
+  },
+  grace: {
+    voiceId: '21m00Tcm4TlvDq8ikWAM', // Rachel: Gentle, peaceful reflective cadence
+    settings: { stability: 0.72, similarity_boost: 0.85, style: 0.0, use_speaker_boost: true },
   },
 };
 
@@ -53,22 +57,61 @@ function queryValue(req: TtsRequest, key: string): string {
   return value || '';
 }
 
+function numberToWordsEn(numStr: string): string {
+  const num = parseInt(numStr, 10);
+  if (isNaN(num)) return numStr;
+  if (num === 0) return 'zero';
+  const ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+  const tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+  if (num < 20) return ones[num];
+  if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 !== 0 ? '-' + ones[num % 10] : '');
+  if (num < 1000) {
+    const rem = num % 100;
+    return ones[Math.floor(num / 100)] + ' hundred' + (rem ? ' ' + numberToWordsEn(String(rem)) : '');
+  }
+  return String(num);
+}
+
 function normalizeSpeech(text: string): string {
   return text
-    .replace(/\b(\d?[A-Za-z]+(?:\s+[A-Za-z]+)?)\s+(\d+):(\d+)\b/g, '$1 $2 verse $3')
-    .replace(/(\d+):(\d+)/g, '$1 verse $2')
+    // 1. Strip badges & annotations
+    .replace(/[\u2728\u2729\u2605\u2B50]?\s*AI\s+reflection\s*[•\-–—·*]?\s*Not\s+Scripture/gi, ' ')
+    .replace(/[\u2728\u2729\u2605\u2B50]?\s*Plain\s+English\s*[•\-–—·*]?\s*AI\s+reflection/gi, ' ')
+    .replace(/[\u2728\u2729\u2605\u2B50]?\s*AI\s+reflection/gi, ' ')
+    .replace(/Scripture\s*\(Verbatim\)/gi, ' ')
+    // 2. Strip URLs & web links
+    .replace(/https?:\/\/\S+/gi, ' ')
+    .replace(/www\.\S+/gi, ' ')
+    // 3. Strip emojis
+    .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}]/gu, ' ')
+    // 4. Expand verse references: "Genesis 45:5" -> "Genesis forty-five, verse five"
+    .replace(/\b(\d?\s*[A-Za-z]+(?:\s+[A-Za-z]+)?)\s+(\d+):(\d+)(?:-(\d+))?\b/g, (_match, book, ch, vs, endVs) => {
+      const chWord = numberToWordsEn(ch);
+      const vsWord = numberToWordsEn(vs);
+      if (endVs) {
+        const endWord = numberToWordsEn(endVs);
+        return `${book} ${chWord}, verses ${vsWord} through ${endWord}`;
+      }
+      return `${book} ${chWord}, verse ${vsWord}`;
+    })
+    .replace(/(\d+):(\d+)/g, (_m, ch, vs) => `${numberToWordsEn(ch)}, verse ${numberToWordsEn(vs)}`)
+    // 5. Clean markdown and bracket formatting
     .replace(/\*\*(.*?)\*\*/g, '$1')
     .replace(/\*(.*?)\*/g, '$1')
     .replace(/_{1,2}(.*?)_{1,2}/g, '$1')
     .replace(/`{1,3}(.*?)`{1,3}/g, '$1')
     .replace(/^#+\s+/gm, '')
     .replace(/^\s*[-*•]\s+/gm, '')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/[{}[\]()<>~^|\\\/]/g, ' ')
+    .replace(/\.{3,}\s*$/g, '.')
     .replace(/\.{3,}/g, ', ')
-    .replace(/—/g, ', ')
+    .replace(/[—–]/g, ', ')
     .replace(/--+/g, ', ')
     .replace(/\s+([,.:;?!])/g, '$1')
     .replace(/,\s*\./g, '.')
     .replace(/\s+/g, ' ')
+    .replace(/,\s*$/, '.')
     .trim();
 }
 

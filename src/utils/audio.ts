@@ -27,9 +27,9 @@ export const NARRATOR_VOICES: Record<NarratorProfile, VoiceMetadata> = {
     elevenVoiceId: 'pNInz6obpgDQGcFmaJgB',
     description: 'Deep, commanding baritone with cinematic gravitas. Ideal for battles and epics.',
     settings: {
-      stability: 0.45,
+      stability: 0.70,
       similarity_boost: 0.85,
-      style: 0.20,
+      style: 0.0,
       use_speaker_boost: true
     }
   },
@@ -41,9 +41,9 @@ export const NARRATOR_VOICES: Record<NarratorProfile, VoiceMetadata> = {
     elevenVoiceId: 'ErXwobaYiN019PkySvjV',
     description: 'Warm, conversational tempo with natural pacing. Perfect for daily guidance.',
     settings: {
-      stability: 0.55,
+      stability: 0.72,
       similarity_boost: 0.80,
-      style: 0.10,
+      style: 0.0,
       use_speaker_boost: true
     }
   },
@@ -55,9 +55,9 @@ export const NARRATOR_VOICES: Record<NarratorProfile, VoiceMetadata> = {
     elevenVoiceId: 'JBFqnCBsd6RMkjVDRZzb',
     description: 'Sophisticated British cadence with thoughtful, intellectual clarity.',
     settings: {
-      stability: 0.65,
+      stability: 0.75,
       similarity_boost: 0.82,
-      style: 0.05,
+      style: 0.0,
       use_speaker_boost: true
     }
   },
@@ -69,13 +69,28 @@ export const NARRATOR_VOICES: Record<NarratorProfile, VoiceMetadata> = {
     elevenVoiceId: '21m00Tcm4TlvDq8ikWAM',
     description: 'Gentle, soothing, and clear cadence. Perfect for quiet reflection, meditation, and prayer.',
     settings: {
-      stability: 0.60,
+      stability: 0.72,
       similarity_boost: 0.85,
-      style: 0.15,
+      style: 0.0,
       use_speaker_boost: true
     }
   }
 };
+
+function numberToWordsEn(numStr: string): string {
+  const num = parseInt(numStr, 10);
+  if (isNaN(num)) return numStr;
+  if (num === 0) return 'zero';
+  const ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+  const tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+  if (num < 20) return ones[num];
+  if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 !== 0 ? '-' + ones[num % 10] : '');
+  if (num < 1000) {
+    const rem = num % 100;
+    return ones[Math.floor(num / 100)] + ' hundred' + (rem ? ' ' + numberToWordsEn(String(rem)) : '');
+  }
+  return String(num);
+}
 
 /**
  * Normalizes scripture references, punctuation, and markdown formatting
@@ -83,28 +98,43 @@ export const NARRATOR_VOICES: Record<NarratorProfile, VoiceMetadata> = {
  */
 export function normalizeScriptureForSpeech(text: string): string {
   return text
-    // Replace scripture citations e.g. "Exodus 14:14" -> "Exodus 14 verse 14"
-    .replace(/\b(\d?[A-Za-z]+(?:\s+[A-Za-z]+)?)\s+(\d+):(\d+)\b/g, '$1 $2 verse $3')
-    .replace(/(\d+):(\d+)/g, '$1 verse $2')
-    // Remove markdown formatting (bold, italics, code blocks)
+    // 1. Strip badges & annotations (AI reflection badges must NEVER be spoken)
+    .replace(/[\u2728\u2729\u2605\u2B50]?\s*AI\s+reflection\s*[•\-–—·*]?\s*Not\s+Scripture/gi, ' ')
+    .replace(/[\u2728\u2729\u2605\u2B50]?\s*Plain\s+English\s*[•\-–—·*]?\s*AI\s+reflection/gi, ' ')
+    .replace(/[\u2728\u2729\u2605\u2B50]?\s*AI\s+reflection/gi, ' ')
+    .replace(/Scripture\s*\(Verbatim\)/gi, ' ')
+    // 2. Strip URLs & web links
+    .replace(/https?:\/\/\S+/gi, ' ')
+    .replace(/www\.\S+/gi, ' ')
+    // 3. Strip emojis
+    .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}]/gu, ' ')
+    // 4. Expand verse references: "Genesis 45:5" -> "Genesis forty-five, verse five"
+    .replace(/\b(\d?\s*[A-Za-z]+(?:\s+[A-Za-z]+)?)\s+(\d+):(\d+)(?:-(\d+))?\b/g, (_match, book, ch, vs, endVs) => {
+      const chWord = numberToWordsEn(ch);
+      const vsWord = numberToWordsEn(vs);
+      if (endVs) {
+        const endWord = numberToWordsEn(endVs);
+        return `${book} ${chWord}, verses ${vsWord} through ${endWord}`;
+      }
+      return `${book} ${chWord}, verse ${vsWord}`;
+    })
+    .replace(/(\d+):(\d+)/g, (_m, ch, vs) => `${numberToWordsEn(ch)}, verse ${numberToWordsEn(vs)}`)
+    // 5. Clean markdown and brackets
     .replace(/\*\*(.*?)\*\*/g, '$1')
     .replace(/\*(.*?)\*/g, '$1')
     .replace(/_{1,2}(.*?)_{1,2}/g, '$1')
     .replace(/`{1,3}(.*?)`{1,3}/g, '$1')
     .replace(/^#+\s+/gm, '')
-    // Clean bullet list symbols
     .replace(/^\s*[-*•]\s+/gm, '')
-    // Handle ellipses at end of sentence vs mid-sentence
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/[{}[\]()<>~^|\\\/]/g, ' ')
     .replace(/\.{3,}\s*$/g, '.')
     .replace(/\.{3,}/g, ', ')
-    .replace(/—/g, ', ')
+    .replace(/[—–]/g, ', ')
     .replace(/--+/g, ', ')
-    // Fix punctuation spacing
     .replace(/\s+([,.:;?!])/g, '$1')
-    // Clean up doubled punctuation
     .replace(/,\s*\./g, '.')
     .replace(/\s+/g, ' ')
-    // Ensure no trailing dangling comma
     .replace(/,\s*$/, '.')
     .trim();
 }
@@ -520,7 +550,7 @@ class SoundEngine {
     }
   }
 
-  // --- BROWSER SPEECH SYNTHESIS FALLBACK (NEVER USES FEMALE ZIRA ROBOT) ---
+  // --- BROWSER SPEECH SYNTHESIS FALLBACK ---
   private getFallbackVoice(profile: NarratorProfile): SpeechSynthesisVoice | null {
     this.refreshVoices();
     const voices = this.cachedVoices.length > 0 ? this.cachedVoices : (typeof window !== 'undefined' ? window.speechSynthesis.getVoices() : []);
@@ -534,116 +564,66 @@ class SoundEngine {
     if (langPrefix === 'fr') {
       const frenchVoices = voices.filter(v => v.lang.toLowerCase().startsWith('fr'));
       if (frenchVoices.length > 0) {
-        if (profile === 'grace') {
-          const femaleFrench = frenchVoices.find(v => {
-            const n = v.name.toLowerCase();
-            return n.includes('natural') || n.includes('online') || n.includes('hortense') || n.includes('julie') || n.includes('denise') || n.includes('celine') || n.includes('female');
-          }) || frenchVoices[0];
-          return femaleFrench;
-        }
-        const maleFrench = frenchVoices.find(v => {
+        const neural = frenchVoices.find(v => {
           const n = v.name.toLowerCase();
-          return (n.includes('natural') || n.includes('online') || n.includes('paul') || n.includes('henri') || n.includes('claude') || n.includes('male')) && !n.includes('female');
-        }) || frenchVoices[0];
-        return maleFrench;
+          return n.includes('natural') || n.includes('online') || n.includes('neural') || n.includes('google');
+        });
+        if (neural) return neural;
+        return frenchVoices[0];
       }
     }
 
     if (langPrefix === 'es') {
       const spanishVoices = voices.filter(v => v.lang.toLowerCase().startsWith('es'));
       if (spanishVoices.length > 0) {
-        if (profile === 'grace') {
-          const femaleSpanish = spanishVoices.find(v => {
-            const n = v.name.toLowerCase();
-            return n.includes('natural') || n.includes('online') || n.includes('elena') || n.includes('monica') || n.includes('laura') || n.includes('female');
-          }) || spanishVoices[0];
-          return femaleSpanish;
-        }
-        const maleSpanish = spanishVoices.find(v => {
+        const neural = spanishVoices.find(v => {
           const n = v.name.toLowerCase();
-          return (n.includes('natural') || n.includes('online') || n.includes('jorge') || n.includes('alvaro') || n.includes('male')) && !n.includes('female');
-        }) || spanishVoices[0];
-        return maleSpanish;
+          return n.includes('natural') || n.includes('online') || n.includes('neural') || n.includes('google');
+        });
+        if (neural) return neural;
+        return spanishVoices[0];
       }
     }
 
-    // Filter OUT any known female or robot voices
-    const nonFemale = voices.filter(v => {
-      const name = v.name.toLowerCase();
-      return !name.includes('zira') &&
-             !name.includes('female') &&
-             !name.includes('hazel') &&
-             !name.includes('samantha') &&
-             !name.includes('victoria') &&
-             !name.includes('susan') &&
-             !name.includes('catherine');
+    // English voices
+    const enVoices = voices.filter(v => v.lang.toLowerCase().startsWith('en'));
+    const pool = enVoices.length > 0 ? enVoices : voices;
+
+    // Filter out robotic legacy desktop voices if any modern ones exist
+    const nonRobotic = pool.filter(v => {
+      const n = v.name.toLowerCase();
+      return !n.includes('desktop') && !n.includes('microsoft david') && !n.includes('zira') && !n.includes('mark');
     });
 
-    const candidates = nonFemale.length > 0 ? nonFemale : voices;
-
-    // Filter to avoid legacy Windows desktop robotic voices if modern/natural ones exist
-    const highQualityCandidates = candidates.filter(v => {
-      const name = v.name.toLowerCase();
-      return !name.includes('desktop') && !name.includes('microsoft david');
-    });
-
-    const pool = highQualityCandidates.length > 0 ? highQualityCandidates : candidates;
+    const activePool = nonRobotic.length > 0 ? nonRobotic : pool;
 
     if (profile === 'scholar') {
-      // Seek British or cultured English voice
-      const british = pool.find(v => {
+      const ukNeural = activePool.find(v => {
         const lang = v.lang.toLowerCase();
         const name = v.name.toLowerCase();
         return (lang.includes('gb') || lang.includes('uk')) &&
-               (name.includes('ryan') || name.includes('george') || name.includes('oliver') || name.includes('daniel') || name.includes('male'));
-      }) || pool.find(v => v.lang.toLowerCase().includes('gb') || v.lang.toLowerCase().includes('uk'));
-
-      if (british) return british;
-    }
-
-    if (profile === 'cinematic') {
-      // Seek deep, commanding US/neutral English voice
-      const cinematicVoice = pool.find(v => {
-        const name = v.name.toLowerCase();
-        return v.lang.toLowerCase().startsWith('en') && 
-               (name.includes('christopher') || name.includes('eric') || name.includes('guy') || name.includes('alex'));
-      });
-      if (cinematicVoice) return cinematicVoice;
+               (name.includes('natural') || name.includes('online') || name.includes('neural') || name.includes('ryan') || name.includes('george') || name.includes('oliver'));
+      }) || activePool.find(v => v.lang.toLowerCase().includes('gb') || v.lang.toLowerCase().includes('uk'));
+      if (ukNeural) return ukNeural;
     }
 
     if (profile === 'grace') {
-      // Seek gentle, natural female English voice
-      const gentleVoice = voices.find(v => {
+      const femaleNeural = activePool.find(v => {
         const name = v.name.toLowerCase();
-        return v.lang.toLowerCase().startsWith('en') && 
-               (name.includes('natural') || name.includes('online') || name.includes('jenny') || name.includes('aria') || name.includes('samantha') || name.includes('karen') || name.includes('victoria') || name.includes('female'));
-      }) || voices.find(v => v.lang.toLowerCase().startsWith('en') && !v.name.toLowerCase().includes('david'));
-      if (gentleVoice) return gentleVoice;
-    }
-
-    if (profile === 'brotherhood') {
-      // Seek warm, conversational US English voice
-      const warmVoice = pool.find(v => {
-        const name = v.name.toLowerCase();
-        return v.lang.toLowerCase().startsWith('en') && 
-               (name.includes('guy') || name.includes('brian') || name.includes('google us english') || name.includes('christopher') || name.includes('matthew'));
+        return (name.includes('natural') || name.includes('online') || name.includes('neural') || name.includes('jenny') || name.includes('aria') || name.includes('samantha')) &&
+               !name.includes('david');
       });
-      if (warmVoice) return warmVoice;
+      if (femaleNeural) return femaleNeural;
     }
 
-    // Secondary search across pool for any natural or Google voice
-    const naturalVoice = pool.find(v => {
+    // Default & cinematic / brotherhood: best available natural/online/Google neural voice
+    const neuralVoice = activePool.find(v => {
       const name = v.name.toLowerCase();
-      return v.lang.toLowerCase().startsWith('en') && (name.includes('natural') || name.includes('online') || name.includes('google'));
+      return name.includes('natural') || name.includes('online') || name.includes('neural') || name.includes('google');
     });
-    if (naturalVoice) return naturalVoice;
+    if (neuralVoice) return neuralVoice;
 
-    // Any English voice
-    const anyEnglish = pool.find(v => v.lang.toLowerCase().startsWith('en'));
-    if (anyEnglish) return anyEnglish;
-
-    // Absolute fallback
-    return candidates.find(v => v.lang.toLowerCase().startsWith('en')) || candidates[0] || null;
+    return activePool[0] || null;
   }
 
   // --- STUDIO & NEURAL VOICE NARRATION ---
@@ -804,6 +784,14 @@ class SoundEngine {
     }
 
     window.speechSynthesis.cancel();
+
+    const matchedVoice = this.getFallbackVoice(this.currentNarratorProfile);
+    if (!matchedVoice) {
+      // If no suitable voice is available on device, finish cleanly without sounding robotic
+      onFinished();
+      return;
+    }
+
     const utterance = new SpeechSynthesisUtterance(text);
 
     const currentLang = (typeof document !== 'undefined' && document.documentElement?.lang) || 
@@ -811,27 +799,10 @@ class SoundEngine {
                         'en';
     utterance.lang = currentLang === 'fr' ? 'fr-FR' : currentLang === 'es' ? 'es-ES' : 'en-US';
 
-    // Apply distinct acoustic profiles for each narrator persona
-    switch (this.currentNarratorProfile) {
-      case 'cinematic':
-        utterance.pitch = 0.82; // Deep, resonance
-        utterance.rate = 0.84;  // Majestic, deliberate pacing
-        break;
-      case 'scholar':
-        utterance.pitch = 1.04; // Clear, intellectual tone
-        utterance.rate = 0.88;  // Articulate, deliberate cadence
-        break;
-      case 'brotherhood':
-      default:
-        utterance.pitch = 1.00; // Natural, relatable pitch
-        utterance.rate = 0.95;  // Warm, conversational tempo
-        break;
-    }
-
-    const matchedVoice = this.getFallbackVoice(this.currentNarratorProfile);
-    if (matchedVoice) {
-      utterance.voice = matchedVoice;
-    }
+    // Work item 2: Natural on-device neural voice at natural rate 1.0 and pitch 1.0 (never altered robotic pitch)
+    utterance.pitch = 1.0;
+    utterance.rate = 1.0;
+    utterance.voice = matchedVoice;
 
     utterance.onend = () => onFinished();
     utterance.onerror = () => onFinished();
