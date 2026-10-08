@@ -6,8 +6,13 @@ import {
   Layers, 
   List, 
   Sparkles, 
-  Flame
+  Flame,
+  Compass,
+  ArrowRight
 } from 'lucide-react';
+import { SeriesPickerModal } from './SeriesPickerModal';
+import { getActiveSeriesState, getSeriesDayNumber, type ActiveSeriesState } from '../utils/weeklySeriesEngine';
+import { getWeeklySeriesById } from '../data/weeklySeries';
 import { 
   CANON_BOOKS, 
   CANON_DIVISIONS, 
@@ -82,15 +87,22 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
   } | null>(null);
   const [readingPlace, setReadingPlace] = useState<ReadingPlace | null>(() => loadReadingPlace());
   const [visited, setVisited] = useState<Record<string, number>>(() => loadVisitedChapters());
+  const [activeSeriesState, setActiveSeriesState] = useState<ActiveSeriesState | null>(() => getActiveSeriesState());
+  const [isSeriesModalOpen, setIsSeriesModalOpen] = useState(false);
   const launchSeq = useRef(0);
 
   useEffect(() => {
     const refresh = () => {
       setReadingPlace(loadReadingPlace());
       setVisited(loadVisitedChapters());
+      setActiveSeriesState(getActiveSeriesState());
     };
     window.addEventListener('testament-reading-place', refresh);
-    return () => window.removeEventListener('testament-reading-place', refresh);
+    window.addEventListener('testament-series-changed', refresh);
+    return () => {
+      window.removeEventListener('testament-reading-place', refresh);
+      window.removeEventListener('testament-series-changed', refresh);
+    };
   }, []);
 
   const openReader = (book: CanonBook, chapter?: number, verseStart = 0, verseEnd = 0) => {
@@ -278,6 +290,49 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
             <BookOpen className="w-5 h-5 text-amber-700 dark:text-amber-400 shrink-0" />
           </button>
         )}
+
+        {/* WEEKLY STUDY SERIES ENTRY POINT */}
+        <div className="w-full mb-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left shadow-xs">
+          <div className="flex items-start gap-3.5">
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
+              <Compass className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold bg-amber-500/15 px-2 py-0.5 rounded-full">
+                  Weekly Study Series
+                </span>
+                {activeSeriesState && (
+                  <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-400 font-bold">
+                    Active • Day {getSeriesDayNumber(activeSeriesState)} of 7
+                  </span>
+                )}
+              </div>
+              <h3 className="font-serif font-bold text-base sm:text-lg text-stone-900 dark:text-parchment-50 mt-1">
+                {activeSeriesState 
+                  ? `${getWeeklySeriesById(activeSeriesState.seriesId)?.title || 'Weekly Series'}`
+                  : 'Go Deep on One Story (7-Day Series)'}
+              </h3>
+              <p className="text-xs text-stone-600 dark:text-stone-300 mt-0.5 max-w-xl">
+                {activeSeriesState
+                  ? `${getWeeklySeriesById(activeSeriesState.seriesId)?.hook}`
+                  : 'Trace one biblical figure across 7 daily decision-moments. One decision a day, depth through repetition.'}
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              soundEngine.playSnap();
+              setIsSeriesModalOpen(true);
+            }}
+            className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 self-start sm:self-center shrink-0 cursor-pointer"
+          >
+            <span>{activeSeriesState ? 'Manage Series' : 'Explore 6 Series'}</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
 
         {/* SEARCH & FILTER CONTROLS BAR */}
         <div className="space-y-3 pb-8">
@@ -597,6 +652,11 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
           launchToken={readerLaunch?.token ?? 0}
           highlightVerseStart={readerLaunch && readerLaunch.verseStart > 0 ? readerLaunch.verseStart : undefined}
           highlightVerseEnd={readerLaunch && readerLaunch.verseEnd > 0 ? readerLaunch.verseEnd : undefined}
+        />
+
+        <SeriesPickerModal
+          isOpen={isSeriesModalOpen}
+          onClose={() => setIsSeriesModalOpen(false)}
         />
 
       </div>

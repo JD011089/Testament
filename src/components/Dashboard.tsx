@@ -15,8 +15,12 @@ import {
   Check,
   BookMarked,
   Users,
-  ShieldCheck
+  ShieldCheck,
+  Compass
 } from 'lucide-react';
+import { SeriesPickerModal } from './SeriesPickerModal';
+import { getActiveSeriesState, getSeriesDayNumber, type ActiveSeriesState } from '../utils/weeklySeriesEngine';
+import { getWeeklySeriesById } from '../data/weeklySeries';
 import type { UserCalibrationProfile } from './OnboardingModal';
 import { ThemeToggle } from './ThemeToggle';
 import { LanguageToggle } from './LanguageToggle';
@@ -154,6 +158,26 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [showReciterModal, setShowReciterModal] = useState<boolean>(false);
   const [showStorytellerModal, setShowStorytellerModal] = useState<boolean>(false);
 
+  // Weekly Series State
+  const [activeSeriesState, setActiveSeriesState] = useState<ActiveSeriesState | null>(() => getActiveSeriesState());
+  const [showSeriesPicker, setShowSeriesPicker] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleSeriesChange = () => {
+      const state = getActiveSeriesState();
+      setActiveSeriesState(state);
+      const dateKey = getTodayDateKey();
+      try {
+        localStorage.removeItem(`testament_daily_generated_mission_${dateKey}`);
+      } catch {
+        // ignore
+      }
+      setDailyMission(getDailyMissionSync(dateKey, 0, activeBattlefieldId));
+    };
+    window.addEventListener('testament-series-changed', handleSeriesChange);
+    return () => window.removeEventListener('testament-series-changed', handleSeriesChange);
+  }, [activeBattlefieldId]);
+
   useEffect(() => {
     const handleModeUpdate = () => {
       setLearnerModesState(loadLearnerModesState());
@@ -215,6 +239,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
     || featuredQuest.acts[0];
 
   const isTodayMissionDone = completedActs.includes(dailyMission.id) || completedActs.includes(featuredAct.id);
+
+  // Weekly Series resolution
+  const activeSeries = activeSeriesState ? getWeeklySeriesById(activeSeriesState.seriesId) : null;
+  const activeSeriesDay = activeSeriesState ? getSeriesDayNumber(activeSeriesState) : 1;
 
   // Feature 6: Cross-link today's mission with character arcs
   const matchedCharacterArc = CHARACTER_ARCS.find(arc => 
@@ -473,6 +501,22 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     <button
                       type="button"
                       onClick={() => {
+                        soundEngine.playClick();
+                        setShowSettings(false);
+                        setShowSeriesPicker(true);
+                      }}
+                      className="w-full text-left text-xs px-1 py-1 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition-colors cursor-pointer flex items-center justify-between"
+                    >
+                      <span>Weekly study series</span>
+                      {activeSeries && (
+                        <span className="text-[10px] font-mono text-amber-700 dark:text-amber-400 font-bold bg-amber-500/10 px-1.5 py-0.5 rounded">
+                          {activeSeries.heroName}
+                        </span>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
                         soundEngine.playSnap();
                         setShowSettings(false);
                         setShowRelics(true);
@@ -509,6 +553,26 @@ export const Dashboard: React.FC<DashboardProps> = ({
           One scenario question, one clear CTA ("Make today's call").
           ========================================================================= */}
       <div className="p-6 sm:p-7 rounded-3xl bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-stone-100/50 dark:to-stone-900/40 shadow-xs transition-colors">
+        {/* Weekly Series Banner if active */}
+        {activeSeries && (
+          <div className="flex items-center justify-between gap-2 mb-3 px-3.5 py-2 rounded-2xl bg-amber-500/20 border border-amber-500/35 text-xs">
+            <div className="flex items-center gap-2 text-amber-950 dark:text-amber-200 font-semibold">
+              <span className="text-base">{activeSeries.avatarIcon}</span>
+              <span>This Week: <strong>{activeSeries.heroName}</strong> • Day {activeSeriesDay} of 7</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                soundEngine.playSnap();
+                setShowSeriesPicker(true);
+              }}
+              className="text-[11px] font-mono font-bold text-amber-900 dark:text-amber-300 hover:underline cursor-pointer"
+            >
+              Change
+            </button>
+          </div>
+        )}
+
         {/* Micro-tag with AI Reflection Badge (N-1: wrap instead of truncate) */}
         <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
           <span className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
@@ -525,9 +589,25 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </h2>
 
         {/* Plain, encouraging subtext (M-1) */}
-        <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed mb-6 max-w-lg">
+        <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed mb-4 max-w-lg">
           No 40-minute reading plans. Just today's decision: what would you do before seeing what {dailyMission.heroName} did?
         </p>
+
+        {!activeSeries && (
+          <div className="mb-5">
+            <button
+              type="button"
+              onClick={() => {
+                soundEngine.playSnap();
+                setShowSeriesPicker(true);
+              }}
+              className="inline-flex items-center gap-1.5 text-xs font-mono text-amber-800 dark:text-amber-400 hover:underline cursor-pointer"
+            >
+              <Compass className="w-3.5 h-3.5" />
+              <span>Theme your week with a 7-day series</span>
+            </button>
+          </div>
+        )}
 
           {/* Action Row: Start mission CTA + 45s audio story */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
@@ -942,6 +1022,23 @@ export const Dashboard: React.FC<DashboardProps> = ({
         heroName={dailyMission.heroName}
         faithfulRetelling={dailyMission.storyRetelling}
         todayDateKey={getTodayDateKey()}
+      />
+
+      {/* Weekly Series Picker Modal */}
+      <SeriesPickerModal
+        isOpen={showSeriesPicker}
+        onClose={() => setShowSeriesPicker(false)}
+        onSeriesSelected={(_seriesId) => {
+          const state = getActiveSeriesState();
+          setActiveSeriesState(state);
+          const dateKey = getTodayDateKey();
+          try {
+            localStorage.removeItem(`testament_daily_generated_mission_${dateKey}`);
+          } catch {
+            // ignore
+          }
+          setDailyMission(getDailyMissionSync(dateKey, 0, activeBattlefieldId));
+        }}
       />
 
       {/* Settings Modal (Text Size Scale, Voice Preview & Selection, Quick Nav) */}

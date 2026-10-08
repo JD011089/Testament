@@ -36,7 +36,9 @@ export const WeeklyRecapCard: React.FC<WeeklyRecapCardProps> = ({ forceExpanded 
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-[11px] font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold">
-                {recap.isMonday ? "Monday Recap • Your Week in the Story" : "Your Week in the Story"}
+                {recap.seriesHeroName
+                  ? (recap.isMonday ? `Monday Recap • Your Week with ${recap.seriesHeroName}` : `Your Week with ${recap.seriesHeroName}`)
+                  : (recap.isMonday ? "Monday Recap • Your Week in the Story" : "Your Week in the Story")}
               </span>
               <span className="text-[10px] font-mono text-stone-500 dark:text-stone-400 bg-stone-200/60 dark:bg-stone-800 px-2 py-0.5 rounded-full">
                 60-sec read
