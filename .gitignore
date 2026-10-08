@@ -29,3 +29,4 @@ dev-dist
 *.sln
 *.sw?
 scratch/
+test-results/

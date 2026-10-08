@@ -39,6 +39,10 @@ export const translations: Record<Language, Record<string, string>> = {
     'theme.switchToLight': 'Switch to Light Theme',
     'theme.switchToDark': 'Switch to Dark Theme',
 
+    // Text Size
+    'fontSize.title': 'Text size',
+    'fontSize.preview': 'The Living Word equips your steps today.',
+
     // Language Toggle
     'lang.name': 'English',
     'lang.code': 'EN',
@@ -565,6 +569,10 @@ export const translations: Record<Language, Record<string, string>> = {
     'theme.switchToLight': 'Cambiar a Tema Claro',
     'theme.switchToDark': 'Cambiar a Tema Oscuro',
 
+    // Text Size
+    'fontSize.title': 'Tamaño del texto',
+    'fontSize.preview': 'La Palabra viva guía tus pasos hoy.',
+
     // Language Toggle
     'lang.name': 'Español',
     'lang.code': 'ES',
@@ -1089,6 +1097,10 @@ export const translations: Record<Language, Record<string, string>> = {
     'theme.dark': 'Sombre',
     'theme.switchToLight': 'Passer au Thème Clair',
     'theme.switchToDark': 'Passer au Thème Sombre',
+
+    // Text Size
+    'fontSize.title': 'Taille du texte',
+    'fontSize.preview': 'La Parole vivante guide vos pas aujourd’hui.',
 
     // Language Toggle
     'lang.name': 'Français',

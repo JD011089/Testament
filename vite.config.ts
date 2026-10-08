@@ -23,39 +23,65 @@ interface VoiceProfileConfig {
 
 const ELEVENLABS_VOICE_PROFILES: Record<string, VoiceProfileConfig> = {
   cinematic: {
-    voiceId: 'pNInz6obpgDQGcFmaJgB', // Adam: Epic, deep, resonant cinematic narration
+    voiceId: 'pNInz6obpgDQGcFmaJgB', // Adam: Deep, calm resonant narration
     name: 'Adam (Cinematic)',
     edgeFallback: 'en-US-ChristopherNeural',
     settings: {
-      stability: 0.45,
+      stability: 0.70,
       similarity_boost: 0.85,
-      style: 0.20,
+      style: 0.0,
       use_speaker_boost: true
     }
   },
   brotherhood: {
-    voiceId: 'ErXwobaYiN019PkySvjV', // Antoni: Warm, grounded, natural conversational cadence
+    voiceId: 'ErXwobaYiN019PkySvjV', // Antoni: Warm, grounded natural conversational cadence
     name: 'Antoni (Grounded)',
     edgeFallback: 'en-US-GuyNeural',
     settings: {
-      stability: 0.55,
+      stability: 0.72,
       similarity_boost: 0.80,
-      style: 0.10,
+      style: 0.0,
       use_speaker_boost: true
     }
   },
   scholar: {
-    voiceId: 'JBFqnCBsd6RMkjVDRZzb', // George: Articulate, wise British scholar & storyteller
+    voiceId: 'JBFqnCBsd6RMkjVDRZzb', // George: Wise, articulate UK reader
     name: 'George (Scholar)',
     edgeFallback: 'en-GB-RyanNeural',
     settings: {
-      stability: 0.65,
+      stability: 0.75,
       similarity_boost: 0.82,
-      style: 0.05,
+      style: 0.0,
+      use_speaker_boost: true
+    }
+  },
+  grace: {
+    voiceId: '21m00Tcm4TlvDq8ikWAM', // Rachel: Gentle, peaceful reflective cadence
+    name: 'Rachel (Grace & Peace)',
+    edgeFallback: 'en-US-JennyNeural',
+    settings: {
+      stability: 0.72,
+      similarity_boost: 0.85,
+      style: 0.0,
       use_speaker_boost: true
     }
   }
 };
+
+function numberToWordsEn(numStr: string): string {
+  const num = parseInt(numStr, 10);
+  if (isNaN(num)) return numStr;
+  if (num === 0) return 'zero';
+  const ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+  const tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+  if (num < 20) return ones[num];
+  if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 !== 0 ? '-' + ones[num % 10] : '');
+  if (num < 1000) {
+    const rem = num % 100;
+    return ones[Math.floor(num / 100)] + ' hundred' + (rem ? ' ' + numberToWordsEn(String(rem)) : '');
+  }
+  return String(num);
+}
 
 /**
  * Normalizes scripture references, punctuation, and markdown formatting
@@ -63,28 +89,43 @@ const ELEVENLABS_VOICE_PROFILES: Record<string, VoiceProfileConfig> = {
  */
 function normalizeScriptureForSpeech(text: string): string {
   return text
-    // Replace scripture citations e.g. "Exodus 14:14" -> "Exodus 14 verse 14"
-    .replace(/\b(\d?[A-Za-z]+(?:\s+[A-Za-z]+)?)\s+(\d+):(\d+)\b/g, '$1 $2 verse $3')
-    .replace(/(\d+):(\d+)/g, '$1 verse $2')
-    // Remove markdown formatting (bold, italics, code blocks)
+    // 1. Strip badges & annotations
+    .replace(/[\u2728\u2729\u2605\u2B50]?\s*AI\s+reflection\s*[•\-–—·*]?\s*Not\s+Scripture/gi, ' ')
+    .replace(/[\u2728\u2729\u2605\u2B50]?\s*Plain\s+English\s*[•\-–—·*]?\s*AI\s+reflection/gi, ' ')
+    .replace(/[\u2728\u2729\u2605\u2B50]?\s*AI\s+reflection/gi, ' ')
+    .replace(/Scripture\s*\(Verbatim\)/gi, ' ')
+    // 2. Strip URLs & web links
+    .replace(/https?:\/\/\S+/gi, ' ')
+    .replace(/www\.\S+/gi, ' ')
+    // 3. Strip emojis
+    .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}]/gu, ' ')
+    // 4. Expand verse references: "Genesis 45:5" -> "Genesis forty-five, verse five"
+    .replace(/\b(\d?\s*[A-Za-z]+(?:\s+[A-Za-z]+)?)\s+(\d+):(\d+)(?:-(\d+))?\b/g, (_match, book, ch, vs, endVs) => {
+      const chWord = numberToWordsEn(ch);
+      const vsWord = numberToWordsEn(vs);
+      if (endVs) {
+        const endWord = numberToWordsEn(endVs);
+        return `${book} ${chWord}, verses ${vsWord} through ${endWord}`;
+      }
+      return `${book} ${chWord}, verse ${vsWord}`;
+    })
+    .replace(/(\d+):(\d+)/g, (_m, ch, vs) => `${numberToWordsEn(ch)}, verse ${numberToWordsEn(vs)}`)
+    // 5. Clean markdown and bracket formatting
     .replace(/\*\*(.*?)\*\*/g, '$1')
     .replace(/\*(.*?)\*/g, '$1')
     .replace(/_{1,2}(.*?)_{1,2}/g, '$1')
     .replace(/`{1,3}(.*?)`{1,3}/g, '$1')
     .replace(/^#+\s+/gm, '')
-    // Clean bullet list symbols
     .replace(/^\s*[-*•]\s+/gm, '')
-    // Handle ellipses at end of sentence vs mid-sentence
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/[{}[\]()<>~^|\\\/]/g, ' ')
     .replace(/\.{3,}\s*$/g, '.')
     .replace(/\.{3,}/g, ', ')
-    .replace(/—/g, ', ')
+    .replace(/[—–]/g, ', ')
     .replace(/--+/g, ', ')
-    // Fix punctuation spacing
     .replace(/\s+([,.:;?!])/g, '$1')
-    // Clean up doubled punctuation
     .replace(/,\s*\./g, '.')
     .replace(/\s+/g, ' ')
-    // Ensure no trailing dangling comma
     .replace(/,\s*$/, '.')
     .trim();
 }

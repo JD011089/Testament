@@ -12,7 +12,12 @@
     color: #fde68a;
   }
 
+  :root {
+    --app-font-scale: 1;
+  }
+
   html {
+    font-size: calc(16px * var(--app-font-scale, 1));
     overflow-x: hidden;
     overflow-y: scroll;
     scroll-behavior: smooth;
@@ -21,6 +26,7 @@
   }
 
   body {
+    font-size: 1rem;
     @apply bg-surface text-stone-900 dark:bg-ink dark:text-parchment-100 font-sans antialiased;
     overflow-x: hidden;
     overflow-y: visible;
