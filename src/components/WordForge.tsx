@@ -534,13 +534,13 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                     return (
                       <React.Fragment key={idx}>
                         <span
-                          className={`inline-block px-3 py-0.5 rounded-lg font-mono text-xs sm:text-sm transition-all ${
+                          className={`inline-flex items-center justify-center min-w-[3.75rem] h-6 px-3 py-0.5 rounded-lg border-b-2 align-middle transition-all font-mono text-xs ${
                             isCurrent
-                              ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300 ring-2 ring-amber-500 animate-pulse'
-                              : 'bg-stone-200 dark:bg-stone-800 text-stone-400'
+                              ? 'bg-amber-500/20 border-amber-500 text-amber-800 dark:text-amber-300 ring-2 ring-amber-500/60 shadow-xs animate-pulse font-bold'
+                              : 'bg-stone-200/70 dark:bg-stone-800/80 border-stone-400/80 dark:border-stone-600 text-transparent'
                           }`}
                         >
-                          [ ______ ]
+                          <span className={`block w-6 h-0.5 rounded-full ${isCurrent ? 'bg-amber-600 dark:bg-amber-400' : 'bg-stone-400 dark:bg-stone-600'}`} />
                         </span>
                         {!isLast && ' '}
                       </React.Fragment>

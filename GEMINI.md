@@ -12,3 +12,6 @@
 - **Proactive End-to-End Verification**: Whenever new features are added or bugs are fixed, proactively test and verify them end-to-end to ensure they work as intended before concluding the task.
 - **Inspect, Fix, Re-test Cycle**: If any failure, regression, or usability issue is found during testing, diagnose the root cause, fix it, re-test thoroughly, and only finish once the implementation is completely verified.
 
+## 4. Production Deployment & Vercel CLI Requirement
+- **Always Deploy Production via Vercel CLI**: From here on out, every production release, feature completion, or deployment must be pushed directly to Vercel production using the CLI (`npx vercel --prod` or `vercel --prod`) within this environment.
+- **Do Not Rely Exclusively on Git Push for Production**: Never assume external Git push or remote hooks alone are sufficient for deploying production. Always verify and execute the CLI production deployment command (`npx vercel --prod`) directly so the live deployment is confirmed and the production URL is generated and verified.

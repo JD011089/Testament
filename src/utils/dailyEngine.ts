@@ -208,3 +208,56 @@ export const claimDailyBonus = (type: 'briefing' | 'drill'): void => {
   const key = `testament_daily_bonus_${type}_${getTodayDateKey()}`;
   localStorage.setItem(key, 'true');
 };
+
+/**
+ * Single source of truth for daily streak count across all views (Dashboard, Recap, Nav).
+ */
+export const getDailyStreakCount = (): number => {
+  if (typeof window === 'undefined') return 0;
+  try {
+    const stored = Number(localStorage.getItem('testament_streak'));
+    return Number.isFinite(stored) && stored > 0 ? stored : 0;
+  } catch {
+    return 0;
+  }
+};
+
+/**
+ * Records daily activity and updates the streak with weekly grace day forgiveness.
+ */
+export const recordDailyActivityStreak = (): number => {
+  if (typeof window === 'undefined') return 0;
+  try {
+    const today = new Date().toDateString();
+    const lastActive = localStorage.getItem('testament_last_active');
+    const stored = getDailyStreakCount();
+    if (lastActive === today) return stored;
+
+    const diffDays = lastActive
+      ? Math.round((new Date(today).getTime() - new Date(lastActive).getTime()) / (1000 * 60 * 60 * 24))
+      : 0;
+
+    const now = new Date();
+    const currentWeekKey = `${now.getFullYear()}-W${Math.ceil((now.getDate() + new Date(now.getFullYear(), now.getMonth(), 1).getDay()) / 7)}`;
+    const lastGraceWeek = localStorage.getItem('testament_last_grace_week');
+
+    let next = 1;
+    if (!lastActive) {
+      next = 1;
+    } else if (diffDays === 1) {
+      next = stored + 1;
+    } else if (diffDays === 2 && lastGraceWeek !== currentWeekKey) {
+      // Missed yesterday, but protected by weekly grace day!
+      localStorage.setItem('testament_last_grace_week', currentWeekKey);
+      next = stored + 1;
+    } else {
+      next = 1;
+    }
+
+    localStorage.setItem('testament_streak', String(next));
+    localStorage.setItem('testament_last_active', today);
+    return next;
+  } catch {
+    return 1;
+  }
+};
