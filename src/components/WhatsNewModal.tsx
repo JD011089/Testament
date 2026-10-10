@@ -44,10 +44,61 @@ interface ReleaseMilestone {
 
 const ACTIVE_RELEASES: ReleaseMilestone[] = [
   {
-    version: 'v1.21.0',
-    tagline: 'Calendar Reminders — Replaces Push Notifications',
+    version: 'v1.22.2',
+    tagline: 'Celestial Amber Branding, Mission Audio Briefing & Native Calendar Handoff',
     dateBadge: 'Current Release',
     isLatest: true,
+    highlights: [
+      {
+        icon: <Sparkles className="w-4 h-4 text-amber-400" />,
+        title: 'Celestial Amber Icon & Branding',
+        description: 'Vibrant, hope-filled app icon with radiant celestial amber, dawn rays, and an illuminated heraldic crest across all mobile and PWA display targets.'
+      },
+      {
+        icon: <Car className="w-4 h-4 text-amber-400" />,
+        title: 'Drive Mode Mission Briefing (Track 0)',
+        description: 'Drive mode now opens directly with Today\'s Mission briefing — narrating the hero, scenario, story, and scripture hands-free on your commute.'
+      },
+      {
+        icon: <Calendar className="w-4 h-4 text-amber-400" />,
+        title: 'Native Device Calendar Handoff',
+        description: 'Add to Calendar routes directly to Samsung Calendar, Google Calendar, and Apple Calendar without mobile browser redirect issues.'
+      },
+      {
+        icon: <Volume2 className="w-4 h-4 text-amber-400" />,
+        title: 'Reliable Audio Recitals',
+        description: 'Instant scripture and plain-English audio playback in the Saved tab with intelligent on-device neural voice fallback.'
+      }
+    ]
+  },
+  {
+    version: 'v1.22.1',
+    tagline: 'Post-Sweep Polish — Calendar Handoff, Question Parity & ADHD Clarity',
+    dateBadge: 'Previous Release',
+    isLatest: false,
+    highlights: [
+      {
+        icon: <Target className="w-4 h-4 text-amber-400" />,
+        title: 'Question Parity & Zero Drift',
+        description: 'Single source of truth guarantees Home Card and Decide Screen show identical scenario questions without desync.'
+      },
+      {
+        icon: <BookOpen className="w-4 h-4 text-amber-400" />,
+        title: 'Resilient Backstory Layer',
+        description: 'Historical backstory layer ("Why this mattered then") now reliably grounds every single mission without intermittent drops.'
+      },
+      {
+        icon: <Flame className="w-4 h-4 text-amber-400" />,
+        title: 'Unified Streak Truth',
+        description: 'Single unified streak calculation across header pill, navigation, and weekly recap card with weekly grace day protection.'
+      }
+    ]
+  },
+  {
+    version: 'v1.21.0',
+    tagline: 'Calendar Reminders — Replaces Push Notifications',
+    dateBadge: 'Previous Release',
+    isLatest: false,
     highlights: [
       {
         icon: <Calendar className="w-4 h-4 text-amber-400" />,
@@ -739,7 +790,7 @@ const ARCHIVED_RELEASES: ReleaseMilestone[] = [
 
 export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose }) => {
   const modalRef = useModalLock(isOpen);
-  const [activeTab, setActiveTab] = useState<string>('v1.21.0');
+  const [activeTab, setActiveTab] = useState<string>('v1.22.2');
   const [showArchive, setShowArchive] = useState(false);
 
   const RELEASES = showArchive ? [...ACTIVE_RELEASES, ...ARCHIVED_RELEASES] : ACTIVE_RELEASES;
@@ -747,7 +798,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
   const handleDismiss = () => {
     soundEngine.playClick();
     try {
-      localStorage.setItem('testament_last_seen_version', '1.21.0');
+      localStorage.setItem('testament_last_seen_version', '1.22.2');
     } catch {
       // ignore
     }

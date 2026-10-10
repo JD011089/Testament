@@ -244,8 +244,16 @@ export function isIOS(): boolean {
 }
 
 /**
- * Opens Google Calendar URL. On mobile Android devices, Android App Links
- * will automatically route this to the native Google Calendar app.
+ * Detects if current environment is a mobile device (Android, iOS).
+ */
+export function isMobileDevice(): boolean {
+  return isAndroid() || isIOS() || (typeof navigator !== 'undefined' && /mobile|tablet/i.test(navigator.userAgent));
+}
+
+/**
+ * Opens Google Calendar URL. On mobile devices where Google Calendar web URLs
+ * can redirect unauthenticated browsers to workspace.google.com, callers should
+ * prefer shareOrDownloadCalendarIcs to open native device calendars (Samsung, Apple, Google).
  */
 export function openGoogleCalendar(
   type: ReminderType, 

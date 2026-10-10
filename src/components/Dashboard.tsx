@@ -182,8 +182,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
     const handleModeUpdate = () => {
       setLearnerModesState(loadLearnerModesState());
     };
+    const handleOpenSettings = () => {
+      setShowSettingsModal(true);
+    };
     window.addEventListener('testament-mode-changed', handleModeUpdate);
-    return () => window.removeEventListener('testament-mode-changed', handleModeUpdate);
+    window.addEventListener('testament-open-settings', handleOpenSettings);
+    return () => {
+      window.removeEventListener('testament-mode-changed', handleModeUpdate);
+      window.removeEventListener('testament-open-settings', handleOpenSettings);
+    };
   }, []);
 
   useEffect(() => {
@@ -305,12 +312,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-3 sm:pt-4 pb-2 md:pb-6 text-left transition-colors">
+    <div className="max-w-2xl lg:max-w-6xl xl:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 lg:pt-6 pb-2 md:pb-12 text-left transition-colors relative">
       
+      {/* Subtle Desktop Background Intent */}
+      <div aria-hidden="true" className="hidden lg:block absolute -top-8 right-8 text-[11rem] font-serif font-black text-amber-500/[0.03] dark:text-amber-400/[0.02] pointer-events-none select-none tracking-tighter leading-none -z-10">
+        TESTAMENT
+      </div>
+      <div aria-hidden="true" className="hidden lg:block absolute top-16 left-12 w-96 h-96 bg-amber-400/[0.035] dark:bg-amber-500/[0.025] rounded-full blur-3xl pointer-events-none -z-10" />
+
       {/* =========================================================================
-          TOP BAR: Streamlined Brand & Status (Seamless, borderless)
+          TOP BAR: Mobile Status Bar (Hidden on md/lg desktop where top nav is unified)
           ========================================================================= */}
-      <div className="flex items-center justify-between gap-3 mb-5">
+      <div className="flex md:hidden items-center justify-between gap-3 mb-5">
         {/* Left: Emblem & Brand Title */}
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-10 h-10 rounded-xl overflow-hidden shadow-xs bg-stone-100 dark:bg-stone-900 shrink-0">
@@ -340,7 +353,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 className="text-[11px] font-mono px-1.5 py-0.2 rounded-full text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-amber-300 transition-colors"
                 title={t('dashboard.versionTooltip')}
               >
-                v1.22.1
+                v1.23.0
               </button>
             </div>
             {/* N-1: No truncated kicker on 390px screens */}
@@ -547,146 +560,228 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
-      {/* =========================================================================
-          PART 1 — HOMEPAGE: EXACTLY ONE CARD ABOVE THE FOLD
-          No competing mission buttons, no triple-named confusion.
-          One scenario question, one clear CTA ("Make today's call").
-          ========================================================================= */}
-      <div className="p-6 sm:p-7 rounded-3xl bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-stone-100/50 dark:to-stone-900/40 shadow-xs transition-colors">
-        {/* Weekly Series Banner if active */}
-        {activeSeries && (
-          <div className="flex items-center justify-between gap-2 mb-3 px-3.5 py-2 rounded-2xl bg-amber-500/20 border border-amber-500/35 text-xs">
-            <div className="flex items-center gap-2 text-amber-950 dark:text-amber-200 font-semibold">
-              <span className="text-base">{activeSeries.avatarIcon}</span>
-              <span>This Week: <strong>{activeSeries.heroName}</strong> • Day {activeSeriesDay} of 7</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                soundEngine.playSnap();
-                setShowSeriesPicker(true);
-              }}
-              className="text-[11px] font-mono font-bold text-amber-900 dark:text-amber-300 hover:underline cursor-pointer"
-            >
-              Change
-            </button>
-          </div>
-        )}
-
-        {/* Micro-tag with AI Reflection Badge (N-1: wrap instead of truncate) */}
-        <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
-          <span className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
-            {formatSpaced(["Today's Mission", "•", `${dailyMission.heroName} (${dailyMission.passageReference})`])}
-          </span>
-          <span className="text-[10px] font-mono text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full shrink-0" role="note" aria-label="AI reflection, Not Scripture">
-            <span aria-hidden="true">✨ </span>AI reflection • Not Scripture
-          </span>
-        </div>
-
-        {/* The Decision-First Scenario Question */}
-        <h2 className="text-xl sm:text-2xl font-serif font-black text-stone-900 dark:text-parchment-50 leading-snug mb-3">
-          "{dailyMission.scenarioQuestion}"
-        </h2>
-
-        {/* Plain, encouraging subtext (M-1) */}
-        <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed mb-4 max-w-lg">
-          No 40-minute reading plans. Just today's decision: what would you do before seeing what {dailyMission.heroName} did?
-        </p>
-
-        {!activeSeries && (
-          <div className="mb-5">
-            <button
-              type="button"
-              onClick={() => {
-                soundEngine.playSnap();
-                setShowSeriesPicker(true);
-              }}
-              className="inline-flex items-center gap-1.5 text-xs font-mono text-amber-800 dark:text-amber-400 hover:underline cursor-pointer"
-            >
-              <Compass className="w-3.5 h-3.5" />
-              <span>Theme your week with a 7-day series</span>
-            </button>
-          </div>
-        )}
-
-          {/* Action Row: Start mission CTA + 45s audio story */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-          <button
-            type="button"
-            onClick={handleStartMission}
-            className="flex-1 sm:flex-initial px-7 py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-sm sm:text-base flex items-center justify-center gap-2 shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-          >
-            <span>{isTodayMissionDone ? "Review today's mission" : "Start today's mission"}</span>
-            <ArrowRight aria-hidden="true" className="w-4 h-4" />
-          </button>
-
-          {/* Mode-specific primary lens CTA */}
-          {learnerModesState.activeMode === 'reciter' && (
-            <button
-              type="button"
-              onClick={() => {
-                soundEngine.playSnap();
-                setShowReciterModal(true);
-              }}
-              className="px-5 py-3.5 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-950 dark:text-amber-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer"
-            >
-              <span>Recite Verse of Week (Day {getOrInitReciterVerse(getTodayDateKey()).dayNumber})</span>
-            </button>
-          )}
-
-          {learnerModesState.activeMode === 'storyteller' && (
-            <button
-              type="button"
-              onClick={() => {
-                soundEngine.playSnap();
-                setShowStorytellerModal(true);
-              }}
-              className="px-5 py-3.5 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-950 dark:text-amber-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer"
-            >
-              <span>Tell story in your words</span>
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={handlePlayBriefing}
-            className="px-5 py-3.5 rounded-2xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-950 dark:text-amber-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer"
-            aria-label={isPlayingBriefing ? "Pause 45-second audio story" : "Listen to today's 45-second audio story"}
-          >
-            {isPlayingBriefing ? (
-              <>
-                <Pause aria-hidden="true" className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                <span>Pause story</span>
-              </>
-            ) : (
-              <>
-                <Play aria-hidden="true" className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                <span>Listen (45 sec)</span>
-              </>
-            )}
-          </button>
-        </div>
-
-        {/* Feature 6: Cross-link to character arc if matched */}
-        {matchedCharacterArc && (
-          <div className="mt-4 pt-3 border-t border-amber-500/20">
-            <button
-              type="button"
-              onClick={() => {
-                soundEngine.playClick();
-                setSelectedCharacterArcId(matchedCharacterArc.id);
-                if (matchedMomentIndex >= 0) setSelectedMomentIndex(matchedMomentIndex);
-                setShowPeopleModal(true);
-              }}
-              className="inline-flex items-center gap-1.5 text-xs text-amber-900 dark:text-amber-300 hover:underline font-medium cursor-pointer"
-            >
-              <span>
-                Part of {matchedCharacterArc.name}'s story arc {matchedMomentIndex >= 0 ? `(Moment ${matchedMomentIndex + 1} of ${matchedCharacterArc.moments.length})` : ''} →
+      {/* Responsive Desktop 2-Column Grid */}
+      <div className="lg:grid lg:grid-cols-12 lg:gap-8 lg:items-start">
+        {/* Left Column: Hero Mission, Weekly Series Showcase, Key Features Hub */}
+        <div className="lg:col-span-7 xl:col-span-7 space-y-5 lg:space-y-6">
+          {/* =========================================================================
+              PART 1 — HOMEPAGE: HERO MISSION CARD
+              ========================================================================= */}
+          <div className="p-6 sm:p-7 lg:p-8 rounded-3xl bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-stone-100/50 dark:to-stone-900/40 shadow-xs transition-colors">
+            {/* Micro-tag with AI Reflection Badge */}
+            <div className="flex items-center justify-between gap-2 mb-3.5 flex-wrap">
+              <span className="text-[11px] lg:text-xs font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
+                {formatSpaced(["Today's Mission", "•", `${dailyMission.heroName} (${dailyMission.passageReference})`])}
               </span>
-            </button>
+              <span className="text-[10px] lg:text-[11px] font-mono text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full shrink-0" role="note" aria-label="AI reflection, Not Scripture">
+                <span aria-hidden="true">✨ </span>AI reflection • Not Scripture
+              </span>
+            </div>
+
+            {/* The Decision-First Scenario Question */}
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif font-black text-stone-900 dark:text-parchment-50 leading-snug lg:leading-tight mb-3.5">
+              "{dailyMission.scenarioQuestion}"
+            </h2>
+
+            {/* Plain, encouraging subtext (M-1) */}
+            <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed mb-5 max-w-xl">
+              No 40-minute reading plans. Just today's decision: what would you do before seeing what {dailyMission.heroName} did?
+            </p>
+
+            {/* Action Row: Start mission CTA + 45s audio story */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <button
+                type="button"
+                onClick={handleStartMission}
+                className="flex-1 sm:flex-initial px-7 lg:px-8 py-3.5 lg:py-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-sm sm:text-base flex items-center justify-center gap-2 shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              >
+                <span>{isTodayMissionDone ? "Review today's mission" : "Start today's mission"}</span>
+                <ArrowRight aria-hidden="true" className="w-4 h-4" />
+              </button>
+
+              {/* Mode-specific primary lens CTA */}
+              {learnerModesState.activeMode === 'reciter' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playSnap();
+                    setShowReciterModal(true);
+                  }}
+                  className="px-5 py-3.5 lg:py-4 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-950 dark:text-amber-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer"
+                >
+                  <span>Recite Verse (Day {getOrInitReciterVerse(getTodayDateKey()).dayNumber})</span>
+                </button>
+              )}
+
+              {learnerModesState.activeMode === 'storyteller' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playSnap();
+                    setShowStorytellerModal(true);
+                  }}
+                  className="px-5 py-3.5 lg:py-4 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-950 dark:text-amber-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer"
+                >
+                  <span>Tell story in your words</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={handlePlayBriefing}
+                className="px-5 py-3.5 lg:py-4 rounded-2xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-950 dark:text-amber-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer"
+                aria-label={isPlayingBriefing ? "Pause 45-second audio story" : "Listen to today's 45-second audio story"}
+              >
+                {isPlayingBriefing ? (
+                  <>
+                    <Pause aria-hidden="true" className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                    <span>Pause story</span>
+                  </>
+                ) : (
+                  <>
+                    <Play aria-hidden="true" className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                    <span>Listen (45 sec)</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Feature 6: Cross-link to character arc if matched */}
+            {matchedCharacterArc && (
+              <div className="mt-4 pt-3 border-t border-amber-500/20">
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playClick();
+                    setSelectedCharacterArcId(matchedCharacterArc.id);
+                    if (matchedMomentIndex >= 0) setSelectedMomentIndex(matchedMomentIndex);
+                    setShowPeopleModal(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 text-xs text-amber-900 dark:text-amber-300 hover:underline font-medium cursor-pointer"
+                >
+                  <span>
+                    Part of {matchedCharacterArc.name}'s story arc {matchedMomentIndex >= 0 ? `(Moment ${matchedMomentIndex + 1} of ${matchedCharacterArc.moments.length})` : ''} →
+                  </span>
+                </button>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+
+          {/* =========================================================================
+              FLAGSHIP WEEKLY SERIES SHOWCASE (Fix 5)
+              ========================================================================= */}
+          {activeSeries ? (
+            <div className="p-5 lg:p-6 rounded-3xl bg-gradient-to-br from-amber-500/15 via-amber-500/10 to-stone-100/60 dark:to-stone-900/60 border border-amber-500/30 transition-all">
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-2xl p-2 rounded-2xl bg-amber-500/20">{activeSeries.avatarIcon}</span>
+                  <div>
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold block">
+                      Active Study Series
+                    </span>
+                    <h3 className="text-base lg:text-lg font-serif font-bold text-stone-900 dark:text-parchment-50 leading-tight">
+                      {activeSeries.title}
+                    </h3>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playSnap();
+                    setShowSeriesPicker(true);
+                  }}
+                  className="text-xs font-mono font-bold text-amber-800 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 py-1 px-2.5 rounded-lg hover:bg-amber-500/10 transition-colors cursor-pointer"
+                >
+                  Change
+                </button>
+              </div>
+
+              {/* 7-Day Arc Progress Pill Bar */}
+              <div className="space-y-1.5 mb-3.5">
+                <div className="flex items-center justify-between text-xs text-stone-600 dark:text-stone-300 font-medium">
+                  <span>Day {activeSeriesDay} of 7</span>
+                  <span className="font-mono text-amber-800 dark:text-amber-400 font-bold">{Math.round((activeSeriesDay / 7) * 100)}%</span>
+                </div>
+                <div className="grid grid-cols-7 gap-1.5" aria-label={`Day ${activeSeriesDay} of 7`}>
+                  {[1, 2, 3, 4, 5, 6, 7].map((dayNum) => (
+                    <div
+                      key={dayNum}
+                      className={`h-2 rounded-full transition-all ${
+                        dayNum === activeSeriesDay
+                          ? 'bg-amber-500 ring-2 ring-amber-500/40 animate-pulse'
+                          : dayNum < activeSeriesDay
+                          ? 'bg-amber-600 dark:bg-amber-500'
+                          : 'bg-stone-200 dark:bg-stone-800'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <p className="text-xs lg:text-sm text-stone-600 dark:text-stone-300 leading-relaxed mb-3">
+                {activeSeries.tagline}
+              </p>
+
+              <div className="flex items-center justify-between gap-2 pt-2.5 border-t border-amber-500/20">
+                <span className="text-[11px] font-serif italic text-stone-500 dark:text-stone-400 truncate">
+                  Theme: {activeSeries.weekTheme}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleStartMission}
+                  className="text-xs font-bold text-amber-900 dark:text-amber-200 hover:underline flex items-center gap-1 cursor-pointer shrink-0"
+                >
+                  <span>{isTodayMissionDone ? `Review Day ${activeSeriesDay}` : `Jump into Day ${activeSeriesDay}`}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="p-5 lg:p-6 rounded-3xl bg-gradient-to-br from-amber-500/10 via-stone-100/70 to-stone-100/40 dark:from-amber-500/10 dark:via-stone-900/60 dark:to-stone-900/40 border border-stone-200/80 dark:border-stone-800/80 hover:border-amber-500/40 transition-all">
+              <div className="flex items-start justify-between gap-3 mb-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
+                    <Compass className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
+                    Weekly Study Series • 7-Day Guided Arcs
+                  </span>
+                </div>
+              </div>
+
+              <h3 className="text-base lg:text-lg font-serif font-bold text-stone-900 dark:text-parchment-50 mb-1.5 leading-snug">
+                Walk 7 Days with Biblical Leaders
+              </h3>
+              <p className="text-xs lg:text-sm text-stone-600 dark:text-stone-300 leading-relaxed mb-4">
+                Theme your daily walk with high-tension decisions and enduring wisdom from Scripture's greatest character arcs.
+              </p>
+
+              {/* Character Arc Pills Preview */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-stone-200/60 dark:bg-stone-800/70 text-xs text-stone-800 dark:text-stone-200 font-medium">
+                  <span>👑</span> David (7 Decisions)
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-stone-200/60 dark:bg-stone-800/70 text-xs text-stone-800 dark:text-stone-200 font-medium">
+                  <span>✨</span> Esther (For Such a Time)
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-stone-200/60 dark:bg-stone-800/70 text-xs text-stone-800 dark:text-stone-200 font-medium">
+                  <span>🌊</span> Moses (Deliverer)
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  soundEngine.playSnap();
+                  setShowSeriesPicker(true);
+                }}
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs sm:text-sm inline-flex items-center justify-center gap-2 shadow-xs hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer"
+              >
+                <span>Explore all 6 weekly series</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
 
       {/* =========================================================================
           KEY FEATURES HUB: High-visibility 2x2 grid (Impossible to miss)
@@ -801,50 +896,52 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </button>
       </div>
 
-      {/* Relics / Collection Drawer (Expands right below the grid when tapped) */}
-      {showRelics && (
-        <div className="mt-3 p-4 rounded-2xl bg-stone-100/70 dark:bg-stone-900/60 border border-amber-500/30 space-y-2.5 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold block">
-              Unlocked Collection ({unlockedRelics.length}/{ALL_RELICS.length})
-            </span>
-            <button
-              type="button"
-              onClick={() => setShowRelics(false)}
-              className="text-xs text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 cursor-pointer"
-            >
-              Close
-            </button>
-          </div>
-          <p className="text-[11px] text-stone-600 dark:text-stone-400 leading-relaxed">
-            Milestones you unlock as you complete daily missions.
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
-            {ALL_RELICS.map((relic) => {
-              const isUnlocked = unlockedRelics.includes(relic.id);
-              return (
-                <div
-                  key={relic.id}
-                  className={`p-2.5 rounded-xl text-xs transition-colors ${
-                    isUnlocked
-                      ? 'bg-amber-500/15 text-stone-900 dark:text-parchment-50 font-medium'
-                      : 'bg-stone-200/40 dark:bg-stone-800/40 text-stone-400 dark:text-stone-600 opacity-60'
-                  }`}
+          {/* Relics / Collection Drawer (Expands right below the grid when tapped) */}
+          {showRelics && (
+            <div className="mt-3 p-4 rounded-2xl bg-stone-100/70 dark:bg-stone-900/60 border border-amber-500/30 space-y-2.5 transition-all">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold block">
+                  Unlocked Collection ({unlockedRelics.length}/{ALL_RELICS.length})
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowRelics(false)}
+                  className="text-xs text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 cursor-pointer"
                 >
-                  <div className="text-lg mb-0.5">{relic.icon}</div>
-                  <span className="font-bold block truncate">{relic.name}</span>
-                  <span className="text-[10px] text-stone-500 dark:text-stone-400 block truncate">{relic.character}</span>
-                </div>
-              );
-            })}
-          </div>
+                  Close
+                </button>
+              </div>
+              <p className="text-[11px] text-stone-600 dark:text-stone-400 leading-relaxed">
+                Milestones you unlock as you complete daily missions.
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
+                {ALL_RELICS.map((relic) => {
+                  const isUnlocked = unlockedRelics.includes(relic.id);
+                  return (
+                    <div
+                      key={relic.id}
+                      className={`p-2.5 rounded-xl text-xs transition-colors ${
+                        isUnlocked
+                          ? 'bg-amber-500/15 text-stone-900 dark:text-parchment-50 font-medium'
+                          : 'bg-stone-200/40 dark:bg-stone-800/40 text-stone-400 dark:text-stone-600 opacity-60'
+                      }`}
+                    >
+                      <div className="text-lg mb-0.5">{relic.icon}</div>
+                      <span className="font-bold block truncate">{relic.name}</span>
+                      <span className="text-[10px] text-stone-500 dark:text-stone-400 block truncate">{relic.character}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
-      )}
 
-      {/* =========================================================================
-          BELOW THE FOLD: Progression & Retention Cards
-          ========================================================================= */}
-      <div className="mt-6 space-y-5">
+        {/* =========================================================================
+            RIGHT RAIL (Desktop lg:col-span-5) / Stacked Below on Mobile:
+            Progression & Retention Supporting Cards
+            ========================================================================= */}
+        <div className="mt-6 lg:mt-0 lg:col-span-5 xl:col-span-5 space-y-5">
 
         {/* Feature 1: Locked Tomorrow Teaser Card ("Can't peek") */}
         <TomorrowTeaserCard />
@@ -970,6 +1067,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <ArrowRight className="w-4 h-4 text-stone-400 shrink-0" />
           </button>
         )}
+        </div>
       </div>
 
       {/* Feature 3: Decision Journal Modal */}

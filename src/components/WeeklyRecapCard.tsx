@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Calendar, ChevronDown, ChevronUp, Sparkles, CheckCircle2, Circle, ArrowRight } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
 import { getWeeklyRecap, type WeeklyRecapData } from '../utils/weeklyRecap';
+import { getDailyStreakCount } from '../utils/dailyEngine';
 
 interface WeeklyRecapCardProps {
   forceExpanded?: boolean;
@@ -10,6 +11,7 @@ interface WeeklyRecapCardProps {
 export const WeeklyRecapCard: React.FC<WeeklyRecapCardProps> = ({ forceExpanded = false }) => {
   const [recap] = useState<WeeklyRecapData>(() => getWeeklyRecap());
   const [isExpanded, setIsExpanded] = useState<boolean>(forceExpanded || recap.isMonday);
+  const streak = getDailyStreakCount();
 
   const handleToggle = () => {
     soundEngine.playSnap();
@@ -43,6 +45,11 @@ export const WeeklyRecapCard: React.FC<WeeklyRecapCardProps> = ({ forceExpanded 
               <span className="text-[10px] font-mono text-stone-500 dark:text-stone-400 bg-stone-200/60 dark:bg-stone-800 px-2 py-0.5 rounded-full">
                 60-sec read
               </span>
+              {streak > 0 && (
+                <span className="text-[10px] font-mono font-bold text-orange-700 dark:text-orange-300 bg-orange-500/15 px-2 py-0.5 rounded-full">
+                  {streak}d streak
+                </span>
+              )}
             </div>
             <p className="text-xs text-stone-600 dark:text-stone-300 mt-0.5">
               The story so far: 7 days connected in 60 seconds

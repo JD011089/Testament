@@ -15,7 +15,13 @@ import { WhatsNewModal } from './components/WhatsNewModal';
 import { UpdateNotificationBanner } from './components/UpdateNotificationBanner';
 import { CampaignNextTaskPrompt } from './components/CampaignNextTaskPrompt';
 import { soundEngine } from './utils/audio';
-import { recordVerseMasteryDate, setTodayBattlefieldId } from './utils/dailyEngine';
+import { 
+  recordVerseMasteryDate, 
+  setTodayBattlefieldId,
+  getDailyStreakCount,
+  recordDailyActivityStreak,
+  getTodayDateKey 
+} from './utils/dailyEngine';
 import { setActiveMemoryVerse } from './utils/calendarReminders';
 import { markCampaignStepCompleted } from './data/dailyCampaigns';
 import type { DailyCampaignStep } from './data/dailyCampaigns';
@@ -23,7 +29,6 @@ import { getComposedDailyMission } from './utils/missionComposer';
 import { pathForTab, tabFromPath } from './utils/routes';
 import { loadReadingPlace } from './utils/readingPlace';
 import { getDailyMission, type GeneratedDailyMission } from './utils/dailyMissionPipeline';
-import { getTodayDateKey } from './utils/dailyEngine';
 import { HowTestamentWorksModal } from './components/HowTestamentWorksModal';
 
 const WordForge = lazy(() => import('./components/WordForge').then((m) => ({ default: m.WordForge })));
@@ -131,44 +136,12 @@ export function App() {
     } catch {
       // ignore
     }
-    const stored = Number(localStorage.getItem('testament_streak'));
-    return Number.isFinite(stored) && stored > 0 ? stored : 0;
+    return getDailyStreakCount();
   });
 
   const recordActivityStreak = () => {
-    try {
-      const today = new Date().toDateString();
-      const lastActive = localStorage.getItem('testament_last_active');
-      if (lastActive === today) return;
-      const stored = Number(localStorage.getItem('testament_streak')) || 0;
-      const diffDays = lastActive
-        ? Math.round((new Date(today).getTime() - new Date(lastActive).getTime()) / (1000 * 60 * 60 * 24))
-        : 0;
-
-      // Part 7: Streak forgiveness — 1 grace day per week so a single missed day doesn't reset the streak
-      const now = new Date();
-      const currentWeekKey = `${now.getFullYear()}-W${Math.ceil((now.getDate() + new Date(now.getFullYear(), now.getMonth(), 1).getDay()) / 7)}`;
-      const lastGraceWeek = localStorage.getItem('testament_last_grace_week');
-
-      let next = 1;
-      if (!lastActive) {
-        next = 1;
-      } else if (diffDays === 1) {
-        next = stored + 1;
-      } else if (diffDays === 2 && lastGraceWeek !== currentWeekKey) {
-        // Missed yesterday, but protected by weekly grace day!
-        localStorage.setItem('testament_last_grace_week', currentWeekKey);
-        next = stored + 1;
-      } else {
-        next = 1;
-      }
-
-      localStorage.setItem('testament_streak', String(next));
-      localStorage.setItem('testament_last_active', today);
-      setStreakCount(next);
-    } catch {
-      // ignore
-    }
+    const next = recordDailyActivityStreak();
+    setStreakCount(next);
   };
 
   // Keep activeQuestRef & activeDailyMissionRef in sync with state for popstate listener closure
@@ -785,6 +758,7 @@ export function App() {
           onOpenDriveMode={() => setIsDriveModeOpen(true)}
           streakCount={streakCount}
           xp={xp}
+          onOpenWhatsNew={() => setIsWhatsNewOpen(true)}
         />
       )}
 

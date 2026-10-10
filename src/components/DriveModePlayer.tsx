@@ -21,6 +21,8 @@ import {
 import { useLanguage } from '../context/LanguageContext';
 import { getDailyCuratedPassage } from '../data/dailyPassages';
 import { getTodayBattlefieldId } from '../utils/battlefield';
+import { getDailyMissionSync } from '../utils/dailyMissionPipeline';
+import { getTodayDateKey } from '../utils/dailyEngine';
 
 interface DriveModePlayerProps {
   isOpen: boolean;
@@ -38,26 +40,9 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
   const { t, language } = useLanguage();
   const modalRef = useModalLock(isOpen);
 
-  // Default to today's active mission quest rather than a hardcoded track
-  const [currentQuestIndex, setCurrentQuestIndex] = useState<number>(() => {
-    try {
-      const activeBattlefieldId = getTodayBattlefieldId();
-      const todayPassage = getDailyCuratedPassage(0, activeBattlefieldId);
-      if (todayPassage) {
-        // Find quest matching today's mission hero or reference
-        const matchedIdx = STORY_QUESTS.findIndex(q => 
-          q.heroName.toLowerCase() === todayPassage.heroName.toLowerCase() ||
-          q.title.toLowerCase().includes(todayPassage.heroName.toLowerCase()) ||
-          q.acts.some(a => a.unlockedScripture.reference.includes(todayPassage.book))
-        );
-        if (matchedIdx >= 0) return matchedIdx;
-      }
-    } catch {
-      // fallback
-    }
-    return 0;
-  });
-
+  // Track Mode: 'mission' (Today's Mission Briefing) vs 'quest' (Full Quest Audio)
+  const [activeMode, setActiveMode] = useState<'mission' | 'quest'>('mission');
+  const [currentQuestIndex, setCurrentQuestIndex] = useState<number>(0);
   const [currentActIndex, setCurrentActIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [narratorProfile, setNarratorProfile] = useState<NarratorProfile>(soundEngine.getNarratorProfile());
@@ -82,6 +67,11 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
 
   if (!isOpen) return null;
 
+  // Resolve today's mission
+  const activeBattlefieldId = getTodayBattlefieldId();
+  const todayPassage = getDailyCuratedPassage(0, activeBattlefieldId);
+  const todayMission = getDailyMissionSync(getTodayDateKey(), 0, activeBattlefieldId);
+
   const quest = STORY_QUESTS[currentQuestIndex];
   const act = quest.acts[currentActIndex];
 
@@ -99,6 +89,27 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
     }
   };
 
+  const playMissionBriefing = () => {
+    soundEngine.stopSpeaking();
+    setIsPlaying(true);
+    setActiveMode('mission');
+
+    const hero = todayMission.heroName || todayPassage.heroName;
+    const ref = todayMission.passageReference || todayPassage.reference;
+    const scenario = todayMission.scenarioQuestion;
+    const story = todayMission.storyRetelling.join(' ');
+    const scripture = `${todayMission.keyVerseReference}. ${todayMission.keyVerseText}`;
+    const action = todayMission.actionLine;
+
+    const briefingText = language === 'en'
+      ? `Today's Mission Briefing. ${hero}. Scripture reference: ${ref}. The Decision: ${scenario}. What unfolded: ${story}. Verbatim Scripture: ${scripture}. Your move today: ${action}`
+      : `Misión de hoy. ${hero}. ${ref}. ${scenario}. ${scripture}`;
+
+    soundEngine.speakVerse(briefingText, () => {
+      setIsPlaying(false);
+    });
+  };
+
   const playAct = (qIdx: number, aIdx: number) => {
     const targetQuest = STORY_QUESTS[qIdx];
     if (!targetQuest) return;
@@ -107,6 +118,7 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
 
     soundEngine.stopSpeaking();
     setIsPlaying(true);
+    setActiveMode('quest');
     setCurrentQuestIndex(qIdx);
     setCurrentActIndex(aIdx);
 
@@ -133,12 +145,21 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
       soundEngine.stopSpeaking();
       setIsPlaying(false);
     } else {
-      playAct(currentQuestIndex, currentActIndex);
+      if (activeMode === 'mission') {
+        playMissionBriefing();
+      } else {
+        playAct(currentQuestIndex, currentActIndex);
+      }
     }
   };
 
   const handleNext = () => {
     soundEngine.playSnap();
+    if (activeMode === 'mission') {
+      setActiveMode('quest');
+      playAct(0, 0);
+      return;
+    }
     let nextQIdx = currentQuestIndex;
     let nextAIdx = currentActIndex + 1;
     if (nextAIdx >= quest.acts.length) {
@@ -154,9 +175,23 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
 
   const handlePrev = () => {
     soundEngine.playSnap();
+    if (activeMode === 'mission') {
+      setActiveMode('quest');
+      const lastQ = STORY_QUESTS.length - 1;
+      const lastA = STORY_QUESTS[lastQ].acts.length - 1;
+      setCurrentQuestIndex(lastQ);
+      setCurrentActIndex(lastA);
+      if (isPlaying) playAct(lastQ, lastA);
+      return;
+    }
     let prevQIdx = currentQuestIndex;
     let prevAIdx = currentActIndex - 1;
     if (prevAIdx < 0) {
+      if (currentQuestIndex === 0) {
+        setActiveMode('mission');
+        if (isPlaying) playMissionBriefing();
+        return;
+      }
       prevQIdx = (currentQuestIndex - 1 + STORY_QUESTS.length) % STORY_QUESTS.length;
       prevAIdx = STORY_QUESTS[prevQIdx].acts.length - 1;
     }
@@ -207,8 +242,8 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
         <div className="my-auto space-y-5 text-center">
           <div className="w-36 h-36 sm:w-48 sm:h-48 mx-auto rounded-3xl overflow-hidden border-2 border-amber-400 dark:border-amber-500/40 shadow-md dark:shadow-glow bg-stone-100 dark:bg-stone-950">
             <ArtImage
-              src={getThemeImage(act.visualTheme)}
-              alt={quest.title}
+              src={activeMode === 'mission' ? '/images/valley_battlefield.jpg' : getThemeImage(act.visualTheme)}
+              alt={activeMode === 'mission' ? todayMission.heroName : quest.title}
               width={1376}
               height={768}
               className="w-full h-full object-cover"
@@ -217,18 +252,22 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
 
           <div className="space-y-1">
             <span className="text-xs font-mono text-amber-800 dark:text-amber-500 uppercase tracking-widest font-bold">
-              {quest.heroName} • Act {act.actNumber} of {quest.acts.length}
+              {activeMode === 'mission'
+                ? `Today's Mission • ${todayMission.passageReference}`
+                : `${quest.heroName} • Act ${act.actNumber} of ${quest.acts.length}`}
             </span>
             <h3 className="text-2xl sm:text-3xl font-serif font-black text-stone-900 dark:text-parchment-50">
-              {act.actTitle}
+              {activeMode === 'mission' ? todayMission.heroName : act.actTitle}
             </h3>
             <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 font-medium">
-              {quest.title}
+              {activeMode === 'mission' ? `Briefing: "${todayMission.scenarioQuestion}"` : quest.title}
             </p>
           </div>
 
           <p className="text-xs sm:text-sm text-stone-700 dark:text-parchment-200/90 italic max-w-lg mx-auto font-reading">
-            "{act.sceneAtmosphere}"
+            {activeMode === 'mission'
+              ? `"${todayMission.keyVerseText}" — ${todayMission.keyVerseReference}`
+              : `"${act.sceneAtmosphere}"`}
           </p>
         </div>
 

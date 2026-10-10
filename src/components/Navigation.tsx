@@ -10,7 +10,8 @@ import {
   VolumeX, 
   Flame, 
   Award, 
-  Sparkles
+  Sparkles,
+  Settings
 } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
 import { ThemeToggle } from './ThemeToggle';
@@ -27,6 +28,8 @@ interface NavigationProps {
   onOpenDriveMode: () => void;
   streakCount?: number;
   xp?: number;
+  onOpenSettings?: () => void;
+  onOpenWhatsNew?: () => void;
 }
 
 export const Navigation: React.FC<NavigationProps> = ({
@@ -36,7 +39,9 @@ export const Navigation: React.FC<NavigationProps> = ({
   onToggleAmbience,
   onOpenDriveMode,
   streakCount = 0,
-  xp = 0
+  xp = 0,
+  onOpenSettings,
+  onOpenWhatsNew
 }) => {
   const { t, language } = useLanguage();
 
@@ -98,17 +103,28 @@ export const Navigation: React.FC<NavigationProps> = ({
               <Sparkles className="w-5 h-5 text-black" />
             </div>
             <div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 <span className="font-display font-extrabold text-base tracking-widest text-stone-900 dark:text-parchment-50 group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-colors">
                   {t('nav.brand')}
                 </span>
-                <span className="text-xs font-mono uppercase bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 px-1.5 py-0.5 rounded-full font-bold">
-                  {t('nav.tactical')}
+                <span className="text-xs font-serif italic text-amber-800 dark:text-amber-400 font-medium">
+                  • {t('nav.tagline')}
                 </span>
+                {onOpenWhatsNew && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      soundEngine.playClick();
+                      onOpenWhatsNew();
+                    }}
+                    title="What's new in v1.23.0"
+                    className="text-[10px] font-mono px-1.5 py-0.2 rounded-full text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-amber-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer"
+                  >
+                    v1.23.0
+                  </button>
+                )}
               </div>
-              <span className="text-xs text-stone-600 dark:text-stone-400 block -mt-0.5 font-reading">
-                {t('nav.tagline')}
-              </span>
             </div>
           </div>
 
@@ -198,6 +214,24 @@ export const Navigation: React.FC<NavigationProps> = ({
 
             {/* Theme Toggle Button */}
             <ThemeToggle />
+
+            {/* Desktop Settings Menu Button */}
+            <button
+              type="button"
+              onClick={() => {
+                soundEngine.playClick();
+                if (onOpenSettings) {
+                  onOpenSettings();
+                } else {
+                  window.dispatchEvent(new CustomEvent('testament-open-settings'));
+                }
+              }}
+              title="Settings & Preferences"
+              aria-label="Settings"
+              className="p-2 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 transition-all cursor-pointer"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </header>

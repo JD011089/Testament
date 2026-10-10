@@ -783,31 +783,40 @@ class SoundEngine {
       return;
     }
 
-    window.speechSynthesis.cancel();
+    try {
+      window.speechSynthesis.cancel();
 
-    const matchedVoice = this.getFallbackVoice(this.currentNarratorProfile);
-    if (!matchedVoice) {
-      // If no suitable voice is available on device, finish cleanly without sounding robotic
+      const matchedVoice = this.getFallbackVoice(this.currentNarratorProfile);
+
+      const utterance = new SpeechSynthesisUtterance(text);
+
+      const currentLang = (typeof document !== 'undefined' && document.documentElement?.lang) || 
+                          (typeof localStorage !== 'undefined' && localStorage.getItem('testament_language')) || 
+                          'en';
+      utterance.lang = currentLang === 'fr' ? 'fr-FR' : currentLang === 'es' ? 'es-ES' : 'en-US';
+
+      // Natural on-device voice at standard rate 1.0 and pitch 1.0
+      utterance.pitch = 1.0;
+      utterance.rate = 1.0;
+      if (matchedVoice) {
+        utterance.voice = matchedVoice;
+      }
+
+      let finishedCalled = false;
+      const callFinishedOnce = () => {
+        if (!finishedCalled) {
+          finishedCalled = true;
+          onFinished();
+        }
+      };
+
+      utterance.onend = () => callFinishedOnce();
+      utterance.onerror = () => callFinishedOnce();
+
+      window.speechSynthesis.speak(utterance);
+    } catch {
       onFinished();
-      return;
     }
-
-    const utterance = new SpeechSynthesisUtterance(text);
-
-    const currentLang = (typeof document !== 'undefined' && document.documentElement?.lang) || 
-                        (typeof localStorage !== 'undefined' && localStorage.getItem('testament_language')) || 
-                        'en';
-    utterance.lang = currentLang === 'fr' ? 'fr-FR' : currentLang === 'es' ? 'es-ES' : 'en-US';
-
-    // Work item 2: Natural on-device neural voice at natural rate 1.0 and pitch 1.0 (never altered robotic pitch)
-    utterance.pitch = 1.0;
-    utterance.rate = 1.0;
-    utterance.voice = matchedVoice;
-
-    utterance.onend = () => onFinished();
-    utterance.onerror = () => onFinished();
-
-    window.speechSynthesis.speak(utterance);
   }
 
   public stopSpeaking() {

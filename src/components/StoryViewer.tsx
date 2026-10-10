@@ -45,6 +45,7 @@ import { paraphraseVerseSimpler } from '../utils/geminiFeatures';
 import { ReportIssueModal } from './ReportIssueModal';
 import { fetchDecisionStats, submitAnonymousDecisionVote } from '../utils/decisionStatsClient';
 import { StorytellerModal } from './StorytellerModal';
+import { getDailyCuratedPassage } from '../data/dailyPassages';
 
 interface StoryViewerProps {
   quest?: StoryQuest | null;
@@ -134,6 +135,24 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     : `${keyVerseText} — ${keyVerseRef} (KJV)`;
 
   const missionIdentifier = dailyMission ? dailyMission.id : (act?.id || 'mission-act');
+
+  // Backstory resolution: Guarantee backstory layer is never intermittently dropped
+  const activeBackstory = dailyMission?.backstory || (() => {
+    try {
+      const curated = getDailyCuratedPassage();
+      if (curated?.backstory) return curated.backstory;
+    } catch {
+      // fallback
+    }
+    if (act?.historicalContext) {
+      return {
+        category: 'Culture' as const,
+        title: `Context for ${heroName}`,
+        content: act.historicalContext
+      };
+    }
+    return undefined;
+  })();
 
   // M-10: Retrieve in-progress mission state from localStorage so interruptions resume exact step
   const inProgressInitial = (() => {
@@ -629,10 +648,10 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
   const isDecisionReady = Boolean(selectedChoiceId || (isCustomMode && customText.trim().length > 0));
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-4 md:pb-8 text-left transition-colors">
+    <div className="max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 pb-4 md:pb-12 text-left transition-colors">
       
       {/* TOP STREAMLINED NAVIGATION / PROGRESS BAR */}
-      <div className="flex items-center justify-between gap-3 mb-6">
+      <div className="flex items-center justify-between gap-3 mb-6 lg:mb-8 max-w-2xl lg:max-w-3xl mx-auto">
         <button
           type="button"
           onClick={() => {
@@ -644,7 +663,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
               handleFinishMission();
             }
           }}
-          className="flex items-center gap-1.5 text-xs font-semibold text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 py-1.5 px-2.5 rounded-xl hover:bg-stone-200/50 dark:hover:bg-stone-800 transition-colors"
+          className="flex items-center gap-1.5 text-xs font-semibold text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 py-1.5 px-2.5 rounded-xl hover:bg-stone-200/50 dark:hover:bg-stone-800 transition-colors cursor-pointer"
         >
           <ArrowLeft aria-hidden="true" className="w-4 h-4" />
           <span>{currentScreen === 1 ? 'Exit' : 'Back'}</span>
@@ -686,29 +705,29 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="space-y-6"
+            className="space-y-6 max-w-2xl lg:max-w-3xl mx-auto"
           >
-            <fieldset className="space-y-6 border-0 p-0 m-0">
+            <fieldset className="space-y-6 lg:space-y-7 border-0 p-0 m-0">
               {/* Context Micro-Tag & Reflection Badge (M-4: aria-hidden decorative icons) */}
               <div>
-                <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
-                  <span className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
+                <div className="flex items-center justify-between gap-2 flex-wrap mb-1.5">
+                  <span className="text-[11px] lg:text-xs font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
                     {missionTitle}
                   </span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300" role="note" aria-label="AI reflection, Not Scripture">
+                  <span className="text-[10px] lg:text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300" role="note" aria-label="AI reflection, Not Scripture">
                     <span aria-hidden="true">✨ </span>AI reflection • Not Scripture
                   </span>
                 </div>
-                <legend className="text-xl sm:text-2xl font-serif font-black text-stone-900 dark:text-parchment-50 leading-snug mt-1 block">
+                <legend className="text-xl sm:text-2xl lg:text-3xl font-serif font-black text-stone-900 dark:text-parchment-50 leading-snug lg:leading-tight mt-1.5 block">
                   "{scenarioQuestion}"
                 </legend>
-                <p id="decide-instructions" className="text-xs text-stone-600 dark:text-stone-400 mt-1.5">
+                <p id="decide-instructions" className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 mt-2">
                   Pick your instinct before seeing what {heroName} actually did.
                 </p>
               </div>
 
               {/* Nuanced Preset Choices with real radio accessibility (C-1) */}
-              <div role="radiogroup" aria-labelledby="decide-instructions" className="space-y-2.5">
+              <div role="radiogroup" aria-labelledby="decide-instructions" className="space-y-3">
                 {presetChoices.map((choice) => {
                   const isSelected = selectedChoiceId === choice.id && !isCustomMode;
                   return (
@@ -860,18 +879,18 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="space-y-5"
+            className="space-y-6 max-w-2xl lg:max-w-3xl mx-auto"
           >
             {/* M-5: Verbatim User Choice Quoted + Separately Badged AI Connection */}
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent text-left space-y-2.5">
-              <div className="flex items-start gap-2.5">
+            <div className="p-5 lg:p-6 rounded-3xl bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent text-left space-y-3">
+              <div className="flex items-start gap-3">
                 <Sparkles aria-hidden="true" className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
-                    <span className="text-xs font-semibold text-amber-800 dark:text-amber-400">
+                    <span className="text-xs sm:text-sm font-semibold text-amber-800 dark:text-amber-400">
                       Here's how your answer connects
                     </span>
-                    <span className="text-[10px] font-mono text-amber-700 dark:text-amber-400" role="note" aria-label="AI reflection, Not Scripture">
+                    <span className="text-[10px] sm:text-[11px] font-mono text-amber-700 dark:text-amber-400" role="note" aria-label="AI reflection, Not Scripture">
                       <span aria-hidden="true">✨ </span>AI reflection • Not Scripture
                     </span>
                   </div>
@@ -879,37 +898,37 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   {recordedDecisionText ? (
                     <div className="space-y-2">
                       {/* Exact words quoted (M-5) */}
-                      <p className="text-xs sm:text-sm font-serif text-stone-900 dark:text-parchment-50 leading-snug">
+                      <p className="text-xs sm:text-sm lg:text-base font-serif text-stone-900 dark:text-parchment-50 leading-snug">
                         <span className="font-semibold text-stone-700 dark:text-stone-300">You chose: </span>
                         <span className="font-bold text-amber-950 dark:text-amber-200">"{recordedDecisionText}"</span>
                       </p>
 
                       {/* AI connection as a separate, badged sentence (M-5) */}
-                      <div className="pt-2 border-t border-amber-500/20">
+                      <div className="pt-2.5 border-t border-amber-500/20">
                         <div className="flex items-center gap-1.5 mb-1">
                           <span className="text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded-sm bg-amber-500/15 text-amber-800 dark:text-amber-300 font-bold" role="note">
                             <span aria-hidden="true">✨ </span>AI connection
                           </span>
                         </div>
-                        <p className="text-xs sm:text-sm font-serif text-stone-800 dark:text-parchment-100 leading-snug">
+                        <p className="text-xs sm:text-sm lg:text-base font-serif text-stone-800 dark:text-parchment-100 leading-snug">
                           {getAiConnectionText(personalization.mirrorBack, heroName)}
                         </p>
                       </div>
                     </div>
                   ) : (
-                    <p className="text-xs sm:text-sm font-serif font-bold text-stone-900 dark:text-parchment-50 leading-snug">
+                    <p className="text-xs sm:text-sm lg:text-base font-serif font-bold text-stone-900 dark:text-parchment-50 leading-snug">
                       {personalization.mirrorBack}
                     </p>
                   )}
 
                   {/* M-6: Slow network progress indication */}
                   {isRefiningAi && (
-                    <p className="text-[11px] text-amber-700 dark:text-amber-400 mt-1 italic animate-pulse">
+                    <p className="text-[11px] sm:text-xs text-amber-700 dark:text-amber-400 mt-1 italic animate-pulse">
                       Writing today's story connection…
                     </p>
                   )}
                   {refinementExceeded && (
-                    <p className="text-[11px] text-amber-700 dark:text-amber-400 mt-1 italic">
+                    <p className="text-[11px] sm:text-xs text-amber-700 dark:text-amber-400 mt-1 italic">
                       Still working — showing you today's backup version instead.
                     </p>
                   )}
@@ -918,7 +937,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             </div>
 
             {/* Feature 4: Real Anonymous Decision Stats (The Honesty Rule: Zero Fabricated Numbers) */}
-            <div className="px-3.5 py-2 rounded-xl bg-stone-100/60 dark:bg-stone-900/40 border border-stone-200/50 dark:border-stone-800/50 text-[11px] text-stone-600 dark:text-stone-400 flex items-center justify-between">
+            <div className="px-4 py-2.5 rounded-2xl bg-stone-100/60 dark:bg-stone-900/40 border border-stone-200/50 dark:border-stone-800/50 text-[11px] sm:text-xs text-stone-600 dark:text-stone-400 flex items-center justify-between">
               <span>
                 {!decisionStats || decisionStats.totalVotes === 0
                   ? "Be the first to weigh in today."
@@ -931,18 +950,18 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
 
             {/* Story Header */}
             <div>
-              <div className="flex items-center justify-between gap-2 mb-1">
-                <h2 className="text-lg sm:text-xl font-serif font-bold text-stone-900 dark:text-parchment-50">
+              <div className="flex items-center justify-between gap-2 mb-1.5">
+                <h2 className="text-lg sm:text-xl lg:text-2xl font-serif font-bold text-stone-900 dark:text-parchment-50">
                   What actually happened
                 </h2>
-                <span className="text-[10px] font-mono text-stone-600 dark:text-stone-400" role="note" aria-label="AI reflection, Not Scripture">
+                <span className="text-[10px] sm:text-[11px] font-mono text-stone-600 dark:text-stone-400" role="note" aria-label="AI reflection, Not Scripture">
                   <span aria-hidden="true">✨ </span>AI reflection • Not Scripture
                 </span>
               </div>
             </div>
 
             {/* Modern Plain English Story Narrative with Tap-to-define hard words (M-3) */}
-            <div className="space-y-2.5 text-xs sm:text-sm text-stone-800 dark:text-parchment-100 leading-relaxed font-reading">
+            <div className="space-y-3.5 text-xs sm:text-sm lg:text-base text-stone-800 dark:text-parchment-100 leading-relaxed font-reading">
               {storyRetelling.map((para, i) => (
                 <p key={i}>
                   {renderTextWithHardWords(para)}
@@ -950,24 +969,24 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
               ))}
             </div>
 
-            {/* Key Verse Verbatim (VERBATIM SCRIPTURE) with "Say it simpler" toggle (M-3) */}
-            <div className="p-4 rounded-2xl bg-stone-100/80 dark:bg-stone-900/60 space-y-2">
-              <div className="flex items-center justify-between text-xs flex-wrap gap-2">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-mono font-bold text-amber-800 dark:text-amber-400">
+            {/* Key Verse Verbatim (VERBATIM SCRIPTURE) with "Say it simpler" toggle (M-3) — EMOTIONAL CENTER */}
+            <div className="p-5 sm:p-6 lg:p-7 rounded-3xl bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-stone-100/80 dark:to-stone-900/70 border-2 border-amber-500/30 dark:border-amber-500/40 shadow-sm space-y-3.5">
+              <div className="flex items-center justify-between text-xs sm:text-sm flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono font-bold text-amber-800 dark:text-amber-400 text-xs sm:text-sm">
                     {keyVerseRef}
                   </span>
-                  <span className="text-[10px] font-mono uppercase bg-amber-500/15 text-amber-900 dark:text-amber-300 px-1.5 py-0.2 rounded-md font-bold">
+                  <span className="text-[10px] sm:text-[11px] font-mono uppercase bg-amber-500/20 text-amber-950 dark:text-amber-200 px-2 py-0.5 rounded-md font-bold">
                     Scripture (Verbatim)
                   </span>
                 </div>
 
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 flex-wrap">
                   {/* M-3: Say it simpler toggle */}
                   <button
                     type="button"
                     onClick={handleToggleSimplerVerse}
-                    className="text-[11px] font-mono px-2 py-0.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-900 dark:text-amber-200 transition-colors"
+                    className="text-[11px] sm:text-xs font-mono px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-900 dark:text-amber-200 transition-colors"
                   >
                     {showSimplerVerse ? 'Hide simpler' : 'Say it simpler'}
                   </button>
@@ -979,7 +998,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                       soundEngine.playSnap();
                       setUseKjv((prev) => !prev);
                     }}
-                    className="text-[11px] font-mono px-2 py-0.5 rounded-lg bg-stone-200/80 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
+                    className="text-[11px] sm:text-xs font-mono px-2.5 py-1 rounded-lg bg-stone-200/80 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
                   >
                     {useKjv ? 'Showing KJV' : 'CSB (Tap for KJV)'}
                   </button>
@@ -989,22 +1008,22 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                     type="button"
                     disabled={isSavingVerseCard}
                     onClick={handleSaveVerseCard}
-                    className="text-[11px] font-mono px-2 py-0.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-900 dark:text-amber-200 transition-colors inline-flex items-center gap-1 cursor-pointer"
+                    className="text-[11px] sm:text-xs font-mono px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-900 dark:text-amber-200 transition-colors inline-flex items-center gap-1 cursor-pointer"
                     title="Save as phone lock-screen card or share"
                   >
-                    <Download aria-hidden="true" className="w-3 h-3" />
+                    <Download aria-hidden="true" className="w-3.5 h-3.5" />
                     <span>{isSavingVerseCard ? 'Saving…' : 'Save card'}</span>
                   </button>
                 </div>
               </div>
 
-              <blockquote className="text-xs sm:text-sm font-serif italic text-stone-900 dark:text-parchment-50 leading-relaxed border-l-2 border-amber-500/60 pl-3">
+              <blockquote className="text-sm sm:text-base lg:text-lg font-serif italic font-medium text-stone-900 dark:text-parchment-50 leading-relaxed border-l-4 border-amber-500 pl-4 lg:pl-5">
                 "{renderTextWithHardWords(useKjv ? personalization.kjvVerseText : keyVerseText)}"
               </blockquote>
 
               {/* M-3: Inline Say It Simpler translation */}
               {showSimplerVerse && (
-                <div className="mt-2.5 p-3 rounded-xl bg-amber-500/10 border-l-2 border-amber-500 text-xs text-stone-800 dark:text-parchment-100">
+                <div className="mt-3 p-3.5 rounded-2xl bg-amber-500/10 border-l-3 border-amber-500 text-xs sm:text-sm text-stone-800 dark:text-parchment-100">
                   <div className="flex items-center gap-1.5 mb-1">
                     <span className="font-mono text-[10px] text-amber-700 dark:text-amber-400 font-bold" role="note" aria-label="AI reflection, Not Scripture">
                       <span aria-hidden="true">✨ </span>Plain English • AI reflection
@@ -1039,9 +1058,9 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             )}
 
             {/* Feature 2: Backstory Layer (Collapsed by default, opt-in depth) */}
-            {dailyMission?.backstory && (
+            {activeBackstory && (
               <BackstoryCard
-                backstory={dailyMission.backstory}
+                backstory={activeBackstory}
                 passageReference={keyVerseRef}
                 heroName={heroName}
                 onReportIssue={() => setIsReportOpen(true)}
@@ -1209,42 +1228,42 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="space-y-6"
+            className="space-y-6 max-w-2xl lg:max-w-3xl mx-auto"
           >
             {/* N-5: Clear, plain header */}
             <div>
-              <h2 className="text-xl sm:text-2xl font-serif font-bold text-stone-900 dark:text-parchment-50 leading-tight">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif font-black text-stone-900 dark:text-parchment-50 leading-tight">
                 Your one thing today
               </h2>
             </div>
 
             {/* The Verse verbatim */}
-            <div className="p-4 rounded-2xl bg-stone-100/70 dark:bg-stone-900/60">
-              <div className="flex items-center justify-between gap-2 mb-1">
-                <span className="font-mono font-bold text-amber-800 dark:text-amber-400 text-xs">
+            <div className="p-4 sm:p-5 lg:p-6 rounded-3xl bg-stone-100/70 dark:bg-stone-900/60">
+              <div className="flex items-center justify-between gap-2 mb-1.5">
+                <span className="font-mono font-bold text-amber-800 dark:text-amber-400 text-xs sm:text-sm">
                   {keyVerseRef}
                 </span>
-                <span className="text-[10px] font-mono uppercase bg-amber-500/15 text-amber-900 dark:text-amber-300 px-1.5 py-0.2 rounded-md font-bold">
+                <span className="text-[10px] sm:text-[11px] font-mono uppercase bg-amber-500/20 text-amber-950 dark:text-amber-200 px-2 py-0.5 rounded-md font-bold">
                   Scripture (Verbatim)
                 </span>
               </div>
-              <p className="text-xs sm:text-sm font-serif italic text-stone-900 dark:text-parchment-50 leading-relaxed">
+              <p className="text-xs sm:text-sm lg:text-base font-serif italic text-stone-900 dark:text-parchment-50 leading-relaxed">
                 "{keyVerseText}"
               </p>
             </div>
 
             {/* The Tailored Concrete Action Line */}
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-transparent">
-              <div className="flex items-center justify-between gap-2 mb-1.5">
+            <div className="p-5 sm:p-6 lg:p-7 rounded-3xl bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-transparent">
+              <div className="flex items-center justify-between gap-2 mb-2">
                 <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400 flex items-center gap-1.5">
                   <Sparkles aria-hidden="true" className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                   <span>Today's Move</span>
                 </span>
-                <span className="text-[10px] font-mono text-amber-700 dark:text-amber-400" role="note" aria-label="AI reflection, Not Scripture">
+                <span className="text-[10px] sm:text-[11px] font-mono text-amber-700 dark:text-amber-400" role="note" aria-label="AI reflection, Not Scripture">
                   <span aria-hidden="true">✨ </span>AI reflection • Not Scripture
                 </span>
               </div>
-              <p className="text-base sm:text-lg font-serif font-bold text-stone-900 dark:text-parchment-50 leading-snug">
+              <p className="text-base sm:text-lg lg:text-xl font-serif font-bold text-stone-900 dark:text-parchment-50 leading-snug">
                 {personalization.actionLine}
               </p>
             </div>
@@ -1254,7 +1273,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
               <motion.div
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/25 via-amber-500/15 to-amber-500/5 text-stone-900 dark:text-parchment-50 flex items-center gap-3.5 shadow-sm"
+                className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-amber-500/25 via-amber-500/15 to-amber-500/5 text-stone-900 dark:text-parchment-50 flex items-center gap-3.5 shadow-sm"
               >
                 <div aria-hidden="true" className="w-11 h-11 rounded-xl bg-amber-500/30 flex items-center justify-center text-2xl shrink-0">
                   👑
@@ -1263,37 +1282,37 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   <span className="text-[10px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold block">
                     Rank Promotion Earned!
                   </span>
-                  <p className="text-sm font-serif font-bold text-stone-900 dark:text-parchment-50">
+                  <p className="text-sm sm:text-base font-serif font-bold text-stone-900 dark:text-parchment-50">
                     You advanced to {rankPromotion}!
                   </p>
-                  <p className="text-[11px] text-stone-600 dark:text-stone-300">
-                    Your tactical discipline and scripture retention are leveling up.
+                  <p className="text-[11px] sm:text-xs text-stone-600 dark:text-stone-300">
+                    Your spiritual discipline and scripture retention are leveling up.
                   </p>
                 </div>
               </motion.div>
             )}
 
             {/* Inline Consolidated Celebration Card (ZERO MODALS) */}
-            <div className="p-4 rounded-2xl bg-emerald-500/15 dark:bg-emerald-950/40 text-stone-900 dark:text-parchment-100 flex items-center justify-between gap-3">
+            <div className="p-4 sm:p-5 rounded-3xl bg-emerald-500/15 dark:bg-emerald-950/40 text-stone-900 dark:text-parchment-100 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-xl shrink-0">
                   <CheckCircle2 aria-hidden="true" className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div>
-                  <div className="text-xs font-mono uppercase tracking-widest text-emerald-800 dark:text-emerald-400 font-bold">
+                  <div className="text-xs sm:text-sm font-mono uppercase tracking-widest text-emerald-800 dark:text-emerald-400 font-bold">
                     Mission Complete
                   </div>
-                  <p className="text-xs text-stone-700 dark:text-parchment-200 mt-0.5">
+                  <p className="text-xs sm:text-sm text-stone-700 dark:text-parchment-200 mt-0.5">
                     +50 Scripture XP earned • Streak updated!
                   </p>
                   {/* N-3: Plain language saved memory verse */}
-                  <p className="text-[11px] text-emerald-700 dark:text-emerald-400 mt-0.5 font-medium">
+                  <p className="text-[11px] sm:text-xs text-emerald-700 dark:text-emerald-400 mt-0.5 font-medium">
                     {keyVerseRef} saved as today's memory verse
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-800 dark:text-amber-300 font-mono font-bold text-xs shrink-0">
+              <div className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-800 dark:text-amber-300 font-mono font-bold text-xs sm:text-sm shrink-0">
                 <Award aria-hidden="true" className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                 <span>+50 XP</span>
               </div>
@@ -1301,27 +1320,27 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
 
             {/* Relic Unlocked if last act of a journey */}
             {quest && currentActIndex === quest.acts.length - 1 && quest.relicReward && (
-              <div className="p-4 rounded-2xl bg-amber-500/15 dark:bg-amber-950/40 flex items-center gap-3">
+              <div className="p-4 sm:p-5 rounded-3xl bg-amber-500/15 dark:bg-amber-950/40 flex items-center gap-3">
                 <span aria-hidden="true" className="text-3xl shrink-0">🏆</span>
                 <div>
                   <span className="text-[11px] font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold block">
                     Collection Unlocked: {quest.relicReward.name}
                   </span>
-                  <p className="text-xs text-stone-700 dark:text-stone-300">
+                  <p className="text-xs sm:text-sm text-stone-700 dark:text-stone-300">
                     {quest.relicReward.lesson}
                   </p>
                 </div>
               </div>
             )}
 
-            {/* Shareable Completion Card Button */}
+            {/* Shareable Completion Card Button (Primary High-Visibility Action) */}
             <div>
               <button
                 type="button"
                 onClick={handleShareCard}
-                className="w-full py-3 px-4 rounded-2xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 text-stone-800 dark:text-parchment-200 font-medium text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="w-full py-4 px-6 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs sm:text-sm lg:text-base flex items-center justify-center gap-2.5 shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer"
               >
-                <Share2 aria-hidden="true" className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                <Share2 aria-hidden="true" className="w-4 h-4 sm:w-5 sm:h-5 text-stone-950" />
                 <span>{copiedShareCard ? "✓ Mission card copied to clipboard!" : "Share today's mission card"}</span>
               </button>
             </div>

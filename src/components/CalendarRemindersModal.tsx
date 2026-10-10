@@ -17,8 +17,10 @@ import {
   saveCalendarReminderPrefs, 
   openGoogleCalendar, 
   shareOrDownloadCalendarIcs,
+  downloadCalendarIcs,
   isAndroid,
   isIOS,
+  isMobileDevice,
   formatTime12h,
   type ReminderType 
 } from '../utils/calendarReminders';
@@ -72,7 +74,8 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
     soundEngine.playVictory();
     const time = type === 'morning' ? morningTime : recallTime;
     
-    // On Android/mobile, attempt Web Share .ics first so default calendar (Samsung, Google, etc.) opens directly
+    // On Android / iOS / mobile devices: attempt Web Share .ics first so the device's native calendar
+    // (Samsung Calendar, Google Calendar app, Apple Calendar) opens directly with the prefilled event.
     if (typeof navigator !== 'undefined' && typeof navigator.share === 'function' && typeof File !== 'undefined') {
       try {
         const result = await shareOrDownloadCalendarIcs(type, { 
@@ -87,11 +90,27 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
           return;
         }
       } catch {
-        // continue to openGoogleCalendar or download
+        // Fall back to clean .ics download
       }
     }
 
-    // Default handoff: Open calendar web link (routes to native Calendar app on Android / mobile)
+    // If on mobile (or if Web Share was dismissed/unsupported), use direct .ics download so
+    // mobile browsers never navigate away to calendar.google.com (which redirects to workspace.google.com on mobile)
+    if (isMobileDevice()) {
+      downloadCalendarIcs(type, {
+        time,
+        verseRef: targetVerse?.reference
+      });
+      setFeedback({
+        type: 'ics',
+        message: isAndroid()
+          ? 'Downloaded calendar reminder (.ics). Tap the download alert to add directly to Samsung or Google Calendar.'
+          : 'Calendar file ready (.ics). Tap to add directly to your calendar.'
+      });
+      return;
+    }
+
+    // On Desktop: Open Google Calendar web link in a new tab
     openGoogleCalendar(type, { 
       time, 
       verseRef: targetVerse?.reference 
