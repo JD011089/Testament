@@ -17,16 +17,20 @@ export interface RankInfo {
 }
 
 export const RANKS: RankInfo[] = [
-  { title: 'Iron Pillar', minXp: 500 },
-  { title: 'Mighty Man of Adullam', minXp: 300, nextThreshold: 500 },
-  { title: 'Story Explorer', minXp: 150, nextThreshold: 300 },
-  { title: 'Seeker', minXp: 0, nextThreshold: 150 },
+  { title: 'Shepherd', minXp: 800 },
+  { title: 'Steward', minXp: 500, nextThreshold: 800 },
+  { title: 'Disciple', minXp: 300, nextThreshold: 500 },
+  { title: 'Learner', minXp: 180, nextThreshold: 300 },
+  { title: 'Listener', minXp: 80, nextThreshold: 180 },
+  { title: 'Seeker', minXp: 0, nextThreshold: 80 },
 ];
 
 export function getRankTitle(xp: number): string {
-  if (xp >= 500) return 'Iron Pillar';
-  if (xp >= 300) return 'Mighty Man of Adullam';
-  if (xp >= 150) return 'Story Explorer';
+  if (xp >= 800) return 'Shepherd';
+  if (xp >= 500) return 'Steward';
+  if (xp >= 300) return 'Disciple';
+  if (xp >= 180) return 'Learner';
+  if (xp >= 80) return 'Listener';
   return 'Seeker';
 }
 

@@ -26,8 +26,6 @@ import {
   X
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import { LanguageToggle } from './LanguageToggle';
-import { ThemeToggle } from './ThemeToggle';
 import { getLocalizedDilemma } from '../utils/localizedScripture';
 
 interface DilemmaSimulatorProps {
@@ -201,6 +199,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
   }, []);
 
   const bottomSentinelRef = useRef<HTMLDivElement | null>(null);
+  const evaluationResultRef = useRef<HTMLDivElement | null>(null);
   const dispatchedDilemmasRef = useRef<Set<string>>(new Set());
 
   // Trigger campaign next task prompt ONLY when user scrolls down to the bottom of the evaluated dilemma
@@ -307,6 +306,9 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
         }
       }
       setEvaluationResult(result);
+      setTimeout(() => {
+        evaluationResultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
 
       // Save user's answer and evaluation so it's preserved on review (Requirement 3 & 4)
       try {
@@ -426,110 +428,9 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
             {t('dilemma.subtitle')}
           </p>
         </div>
-
-        {/* Mobile Quick Controls */}
-        <div className="flex md:hidden items-center gap-1.5">
-          <LanguageToggle compact />
-          <ThemeToggle compact />
-        </div>
       </div>
 
-      {/* Category Filter Pills & Single Campaign Dilemma Focus (Requirement 6) */}
-      {isCampaignFocus ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-950/40 mb-6 transition-colors">
-          <div className="flex items-center gap-2.5">
-            <span className="text-xl">🎯</span>
-            <div>
-              <span className="text-xs font-mono font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider block">
-                {t('dilemma.campaignFocus')}
-              </span>
-              <span className="text-xs text-stone-600 dark:text-stone-400">
-                {t('dilemma.campaignFocusSub')}
-              </span>
-            </div>
-          </div>
-          <button
-            onClick={() => setIsCampaignFocus(false)}
-            className="text-xs text-amber-800 hover:text-amber-600 dark:text-amber-400 dark:hover:text-amber-300 underline underline-offset-2 transition-colors font-semibold"
-          >
-            {t('dilemma.browseAll')}
-          </button>
-        </div>
-      ) : (
-        <>
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none" role="tablist" aria-label={t('dilemma.category')}>
-              <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400 flex items-center gap-1 pl-1">
-                <Filter className="w-3 h-3 text-amber-800 dark:text-amber-500" /> {t('dilemma.category')}
-              </span>
-              {categories.map(cat => {
-                const catLabel = cat === 'All' ? t('dilemma.catAll')
-                  : cat === 'Workplace & Ambition' ? t('dilemma.catWorkplace')
-                  : cat === 'Family & Relationships' ? t('dilemma.catFamily')
-                  : cat === 'Stress & Burnout' ? t('dilemma.catStress')
-                  : cat === 'Betrayal & Integrity' ? t('dilemma.catBetrayal')
-                  : cat;
-
-                return (
-                  <button
-                    key={cat}
-                    role="tab"
-                    aria-selected={selectedCategory === cat}
-                    onClick={() => {
-                      soundEngine.playClick();
-                      setSelectedCategory(cat);
-                      const firstInCat = REAL_LIFE_DILEMMAS.find(d => cat === 'All' || d.category === cat);
-                      if (firstInCat) handleSelectDilemma(firstInCat.id);
-                    }}
-                    className={`text-xs px-3.5 py-2 rounded-full font-medium whitespace-nowrap min-h-[44px] flex items-center transition-all focus-visible:ring-2 focus-visible:ring-amber-500 ${
-                      selectedCategory === cat
-                        ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
-                        : 'bg-stone-200/50 dark:bg-stone-900/80 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
-                    }`}
-                  >
-                    {catLabel} {cat === 'All' ? `(${REAL_LIFE_DILEMMAS.length})` : ''}
-                  </button>
-                );
-              })}
-            </div>
-
-            <button
-              onClick={() => {
-                handleSelectDilemma(dailyDilemma.id);
-                setIsCampaignFocus(true);
-              }}
-              className="text-xs font-mono text-amber-800 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 font-bold shrink-0 ml-auto pb-2"
-            >
-              {t('dilemma.focusCampaign')}
-            </button>
-          </div>
-
-          {/* Scenario Horizontal Selector */}
-          <div className="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-none">
-            {filteredDilemmas.map(d => {
-              const isSelected = dilemma.id === d.id;
-              const isDone = completedDilemmas.includes(d.id);
-              return (
-                <button
-                  key={d.id}
-                  onClick={() => handleSelectDilemma(d.id)}
-                  className={`text-xs px-3.5 py-2 rounded-xl font-medium whitespace-nowrap transition-all flex items-center gap-1.5 ${
-                    isSelected
-                      ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
-                      : 'bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-900/70 dark:hover:bg-stone-850 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
-                  }`}
-                >
-                  {isDone && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />}
-                  {d.id === dailyDilemma.id && <span className="text-amber-800 dark:text-amber-400 text-xs shrink-0" title="Today's Featured Scenario">★</span>}
-                  <span>{d.title}</span>
-                </button>
-              );
-            })}
-          </div>
-        </>
-      )}
-
-      {/* Main Dilemma Briefing Card */}
+      {/* Main Dilemma Briefing Card (Scenario First) */}
       <div className="p-5 sm:p-6 rounded-2xl bg-stone-100/70 dark:bg-stone-900/50 mb-6 relative overflow-hidden transition-colors">
         <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -625,6 +526,101 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Category Filter Pills & Scenario Selector (Below Scenario) */}
+      {isCampaignFocus ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-950/40 mb-6 transition-colors">
+          <div className="flex items-center gap-2.5">
+            <span className="text-xl">🎯</span>
+            <div>
+              <span className="text-xs font-mono font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider block">
+                {t('dilemma.campaignFocus')}
+              </span>
+              <span className="text-xs text-stone-600 dark:text-stone-400">
+                {t('dilemma.campaignFocusSub')}
+              </span>
+            </div>
+          </div>
+          <button
+            onClick={() => setIsCampaignFocus(false)}
+            className="text-xs text-amber-800 hover:text-amber-600 dark:text-amber-400 dark:hover:text-amber-300 underline underline-offset-2 transition-colors font-semibold"
+          >
+            {t('dilemma.browseAll')}
+          </button>
+        </div>
+      ) : (
+        <>
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none" role="tablist" aria-label={t('dilemma.category')}>
+              <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400 flex items-center gap-1 pl-1">
+                <Filter className="w-3 h-3 text-amber-800 dark:text-amber-500" /> {t('dilemma.category')}
+              </span>
+              {categories.map(cat => {
+                const catLabel = cat === 'All' ? t('dilemma.catAll')
+                  : cat === 'Workplace & Ambition' ? t('dilemma.catWorkplace')
+                  : cat === 'Family & Relationships' ? t('dilemma.catFamily')
+                  : cat === 'Stress & Burnout' ? t('dilemma.catStress')
+                  : cat === 'Betrayal & Integrity' ? t('dilemma.catBetrayal')
+                  : cat;
+
+                return (
+                  <button
+                    key={cat}
+                    role="tab"
+                    aria-selected={selectedCategory === cat}
+                    onClick={() => {
+                      soundEngine.playClick();
+                      setSelectedCategory(cat);
+                      const firstInCat = REAL_LIFE_DILEMMAS.find(d => cat === 'All' || d.category === cat);
+                      if (firstInCat) handleSelectDilemma(firstInCat.id);
+                    }}
+                    className={`text-xs px-3.5 py-2 rounded-full font-medium whitespace-nowrap min-h-[44px] flex items-center transition-all focus-visible:ring-2 focus-visible:ring-amber-500 ${
+                      selectedCategory === cat
+                        ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                        : 'bg-stone-200/50 dark:bg-stone-900/80 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                    }`}
+                  >
+                    {catLabel} {cat === 'All' ? `(${REAL_LIFE_DILEMMAS.length})` : ''}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={() => {
+                handleSelectDilemma(dailyDilemma.id);
+                setIsCampaignFocus(true);
+              }}
+              className="text-xs font-mono text-amber-800 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 font-bold shrink-0 ml-auto pb-2"
+            >
+              {t('dilemma.focusCampaign')}
+            </button>
+          </div>
+
+          {/* Scenario Horizontal Selector */}
+          <div className="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-none">
+            {filteredDilemmas.map(d => {
+              const isSelected = dilemma.id === d.id;
+              const isDone = completedDilemmas.includes(d.id);
+              return (
+                <button
+                  key={d.id}
+                  onClick={() => handleSelectDilemma(d.id)}
+                  className={`text-xs px-3.5 py-2 rounded-xl font-medium whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                    isSelected
+                      ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                      : 'bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-900/70 dark:hover:bg-stone-850 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                  }`}
+                >
+                  {isDone && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />}
+                  {d.id === dailyDilemma.id && <span className="text-amber-800 dark:text-amber-400 text-xs shrink-0" title="Today's Featured Scenario">★</span>}
+                  <span>{d.title}</span>
+                </button>
+              );
+            })}
+          </div>
+        </>
+      )}
 
       {/* Simulator Mode Tabs */}
       <div className="flex items-center gap-3 mb-6 p-1 bg-stone-200/50 dark:bg-stone-900/90 rounded-2xl max-w-md">
@@ -766,7 +762,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
 
           {/* Heart Check Evaluation Results Card */}
           {evaluationResult && (
-            <div className="p-5 md:p-8 rounded-2xl bg-stone-100/70 dark:bg-stone-900/50 space-y-6 transition-colors">
+            <div ref={evaluationResultRef} className="p-5 md:p-8 rounded-2xl bg-stone-100/70 dark:bg-stone-900/50 space-y-6 transition-colors">
               {/* EVALUATION TABS: Pastoral Diagnosis vs Tactical Playbook */}
               <div className="flex items-center gap-2 p-1 rounded-xl bg-stone-200/80 dark:bg-stone-950 border border-stone-300/60 dark:border-stone-800">
                 <button
@@ -1141,10 +1137,10 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
               {/* LIVING CANON: TACTICAL NEXUS KNOWLEDGE GRAPH */}
               <TacticalNexusCard entityId={dilemma.id} onOpenEntity={onOpenNexus} />
 
-              {/* 3 Tactical Moves For Tomorrow */}
+              {/* 3 Practical Next Steps For Tomorrow */}
               <div>
                 <h4 className="text-xs font-mono font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-3">
-                  🎯 3 Tactical Battle Moves For Tomorrow Morning:
+                  🎯 3 Practical Next Steps For Tomorrow Morning:
                 </h4>
                 <div className="space-y-2">
                   {evaluationResult.tacticalMoves.map((move, i) => (

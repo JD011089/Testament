@@ -32,8 +32,6 @@ import {
   CANON_DIVISION_I18N_KEYS, 
   CANON_LIFE_THEME_I18N_KEYS 
 } from '../utils/localizedScripture';
-import { ThemeToggle } from './ThemeToggle';
-import { LanguageToggle } from './LanguageToggle';
 
 interface CanonLibraryPageProps {
   onBackToDashboard: () => void;
@@ -214,11 +212,6 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="flex md:hidden items-center gap-1.5">
-              <LanguageToggle compact />
-              <ThemeToggle compact />
-            </div>
-
             {/* VIEW MODE TOGGLE (Bookshelf vs Grid) */}
             <div className="flex items-center gap-1.5 p-1 rounded-xl bg-stone-100 dark:bg-stone-900/90 border border-stone-200 dark:border-stone-800">
               <button

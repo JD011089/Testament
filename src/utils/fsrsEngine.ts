@@ -179,3 +179,20 @@ export const getDueFSRSCards = (): FSRSCard[] => {
 export const getDueFSRSCount = (): number => {
   return getDueFSRSCards().length;
 };
+
+/**
+ * A verse is considered "Mastered" only after repeated successful recalls across days,
+ * not after a single session or instant round.
+ * Criteria: Reps >= 4, stability >= 7 days, lapses <= 1, state === 'review'.
+ */
+export const isVerseMastered = (verseId: string): boolean => {
+  const card = getFSRSCard(verseId);
+  return card.reps >= 4 && card.stability >= 7.0 && card.lapses <= 1 && card.state === 'review';
+};
+
+export const getAllMasteredVerseIds = (): string[] => {
+  const cards = loadFSRSCards();
+  return Object.values(cards)
+    .filter(card => card.reps >= 4 && card.stability >= 7.0 && card.lapses <= 1 && card.state === 'review')
+    .map(card => card.verseId);
+};

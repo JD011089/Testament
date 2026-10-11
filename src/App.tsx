@@ -33,8 +33,7 @@ const OnboardingModal = lazy(() => import('./components/OnboardingModal').then(m
 const WhatsNewModal = lazy(() => import('./components/WhatsNewModal').then(m => ({ default: m.WhatsNewModal })));
 const HowTestamentWorksModal = lazy(() => import('./components/HowTestamentWorksModal').then(m => ({ default: m.HowTestamentWorksModal })));
 const SettingsModal = lazy(() => import('./components/SettingsModal').then(m => ({ default: m.SettingsModal })));
-const WordForge = lazy(() => import('./components/WordForge').then((m) => ({ default: m.WordForge })));
-const DilemmaSimulator = lazy(() => import('./components/DilemmaSimulator').then((m) => ({ default: m.DilemmaSimulator })));
+const PracticeView = lazy(() => import('./components/PracticeView').then((m) => ({ default: m.PracticeView })));
 const CanonLibraryPage = lazy(() => import('./components/CanonLibraryPage').then((m) => ({ default: m.CanonLibraryPage })));
 const DriveModePlayer = lazy(() => import('./components/DriveModePlayer').then((m) => ({ default: m.DriveModePlayer })));
 
@@ -719,25 +718,19 @@ export function App() {
               </Suspense>
             )}
 
-            {currentTab === 'wordforge' && (
+            {(currentTab === 'practice' || currentTab === 'wordforge' || currentTab === 'dilemmas') && (
               <Suspense fallback={<ViewFallback />}>
-              <WordForge 
-                memorizedVerses={memorizedVerses}
-                onVerseMastered={handleVerseMastered}
-                targetVerseId={targetWordForgeVerseId}
-                onClearTargetVerse={() => setTargetWordForgeVerseId(null)}
-              />
-              </Suspense>
-            )}
-
-            {currentTab === 'dilemmas' && (
-              <Suspense fallback={<ViewFallback />}>
-              <DilemmaSimulator 
-                onRewardXP={handleRewardXP}
-                targetDilemmaId={targetDilemmaId}
-                onClearTargetDilemma={() => setTargetDilemmaId(null)}
-                onOpenNexus={handleOpenNexus}
-              />
+                <PracticeView
+                  initialSubTab={currentTab === 'dilemmas' ? 'dilemmas' : 'memorize'}
+                  memorizedVerses={memorizedVerses}
+                  onVerseMastered={handleVerseMastered}
+                  targetVerseId={targetWordForgeVerseId}
+                  onClearTargetVerse={() => setTargetWordForgeVerseId(null)}
+                  onRewardXP={handleRewardXP}
+                  targetDilemmaId={targetDilemmaId}
+                  onClearTargetDilemma={() => setTargetDilemmaId(null)}
+                  onOpenNexus={handleOpenNexus}
+                />
               </Suspense>
             )}
 

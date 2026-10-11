@@ -16,7 +16,10 @@ import {
   ChevronDown,
   Mic,
   SlidersHorizontal,
-  Download
+  Download,
+  Search,
+  Highlighter,
+  Share2
 } from 'lucide-react';
 import type { CanonBook } from '../data/canon';
 import { soundEngine, NARRATOR_VOICES, type NarratorProfile } from '../utils/audio';
@@ -136,7 +139,72 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
     }
   }, [language, selectedTranslation]);
 
+  const [chapterSearch, setChapterSearch] = useState<string>('');
+  const [highlightedVerses, setHighlightedVerses] = useState<Record<number, boolean>>({});
+
   const totalChapters = book ? getBookChapterCount(book.name) : 1;
+
+  const handleSearchSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const query = chapterSearch.trim().toLowerCase();
+    if (!query) return;
+
+    // Pattern 1: pure number, e.g. "3" or "ch 3"
+    const numberMatch = query.match(/^(\d+)$/) || query.match(/^ch(?:apter)?\s*(\d+)$/);
+    if (numberMatch && numberMatch[1]) {
+      const chNum = parseInt(numberMatch[1], 10);
+      if (chNum >= 1 && chNum <= totalChapters) {
+        soundEngine.playPageTurn();
+        setSelectedChapter(chNum);
+        setChapterSearch('');
+        readerScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+        showToast(`Jumped to Chapter ${chNum}`);
+        return;
+      }
+    }
+
+    // Pattern 2: "Book Chapter", e.g. "John 3", "1 Corinthians 13", "Gen 1"
+    const bookChapterMatch = query.match(/^(.+?)\s+(\d+)$/);
+    if (bookChapterMatch) {
+      const targetBookName = bookChapterMatch[1].trim();
+      const targetChapter = parseInt(bookChapterMatch[2], 10);
+      const foundBook = allBooks.find(b => 
+        b.name.toLowerCase() === targetBookName ||
+        b.id.toLowerCase() === targetBookName ||
+        b.name.toLowerCase().startsWith(targetBookName)
+      );
+
+      if (foundBook) {
+        const bookMaxChapters = getBookChapterCount(foundBook.name);
+        const validChapter = Math.min(Math.max(1, targetChapter), bookMaxChapters);
+        soundEngine.playPageTurn();
+        onSelectBook(foundBook);
+        setSelectedChapter(validChapter);
+        setChapterSearch('');
+        readerScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+        showToast(`Opened ${foundBook.name} ${validChapter}`);
+        return;
+      }
+    }
+
+    // Pattern 3: Just book name, e.g. "Romans"
+    const foundBookOnly = allBooks.find(b => 
+      b.name.toLowerCase() === query ||
+      b.id.toLowerCase() === query ||
+      b.name.toLowerCase().startsWith(query)
+    );
+    if (foundBookOnly) {
+      soundEngine.playPageTurn();
+      onSelectBook(foundBookOnly);
+      setSelectedChapter(1);
+      setChapterSearch('');
+      readerScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+      showToast(`Opened ${foundBookOnly.name}`);
+      return;
+    }
+
+    showToast(`Could not find "${chapterSearch}"`);
+  };
 
   useEffect(() => {
     const handleVoiceChange = (e: Event) => {
@@ -413,13 +481,51 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
     }
   };
 
+  const handleToggleHighlight = (verseNum: number) => {
+    soundEngine.playSnap();
+    setHighlightedVerses(prev => {
+      const next = { ...prev, [verseNum]: !prev[verseNum] };
+      showToast(next[verseNum] ? `Verse ${verseNum} highlighted` : `Highlight removed`);
+      return next;
+    });
+  };
+
+  const handleShareVerse = async (verseNum: number, text: string) => {
+    soundEngine.playSnap();
+    const reference = `${book.name} ${selectedChapter}:${verseNum}`;
+    const shareText = `"${text}" — ${reference} (${chapterData?.translation || 'WEB'})`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: reference,
+          text: shareText,
+          url: window.location.href
+        });
+        showToast('Shared successfully');
+      } catch {
+        // User dismissed share sheet
+      }
+    } else {
+      navigator.clipboard.writeText(shareText);
+      showToast(`Copied to clipboard for sharing: ${reference}`);
+    }
+  };
+
   const verseActions = (verseNum: number, text: string) => (
     <div className="mt-2 space-y-2" onClick={(event) => event.stopPropagation()}>
       <div className="flex flex-wrap gap-1.5">
-        <button type="button" onClick={() => handleSendVerseToForge(verseNum, text)} className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold text-stone-700 dark:text-stone-200">Memorize</button>
-        <button type="button" onClick={() => handleSaveVerseToArsenal(verseNum, text)} className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold text-stone-700 dark:text-stone-200">Save</button>
-        <button type="button" onClick={() => handleSpeakSingleVerse(verseNum, text)} className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold text-stone-700 dark:text-stone-200">Listen</button>
-        <button type="button" onClick={() => handleCopyVerse(verseNum, text)} className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold text-stone-700 dark:text-stone-200">Copy</button>
+        <button type="button" onClick={() => handleSendVerseToForge(verseNum, text)} className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold text-stone-700 dark:text-stone-200 transition-colors">Memorize</button>
+        <button type="button" onClick={() => handleSaveVerseToArsenal(verseNum, text)} className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold text-stone-700 dark:text-stone-200 transition-colors">Save</button>
+        <button type="button" onClick={() => handleSpeakSingleVerse(verseNum, text)} className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold text-stone-700 dark:text-stone-200 transition-colors">Listen</button>
+        <button type="button" onClick={() => handleToggleHighlight(verseNum)} className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors ${highlightedVerses[verseNum] ? 'bg-amber-400 text-stone-950 font-bold' : 'bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-stone-700 dark:text-stone-200'}`}>
+          <Highlighter className="w-3 h-3" />
+          <span>{highlightedVerses[verseNum] ? 'Highlighted' : 'Highlight'}</span>
+        </button>
+        <button type="button" onClick={() => handleShareVerse(verseNum, text)} className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold text-stone-700 dark:text-stone-200 flex items-center gap-1 transition-colors">
+          <Share2 className="w-3 h-3" />
+          <span>Share</span>
+        </button>
+        <button type="button" onClick={() => handleCopyVerse(verseNum, text)} className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold text-stone-700 dark:text-stone-200 transition-colors">Copy</button>
         {isFeatureEnabled('simplerVerse') && (
           <button
             type="button"
@@ -859,6 +965,18 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
+
+                  {/* Chapter / Book Search Input */}
+                  <form onSubmit={handleSearchSubmit} className="relative flex items-center ml-1">
+                    <input
+                      type="text"
+                      value={chapterSearch}
+                      onChange={(e) => setChapterSearch(e.target.value)}
+                      placeholder='Jump e.g. "John 3" or "5"'
+                      className="w-28 sm:w-44 pl-7 pr-2 py-1.5 text-xs rounded-xl bg-stone-100 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    />
+                    <Search className="w-3.5 h-3.5 text-stone-400 absolute left-2 pointer-events-none" />
+                  </form>
                 </div>
 
                 {/* Desktop Reader Controls (Hidden on mobile) */}
@@ -1189,13 +1307,14 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                               const citeActive = launchToken > 0 && selectedChapter === initialChapter;
                               const isCited = citeActive && (highlightVerseStart ?? 0) > 0 && highlightVerseEnd != null
                                 && v.verse >= highlightVerseStart! && v.verse <= highlightVerseEnd;
+                              const isHighlighted = Boolean(highlightedVerses[v.verse]);
                               const isActive = selectedVerse === v.verse || activeReadingVerse === v.verse || isCited;
                               return (
                                 <span
                                   key={v.verse}
                                   data-verse={v.verse}
                                   onClick={() => setSelectedVerse(v.verse)}
-                                  className={`cursor-pointer rounded-sm ${isActive ? 'bg-amber-100/80 dark:bg-amber-950/50' : ''}`}
+                                  className={`cursor-pointer rounded-sm ${isHighlighted ? 'bg-amber-300/60 dark:bg-amber-500/30 font-medium' : isActive ? 'bg-amber-100/80 dark:bg-amber-950/50' : ''}`}
                                 >
                                   <sup className="text-[0.65em] font-mono font-bold text-amber-800 dark:text-amber-400 mr-0.5 select-none">{v.verse}</sup>
                                   {v.text}{' '}
@@ -1211,6 +1330,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                           const isCited = citeActive && (highlightVerseStart ?? 0) > 0 && highlightVerseEnd != null
                             && v.verse >= highlightVerseStart! && v.verse <= highlightVerseEnd;
                           const isOpen = selectedVerse === v.verse;
+                          const isHighlighted = Boolean(highlightedVerses[v.verse]);
 
                           return (
                             <div
@@ -1218,9 +1338,11 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                               data-verse={v.verse}
                               onClick={() => setSelectedVerse(isOpen ? null : v.verse)}
                               className={`p-2 rounded-xl transition-colors cursor-pointer ${
-                                isSpeakingThis || isCited || isOpen
-                                  ? 'bg-amber-100/60 dark:bg-amber-950/40 text-stone-950 dark:text-white'
-                                  : 'hover:bg-stone-100/70 dark:hover:bg-stone-900/50'
+                                isHighlighted
+                                  ? 'bg-amber-300/40 dark:bg-amber-500/20 text-stone-950 dark:text-white border-l-2 border-amber-500'
+                                  : isSpeakingThis || isCited || isOpen
+                                    ? 'bg-amber-100/60 dark:bg-amber-950/40 text-stone-950 dark:text-white'
+                                    : 'hover:bg-stone-100/70 dark:hover:bg-stone-900/50'
                               }`}
                             >
                               <span className="inline-block text-[0.7em] font-mono font-bold text-amber-800 dark:text-amber-400 mr-2 select-none align-baseline">

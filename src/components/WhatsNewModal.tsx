@@ -25,6 +25,8 @@ import {
   ShieldCheck
 } from 'lucide-react';
 
+import { APP_VERSION } from '../config/version';
+
 interface WhatsNewModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -44,10 +46,46 @@ interface ReleaseMilestone {
 
 const ACTIVE_RELEASES: ReleaseMilestone[] = [
   {
-    version: 'v1.22.2',
-    tagline: 'Celestial Amber Branding, Mission Audio Briefing & Native Calendar Handoff',
+    version: APP_VERSION,
+    tagline: 'Daybreak Redesign — Calmer, Simpler & Gold Lit Palette',
     dateBadge: 'Current Release',
     isLatest: true,
+    highlights: [
+      {
+        icon: <Sparkles className="w-4 h-4 text-amber-400" />,
+        title: 'Daybreak Palette & Lit Gold Buttons',
+        description: 'Warm parchment and celestial sunrise hues with WCAG AA compliance across light and dark modes, paired with tactile lit gold primary buttons.'
+      },
+      {
+        icon: <BookOpen className="w-4 h-4 text-amber-400" />,
+        title: 'Calm 3-Item Home & 4-Tab Navigation',
+        description: 'Streamlined Home focusing solely on Today\'s mission, Memory verse, and Weekly series. Consolidated Practice tab combining Memorize and Dilemmas.'
+      },
+      {
+        icon: <ShieldCheck className="w-4 h-4 text-amber-400" />,
+        title: 'Toned Down XP & Calmer Tone',
+        description: 'Military ranks and XP distractions are toned down and quiet by default, keeping focus on Scripture and daily rhythm.'
+      }
+    ]
+  },
+  {
+    version: 'v1.23.1',
+    tagline: 'Bug Fixes & Native Android TWA Alignment',
+    dateBadge: 'Previous Release',
+    isLatest: false,
+    highlights: [
+      {
+        icon: <ShieldCheck className="w-4 h-4 text-amber-400" />,
+        title: 'Native Wrapper Stability',
+        description: 'Clean release artifacts, automated version checksums, and streamlined manifest alignment.'
+      }
+    ]
+  },
+  {
+    version: 'v1.22.2',
+    tagline: 'Celestial Amber Branding, Mission Audio Briefing & Native Calendar Handoff',
+    dateBadge: 'Previous Release',
+    isLatest: false,
     highlights: [
       {
         icon: <Sparkles className="w-4 h-4 text-amber-400" />,

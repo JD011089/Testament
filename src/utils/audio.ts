@@ -2,6 +2,7 @@
 // 100% Offline-capable, zero external asset dependencies with Neural Studio Voice streaming
 
 export type NarratorProfile = 'cinematic' | 'brotherhood' | 'scholar' | 'grace';
+export type VoicePlaybackState = 'idle' | 'loading' | 'playing' | 'error';
 
 export interface VoiceMetadata {
   id: NarratorProfile;
@@ -155,6 +156,20 @@ class SoundEngine {
   private currentObjectUrl: string | null = null;
   private currentAbortController: AbortController | null = null;
   private cachedVoices: SpeechSynthesisVoice[] = [];
+  private currentPlaybackState: VoicePlaybackState = 'idle';
+
+  public getPlaybackState(): VoicePlaybackState {
+    return this.currentPlaybackState;
+  }
+
+  private setPlaybackState(state: VoicePlaybackState, errorDetail?: string) {
+    this.currentPlaybackState = state;
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('testament:voice-state', {
+        detail: { state, errorDetail }
+      }));
+    }
+  }
 
   constructor() {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -669,6 +684,8 @@ class SoundEngine {
     // Primary: High-fidelity ElevenLabs via Vite local proxy
     const streamUrl = `/api/tts?text=${encodeURIComponent(cleanText)}&voice=${encodeURIComponent(this.currentNarratorProfile)}`;
 
+    this.setPlaybackState('loading');
+
     const playBlob = (blob: Blob) => {
       const objectUrl = URL.createObjectURL(blob);
       this.currentObjectUrl = objectUrl;
@@ -693,18 +710,25 @@ class SoundEngine {
         }
       };
 
+      audio.onplay = () => {
+        this.setPlaybackState('playing');
+      };
+
       audio.onended = () => {
         cleanup();
+        this.setPlaybackState('idle');
         onFinished();
       };
 
       audio.onerror = () => {
         cleanup();
+        this.setPlaybackState('error', 'Audio streaming failed');
         this.fallbackWithAssetOrSpeech(cleanText, onFinished, audioAssetUrl);
       };
 
       audio.play().catch(() => {
         cleanup();
+        this.setPlaybackState('error', 'Audio playback blocked');
         this.fallbackWithAssetOrSpeech(cleanText, onFinished, audioAssetUrl);
       });
     };
@@ -726,6 +750,7 @@ class SoundEngine {
       .catch((err) => {
         if (controller.signal.aborted) return;
         console.warn('[SoundEngine] Narration API unavailable, using on-device reader:', (err as Error)?.message);
+        this.setPlaybackState('error', (err as Error)?.message || 'Narration unavailable');
         if (typeof window !== 'undefined') {
           window.dispatchEvent(
             new CustomEvent('testament:narration-fallback', {
@@ -867,6 +892,8 @@ class SoundEngine {
         /* ignore */
       }
     }
+
+    this.setPlaybackState('idle');
 
     this.restoreAmbience();
   }

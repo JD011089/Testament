@@ -22,8 +22,6 @@ import { SeriesPickerModal } from './SeriesPickerModal';
 import { getActiveSeriesState, getSeriesDayNumber, type ActiveSeriesState } from '../utils/weeklySeriesEngine';
 import { getWeeklySeriesById } from '../data/weeklySeries';
 import type { UserCalibrationProfile } from './OnboardingModal';
-import { ThemeToggle } from './ThemeToggle';
-import { LanguageToggle } from './LanguageToggle';
 import { useLanguage } from '../context/LanguageContext';
 import type { DailyCampaignStep } from '../data/dailyCampaigns';
 import { getComposedDailyMission } from '../utils/missionComposer';
@@ -47,12 +45,9 @@ import {
   markYesterdayRecallComplete, 
   type MemoryVerseData 
 } from '../utils/memoryVerseEngine';
-import { TomorrowTeaserCard } from './TomorrowTeaserCard';
 import { DecisionJournalModal } from './DecisionJournalModal';
-import { WeeklyRecapCard } from './WeeklyRecapCard';
 import { CharacterArcModal } from './CharacterArcModal';
 import { CalendarRemindersModal } from './CalendarRemindersModal';
-import { SettingsModal } from './SettingsModal';
 import { CHARACTER_ARCS } from '../data/characterArcs';
 import { ModeSelectorModal } from './ModeSelectorModal';
 import { ReciterModal } from './ReciterModal';
@@ -64,6 +59,8 @@ import {
 } from '../utils/learnerModes';
 import { formatSpaced } from '../utils/textUtils';
 import type { LearnerModesState } from '../types/learnerModes';
+import { getShowXpPreference } from '../utils/userPreferences';
+import { APP_VERSION } from '../config/version';
 
 interface DashboardProps {
   onSelectQuest: (quest: StoryQuest) => void;
@@ -146,8 +143,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [yesterdayVerse, setYesterdayVerse] = useState<MemoryVerseData | null>(() => getYesterdayRecallVerse());
   const [isYesterdayFlipped, setIsYesterdayFlipped] = useState<boolean>(false);
   const [yesterdayRecalled, setYesterdayRecalled] = useState<boolean>(false);
-  const [showSettings, setShowSettings] = useState<boolean>(false);
-  const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
   const [showCalendarModal, setShowCalendarModal] = useState<boolean>(false);
   const [showJournalModal, setShowJournalModal] = useState<boolean>(false);
   const [showPeopleModal, setShowPeopleModal] = useState<boolean>(false);
@@ -163,6 +158,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   // Weekly Series State
   const [activeSeriesState, setActiveSeriesState] = useState<ActiveSeriesState | null>(() => getActiveSeriesState());
   const [showSeriesPicker, setShowSeriesPicker] = useState<boolean>(false);
+  const [showXp, setShowXp] = useState<boolean>(() => getShowXpPreference());
 
   useEffect(() => {
     const handleSeriesChange = () => {
@@ -184,9 +180,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
     const handleModeUpdate = () => {
       setLearnerModesState(loadLearnerModesState());
     };
-    const handleOpenSettings = () => {
-      setShowSettingsModal(true);
-    };
     const handleOpenReminders = () => setShowCalendarModal(true);
     const handleOpenJournal = () => setShowJournalModal(true);
     const handleOpenPeople = () => {
@@ -196,23 +189,27 @@ export const Dashboard: React.FC<DashboardProps> = ({
     };
     const handleOpenRelics = () => setShowRelics(true);
     const handleOpenModes = () => setShowModeModal(true);
+    const handleShowXpChange = (e: Event) => {
+      const custom = e as CustomEvent<{ show: boolean }>;
+      if (custom.detail) setShowXp(custom.detail.show);
+    };
 
     window.addEventListener('testament-mode-changed', handleModeUpdate);
-    window.addEventListener('testament-open-settings', handleOpenSettings);
     window.addEventListener('testament-open-reminders', handleOpenReminders);
     window.addEventListener('testament-open-journal', handleOpenJournal);
     window.addEventListener('testament-open-people', handleOpenPeople);
     window.addEventListener('testament-open-relics', handleOpenRelics);
     window.addEventListener('testament-open-modes', handleOpenModes);
+    window.addEventListener('testament-show-xp-changed', handleShowXpChange);
 
     return () => {
       window.removeEventListener('testament-mode-changed', handleModeUpdate);
-      window.removeEventListener('testament-open-settings', handleOpenSettings);
       window.removeEventListener('testament-open-reminders', handleOpenReminders);
       window.removeEventListener('testament-open-journal', handleOpenJournal);
       window.removeEventListener('testament-open-people', handleOpenPeople);
       window.removeEventListener('testament-open-relics', handleOpenRelics);
       window.removeEventListener('testament-open-modes', handleOpenModes);
+      window.removeEventListener('testament-show-xp-changed', handleShowXpChange);
     };
   }, []);
 
@@ -364,9 +361,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <h1 className="text-base font-serif font-bold text-stone-900 dark:text-parchment-100 tracking-wide">
                 Testament
               </h1>
-              <span className="text-[11px] font-mono px-2 py-0.2 rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 font-bold">
-                {getRankTitle(xp)}
-              </span>
+              {showXp && (
+                <span className="text-[11px] font-mono px-2 py-0.2 rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 font-bold">
+                  {getRankTitle(xp)}
+                </span>
+              )}
               <button
                 type="button"
                 onClick={() => {
@@ -376,7 +375,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 className="text-[11px] font-mono px-1.5 py-0.2 rounded-full text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-amber-300 transition-colors"
                 title={t('dashboard.versionTooltip')}
               >
-                v1.23.0
+                {APP_VERSION}
               </button>
             </div>
             {/* N-1: No truncated kicker on 390px screens */}
@@ -388,7 +387,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
 
-        {/* Right: Streak, XP, Single Settings Entry (N-8: Accessible labels and roles) */}
+        {/* Right: Streak, XP (if enabled), Single Settings Entry */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 relative">
           {streakCount > 0 ? (
             <div 
@@ -412,178 +411,36 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           )}
 
-          <div 
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/60 dark:bg-stone-900 text-xs font-mono font-bold text-amber-800 dark:text-amber-300"
-            title="Scripture XP"
-            role="status"
-            aria-label={`${xp} Scripture XP`}
-          >
-            <Award aria-hidden="true" className="w-3.5 h-3.5 text-amber-500" />
-            <span>{xp}</span>
-          </div>
-
-          {/* Single Settings Entry */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => {
-                soundEngine.playClick();
-                setShowSettings(!showSettings);
-              }}
-              className={`p-2 rounded-xl transition-all cursor-pointer ${
-                showSettings 
-                  ? 'bg-amber-500 text-stone-950 font-bold' 
-                  : 'bg-stone-200/60 dark:bg-stone-900 text-stone-600 dark:text-stone-300 hover:text-stone-950 dark:hover:text-parchment-50'
-              }`}
-              title="Settings"
-              aria-label="Settings"
+          {showXp && (
+            <div 
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/60 dark:bg-stone-900 text-xs font-mono font-bold text-amber-800 dark:text-amber-300"
+              title="Scripture XP"
+              role="status"
+              aria-label={`${xp} Scripture XP`}
             >
-              <Settings aria-hidden="true" className="w-4 h-4" />
-            </button>
+              <Award aria-hidden="true" className="w-3.5 h-3.5 text-amber-500" />
+              <span>{xp}</span>
+            </div>
+          )}
 
-            {showSettings && (
-              <>
-                <div 
-                  className="fixed inset-0 z-30" 
-                  onClick={() => setShowSettings(false)} 
-                />
-                <div className="absolute right-0 top-full mt-2 z-40 p-3 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-xl flex flex-col gap-2 min-w-[180px]">
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-stone-600 dark:text-stone-400 font-bold px-1">
-                    Settings
-                  </div>
-                  <div className="flex items-center justify-between gap-2 px-1">
-                    <span className="text-xs font-medium text-stone-800 dark:text-stone-200">Language</span>
-                    <LanguageToggle compact />
-                  </div>
-                  <div className="flex items-center justify-between gap-2 px-1">
-                    <span className="text-xs font-medium text-stone-800 dark:text-stone-200">Theme</span>
-                    <ThemeToggle compact />
-                  </div>
-                  <div className="pt-1 border-t border-stone-200 dark:border-stone-800 space-y-1">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        soundEngine.playClick();
-                        setShowSettings(false);
-                        if (onOpenSettings) {
-                          onOpenSettings();
-                        } else {
-                          window.dispatchEvent(new CustomEvent('testament-open-settings'));
-                        }
-                      }}
-                      className="w-full text-left text-xs px-2 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-950 dark:text-amber-200 font-bold transition-colors cursor-pointer flex items-center justify-between"
-                    >
-                      <span>Text size & voice</span>
-                      <span className="text-[10px] font-mono">⚙</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        soundEngine.playClick();
-                        setShowSettings(false);
-                        setShowModeModal(true);
-                      }}
-                      className="w-full text-left text-xs px-1 py-1 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition-colors cursor-pointer flex items-center justify-between"
-                    >
-                      <span>Learner mode</span>
-                      <span className="text-[10px] font-mono uppercase bg-amber-500/15 text-amber-800 dark:text-amber-400 font-bold px-1.5 py-0.2 rounded-md">
-                        {learnerModesState.activeMode}
-                      </span>
-                    </button>
-                    {onOpenOnboarding && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          soundEngine.playClick();
-                          setShowSettings(false);
-                          onOpenOnboarding();
-                        }}
-                        className="w-full text-left text-xs px-1 py-1 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition-colors cursor-pointer"
-                      >
-                        Set up my plan
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        soundEngine.playClick();
-                        setShowSettings(false);
-                        setShowCalendarModal(true);
-                      }}
-                      className="w-full text-left text-xs px-1 py-1 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition-colors cursor-pointer"
-                    >
-                      Reminders
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        soundEngine.playClick();
-                        setShowSettings(false);
-                        setShowJournalModal(true);
-                      }}
-                      className="w-full text-left text-xs px-1 py-1 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition-colors cursor-pointer"
-                    >
-                      Decision journal
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        soundEngine.playClick();
-                        setShowSettings(false);
-                        setSelectedCharacterArcId(undefined);
-                        setSelectedMomentIndex(undefined);
-                        setShowPeopleModal(true);
-                      }}
-                      className="w-full text-left text-xs px-1 py-1 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition-colors cursor-pointer"
-                    >
-                      People & character arcs
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        soundEngine.playClick();
-                        setShowSettings(false);
-                        setShowSeriesPicker(true);
-                      }}
-                      className="w-full text-left text-xs px-1 py-1 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition-colors cursor-pointer flex items-center justify-between"
-                    >
-                      <span>Weekly study series</span>
-                      {activeSeries && (
-                        <span className="text-[10px] font-mono text-amber-700 dark:text-amber-400 font-bold bg-amber-500/10 px-1.5 py-0.5 rounded">
-                          {activeSeries.heroName}
-                        </span>
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        soundEngine.playSnap();
-                        setShowSettings(false);
-                        setShowRelics(true);
-                      }}
-                      className="w-full text-left text-xs px-1 py-1 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition-colors cursor-pointer"
-                    >
-                      Collection ({unlockedRelics.length}/{ALL_RELICS.length})
-                    </button>
-                    {/* M-8: Transparency Page link */}
-                    {onOpenHowItWorks && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          soundEngine.playClick();
-                          setShowSettings(false);
-                          onOpenHowItWorks();
-                        }}
-                        className="w-full text-left text-xs px-1 py-1 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition-colors"
-                      >
-                        How Testament works
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
+          {/* Settings Entry (44x44 touch target) */}
+          <button
+            type="button"
+            onClick={() => {
+              soundEngine.playClick();
+              if (onOpenSettings) {
+                onOpenSettings();
+              } else {
+                window.dispatchEvent(new CustomEvent('testament-open-settings'));
+              }
+            }}
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-xl transition-all cursor-pointer bg-stone-200/60 dark:bg-stone-900 text-stone-600 dark:text-stone-300 hover:text-stone-950 dark:hover:text-parchment-50"
+            title="Settings"
+            aria-label="Settings"
+          >
+            <Settings aria-hidden="true" className="w-4 h-4" />
+          </button>
+
         </div>
       </div>
 
@@ -620,7 +477,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <button
                 type="button"
                 onClick={handleStartMission}
-                className="flex-1 sm:flex-initial px-7 lg:px-8 py-3.5 lg:py-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-sm sm:text-base flex items-center justify-center gap-2 shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                className="btn-gold flex-1 sm:flex-initial px-7 lg:px-8 py-3.5 lg:py-4 rounded-2xl text-sm sm:text-base flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>{isTodayMissionDone ? t('dashboard.reviewTodayMission') : t('dashboard.startTodayMission')}</span>
                 <ArrowRight aria-hidden="true" className="w-4 h-4" />
@@ -811,121 +668,156 @@ export const Dashboard: React.FC<DashboardProps> = ({
           )}
 
       {/* =========================================================================
-          KEY FEATURES HUB: High-visibility 2x2 grid (Impossible to miss)
+          MORE SECTION: Collapsed by default for a simpler, calmer home
           ========================================================================= */}
-      <div className="mt-4 grid grid-cols-2 gap-2.5 sm:gap-3">
-        {/* Card 1: Decision Journal */}
-        <button
-          type="button"
-          onClick={() => {
-            soundEngine.playClick();
-            setShowJournalModal(true);
-          }}
-          className="p-3.5 sm:p-4 rounded-2xl bg-stone-100/70 dark:bg-stone-900/60 hover:bg-stone-200/50 dark:hover:bg-stone-850/80 border border-stone-200/70 dark:border-stone-800/70 transition-all text-left flex flex-col justify-between cursor-pointer group hover:border-amber-500/40"
-        >
-          <div className="flex items-center justify-between mb-2">
-            <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-              <BookMarked aria-hidden="true" className="w-4 h-4" />
-            </div>
-            <ArrowRight aria-hidden="true" className="w-3.5 h-3.5 text-stone-400 group-hover:text-amber-600 dark:group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all" />
-          </div>
-          <div>
-            <span className="text-xs sm:text-sm font-serif font-bold text-stone-900 dark:text-parchment-50 block leading-tight mb-0.5">
-              Decision Journal
-            </span>
-            <span className="text-[11px] text-stone-500 dark:text-stone-400 block truncate">
-              Your private reflections
-            </span>
-          </div>
-        </button>
+      <details className="mt-4 rounded-2xl bg-stone-100/50 dark:bg-stone-900/40 border border-stone-200/60 dark:border-stone-800/60 group transition-all">
+        <summary className="p-3.5 sm:p-4 text-xs font-mono font-semibold text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 cursor-pointer list-none flex items-center justify-between select-none">
+          <span className="flex items-center gap-2">
+            <span>More tools & reflections</span>
+          </span>
+          <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 group-open:rotate-90 transition-transform">▸</span>
+        </summary>
+        <div className="p-3.5 sm:p-4 pt-0 border-t border-stone-200/40 dark:border-stone-800/40 space-y-3">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3 pt-3">
+            {/* Card 1: Decision Journal */}
+            <button
+              type="button"
+              onClick={() => {
+                soundEngine.playClick();
+                setShowJournalModal(true);
+              }}
+              className="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-stone-900/80 hover:bg-stone-100 dark:hover:bg-stone-850 border border-stone-200/70 dark:border-stone-800/70 transition-all text-left flex flex-col justify-between cursor-pointer group hover:border-amber-500/40"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <BookMarked aria-hidden="true" className="w-4 h-4" />
+                </div>
+                <ArrowRight aria-hidden="true" className="w-3.5 h-3.5 text-stone-400 group-hover:text-amber-600 dark:group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all" />
+              </div>
+              <div>
+                <span className="text-xs sm:text-sm font-serif font-bold text-stone-900 dark:text-parchment-50 block leading-tight mb-0.5">
+                  Decision Journal
+                </span>
+                <span className="text-[11px] text-stone-500 dark:text-stone-400 block truncate">
+                  Your private reflections
+                </span>
+              </div>
+            </button>
 
-        {/* Card 2: Character Arcs */}
-        <button
-          type="button"
-          onClick={() => {
-            soundEngine.playClick();
-            setSelectedCharacterArcId(undefined);
-            setSelectedMomentIndex(undefined);
-            setShowPeopleModal(true);
-          }}
-          className="p-3.5 sm:p-4 rounded-2xl bg-stone-100/70 dark:bg-stone-900/60 hover:bg-stone-200/50 dark:hover:bg-stone-850/80 border border-stone-200/70 dark:border-stone-800/70 transition-all text-left flex flex-col justify-between cursor-pointer group hover:border-amber-500/40"
-        >
-          <div className="flex items-center justify-between mb-2">
-            <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-              <Users aria-hidden="true" className="w-4 h-4" />
-            </div>
-            <ArrowRight aria-hidden="true" className="w-3.5 h-3.5 text-stone-400 group-hover:text-amber-600 dark:group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all" />
-          </div>
-          <div>
-            <span className="text-xs sm:text-sm font-serif font-bold text-stone-900 dark:text-parchment-50 block leading-tight mb-0.5">
-              Character Arcs
-            </span>
-            <span className="text-[11px] text-stone-500 dark:text-stone-400 block truncate">
-              Follow biblical journeys
-            </span>
-          </div>
-        </button>
+            {/* Card 2: Character Arcs */}
+            <button
+              type="button"
+              onClick={() => {
+                soundEngine.playClick();
+                setSelectedCharacterArcId(undefined);
+                setSelectedMomentIndex(undefined);
+                setShowPeopleModal(true);
+              }}
+              className="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-stone-900/80 hover:bg-stone-100 dark:hover:bg-stone-850 border border-stone-200/70 dark:border-stone-800/70 transition-all text-left flex flex-col justify-between cursor-pointer group hover:border-amber-500/40"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Users aria-hidden="true" className="w-4 h-4" />
+                </div>
+                <ArrowRight aria-hidden="true" className="w-3.5 h-3.5 text-stone-400 group-hover:text-amber-600 dark:group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all" />
+              </div>
+              <div>
+                <span className="text-xs sm:text-sm font-serif font-bold text-stone-900 dark:text-parchment-50 block leading-tight mb-0.5">
+                  Character Arcs
+                </span>
+                <span className="text-[11px] text-stone-500 dark:text-stone-400 block truncate">
+                  Follow biblical journeys
+                </span>
+              </div>
+            </button>
 
-        {/* Card 3: Collection */}
-        <button
-          type="button"
-          onClick={() => {
-            soundEngine.playSnap();
-            setShowRelics(prev => !prev);
-          }}
-          className={`p-3.5 sm:p-4 rounded-2xl border transition-all text-left flex flex-col justify-between cursor-pointer group ${
-            showRelics 
-              ? 'bg-amber-500/15 border-amber-500/50 shadow-xs' 
-              : 'bg-stone-100/70 dark:bg-stone-900/60 hover:bg-stone-200/50 dark:hover:bg-stone-850/80 border-stone-200/70 dark:border-stone-800/70 hover:border-amber-500/40'
-          }`}
-        >
-          <div className="flex items-center justify-between mb-2">
-            <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-              <Award aria-hidden="true" className="w-4 h-4" />
-            </div>
-            <span className="text-[10px] font-mono font-bold text-amber-800 dark:text-amber-400 px-1.5 py-0.5 rounded-full bg-amber-500/10">
-              {unlockedRelics.length}/{ALL_RELICS.length}
-            </span>
-          </div>
-          <div>
-            <span className="text-xs sm:text-sm font-serif font-bold text-stone-900 dark:text-parchment-50 block leading-tight mb-0.5">
-              Collection
-            </span>
-            <span className="text-[11px] text-stone-500 dark:text-stone-400 block truncate">
-              {showRelics ? 'Hide milestones' : 'Milestone rewards'}
-            </span>
-          </div>
-        </button>
+            {/* Card 3: Collection */}
+            <button
+              type="button"
+              onClick={() => {
+                soundEngine.playSnap();
+                setShowRelics(prev => !prev);
+              }}
+              className={`p-3.5 sm:p-4 rounded-2xl border transition-all text-left flex flex-col justify-between cursor-pointer group ${
+                showRelics 
+                  ? 'bg-amber-500/15 border-amber-500/50 shadow-xs' 
+                  : 'bg-white dark:bg-stone-900/80 hover:bg-stone-100 dark:hover:bg-stone-850 border-stone-200/70 dark:border-stone-800/70 hover:border-amber-500/40'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Award aria-hidden="true" className="w-4 h-4" />
+                </div>
+                <span className="text-[10px] font-mono font-bold text-amber-800 dark:text-amber-400 px-1.5 py-0.5 rounded-full bg-amber-500/10">
+                  {unlockedRelics.length}/{ALL_RELICS.length}
+                </span>
+              </div>
+              <div>
+                <span className="text-xs sm:text-sm font-serif font-bold text-stone-900 dark:text-parchment-50 block leading-tight mb-0.5">
+                  Collection
+                </span>
+                <span className="text-[11px] text-stone-500 dark:text-stone-400 block truncate">
+                  {showRelics ? 'Hide milestones' : 'Milestone rewards'}
+                </span>
+              </div>
+            </button>
 
-        {/* Card 4: How Testament Works */}
-        <button
-          type="button"
-          onClick={() => {
-            soundEngine.playClick();
-            if (onOpenHowItWorks) onOpenHowItWorks();
-          }}
-          className="p-3.5 sm:p-4 rounded-2xl bg-stone-100/70 dark:bg-stone-900/60 hover:bg-stone-200/50 dark:hover:bg-stone-850/80 border border-stone-200/70 dark:border-stone-800/70 transition-all text-left flex flex-col justify-between cursor-pointer group hover:border-amber-500/40"
-        >
-          <div className="flex items-center justify-between mb-2">
-            <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-              <ShieldCheck aria-hidden="true" className="w-4 h-4" />
-            </div>
-            <ArrowRight aria-hidden="true" className="w-3.5 h-3.5 text-stone-400 group-hover:text-amber-600 dark:group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all" />
+            {/* Card 4: How Testament Works */}
+            <button
+              type="button"
+              onClick={() => {
+                soundEngine.playClick();
+                if (onOpenHowItWorks) onOpenHowItWorks();
+              }}
+              className="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-stone-900/80 hover:bg-stone-100 dark:hover:bg-stone-850 border border-stone-200/70 dark:border-stone-800/70 transition-all text-left flex flex-col justify-between cursor-pointer group hover:border-amber-500/40"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <ShieldCheck aria-hidden="true" className="w-4 h-4" />
+                </div>
+                <ArrowRight aria-hidden="true" className="w-3.5 h-3.5 text-stone-400 group-hover:text-amber-600 dark:group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all" />
+              </div>
+              <div>
+                <span className="text-xs sm:text-sm font-serif font-bold text-stone-900 dark:text-parchment-50 block leading-tight mb-0.5">
+                  How It Works
+                </span>
+                <span className="text-[11px] text-stone-500 dark:text-stone-400 block truncate">
+                  Translations & privacy
+                </span>
+              </div>
+            </button>
+
+            {/* Card 5: Calibration / Onboarding */}
+            {onOpenOnboarding && (
+              <button
+                type="button"
+                onClick={() => {
+                  soundEngine.playClick();
+                  onOpenOnboarding();
+                }}
+                className="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-stone-900/80 hover:bg-stone-100 dark:hover:bg-stone-850 border border-stone-200/70 dark:border-stone-800/70 transition-all text-left flex flex-col justify-between cursor-pointer group hover:border-amber-500/40"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <Compass aria-hidden="true" className="w-4 h-4" />
+                  </div>
+                  <ArrowRight aria-hidden="true" className="w-3.5 h-3.5 text-stone-400 group-hover:text-amber-600 dark:group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all" />
+                </div>
+                <div>
+                  <span className="text-xs sm:text-sm font-serif font-bold text-stone-900 dark:text-parchment-50 block leading-tight mb-0.5">
+                    Calibration
+                  </span>
+                  <span className="text-[11px] text-stone-500 dark:text-stone-400 block truncate">
+                    Re-tune preferences
+                  </span>
+                </div>
+              </button>
+            )}
           </div>
-          <div>
-            <span className="text-xs sm:text-sm font-serif font-bold text-stone-900 dark:text-parchment-50 block leading-tight mb-0.5">
-              How It Works
-            </span>
-            <span className="text-[11px] text-stone-500 dark:text-stone-400 block truncate">
-              Translations & privacy
-            </span>
-          </div>
-        </button>
-      </div>
 
           {/* Relics / Collection Drawer (Expands right below the grid when tapped) */}
           {showRelics && (
-            <div className="mt-3 p-4 rounded-2xl bg-stone-100/70 dark:bg-stone-900/60 border border-amber-500/30 space-y-2.5 transition-all">
+            <div className="p-4 rounded-2xl bg-white dark:bg-stone-900/90 border border-amber-500/30 space-y-2.5 transition-all">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold block">
                   Unlocked Collection ({unlockedRelics.length}/{ALL_RELICS.length})
@@ -963,22 +855,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           )}
         </div>
+      </details>
+    </div>
 
         {/* =========================================================================
             RIGHT RAIL (Desktop lg:col-span-5) / Stacked Below on Mobile:
-            Progression & Retention Supporting Cards
+            PART 7: YESTERDAY'S VERSE RECALL CARD
             ========================================================================= */}
         <div className="mt-6 lg:mt-0 lg:col-span-5 xl:col-span-5 space-y-5">
-
-        {/* Feature 1: Locked Tomorrow Teaser Card ("Can't peek") */}
-        <TomorrowTeaserCard />
-
-        {/* Feature 5: "Previously On..." Weekly Recap Card */}
-        <WeeklyRecapCard />
-
-        {/* =========================================================================
-            PART 7: YESTERDAY'S VERSE RECALL CARD (N-2: "Remember yesterday's verse?")
-            ========================================================================= */}
         {yesterdayVerse && !yesterdayRecalled && (
           <div className="p-5 rounded-2xl bg-stone-100/70 dark:bg-stone-900/60 transition-all">
             <div className="flex items-center justify-between gap-2 mb-2">
@@ -1027,7 +911,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     className="flex-1 py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer"
                   >
                     <Check className="w-3.5 h-3.5" />
-                    <span>Got it! (+10 XP)</span>
+                    <span>Got it!</span>
                   </button>
 
                   <button
@@ -1164,25 +1048,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
           }
           setDailyMission(getDailyMissionSync(dateKey, 0, activeBattlefieldId));
         }}
-      />
-
-      {/* Settings Modal (Text Size Scale, Voice Preview & Selection, Quick Nav) */}
-      <SettingsModal
-        isOpen={showSettingsModal}
-        onClose={() => setShowSettingsModal(false)}
-        onOpenOnboarding={onOpenOnboarding}
-        onOpenReminders={() => setShowCalendarModal(true)}
-        onOpenJournal={() => setShowJournalModal(true)}
-        onOpenPeople={() => {
-          setSelectedCharacterArcId(undefined);
-          setSelectedMomentIndex(undefined);
-          setShowPeopleModal(true);
-        }}
-        onOpenRelics={() => setShowRelics(true)}
-        onOpenHowItWorks={onOpenHowItWorks}
-        onOpenLearnerMode={() => setShowModeModal(true)}
-        activeLearnerMode={learnerModesState.activeMode}
-        relicsCount={{ unlocked: unlockedRelics.length, total: ALL_RELICS.length }}
       />
     </div>
   );

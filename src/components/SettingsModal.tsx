@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Type, Volume2, Mic, Check } from 'lucide-react';
+import { Type, Volume2, Mic, Check, Sun, Moon, Globe, BookOpen, Award } from 'lucide-react';
 import { useFontSize, FONT_SCALE_STEPS, type FontScaleStep } from '../context/FontSizeContext';
-import { useLanguage } from '../context/LanguageContext';
+import { useLanguage, type Language } from '../context/LanguageContext';
 import { soundEngine, NARRATOR_VOICES, type NarratorProfile } from '../utils/audio';
+import { getStoredTheme, applyTheme, type AppTheme } from '../utils/theme';
+import { getShowXpPreference, setShowXpPreference } from '../utils/userPreferences';
+import { loadReadingPlace, saveReadingPlace } from '../utils/readingPlace';
+import { BIBLE_TRANSLATIONS, type TranslationId } from '../utils/bibleService';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -34,9 +38,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   relicsCount,
 }) => {
   const { currentStep, setFontScaleStep } = useFontSize();
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
   const [isPreviewingVoice, setIsPreviewingVoice] = useState(false);
   const [currentVoice, setCurrentVoice] = useState<NarratorProfile>(() => soundEngine.getNarratorProfile());
+  const [currentTheme, setCurrentTheme] = useState<AppTheme>(() => getStoredTheme());
+  const [showXp, setShowXp] = useState<boolean>(() => getShowXpPreference());
+  const [currentTranslation, setCurrentTranslation] = useState<TranslationId>(() => {
+    const place = loadReadingPlace();
+    return place?.translation || 'web';
+  });
 
   useEffect(() => {
     const handleVoiceChange = (e: Event) => {
@@ -124,8 +134,155 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </button>
         </div>
 
+        {/* Theme (Daybreak / Vespers) */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-xs sm:text-sm font-medium text-stone-800 dark:text-stone-200">
+            <div className="flex items-center gap-2">
+              {currentTheme === 'dark' ? <Moon className="w-4 h-4 text-amber-400" /> : <Sun className="w-4 h-4 text-amber-600" />}
+              <span>Theme</span>
+            </div>
+            <span className="text-xs font-mono font-bold text-amber-700 dark:text-amber-400 uppercase">
+              {currentTheme === 'dark' ? 'Vespers (Dark)' : 'Daybreak (Light)'}
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                soundEngine.playClick();
+                applyTheme('light');
+                setCurrentTheme('light');
+              }}
+              className={`p-3 rounded-2xl border text-xs font-semibold flex items-center justify-center gap-2 min-h-[44px] cursor-pointer transition-all ${
+                currentTheme === 'light'
+                  ? 'bg-amber-500/20 border-amber-500 text-stone-900 font-bold shadow-xs'
+                  : 'bg-stone-50 dark:bg-stone-850 border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-300'
+              }`}
+            >
+              <Sun className="w-3.5 h-3.5 text-amber-600" />
+              <span>Daybreak (Light)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                soundEngine.playClick();
+                applyTheme('dark');
+                setCurrentTheme('dark');
+              }}
+              className={`p-3 rounded-2xl border text-xs font-semibold flex items-center justify-center gap-2 min-h-[44px] cursor-pointer transition-all ${
+                currentTheme === 'dark'
+                  ? 'bg-amber-500/20 border-amber-500 text-parchment-50 font-bold shadow-xs'
+                  : 'bg-stone-50 dark:bg-stone-850 border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-300'
+              }`}
+            >
+              <Moon className="w-3.5 h-3.5 text-amber-400" />
+              <span>Vespers (Dark)</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Translation Selector */}
+        <div className="space-y-2 pt-3 border-t border-stone-200 dark:border-stone-800">
+          <div className="flex items-center justify-between text-xs sm:text-sm font-medium text-stone-800 dark:text-stone-200">
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              <span>Bible Translation</span>
+            </div>
+            <span className="text-xs font-mono font-bold text-amber-700 dark:text-amber-400 uppercase">
+              {currentTranslation.toUpperCase()}
+            </span>
+          </div>
+          <select
+            value={currentTranslation}
+            onChange={(e) => {
+              const next = e.target.value as TranslationId;
+              soundEngine.playClick();
+              setCurrentTranslation(next);
+              const currentPlace = loadReadingPlace();
+              saveReadingPlace({
+                bookId: currentPlace?.bookId || 'GEN',
+                bookName: currentPlace?.bookName || 'Genesis',
+                chapter: currentPlace?.chapter || 1,
+                translation: next
+              });
+              window.dispatchEvent(new CustomEvent('testament-translation-changed', { detail: { translation: next } }));
+            }}
+            className="w-full p-2.5 rounded-2xl bg-stone-100 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-xs sm:text-sm font-medium text-stone-900 dark:text-parchment-50 focus:outline-none min-h-[44px] cursor-pointer"
+          >
+            {BIBLE_TRANSLATIONS.map((tr) => (
+              <option key={tr.id} value={tr.id}>
+                {tr.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Language Selector */}
+        <div className="space-y-2 pt-3 border-t border-stone-200 dark:border-stone-800">
+          <div className="flex items-center justify-between text-xs sm:text-sm font-medium text-stone-800 dark:text-stone-200">
+            <div className="flex items-center gap-2">
+              <Globe className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              <span>Language</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-1.5">
+            {(['en', 'es', 'fr'] as Language[]).map((langCode) => {
+              const isSelected = language === langCode;
+              const label = langCode === 'en' ? 'English 🇺🇸' : langCode === 'es' ? 'Español 🇪🇸' : 'Français 🇫🇷';
+              return (
+                <button
+                  key={langCode}
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playClick();
+                    setLanguage(langCode);
+                  }}
+                  className={`py-2 rounded-xl text-xs font-semibold min-h-[44px] flex items-center justify-center transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-amber-500 text-stone-950 font-bold shadow-xs'
+                      : 'bg-stone-100 dark:bg-stone-850 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-800'
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Show XP & Ranks Switch */}
+        <div className="pt-3 border-t border-stone-200 dark:border-stone-800 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Award className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+            <div>
+              <div className="text-xs sm:text-sm font-medium text-stone-800 dark:text-stone-200">Show XP and ranks</div>
+              <div className="text-[11px] text-stone-500 dark:text-stone-400">Keep learning calm and distraction-free</div>
+            </div>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={showXp}
+            onClick={() => {
+              soundEngine.playSnap();
+              const next = !showXp;
+              setShowXp(next);
+              setShowXpPreference(next);
+            }}
+            className={`w-12 h-7 rounded-full p-1 transition-colors cursor-pointer shrink-0 ${
+              showXp ? 'bg-amber-500' : 'bg-stone-300 dark:bg-stone-700'
+            }`}
+          >
+            <div
+              className={`w-5 h-5 rounded-full bg-white transition-transform ${
+                showXp ? 'translate-x-5' : 'translate-x-0'
+              }`}
+            />
+          </button>
+        </div>
+
         {/* Section 1: Text Size Picker */}
-        <div className="space-y-2.5">
+        <div className="space-y-2.5 pt-3 border-t border-stone-200 dark:border-stone-800">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-stone-800 dark:text-stone-200 font-medium text-xs sm:text-sm">
               <Type className="w-4 h-4 text-amber-600 dark:text-amber-400" />

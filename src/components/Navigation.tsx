@@ -4,7 +4,6 @@ import {
   BookOpen, 
   Brain, 
   Shield, 
-  GitFork, 
   Car, 
   Volume2, 
   VolumeX, 
@@ -17,8 +16,9 @@ import { soundEngine } from '../utils/audio';
 import { ThemeToggle } from './ThemeToggle';
 import { LanguageToggle } from './LanguageToggle';
 import { useLanguage } from '../context/LanguageContext';
+import { APP_VERSION } from '../config/version';
 
-export type NavTab = 'dashboard' | 'library' | 'wordforge' | 'dilemmas' | 'arsenal';
+export type NavTab = 'dashboard' | 'library' | 'practice' | 'arsenal' | 'wordforge' | 'dilemmas';
 
 interface NavigationProps {
   currentTab: NavTab | 'not-found';
@@ -45,34 +45,34 @@ export const Navigation: React.FC<NavigationProps> = ({
 }) => {
   const { t, language } = useLanguage();
 
+  const isTabActive = (itemTab: NavTab) => {
+    if (itemTab === 'practice') {
+      return currentTab === 'practice' || currentTab === 'wordforge' || currentTab === 'dilemmas';
+    }
+    return currentTab === itemTab;
+  };
+
   const navItems: { tab: NavTab; label: string; mobileLabel?: string; tooltip: string; icon: React.ReactNode }[] = [
     { 
       tab: 'dashboard', 
       label: t('nav.home'), 
-      mobileLabel: language === 'fr' ? 'Accueil' : language === 'es' ? 'Inicio' : t('nav.home'),
+      mobileLabel: language === 'fr' ? 'Aujourd\'hui' : language === 'es' ? 'Hoy' : t('nav.home'),
       tooltip: t('nav.homeTooltip'), 
       icon: <Compass className="w-4 h-4 md:w-4 md:h-4" /> 
     },
     { 
       tab: 'library', 
       label: t('nav.library'), 
-      mobileLabel: language === 'fr' ? 'Biblio' : language === 'es' ? 'Biblia' : t('nav.library'),
+      mobileLabel: language === 'fr' ? 'Bible' : language === 'es' ? 'Biblia' : t('nav.library'),
       tooltip: t('nav.libraryTooltip'), 
       icon: <BookOpen className="w-4 h-4 md:w-4 md:h-4" /> 
     },
     { 
-      tab: 'wordforge', 
-      label: t('nav.memorize'), 
-      mobileLabel: language === 'fr' ? 'Mémoire' : language === 'es' ? 'Memoria' : t('nav.memorize'),
-      tooltip: t('nav.memorizeTooltip'), 
+      tab: 'practice', 
+      label: t('nav.practice'), 
+      mobileLabel: language === 'fr' ? 'Pratique' : language === 'es' ? 'Práctica' : t('nav.practice'),
+      tooltip: t('nav.practiceTooltip'), 
       icon: <Brain className="w-4 h-4 md:w-4 md:h-4" /> 
-    },
-    { 
-      tab: 'dilemmas', 
-      label: t('nav.dilemmas'), 
-      mobileLabel: language === 'fr' ? 'Dilemmes' : language === 'es' ? 'Dilemas' : t('nav.dilemmas'),
-      tooltip: t('nav.dilemmasTooltip'), 
-      icon: <GitFork className="w-4 h-4 md:w-4 md:h-4" /> 
     },
     { 
       tab: 'arsenal', 
@@ -118,10 +118,10 @@ export const Navigation: React.FC<NavigationProps> = ({
                       soundEngine.playClick();
                       onOpenWhatsNew();
                     }}
-                    title="What's new in v1.23.0"
+                    title={`What's new in ${APP_VERSION}`}
                     className="text-[10px] font-mono px-1.5 py-0.2 rounded-full text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-amber-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer"
                   >
-                    v1.23.0
+                    {APP_VERSION}
                   </button>
                 )}
               </div>
@@ -131,7 +131,7 @@ export const Navigation: React.FC<NavigationProps> = ({
           {/* Central Nav Tabs */}
           <nav className="flex items-center gap-1 bg-stone-100 dark:bg-stone-950/80 p-1 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-inner">
             {navItems.map((item) => {
-              const isActive = currentTab === item.tab;
+              const isActive = isTabActive(item.tab);
               return (
                 <button
                   key={item.tab}
@@ -244,9 +244,9 @@ export const Navigation: React.FC<NavigationProps> = ({
         aria-label="Mobile Navigation" 
         className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-ink/95 backdrop-blur-lg border-t border-stone-200 dark:border-stone-800/90 px-1 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg"
       >
-        <div className="grid grid-cols-5 items-center w-full max-w-lg mx-auto">
+        <div className="grid grid-cols-4 items-center w-full max-w-lg mx-auto">
           {navItems.map((item) => {
-            const isActive = currentTab === item.tab;
+            const isActive = isTabActive(item.tab);
             return (
               <button
                 key={item.tab}

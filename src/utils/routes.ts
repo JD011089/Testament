@@ -5,8 +5,9 @@ export type AppTab = NavTab | 'not-found';
 export const TAB_PATHS: Record<NavTab, string> = {
   dashboard: '/',
   library: '/library',
-  wordforge: '/memorize',
-  dilemmas: '/dilemmas',
+  practice: '/practice',
+  wordforge: '/practice',
+  dilemmas: '/practice',
   arsenal: '/saved',
 };
 
@@ -14,8 +15,9 @@ export function tabFromPath(pathname: string): AppTab {
   const path = pathname.replace(/\/+$/, '') || '/';
   if (path === '/') return 'dashboard';
   if (path === '/library') return 'library';
-  if (path === '/memorize' || path === '/wordforge') return 'wordforge';
-  if (path === '/dilemmas') return 'dilemmas';
+  if (path === '/practice') return 'practice';
+  if (path === '/memorize' || path === '/wordforge') return 'practice';
+  if (path === '/dilemmas') return 'practice';
   if (path === '/saved' || path === '/arsenal') return 'arsenal';
   if (path === '/privacy' || path === '/privacy.html') return 'dashboard';
   return 'not-found';

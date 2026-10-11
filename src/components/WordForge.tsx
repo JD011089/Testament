@@ -22,8 +22,6 @@ import {
   Calendar
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import { LanguageToggle } from './LanguageToggle';
-import { ThemeToggle } from './ThemeToggle';
 
 interface WordItem {
   id: string;
@@ -146,6 +144,8 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
   const [fsrsRated, setFsrsRated] = useState<boolean>(false);
   const [scheduledNextDays, setScheduledNextDays] = useState<number | null>(null);
 
+  const [lastWrongChip, setLastWrongChip] = useState<string | null>(null);
+
   const handleSelectRecallChip = (word: string) => {
     const targetIdx = blankIndices[activeBlankStep];
     const expectedWord = verseWords[targetIdx]?.replace(/[^\w]/g, '').toLowerCase();
@@ -154,6 +154,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
       const nextFilled = { ...filledBlanks, [targetIdx]: verseWords[targetIdx] };
       setFilledBlanks(nextFilled);
       setRecallError(null);
+      setLastWrongChip(null);
       if (activeBlankStep + 1 < blankIndices.length) {
         setActiveBlankStep(prev => prev + 1);
       } else {
@@ -174,8 +175,12 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
       }
     } else {
       soundEngine.playClick();
+      setLastWrongChip(word);
       setRecallError(`Try again for blank #${activeBlankStep + 1}`);
-      setTimeout(() => setRecallError(null), 2000);
+      setTimeout(() => {
+        setRecallError(null);
+        setLastWrongChip(null);
+      }, 2000);
     }
   };
 
@@ -549,26 +554,33 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                 </p>
               </div>
 
-              {/* Word Bank Chips */}
+              {/* Word Bank Chips (Mobile-first: displayed above verse on small screens) */}
               {!isCompleted ? (
                 <div className="space-y-2.5">
                   <span className="text-xs text-stone-500 dark:text-stone-400 block font-medium">
                     Tap the missing word for the highlighted blank:
                   </span>
                   <div className="flex flex-wrap gap-2">
-                    {candidateChips.map((chip, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => handleSelectRecallChip(chip)}
-                        className="px-4 py-2.5 rounded-xl bg-white dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 dark:hover:bg-amber-400 dark:hover:text-stone-950 text-stone-900 dark:text-parchment-100 font-semibold text-xs sm:text-sm shadow-xs transition-all cursor-pointer"
-                      >
-                        {chip}
-                      </button>
-                    ))}
+                    {candidateChips.map((chip, idx) => {
+                      const isWrong = lastWrongChip === chip;
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => handleSelectRecallChip(chip)}
+                          className={`px-4 py-2.5 rounded-xl font-semibold text-xs sm:text-sm shadow-xs transition-all cursor-pointer ${
+                            isWrong
+                              ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/40 animate-shake'
+                              : 'bg-white dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 dark:hover:bg-amber-400 dark:hover:text-stone-950 text-stone-900 dark:text-parchment-100'
+                          }`}
+                        >
+                          {chip}
+                        </button>
+                      );
+                    })}
                   </div>
                   {recallError && (
-                    <p className="text-xs text-rose-500 dark:text-rose-400 font-medium">
+                    <p className="text-xs text-rose-600 dark:text-rose-400 font-medium">
                       {recallError}
                     </p>
                   )}
@@ -586,7 +598,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                   <button
                     type="button"
                     onClick={onNextVerse}
-                    className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer shrink-0"
+                    className="px-4 py-2 rounded-xl btn-gold text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer shrink-0"
                   >
                     <span>Next Verse</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -954,11 +966,6 @@ export const WordForge: React.FC<WordForgeProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Mobile Quick Controls */}
-          <div className="flex md:hidden items-center gap-1.5 mr-1">
-            <LanguageToggle compact />
-            <ThemeToggle compact />
-          </div>
 
           <button
             onClick={() => {

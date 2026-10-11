@@ -68,7 +68,7 @@ export const HowTestamentWorksModal: React.FC<HowTestamentWorksModalProps> = ({
             </h3>
           </div>
           <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed pl-10">
-            Scripture defaults to the <strong className="text-stone-900 dark:text-stone-100">Christian Standard Bible (CSB)</strong> for faithful accuracy in clear modern English. Every verse card includes a 1-tap toggle to compare directly with the <strong className="text-stone-900 dark:text-stone-100">King James Version (KJV)</strong>.
+            Scripture in the reader defaults to the <strong className="text-stone-900 dark:text-stone-100">World English Bible (WEB)</strong> for clear, copyright-free modern English, with seamless switching to the classic <strong className="text-stone-900 dark:text-stone-100">King James Version (KJV)</strong> and curated modern passages (CSB/BSB). Reina-Valera (RVR1960) and Louis Segond (LSG) power our Spanish and French experiences.
           </p>
         </div>
 

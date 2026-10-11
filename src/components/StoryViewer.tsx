@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { StoryQuest, StoryAct } from '../types';
 import { soundEngine } from '../utils/audio';
-import confetti from 'canvas-confetti';
 import { 
   ArrowLeft, 
   ArrowRight, 
@@ -10,7 +9,6 @@ import {
   Pause,
   CheckCircle2, 
   Sparkles, 
-  Award, 
   BookOpen, 
   ChevronDown, 
   ShieldAlert, 
@@ -18,13 +16,15 @@ import {
   Lock,
   Share2,
   Download,
-  Calendar
+  Calendar,
+  Bookmark
 } from 'lucide-react';
 import { CalendarRemindersModal } from './CalendarRemindersModal';
 import { BackstoryCard } from './BackstoryCard';
 import { saveOrShareVerseCard } from '../utils/verseCardGenerator';
 import { saveDecisionJournalEntry } from '../utils/decisionJournal';
 import { markSeriesMomentCompleted } from '../utils/weeklySeriesEngine';
+import { getDailyStreakCount } from '../utils/dailyEngine';
 import { 
   getLocalPersonalization, 
   fetchGeminiPersonalization, 
@@ -104,6 +104,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
   onBack, 
   onCompleteAct, 
   completedActs,
+  onOpenWordForge,
   onRewardXP,
   currentXp
 }) => {
@@ -483,19 +484,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
       setRankPromotion(promotion.newRank);
     }
 
-    // N-10: Trigger celebration state honoring prefers-reduced-motion
-    const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!prefersReducedMotion) {
-      try {
-        confetti({
-          particleCount: 50,
-          spread: 70,
-          origin: { y: 0.6 }
-        });
-      } catch {
-        // safe fallback
-      }
-    }
+    // Sound transition
     soundEngine.playVictory();
 
     // Reward XP & mark progress if not already completed
@@ -589,8 +578,23 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     }
   };
 
-  // Feature 7: Carry It With You — Save lock-screen card or native share
-  const handleSaveVerseCard = async () => {
+  // Save verse card: saves to Saved collection (bookmarks)
+  const handleSaveVerseCard = () => {
+    soundEngine.playSnap();
+    try {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('testament-verse-bookmarked', { detail: keyVerseRef }));
+      }
+      setVerseCardFeedback('Saved to your collection!');
+      setTimeout(() => setVerseCardFeedback(null), 3000);
+    } catch {
+      setVerseCardFeedback('Could not save to collection.');
+      setTimeout(() => setVerseCardFeedback(null), 3000);
+    }
+  };
+
+  // Feature 7: Carry It With You — Share or download lock-screen PNG card
+  const handleShareImageCard = async () => {
     soundEngine.playSnap();
     setIsSavingVerseCard(true);
     setVerseCardFeedback(null);
@@ -829,9 +833,9 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   disabled={!isDecisionReady}
                   aria-describedby={!isDecisionReady ? "decision-disabled-hint" : undefined}
                   onClick={() => handleAdvanceToStory(false)}
-                  className={`w-full py-3.5 px-6 rounded-2xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all ${
+                  className={`w-full py-3.5 px-6 rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 transition-all ${
                     isDecisionReady
-                      ? 'bg-amber-500 hover:bg-amber-400 text-stone-950 cursor-pointer hover:scale-[1.01] active:scale-[0.99]'
+                      ? 'btn-gold cursor-pointer'
                       : 'bg-stone-200 dark:bg-stone-800 text-stone-400 dark:text-stone-500 cursor-not-allowed opacity-60'
                   }`}
                 >
@@ -1003,16 +1007,27 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                     {useKjv ? 'Showing KJV' : 'CSB (Tap for KJV)'}
                   </button>
 
-                  {/* Feature 7: Save lock-screen verse card */}
+                  {/* Save to Saved collection */}
+                  <button
+                    type="button"
+                    onClick={handleSaveVerseCard}
+                    className="text-[11px] sm:text-xs font-mono px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-900 dark:text-amber-200 transition-colors inline-flex items-center gap-1 cursor-pointer"
+                    title="Add verse to your Saved collection"
+                  >
+                    <Bookmark aria-hidden="true" className="w-3.5 h-3.5" />
+                    <span>Save card</span>
+                  </button>
+
+                  {/* Share/Download Lock-screen image */}
                   <button
                     type="button"
                     disabled={isSavingVerseCard}
-                    onClick={handleSaveVerseCard}
-                    className="text-[11px] sm:text-xs font-mono px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-900 dark:text-amber-200 transition-colors inline-flex items-center gap-1 cursor-pointer"
-                    title="Save as phone lock-screen card or share"
+                    onClick={handleShareImageCard}
+                    className="text-[11px] sm:text-xs font-mono px-2.5 py-1 rounded-lg bg-stone-200/80 hover:bg-stone-300 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 transition-colors inline-flex items-center gap-1 cursor-pointer"
+                    title="Export or share Daybreak lock-screen image"
                   >
                     <Download aria-hidden="true" className="w-3.5 h-3.5" />
-                    <span>{isSavingVerseCard ? 'Saving…' : 'Save card'}</span>
+                    <span>{isSavingVerseCard ? 'Exporting…' : 'Share image'}</span>
                   </button>
                 </div>
               </div>
@@ -1198,7 +1213,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
               <button
                 type="button"
                 onClick={handleAdvanceToLiveIt}
-                className="w-full py-3.5 px-6 rounded-2xl font-bold text-xs sm:text-sm bg-amber-500 hover:bg-amber-400 text-stone-950 flex items-center justify-center gap-2 shadow-md transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+                className="w-full py-3.5 px-6 rounded-2xl btn-gold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
                 <span>Live it today</span>
                 <ArrowRight aria-hidden="true" className="w-4 h-4" />
@@ -1292,41 +1307,54 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
               </motion.div>
             )}
 
-            {/* Inline Consolidated Celebration Card (ZERO MODALS) */}
-            <div className="p-4 sm:p-5 rounded-3xl bg-emerald-500/15 dark:bg-emerald-950/40 text-stone-900 dark:text-parchment-100 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-xl shrink-0">
-                  <CheckCircle2 aria-hidden="true" className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <div>
-                  <div className="text-xs sm:text-sm font-mono uppercase tracking-widest text-emerald-800 dark:text-emerald-400 font-bold">
-                    Mission Complete
+            {/* Calm "Done for today" Card */}
+            <div className="p-5 sm:p-6 rounded-3xl bg-surface border border-line text-fg space-y-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-xl shrink-0">
+                    <CheckCircle2 aria-hidden="true" className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                   </div>
-                  <p className="text-xs sm:text-sm text-stone-700 dark:text-parchment-200 mt-0.5">
-                    +50 Scripture XP earned • Streak updated!
-                  </p>
-                  {/* N-3: Plain language saved memory verse */}
-                  <p className="text-[11px] sm:text-xs text-emerald-700 dark:text-emerald-400 mt-0.5 font-medium">
-                    {keyVerseRef} saved as today's memory verse
-                  </p>
+                  <div>
+                    <h3 className="text-base sm:text-lg font-serif font-bold text-fg">
+                      Done for today
+                    </h3>
+                    <p className="text-xs sm:text-sm text-fg-muted">
+                      {keyVerseRef} is locked into your daily rhythm.
+                    </p>
+                  </div>
                 </div>
+
+                {getDailyStreakCount() > 0 && (
+                  <div className="px-3 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-800 text-fg-secondary font-mono text-xs font-semibold shrink-0">
+                    🔥 {getDailyStreakCount()} day streak
+                  </div>
+                )}
               </div>
 
-              <div className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-800 dark:text-amber-300 font-mono font-bold text-xs sm:text-sm shrink-0">
-                <Award aria-hidden="true" className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                <span>+50 XP</span>
-              </div>
+              {/* Secondary Action: Practice your verse */}
+              {onOpenWordForge && (
+                <div className="pt-2 border-t border-line/60 flex items-center justify-between gap-3">
+                  <span className="text-xs text-fg-muted font-medium">Ready to memorize?</span>
+                  <button
+                    type="button"
+                    onClick={() => onOpenWordForge(keyVerseRef)}
+                    className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-stone-200/70 hover:bg-stone-300/70 dark:bg-stone-800 dark:hover:bg-stone-700 text-fg transition-all cursor-pointer"
+                  >
+                    Practice your verse
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Relic Unlocked if last act of a journey */}
             {quest && currentActIndex === quest.acts.length - 1 && quest.relicReward && (
-              <div className="p-4 sm:p-5 rounded-3xl bg-amber-500/15 dark:bg-amber-950/40 flex items-center gap-3">
+              <div className="p-4 sm:p-5 rounded-3xl bg-amber-500/10 border border-amber-500/20 flex items-center gap-3 text-fg">
                 <span aria-hidden="true" className="text-3xl shrink-0">🏆</span>
                 <div>
-                  <span className="text-[11px] font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold block">
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-accent-text font-bold block">
                     Collection Unlocked: {quest.relicReward.name}
                   </span>
-                  <p className="text-xs sm:text-sm text-stone-700 dark:text-stone-300">
+                  <p className="text-xs sm:text-sm text-fg-secondary">
                     {quest.relicReward.lesson}
                   </p>
                 </div>
@@ -1338,9 +1366,9 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
               <button
                 type="button"
                 onClick={handleShareCard}
-                className="w-full py-4 px-6 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs sm:text-sm lg:text-base flex items-center justify-center gap-2.5 shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer"
+                className="w-full py-4 px-6 rounded-2xl btn-gold text-xs sm:text-sm lg:text-base flex items-center justify-center gap-2.5 transition-all cursor-pointer"
               >
-                <Share2 aria-hidden="true" className="w-4 h-4 sm:w-5 sm:h-5 text-stone-950" />
+                <Share2 aria-hidden="true" className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span>{copiedShareCard ? "✓ Mission card copied to clipboard!" : "Share today's mission card"}</span>
               </button>
             </div>
@@ -1397,7 +1425,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
               <button
                 type="button"
                 onClick={handleFinishMission}
-                className="w-full py-3.5 px-6 rounded-2xl font-bold text-xs sm:text-sm bg-amber-500 hover:bg-amber-400 text-stone-950 flex items-center justify-center gap-2 shadow-md transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+                className="w-full py-3.5 px-6 rounded-2xl btn-gold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
                 <span>Done</span>
                 <CheckCircle2 aria-hidden="true" className="w-4 h-4" />

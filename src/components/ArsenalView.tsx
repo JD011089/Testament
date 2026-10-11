@@ -17,8 +17,6 @@ import {
   Calendar
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import { LanguageToggle } from './LanguageToggle';
-import { ThemeToggle } from './ThemeToggle';
 
 interface ArsenalViewProps {
   memorizedVerses: string[];
@@ -121,12 +119,6 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
           <p className="text-xs md:text-sm text-stone-600 dark:text-stone-400 mt-1 max-w-2xl">
             {t('arsenal.subtitle')}
           </p>
-        </div>
-
-        {/* Mobile Quick Controls */}
-        <div className="flex md:hidden items-center gap-1.5">
-          <LanguageToggle compact />
-          <ThemeToggle compact />
         </div>
       </div>
 
