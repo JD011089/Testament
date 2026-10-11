@@ -54,5 +54,7 @@
   <string name="test_reminder_subtitle">Send an instant sample notification to test</string>
   <string name="test_reminder_btn">Send now</string>
   <string name="test_reminder_toast">Test notification sent! Check your status bar.</string>
+  <string name="shortcut_reminder_short">Reminder</string>
+  <string name="shortcut_reminder_long">Daily Reminder</string>
   <string name="settings_privacy_note">Stored on this device only • No remote tracking or push servers</string>
 </resources>
