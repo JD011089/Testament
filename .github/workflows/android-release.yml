@@ -58,6 +58,8 @@ jobs:
         run: |
           chmod +x gradlew
           bubblewrap build --skipPwaValidation --signingKeyPath=/tmp/testament-release.keystore --signingKeyAlias="${{ secrets.KEY_ALIAS }}"
+          mv app-release-signed.apk "testament-${GITHUB_REF_NAME}.apk"
+          mv app-release-bundle.aab "testament-${GITHUB_REF_NAME}.aab"
 
       - name: Clean Keystore Temp File
         if: always()
@@ -68,15 +70,15 @@ jobs:
         with:
           name: testament-android-release
           path: |
-            twa/app-release-signed.apk
-            twa/app-release-bundle.aab
+            twa/testament-*.apk
+            twa/testament-*.aab
 
       - name: Attach APK & AAB to GitHub Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            twa/app-release-signed.apk
-            twa/app-release-bundle.aab
+            twa/testament-*.apk
+            twa/testament-*.aab
           generate_release_notes: true
 

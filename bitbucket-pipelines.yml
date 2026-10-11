@@ -32,9 +32,11 @@ pipelines:
             - export BUBBLEWRAP_KEYSTORE_PASSWORD="$KEYSTORE_PASSWORD"
             - export BUBBLEWRAP_KEY_PASSWORD="$KEY_PASSWORD"
             - bubblewrap build --skipPwaValidation --signingKeyPath=/tmp/testament-release.keystore --signingKeyAlias=$KEY_ALIAS
+            - mv app-release-signed.apk "testament-${BITBUCKET_TAG}.apk"
+            - mv app-release-bundle.aab "testament-${BITBUCKET_TAG}.aab"
             - rm -f /tmp/testament-release.keystore
             - echo "=== Build complete ==="
-            - ls -la app-release-signed.apk app-release-bundle.aab
+            - ls -la testament-${BITBUCKET_TAG}.apk testament-${BITBUCKET_TAG}.aab
           artifacts:
-            - twa/app-release-signed.apk
-            - twa/app-release-bundle.aab
+            - twa/testament-*.apk
+            - twa/testament-*.aab
