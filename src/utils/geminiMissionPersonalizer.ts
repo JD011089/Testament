@@ -166,8 +166,8 @@ function getApiKey(): string {
   } catch {
     // ignore
   }
-  // Default client key
-  return 'REDACTED_API_KEY';
+  // Default empty key if not configured
+  return '';
 }
 
 /**
