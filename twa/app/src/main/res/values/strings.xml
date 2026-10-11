@@ -15,14 +15,6 @@
      limitations under the License.
 -->
 <resources>
-  
-
-  <!--
-    The "fullscreen" and "fullscreen-sticky" TWA manifest values correspond to "immersive" and "sticky-immersive"
-    AndroidManifest values.
-  -->
-  
-
   <!--
     This variable below expresses the relationship between the app and the site,
     as documented in the TWA documentation at
@@ -37,6 +29,26 @@
             \"site\": \"https://testament-bible-learning.vercel.app\"
         }
     }]
-    
-  </string>  
+  </string>
+
+  <!-- Native Daily Reminder Settings Strings -->
+  <string name="settings_title">Daily Reminder</string>
+  <string name="settings_back_to_app">Back to Testament</string>
+  <string name="settings_header_desc">One gentle reminder each day when your daily mission is ready.</string>
+  <string name="daily_reminder_title">Daily reminder</string>
+  <string name="daily_reminder_subtitle">Opt-in notification once per day</string>
+  <string name="reminder_time_title">Reminder time</string>
+  <string name="reminder_time_subtitle">Tap to change daily delivery time</string>
+  <string name="permission_dialog_title">Allow daily reminders</string>
+  <string name="permission_dialog_message">Testament sends one gentle daily reminder when today\’s mission is ready.</string>
+  <string name="permission_dialog_positive">Continue</string>
+  <string name="permission_dialog_negative">Not now</string>
+  <string name="notification_channel_name">Daily Reminders</string>
+  <string name="notification_channel_description">Encouraging daily mission notifications</string>
+  <string name="notification_reminder_title">Testament</string>
+  <string name="notification_reminder_body">Today\’s mission is ready — one decision, a few taps.</string>
+  <string name="reminder_scheduled_toast">Daily reminder scheduled</string>
+  <string name="reminder_cancelled_toast">Daily reminder turned off</string>
+  <string name="reminder_time_updated_toast">Reminder time updated</string>
+  <string name="settings_privacy_note">Stored on this device only • No remote tracking or push servers</string>
 </resources>

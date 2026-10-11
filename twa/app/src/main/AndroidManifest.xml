@@ -24,6 +24,7 @@
 
     
         <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+        <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     
 
     
@@ -69,11 +70,43 @@
                 <meta-data
                     android:name="android.support.customtabs.trusted.MANAGE_SPACE_URL"
                     android:value="@string/launchUrl" />
+            </activity>
+
+            <activity
+                android:name=".SettingsActivity"
+                android:exported="true"
+                android:label="@string/settings_title"
+                android:theme="@style/Theme.Testament.Settings">
                 <intent-filter>
                     <action android:name="android.intent.action.APPLICATION_PREFERENCES" />
                     <category android:name="android.intent.category.DEFAULT" />
                 </intent-filter>
+                <intent-filter>
+                    <action android:name="android.intent.action.VIEW" />
+                    <category android:name="android.intent.category.DEFAULT" />
+                    <category android:name="android.intent.category.BROWSABLE" />
+                    <data android:scheme="testament" android:host="settings" />
+                </intent-filter>
+                <intent-filter>
+                    <action android:name="android.intent.action.VIEW" />
+                    <category android:name="android.intent.category.DEFAULT" />
+                    <category android:name="android.intent.category.BROWSABLE" />
+                    <data
+                        android:scheme="https"
+                        android:host="@string/hostName"
+                        android:pathPrefix="/settings/reminders" />
+                </intent-filter>
             </activity>
+
+            <receiver
+                android:name=".BootReceiver"
+                android:enabled="true"
+                android:exported="false">
+                <intent-filter>
+                    <action android:name="android.intent.action.BOOT_COMPLETED" />
+                    <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                </intent-filter>
+            </receiver>
         
 
         <activity android:name="LauncherActivity"
