@@ -8,47 +8,129 @@ export default {
   theme: {
     extend: {
       colors: {
-        parchment: {
-          50: '#faf8f5',
-          100: '#f5f0e8',
-          200: '#e8ddce',
-          300: '#d7c4af',
-          400: '#c0a388',
-          500: '#ad8769',
-          800: '#3c3127',
-          900: '#231d17',
-          950: '#14100c',
-        },
-        iron: {
-          800: '#1e232a',
-          850: '#161a20',
-          900: '#0f1217',
-          950: '#090b0e',
-        },
+        // Semantic design tokens mapped to CSS variables (Daybreak light / Vespers dark)
+        bg: 'rgb(var(--color-bg) / <alpha-value>)',
         surface: {
-          DEFAULT: '#fcfbfa',
-          raised: '#ffffff',
-          overlay: '#f4f0e8',
+          DEFAULT: 'rgb(var(--color-surface) / <alpha-value>)',
+          raised: 'rgb(var(--color-surface-raised) / <alpha-value>)',
+          overlay: 'rgb(var(--color-surface-raised) / <alpha-value>)',
+        },
+        line: {
+          DEFAULT: 'rgb(var(--color-border) / <alpha-value>)',
+          strong: 'rgb(var(--color-border-strong) / <alpha-value>)',
+        },
+        fg: {
+          DEFAULT: 'rgb(var(--color-text-primary) / <alpha-value>)',
+          secondary: 'rgb(var(--color-text-secondary) / <alpha-value>)',
+          muted: 'rgb(var(--color-text-muted) / <alpha-value>)',
+        },
+        accent: {
+          DEFAULT: 'rgb(var(--color-accent) / <alpha-value>)',
+          hover: 'rgb(var(--color-accent-hover) / <alpha-value>)',
+          on: 'rgb(var(--color-on-accent) / <alpha-value>)',
+          text: 'rgb(var(--color-accent-text) / <alpha-value>)',
+          border: 'rgb(var(--color-accent-border) / <alpha-value>)',
+        },
+        secondary: {
+          DEFAULT: 'rgb(var(--color-secondary) / <alpha-value>)',
+          text: 'rgb(var(--color-secondary-text) / <alpha-value>)',
+          on: 'rgb(var(--color-on-secondary) / <alpha-value>)',
+        },
+        sky: {
+          50: '#F0F6FA',
+          100: '#E0EDF4',
+          200: '#C2DCE9',
+          300: '#9ABED2',
+          400: '#7FAAC6',
+          500: '#5488AC',
+          600: '#3A6F93',
+          700: '#2E5F80',
+          800: '#234760',
+          900: '#1B3547',
+          950: '#0F1E29',
+        },
+        success: 'rgb(var(--color-success) / <alpha-value>)',
+        warning: 'rgb(var(--color-warning) / <alpha-value>)',
+        danger: 'rgb(var(--color-danger) / <alpha-value>)',
+        xp: {
+          DEFAULT: 'rgb(var(--color-xp) / <alpha-value>)',
+          fill: 'rgb(var(--color-xp-fill) / <alpha-value>)',
+        },
+
+        // Remapped stone scale: light end is warm parchment, dark end is night navy
+        // Defines stone-250 so previously broken borders render reliably
+        stone: {
+          50: '#FBF8F1',
+          100: '#F6EEDD',
+          150: '#EFE3CC',
+          200: '#E7D7BA',
+          250: '#DECBA8',
+          300: '#D5BF97',
+          400: '#76695A', // Passed AA contrast (replaces low-contrast stone-400)
+          500: '#645749',
+          600: '#53483C',
+          700: '#433A31',
+          750: '#383028',
+          800: '#2D3446', // night navy tone
+          850: '#232A3B',
+          900: '#1A1F2D',
+          950: '#131722',
+        },
+
+        // Remapped amber scale: tuned with gold accent highlights
+        amber: {
+          50: '#FFFDF8',
+          100: '#FFF5E0',
+          200: '#FCE7BF',
+          300: '#F7D69B',
+          400: '#EDCB93',
+          500: '#D49D5F',
+          600: '#8A5424', // Passed AA contrast (replaces low-contrast #d97706 on light)
+          700: '#A04E14',
+          800: '#783A0E',
+          900: '#552809',
+          950: '#381A05',
+        },
+
+        // Parchment scale
+        parchment: {
+          50: '#FFFDF8',
+          100: '#F8F1E0',
+          200: '#F3EAD3',
+          300: '#E7D7BA',
+          400: '#C9BEA6',
+          500: '#AD9E82',
+          800: '#3C3127',
+          900: '#231D17',
+          950: '#14100C',
+        },
+
+        // Iron / Ink scale (night navy Vesper palette)
+        iron: {
+          700: '#333B50',
+          800: '#232A3B',
+          850: '#1E2433',
+          900: '#1A1F2D',
+          950: '#131722',
         },
         ink: {
-          DEFAULT: '#090b0e',
-          raised: '#12151a',
-          overlay: '#1a1f28',
+          DEFAULT: '#131722',
+          raised: '#1A1F2D',
+          overlay: '#232A3B',
         },
+
+        // Ember / bronze accents
         ember: {
-          400: '#fb923c',
-          500: '#f97316',
-          600: '#ea580c',
-          700: '#c2410c',
+          400: '#F0A35E',
+          500: '#D49D5F',
+          600: '#C38A4B',
+          700: '#A04E14',
         },
         bronze: {
-          400: '#d97706',
-          500: '#b45309',
-          600: '#92400e',
+          400: '#E4B879',
+          500: '#D49D5F',
+          600: '#B27B3F',
         },
-        stone: {
-          850: '#161920',
-        }
       },
       fontFamily: {
         serif: ['Lora', 'Georgia', 'Cambria', 'serif'],
@@ -57,10 +139,10 @@ export default {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },
       boxShadow: {
-        glow: '0 0 25px -5px rgba(180, 83, 9, 0.28)',
-        'glow-ember': '0 0 25px -5px rgba(180, 83, 9, 0.28)',
-        'glow-gold': '0 0 25px -5px rgba(180, 83, 9, 0.28)',
-        'glow-amber': '0 0 25px -5px rgba(180, 83, 9, 0.28)',
+        glow: '0 0 25px -5px rgba(212, 157, 95, 0.30)',
+        'glow-ember': '0 0 25px -5px rgba(212, 157, 95, 0.30)',
+        'glow-gold': '0 0 25px -5px rgba(212, 157, 95, 0.30)',
+        'glow-amber': '0 0 25px -5px rgba(212, 157, 95, 0.30)',
       }
     },
   },
