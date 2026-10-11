@@ -31,6 +31,9 @@ jobs:
 
       - name: Configure Android SDK & Bubblewrap
         run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          sudo ln -sf $ANDROID_HOME/cmdline-tools/latest/bin $ANDROID_HOME/bin || true
+          sudo ln -sf $ANDROID_HOME/cmdline-tools/latest $ANDROID_HOME/tools || true
           mkdir -p ~/.bubblewrap
           cat <<EOF > ~/.bubblewrap/config.json
           {
@@ -38,6 +41,7 @@ jobs:
             "androidSdkPath": "$ANDROID_HOME"
           }
           EOF
+          bubblewrap doctor
 
       - name: Decode Release Keystore
         env:
@@ -52,6 +56,7 @@ jobs:
           BUBBLEWRAP_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           BUBBLEWRAP_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
+          chmod +x gradlew
           bubblewrap build --skipPwaValidation --signingKeyPath=/tmp/testament-release.keystore --signingKeyAlias="${{ secrets.KEY_ALIAS }}"
 
       - name: Clean Keystore Temp File
