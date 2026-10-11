@@ -1,6 +1,7 @@
 /**
  * Client-side Canvas Verse Card Generator ("Carry It With You")
  * Generates lock-screen friendly 1080x1920 PNG cards with verbatim scripture only.
+ * Always renders in Daybreak palette regardless of the user's current theme preference.
  */
 
 function wrapText(
@@ -43,38 +44,37 @@ export async function generateVerseCardBlob(
     throw new Error('Canvas 2D context not supported');
   }
 
-  // 1. Background: Obsidian / deep night gradient
-  const bgGrad = ctx.createLinearGradient(0, 0, width, height);
-  bgGrad.addColorStop(0, '#12151c');
-  bgGrad.addColorStop(0.5, '#0b0d13');
-  bgGrad.addColorStop(1, '#181b24');
+  // 1. Daybreak Background: Warm parchment gradient (#FFFAEE -> #F8F1E0)
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+  bgGrad.addColorStop(0, '#FFFAEE');
+  bgGrad.addColorStop(1, '#F8F1E0');
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, width, height);
 
-  // 2. Ambient subtle warm amber central glow
-  const radialGlow = ctx.createRadialGradient(
+  // 2. Daybreak Sky Wash at Top: #A4BDC7 at ~35% opacity fading out smoothly
+  const skyWash = ctx.createRadialGradient(
     width / 2,
-    height * 0.45,
-    50,
+    -100,
+    100,
     width / 2,
-    height * 0.45,
-    width * 0.7
+    400,
+    width * 0.95
   );
-  radialGlow.addColorStop(0, 'rgba(245, 158, 11, 0.12)');
-  radialGlow.addColorStop(0.6, 'rgba(217, 119, 6, 0.04)');
-  radialGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
-  ctx.fillStyle = radialGlow;
+  skyWash.addColorStop(0, 'rgba(164, 189, 199, 0.45)');
+  skyWash.addColorStop(0.5, 'rgba(164, 189, 199, 0.20)');
+  skyWash.addColorStop(1, 'rgba(164, 189, 199, 0)');
+  ctx.fillStyle = skyWash;
   ctx.fillRect(0, 0, width, height);
 
-  // 3. Delicate inner border
-  ctx.strokeStyle = 'rgba(245, 158, 11, 0.25)';
-  ctx.lineWidth = 2;
+  // 3. Delicate inner border & gold rules in #B27B3F
   const margin = 60;
+  ctx.strokeStyle = 'rgba(178, 123, 63, 0.35)';
+  ctx.lineWidth = 2;
   ctx.strokeRect(margin, margin, width - margin * 2, height - margin * 2);
 
   // Inner corner notches
   const cornerSize = 24;
-  ctx.strokeStyle = '#f59e0b';
+  ctx.strokeStyle = '#B27B3F';
   ctx.lineWidth = 3;
   // Top-left
   ctx.beginPath();
@@ -101,14 +101,14 @@ export async function generateVerseCardBlob(
   ctx.lineTo(width - margin + 4, height - margin - cornerSize);
   ctx.stroke();
 
-  // 4. Subtle Top Ornament
-  ctx.fillStyle = '#f59e0b';
+  // 4. Subtle Top Gold Ornament
+  ctx.fillStyle = '#B27B3F';
   ctx.beginPath();
   const topY = height * 0.22;
   ctx.arc(width / 2, topY, 4, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.strokeStyle = 'rgba(245, 158, 11, 0.4)';
+  ctx.strokeStyle = 'rgba(178, 123, 63, 0.5)';
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(width / 2 - 80, topY);
@@ -117,15 +117,14 @@ export async function generateVerseCardBlob(
   ctx.lineTo(width / 2 + 80, topY);
   ctx.stroke();
 
-  // 5. Verse Text (Verbatim Scripture Only)
+  // 5. Verse Text (Verbatim Scripture in Daybreak textPrimary #1F2330)
   const maxTextWidth = width - 240;
-  // Calculate dynamic font size based on text length
   let fontSize = 48;
   if (verseText.length < 80) fontSize = 56;
   else if (verseText.length > 200) fontSize = 40;
 
   ctx.font = `italic ${fontSize}px Lora, "Times New Roman", Georgia, serif`;
-  ctx.fillStyle = '#fefce8'; // soft parchment white
+  ctx.fillStyle = '#1F2330'; // Daybreak textPrimary
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
 
@@ -140,22 +139,22 @@ export async function generateVerseCardBlob(
     ctx.fillText(line, width / 2, startY + index * lineHeight);
   });
 
-  // 6. Scripture Reference
+  // 6. Scripture Reference in Daybreak accent-text #8A5424
   const refY = startY + totalTextHeight + 70;
   ctx.font = `bold 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-  ctx.fillStyle = '#f59e0b'; // amber-500
+  ctx.fillStyle = '#8A5424'; // Daybreak accent-text
   ctx.textAlign = 'center';
   ctx.fillText(reference.toUpperCase(), width / 2, refY);
 
-  // 7. Tasteful Brand Mark (Bottom)
+  // 7. Tasteful Brand Mark in Daybreak secondary / muted tones
   const brandY = height - margin - 80;
   ctx.font = `bold 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-  ctx.fillStyle = 'rgba(214, 211, 209, 0.8)'; // stone-300
+  ctx.fillStyle = '#584E42'; // Daybreak textSecondary
   ctx.letterSpacing = '6px';
   ctx.fillText('TESTAMENT', width / 2, brandY);
 
   ctx.font = `14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-  ctx.fillStyle = 'rgba(168, 162, 158, 0.6)'; // stone-400
+  ctx.fillStyle = '#76695A'; // Daybreak textMuted
   ctx.letterSpacing = '2px';
   ctx.fillText('THE LIVING WORD', width / 2, brandY + 30);
 
@@ -194,7 +193,6 @@ export async function saveOrShareVerseCard(
         return 'shared';
       }
     } catch (err: unknown) {
-      // User cancelled share or share failed; proceed to download fallback if not user abort
       if (err instanceof Error && err.name === 'AbortError') {
         return 'shared';
       }
