@@ -50,5 +50,9 @@
   <string name="reminder_scheduled_toast">Daily reminder scheduled</string>
   <string name="reminder_cancelled_toast">Daily reminder turned off</string>
   <string name="reminder_time_updated_toast">Reminder time updated</string>
+  <string name="test_reminder_title">Test notification</string>
+  <string name="test_reminder_subtitle">Send an instant sample notification to test</string>
+  <string name="test_reminder_btn">Send now</string>
+  <string name="test_reminder_toast">Test notification sent! Check your status bar.</string>
   <string name="settings_privacy_note">Stored on this device only • No remote tracking or push servers</string>
 </resources>
