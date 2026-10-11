@@ -44,64 +44,67 @@ public class DailyReminderWorker extends Worker {
             return Result.success();
         }
 
+        showNotificationDirectly(context);
+        return Result.success();
+    }
+
+    /**
+     * Posts the notification to the device status bar.
+     * Accessible by Worker, AlarmReceiver, and Settings test button.
+     */
+    public static void showNotificationDirectly(Context context) {
         // Guardrail: Verify POST_NOTIFICATIONS permission on Android 13+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
                 Log.w(TAG, "Notification permission not granted, skipping.");
-                return Result.success();
+                return;
             }
         }
 
         try {
-            showReminderNotification(context);
+            createNotificationChannel(context);
+
+            // Deep-link into the app's start URL (opens the PWA home)
+            Intent intent = new Intent(context, LauncherActivity.class);
+            intent.setAction(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse("https://testament-bible-learning.vercel.app/"));
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+            int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                flags |= PendingIntent.FLAG_IMMUTABLE;
+            }
+
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                    context,
+                    0,
+                    intent,
+                    flags
+            );
+
+            String title = context.getString(R.string.notification_reminder_title);
+            String body = context.getString(R.string.notification_reminder_body);
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                    .setSmallIcon(R.drawable.ic_notification_icon)
+                    .setContentTitle(title)
+                    .setContentText(body)
+                    .setStyle(new NotificationCompat.BigTextStyle().bigText(body))
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setColor(Color.parseColor("#D97706")) // Amber gold
+                    .setAutoCancel(true)
+                    .setContentIntent(pendingIntent);
+
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+            notificationManager.notify(NOTIFICATION_ID, builder.build());
+            Log.d(TAG, "Daily reminder notification posted successfully.");
         } catch (Throwable t) {
             Log.e(TAG, "Error displaying daily reminder notification", t);
         }
-
-        return Result.success();
     }
 
-    private void showReminderNotification(Context context) {
-        createNotificationChannel(context);
-
-        // Deep-link into the app's start URL (opens the PWA home)
-        Intent intent = new Intent(context, LauncherActivity.class);
-        intent.setAction(Intent.ACTION_VIEW);
-        intent.setData(Uri.parse("https://testament-bible-learning.vercel.app/"));
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            flags |= PendingIntent.FLAG_IMMUTABLE;
-        }
-
-        PendingIntent pendingIntent = PendingIntent.getActivity(
-                context,
-                0,
-                intent,
-                flags
-        );
-
-        String title = context.getString(R.string.notification_reminder_title);
-        String body = context.getString(R.string.notification_reminder_body);
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_notification_icon)
-                .setContentTitle(title)
-                .setContentText(body)
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(body))
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setColor(Color.parseColor("#D97706")) // Amber gold
-                .setAutoCancel(true)
-                .setContentIntent(pendingIntent);
-
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
-        notificationManager.notify(NOTIFICATION_ID, builder.build());
-        Log.d(TAG, "Daily reminder notification posted successfully.");
-    }
-
-    private void createNotificationChannel(Context context) {
+    private static void createNotificationChannel(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = context.getString(R.string.notification_channel_name);
             String description = context.getString(R.string.notification_channel_description);

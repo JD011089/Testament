@@ -26,10 +26,12 @@ public class SettingsActivity extends Activity {
 
     private static final String TAG = "SettingsActivity";
     private static final int REQUEST_CODE_POST_NOTIFICATIONS = 1001;
+    private static final int REQUEST_CODE_TEST_NOTIFICATION = 1002;
 
     private Switch switchDailyReminder;
     private View cardDailyReminder;
     private View rowReminderTime;
+    private View rowTestReminder;
     private TextView tvReminderTime;
     private View btnBack;
     private boolean isUpdatingUi = false;
@@ -42,6 +44,7 @@ public class SettingsActivity extends Activity {
         switchDailyReminder = findViewById(R.id.switch_daily_reminder);
         cardDailyReminder = findViewById(R.id.card_daily_reminder);
         rowReminderTime = findViewById(R.id.row_reminder_time);
+        rowTestReminder = findViewById(R.id.row_test_reminder);
         tvReminderTime = findViewById(R.id.tv_reminder_time);
         btnBack = findViewById(R.id.btn_back);
 
@@ -60,6 +63,8 @@ public class SettingsActivity extends Activity {
         });
 
         rowReminderTime.setOnClickListener(v -> showTimePickerDialog());
+
+        rowTestReminder.setOnClickListener(v -> handleSendTestReminder());
 
         updateUiFromPreferences();
     }
@@ -119,6 +124,27 @@ public class SettingsActivity extends Activity {
         enableReminder();
     }
 
+    private void handleSendTestReminder() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                        this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                        REQUEST_CODE_TEST_NOTIFICATION
+                );
+                return;
+            }
+        }
+
+        sendTestNotification();
+    }
+
+    private void sendTestNotification() {
+        DailyReminderWorker.showNotificationDirectly(this);
+        Toast.makeText(this, R.string.test_reminder_toast, Toast.LENGTH_LONG).show();
+    }
+
     private void enableReminder() {
         ReminderPreferences.setReminderEnabled(this, true);
         ReminderScheduler.scheduleDailyReminder(this);
@@ -147,6 +173,10 @@ public class SettingsActivity extends Activity {
             } else {
                 // Denied: toggle stays off, no nagging, no re-prompt loops
                 revertToggleOff();
+            }
+        } else if (requestCode == REQUEST_CODE_TEST_NOTIFICATION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                sendTestNotification();
             }
         }
     }

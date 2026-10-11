@@ -107,6 +107,11 @@
                     <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
                 </intent-filter>
             </receiver>
+
+            <receiver
+                android:name=".ReminderAlarmReceiver"
+                android:enabled="true"
+                android:exported="false" />
         
 
         <activity android:name="LauncherActivity"
