@@ -6,12 +6,8 @@ import { StoryViewer } from './components/StoryViewer';
 import { ArsenalView } from './components/ArsenalView';
 import { Navigation } from './components/Navigation';
 import type { NavTab } from './components/Navigation';
-import { DossierModal } from './components/DossierModal';
-import { ProverbsCodexModal } from './components/ProverbsCodexModal';
-import { PsalmsFieldMedicModal } from './components/PsalmsFieldMedicModal';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
-import { OnboardingModal, type UserCalibrationProfile } from './components/OnboardingModal';
-import { WhatsNewModal } from './components/WhatsNewModal';
+import type { UserCalibrationProfile } from './components/OnboardingModal';
 import { UpdateNotificationBanner } from './components/UpdateNotificationBanner';
 import { CampaignNextTaskPrompt } from './components/CampaignNextTaskPrompt';
 import { soundEngine } from './utils/audio';
@@ -26,11 +22,17 @@ import { setActiveMemoryVerse } from './utils/calendarReminders';
 import { markCampaignStepCompleted } from './data/dailyCampaigns';
 import type { DailyCampaignStep } from './data/dailyCampaigns';
 import { getComposedDailyMission } from './utils/missionComposer';
-import { pathForTab, tabFromPath } from './utils/routes';
+import { pathForTab, tabFromPath, type AppTab } from './utils/routes';
 import { loadReadingPlace } from './utils/readingPlace';
 import { getDailyMission, type GeneratedDailyMission } from './utils/dailyMissionPipeline';
-import { HowTestamentWorksModal } from './components/HowTestamentWorksModal';
 
+const DossierModal = lazy(() => import('./components/DossierModal').then(m => ({ default: m.DossierModal })));
+const ProverbsCodexModal = lazy(() => import('./components/ProverbsCodexModal').then(m => ({ default: m.ProverbsCodexModal })));
+const PsalmsFieldMedicModal = lazy(() => import('./components/PsalmsFieldMedicModal').then(m => ({ default: m.PsalmsFieldMedicModal })));
+const OnboardingModal = lazy(() => import('./components/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
+const WhatsNewModal = lazy(() => import('./components/WhatsNewModal').then(m => ({ default: m.WhatsNewModal })));
+const HowTestamentWorksModal = lazy(() => import('./components/HowTestamentWorksModal').then(m => ({ default: m.HowTestamentWorksModal })));
+const SettingsModal = lazy(() => import('./components/SettingsModal').then(m => ({ default: m.SettingsModal })));
 const WordForge = lazy(() => import('./components/WordForge').then((m) => ({ default: m.WordForge })));
 const DilemmaSimulator = lazy(() => import('./components/DilemmaSimulator').then((m) => ({ default: m.DilemmaSimulator })));
 const CanonLibraryPage = lazy(() => import('./components/CanonLibraryPage').then((m) => ({ default: m.CanonLibraryPage })));
@@ -60,7 +62,7 @@ function persistNumber(key: string, value: number) {
 }
 
 export function App() {
-  const [currentTab, setCurrentTabState] = useState<NavTab>(() => {
+  const [currentTab, setCurrentTabState] = useState<AppTab>(() => {
     if (typeof window === 'undefined') return 'dashboard';
     const params = new URLSearchParams(window.location.search);
     if (params.get('action') === 'wordforge' || params.get('verseId')) return 'wordforge';
@@ -68,7 +70,7 @@ export function App() {
     return tabFromPath(window.location.pathname);
   });
 
-  const setCurrentTab = (tab: NavTab) => {
+  const setCurrentTab = (tab: AppTab) => {
     setCurrentTabState(tab);
     const next = pathForTab(tab);
     if (window.location.pathname !== next) {
@@ -86,6 +88,7 @@ export function App() {
   const [currentAmbience, setCurrentAmbience] = useState<'none' | 'campfire' | 'wind' | 'sanctuary'>('none');
 
   // Modals state (owned at App so Library deep-links work when Dashboard is unmounted)
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isDossierOpen, setIsDossierOpen] = useState(false);
   const [isProverbsOpen, setIsProverbsOpen] = useState(false);
   const [isPsalmsOpen, setIsPsalmsOpen] = useState(false);
@@ -243,11 +246,16 @@ export function App() {
     window.addEventListener('open-canon-codex', handleOpenLibrary);
     window.addEventListener('open-proverbs-codex', handleOpenProverbs);
     window.addEventListener('open-psalms-medic', handleOpenPsalms);
+
+    const handleOpenSettings = () => setIsSettingsOpen(true);
+    window.addEventListener('testament-open-settings', handleOpenSettings);
+
     return () => {
       window.removeEventListener('open-canon-library', handleOpenLibrary);
       window.removeEventListener('open-canon-codex', handleOpenLibrary);
       window.removeEventListener('open-proverbs-codex', handleOpenProverbs);
       window.removeEventListener('open-psalms-medic', handleOpenPsalms);
+      window.removeEventListener('testament-open-settings', handleOpenSettings);
     };
   }, []);
 
@@ -672,6 +680,7 @@ export function App() {
                 onOpenOnboarding={() => setIsOnboardingOpen(true)}
                 onOpenWhatsNew={() => setIsWhatsNewOpen(true)}
                 onOpenHowItWorks={() => setIsHowItWorksOpen(true)}
+                onOpenSettings={() => setIsSettingsOpen(true)}
                 onRewardXP={handleRewardXP}
                 onLaunchCampaignStep={handleLaunchCampaignStep}
               />
@@ -740,6 +749,30 @@ export function App() {
                 onPracticeVerse={handlePracticeVerseFromArsenal}
               />
             )}
+
+            {currentTab === 'not-found' && (
+              <div className="max-w-md mx-auto px-6 py-20 text-center space-y-4">
+                <div className="w-16 h-16 mx-auto rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-2xl font-serif font-black text-amber-500">
+                  404
+                </div>
+                <h1 className="text-xl font-serif font-bold text-stone-900 dark:text-parchment-50">
+                  Page Not Found
+                </h1>
+                <p className="text-xs text-stone-600 dark:text-stone-400">
+                  The path you navigated to doesn't exist in the canon or dashboard.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playClick();
+                    setCurrentTab('dashboard');
+                  }}
+                  className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs shadow-md transition-all cursor-pointer"
+                >
+                  Return to Home
+                </button>
+              </div>
+            )}
           </>
         )}
       </main>
@@ -758,6 +791,7 @@ export function App() {
           onOpenDriveMode={() => setIsDriveModeOpen(true)}
           streakCount={streakCount}
           xp={xp}
+          onOpenSettings={() => setIsSettingsOpen(true)}
           onOpenWhatsNew={() => setIsWhatsNewOpen(true)}
         />
       )}
@@ -852,6 +886,45 @@ export function App() {
         }}
         initialProfile={userProfile}
       />
+
+      {/* Global Lifted Settings Modal */}
+      {isSettingsOpen && (
+        <Suspense fallback={null}>
+          <SettingsModal
+            isOpen={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
+            onOpenOnboarding={() => {
+              setIsSettingsOpen(false);
+              setIsOnboardingOpen(true);
+            }}
+            onOpenReminders={() => {
+              setIsSettingsOpen(false);
+              window.dispatchEvent(new CustomEvent('testament-open-reminders'));
+            }}
+            onOpenJournal={() => {
+              setIsSettingsOpen(false);
+              window.dispatchEvent(new CustomEvent('testament-open-journal'));
+            }}
+            onOpenPeople={() => {
+              setIsSettingsOpen(false);
+              window.dispatchEvent(new CustomEvent('testament-open-people'));
+            }}
+            onOpenRelics={() => {
+              setIsSettingsOpen(false);
+              window.dispatchEvent(new CustomEvent('testament-open-relics'));
+            }}
+            onOpenHowItWorks={() => {
+              setIsSettingsOpen(false);
+              setIsHowItWorksOpen(true);
+            }}
+            onOpenLearnerMode={() => {
+              setIsSettingsOpen(false);
+              window.dispatchEvent(new CustomEvent('testament-open-modes'));
+            }}
+            activeLearnerMode="builder"
+          />
+        </Suspense>
+      )}
 
       {/* PWA Home-Screen Install Prompt (Mutually exclusive with CampaignNextTaskPrompt and readers/modals) */}
       {!campaignPrompt && !activeQuest && !activeDailyMission && !isDossierOpen && !isProverbsOpen && !isPsalmsOpen && !isDriveModeOpen && !isOnboardingOpen && (

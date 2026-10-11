@@ -4,73 +4,17 @@ import { evaluateUserPlay, evaluateSocraticTurn2, type HeartEvaluationResult, ty
 import { evaluateQuestCustomResponse, type QuestCustomEvaluation } from './questInstinctEngine';
 import type { StoryQuest, StoryAct } from '../types/index';
 
-// High-speed, low-latency models priority order
-const CANDIDATE_MODELS = [
-  'gemini-flash-lite-latest',
-  'gemini-3.5-flash-lite',
-  'gemini-flash-latest'
-];
-
-function getApiKey(): string {
-  const envKey = import.meta.env.VITE_GEMINI_API_KEY || '';
-  if (envKey) return envKey;
-  if (typeof localStorage !== 'undefined') {
-    const stored = localStorage.getItem('testament_gemini_api_key');
-    if (stored) return stored;
-  }
-  return '';
-}
+import { callServerGemini } from './geminiClient';
 
 /**
- * Robust caller across fast Gemini Flash models with per-attempt timeout and graceful fallback.
+ * Robust caller to serverless Gemini endpoint with timeout and graceful fallback.
  */
 async function callGemini(prompt: string, maxTokens = 2500): Promise<string | null> {
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    console.warn('Gemini API key is not configured');
-    return null;
-  }
-
-  for (const model of CANDIDATE_MODELS) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000);
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: maxTokens,
-            responseMimeType: 'application/json'
-          }
-        }),
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
-
-      if (!res.ok) {
-        console.warn(`Gemini model ${model} returned HTTP ${res.status}`);
-        continue;
-      }
-
-      const data = await res.json();
-      const parts = data?.candidates?.[0]?.content?.parts;
-      if (!parts || !Array.isArray(parts)) continue;
-
-      const textPart = parts.find((p: { text?: string }) => typeof p.text === 'string' && p.text.trim().length > 0);
-      if (textPart && textPart.text) {
-        return textPart.text.trim();
-      }
-    } catch (err) {
-      clearTimeout(timeoutId);
-      console.warn(`Failed calling Gemini model ${model}:`, err);
-    }
-  }
-
-  return null;
+  return callServerGemini(prompt, {
+    maxTokens,
+    responseMimeType: 'application/json',
+    timeoutMs: 15000,
+  });
 }
 
 /**
@@ -96,12 +40,7 @@ export async function getDynamicDailyDilemma(fallbackDilemma: RealLifeDilemma): 
     // ignore cache read error
   }
 
-  // If no Gemini API key configured, use fallback immediately
-  if (!getApiKey()) {
-    return fallbackDilemma;
-  }
-
-  // 2. Fetch fresh dynamic dilemma from Gemini Flash API
+  // 2. Fetch fresh dynamic dilemma from serverless Gemini API
   try {
     const prompt = `You are an expert biblical counselor and pastoral mentor creating a daily Christian dilemma for an interactive discipleship app.
 

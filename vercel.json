@@ -71,6 +71,7 @@
     }
   ],
   "rewrites": [
+    { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/((?!api|assets|.*\\..*).*)", "destination": "/index.html" }
   ]
 }

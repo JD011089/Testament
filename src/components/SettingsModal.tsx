@@ -316,6 +316,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               How Testament works
             </button>
           )}
+          <a
+            href="/privacy.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => soundEngine.playClick()}
+            className="w-full text-left text-xs p-2 rounded-xl text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 font-medium transition-colors cursor-pointer min-h-[44px] flex items-center justify-between"
+          >
+            <span>Privacy Policy</span>
+            <span className="text-[10px] font-mono text-stone-400">↗</span>
+          </a>
         </div>
       </div>
     </div>

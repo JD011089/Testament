@@ -1,5 +1,7 @@
 import type { NavTab } from '../components/Navigation';
 
+export type AppTab = NavTab | 'not-found';
+
 export const TAB_PATHS: Record<NavTab, string> = {
   dashboard: '/',
   library: '/library',
@@ -8,15 +10,18 @@ export const TAB_PATHS: Record<NavTab, string> = {
   arsenal: '/saved',
 };
 
-export function tabFromPath(pathname: string): NavTab {
+export function tabFromPath(pathname: string): AppTab {
   const path = pathname.replace(/\/+$/, '') || '/';
+  if (path === '/') return 'dashboard';
   if (path === '/library') return 'library';
   if (path === '/memorize' || path === '/wordforge') return 'wordforge';
   if (path === '/dilemmas') return 'dilemmas';
   if (path === '/saved' || path === '/arsenal') return 'arsenal';
-  return 'dashboard';
+  if (path === '/privacy' || path === '/privacy.html') return 'dashboard';
+  return 'not-found';
 }
 
-export function pathForTab(tab: NavTab): string {
-  return TAB_PATHS[tab];
+export function pathForTab(tab: AppTab): string {
+  if (tab === 'not-found') return window.location.pathname;
+  return TAB_PATHS[tab] || '/';
 }

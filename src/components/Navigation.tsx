@@ -21,7 +21,7 @@ import { useLanguage } from '../context/LanguageContext';
 export type NavTab = 'dashboard' | 'library' | 'wordforge' | 'dilemmas' | 'arsenal';
 
 interface NavigationProps {
-  currentTab: NavTab;
+  currentTab: NavTab | 'not-found';
   onSelectTab: (tab: NavTab) => void;
   currentAmbience: 'none' | 'campfire' | 'wind' | 'sanctuary';
   onToggleAmbience: () => void;

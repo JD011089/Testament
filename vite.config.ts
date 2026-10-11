@@ -398,6 +398,15 @@ export default defineConfig(({ mode }) => {
                 networkTimeoutSeconds: 4,
                 expiration: { maxEntries: 80, maxAgeSeconds: 60 * 60 * 24 * 30 }
               }
+            },
+            {
+              urlPattern: /^https:\/\/bolls\.life\/.*/i,
+              handler: 'NetworkFirst',
+              options: {
+                cacheName: 'testament-bolls-api',
+                networkTimeoutSeconds: 4,
+                expiration: { maxEntries: 80, maxAgeSeconds: 60 * 60 * 24 * 30 }
+              }
             }
           ]
         }

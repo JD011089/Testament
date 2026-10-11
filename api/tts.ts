@@ -126,10 +126,33 @@ function allow(ip: string): boolean {
   return entry.count <= MAX_REQUESTS;
 }
 
+function isOriginAllowed(originOrReferer: string): boolean {
+  if (!originOrReferer) return true;
+  try {
+    const url = new URL(originOrReferer);
+    const host = url.hostname.toLowerCase();
+    return (
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      host === 'testament-bible-learning.vercel.app' ||
+      host.endsWith('.vercel.app') ||
+      originOrReferer.startsWith('android-app://')
+    );
+  } catch {
+    return false;
+  }
+}
+
 export default async function handler(req: TtsRequest, res: TtsResponse) {
   if (req.method !== 'GET' && req.method !== 'POST') {
     res.setHeader('Allow', 'GET, POST');
     res.status(405).end('Method not allowed');
+    return;
+  }
+
+  const origin = firstHeader(req.headers['origin']) || firstHeader(req.headers['referer']);
+  if (!isOriginAllowed(origin)) {
+    res.status(403).end('Forbidden origin');
     return;
   }
 

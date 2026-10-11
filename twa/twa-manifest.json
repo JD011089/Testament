@@ -35,9 +35,11 @@
   "isMetaQuest": false,
   "fullScopeUrl": "https://testament-bible-learning.vercel.app/",
   "minSdkVersion": 24,
-  "orientation": "portrait-primary",
-  "fingerprints": [],
-  "additionalTrustedOrigins": [],
+  "fingerprints": [
+    {
+      "value": "23:BD:68:08:FB:7F:EC:CD:9F:93:6D:43:E4:9A:ED:A3:43:9F:CD:F8:55:7C:D9:1A:82:0A:1D:90:E1:45:66:04"
+    }
+  ],
   "retainedBundles": [],
   "protocolHandlers": [],
   "fileHandlers": [],

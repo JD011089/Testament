@@ -12,40 +12,7 @@
  * - In-memory session cache for passage texts.
  */
 
-// Model fallback chain
-const FLASH_MODELS = [
-  'gemini-flash-lite-latest',
-  'gemini-3.5-flash-lite',
-  'gemini-flash-latest'
-];
-
-function getApiKey(): string {
-  let envKey = '';
-  try {
-    if (typeof import.meta !== 'undefined' && import.meta?.env) {
-      envKey = import.meta.env.VITE_GEMINI_API_KEY || '';
-    }
-  } catch {
-    // ignore
-  }
-  if (!envKey) {
-    try {
-      const globalObj = typeof globalThis !== 'undefined' ? (globalThis as Record<string, unknown>) : null;
-      const proc = globalObj?.process as { env?: Record<string, string> } | undefined;
-      if (proc?.env?.VITE_GEMINI_API_KEY) {
-        envKey = proc.env.VITE_GEMINI_API_KEY;
-      }
-    } catch {
-      // ignore
-    }
-  }
-  if (envKey) return envKey;
-  if (typeof localStorage !== 'undefined') {
-    const stored = localStorage.getItem('testament_gemini_api_key');
-    if (stored) return stored;
-  }
-  return '';
-}
+import { callServerGemini } from './geminiClient';
 
 /** In-memory session cache for passage text to avoid redundant transfers */
 const sessionPassageCache = new Map<string, string>();
@@ -67,60 +34,11 @@ async function callGeminiFlash(
   prompt: string,
   options?: { maxTokens?: number; responseMimeType?: string }
 ): Promise<string | null> {
-  const apiKey = getApiKey();
-  if (!apiKey) return null;
-
-  const maxTokens = options?.maxTokens ?? 160;
-  const mimeType = options?.responseMimeType;
-
-  for (const model of FLASH_MODELS) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 9000);
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-      const payload: {
-        contents: { parts: { text: string }[] }[];
-        generationConfig: {
-          temperature: number;
-          maxOutputTokens: number;
-          responseMimeType?: string;
-        };
-      } = {
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: maxTokens,
-        }
-      };
-
-      if (mimeType) {
-        payload.generationConfig.responseMimeType = mimeType;
-      }
-
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
-
-      if (!res.ok) continue;
-
-      const data = await res.json();
-      const parts = data?.candidates?.[0]?.content?.parts;
-      if (!parts || !Array.isArray(parts)) continue;
-
-      const textPart = parts.find((p: { text?: string }) => typeof p.text === 'string' && p.text.trim().length > 0);
-      if (textPart && textPart.text) {
-        return textPart.text.trim();
-      }
-    } catch {
-      clearTimeout(timeoutId);
-    }
-  }
-
-  return null;
+  return callServerGemini(prompt, {
+    maxTokens: options?.maxTokens ?? 160,
+    responseMimeType: options?.responseMimeType,
+    timeoutMs: 9000,
+  });
 }
 
 /* =========================================================================

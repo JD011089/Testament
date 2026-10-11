@@ -32,26 +32,7 @@ export interface PersonalizedMissionResult {
   reflectionBadge: string;
 }
 
-const CANDIDATE_MODELS = [
-  'gemini-flash-lite-latest',
-  'gemini-3.5-flash-lite',
-  'gemini-flash-latest'
-];
-
-function getApiKey(): string {
-  if (typeof localStorage !== 'undefined') {
-    const stored = localStorage.getItem('testament_gemini_api_key');
-    if (stored !== null) return stored.trim();
-  }
-  try {
-    if (typeof import.meta !== 'undefined' && import.meta?.env?.VITE_GEMINI_API_KEY) {
-      return import.meta.env.VITE_GEMINI_API_KEY.trim();
-    }
-  } catch {
-    // ignore
-  }
-  return '';
-}
+import { callServerGemini } from './geminiClient';
 
 function wordCount(paragraphs: string[]): number {
   return paragraphs.join(' ').trim().split(/\s+/).filter(Boolean).length;
@@ -137,22 +118,7 @@ export async function getDailyMission(
     // continue
   }
 
-  // 2. Check API key
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    // API key removed: return static fallback instantly
-    const fallback = buildStaticFallbackMission(passage, dateKey);
-    try {
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem(cacheKey, JSON.stringify(fallback));
-      }
-    } catch {
-      // ignore
-    }
-    return fallback;
-  }
-
-  // 3. Call Gemini with strict grounding instructions
+  // 2. Call Gemini via server proxy with strict grounding instructions
   const prompt = `You are a biblical narrative AI generating today's decision-first mission for Testament, an app for ADHD learners.
 
 PASSAGE REFERENCE: ${passage.reference}
@@ -190,34 +156,14 @@ Return ONLY a valid JSON object matching this structure:
   "actionLine": "One concrete action line for today starting with a strong verb. Under 20 words."
 }`;
 
-  for (const model of CANDIDATE_MODELS) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4500);
+  try {
+    const rawText = await callServerGemini(prompt, {
+      temperature: 0.5,
+      maxOutputTokens: 500,
+      responseMimeType: 'application/json'
+    });
 
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.5,
-            maxOutputTokens: 500,
-            responseMimeType: 'application/json'
-          }
-        }),
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!res.ok) continue;
-
-      const data = await res.json();
-      const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!rawText) continue;
-
+    if (rawText) {
       const parsed = JSON.parse(rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim());
 
       if (
@@ -258,16 +204,13 @@ Return ONLY a valid JSON object matching this structure:
           if (typeof localStorage !== 'undefined') {
             localStorage.setItem(cacheKey, JSON.stringify(generatedMission));
           }
-        } catch {
-          // ignore cache error
-        }
+        } catch {}
 
         return generatedMission;
       }
-    } catch {
-      clearTimeout(timeoutId);
-      // Try next model or fallback
     }
+  } catch (err) {
+    console.warn('Server Gemini call failed for daily mission, using static fallback:', err);
   }
 
   // Fallback to passage static mission
@@ -368,9 +311,6 @@ export async function fetchPersonalizedMirrorBack(
   userDecision: string,
   mission: GeneratedDailyMission
 ): Promise<{ mirrorBack: string; actionLine: string } | null> {
-  const apiKey = getApiKey();
-  if (!apiKey) return null;
-
   const prompt = `You are a biblical guide for Testament, a decision-first Bible app.
 HERO: ${mission.heroName}
 PASSAGE: ${mission.passageReference}
@@ -389,41 +329,23 @@ Return ONLY JSON:
   "actionLine": "string"
 }`;
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 3000);
-
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${apiKey}`;
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.6,
-          maxOutputTokens: 150,
-          responseMimeType: 'application/json'
-        }
-      }),
-      signal: controller.signal
+    const rawText = await callServerGemini(prompt, {
+      maxTokens: 150,
+      responseMimeType: 'application/json',
+      timeoutMs: 4000,
     });
-
-    clearTimeout(timeoutId);
-    if (!res.ok) return null;
-
-    const data = await res.json();
-    const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!rawText) return null;
 
     const parsed = JSON.parse(rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim());
     if (parsed.mirrorBack && parsed.actionLine) {
       return {
         mirrorBack: String(parsed.mirrorBack).trim(),
-        actionLine: String(parsed.actionLine).trim()
+        actionLine: String(parsed.actionLine).trim(),
       };
     }
   } catch {
-    clearTimeout(timeoutId);
+    // Graceful fallback
   }
 
   return null;

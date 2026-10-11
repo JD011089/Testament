@@ -86,6 +86,7 @@ interface DashboardProps {
   onOpenOnboarding?: () => void;
   onOpenWhatsNew?: () => void;
   onOpenHowItWorks?: () => void;
+  onOpenSettings?: () => void;
   onRewardXP?: (points: number) => void;
   onLaunchCampaignStep?: (step: DailyCampaignStep) => void;
 }
@@ -127,6 +128,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenWhatsNew,
   onOpenOnboarding,
   onOpenHowItWorks,
+  onOpenSettings,
   onStartDailyMission,
   onRewardXP
 }) => {
@@ -185,11 +187,32 @@ export const Dashboard: React.FC<DashboardProps> = ({
     const handleOpenSettings = () => {
       setShowSettingsModal(true);
     };
+    const handleOpenReminders = () => setShowCalendarModal(true);
+    const handleOpenJournal = () => setShowJournalModal(true);
+    const handleOpenPeople = () => {
+      setSelectedCharacterArcId(undefined);
+      setSelectedMomentIndex(undefined);
+      setShowPeopleModal(true);
+    };
+    const handleOpenRelics = () => setShowRelics(true);
+    const handleOpenModes = () => setShowModeModal(true);
+
     window.addEventListener('testament-mode-changed', handleModeUpdate);
     window.addEventListener('testament-open-settings', handleOpenSettings);
+    window.addEventListener('testament-open-reminders', handleOpenReminders);
+    window.addEventListener('testament-open-journal', handleOpenJournal);
+    window.addEventListener('testament-open-people', handleOpenPeople);
+    window.addEventListener('testament-open-relics', handleOpenRelics);
+    window.addEventListener('testament-open-modes', handleOpenModes);
+
     return () => {
       window.removeEventListener('testament-mode-changed', handleModeUpdate);
       window.removeEventListener('testament-open-settings', handleOpenSettings);
+      window.removeEventListener('testament-open-reminders', handleOpenReminders);
+      window.removeEventListener('testament-open-journal', handleOpenJournal);
+      window.removeEventListener('testament-open-people', handleOpenPeople);
+      window.removeEventListener('testament-open-relics', handleOpenRelics);
+      window.removeEventListener('testament-open-modes', handleOpenModes);
     };
   }, []);
 
@@ -442,7 +465,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       onClick={() => {
                         soundEngine.playClick();
                         setShowSettings(false);
-                        setShowSettingsModal(true);
+                        if (onOpenSettings) {
+                          onOpenSettings();
+                        } else {
+                          window.dispatchEvent(new CustomEvent('testament-open-settings'));
+                        }
                       }}
                       className="w-full text-left text-xs px-2 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-950 dark:text-amber-200 font-bold transition-colors cursor-pointer flex items-center justify-between"
                     >
@@ -595,7 +622,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 onClick={handleStartMission}
                 className="flex-1 sm:flex-initial px-7 lg:px-8 py-3.5 lg:py-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-sm sm:text-base flex items-center justify-center gap-2 shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
               >
-                <span>{isTodayMissionDone ? "Review today's mission" : "Start today's mission"}</span>
+                <span>{isTodayMissionDone ? t('dashboard.reviewTodayMission') : t('dashboard.startTodayMission')}</span>
                 <ArrowRight aria-hidden="true" className="w-4 h-4" />
               </button>
 
@@ -635,12 +662,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 {isPlayingBriefing ? (
                   <>
                     <Pause aria-hidden="true" className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                    <span>Pause story</span>
+                    <span>{t('dashboard.pauseStory')}</span>
                   </>
                 ) : (
                   <>
                     <Play aria-hidden="true" className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                    <span>Listen (45 sec)</span>
+                    <span>{t('dashboard.listen45s')}</span>
                   </>
                 )}
               </button>
@@ -677,7 +704,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <span className="text-2xl p-2 rounded-2xl bg-amber-500/20">{activeSeries.avatarIcon}</span>
                   <div>
                     <span className="text-[10px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold block">
-                      Active Study Series
+                      {t('dashboard.activeSeries')}
                     </span>
                     <h3 className="text-base lg:text-lg font-serif font-bold text-stone-900 dark:text-parchment-50 leading-tight">
                       {activeSeries.title}
@@ -692,7 +719,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   }}
                   className="text-xs font-mono font-bold text-amber-800 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 py-1 px-2.5 rounded-lg hover:bg-amber-500/10 transition-colors cursor-pointer"
                 >
-                  Change
+                  {t('dashboard.changeSeries')}
                 </button>
               </div>
 

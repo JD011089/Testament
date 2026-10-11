@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — Testament: The Living Word</title>
+  <link rel="icon" href="/favicon.ico" />
+  <style>
+    :root {
+      --bg: #090b0e;
+      --card-bg: #12151b;
+      --text: #f5f0e8;
+      --text-muted: #a8a29e;
+      --accent: #f59e0b;
+      --border: #292524;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #faf8f5;
+        --card-bg: #ffffff;
+        --text: #1c1917;
+        --text-muted: #57534e;
+        --accent: #d97706;
+        --border: #e7e5e4;
+      }
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .header {
+      margin-bottom: 40px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 24px;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-family: monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      background: rgba(245, 158, 11, 0.12);
+      padding: 4px 10px;
+      border-radius: 9999px;
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+    h1 {
+      font-size: 2rem;
+      margin: 0 0 8px;
+      font-weight: 800;
+    }
+    .effective-date {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    section {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: var(--accent);
+    }
+    p, li {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+    ul {
+      padding-left: 20px;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+    a {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 48px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .back-btn {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 10px 20px;
+      background: var(--accent);
+      color: #000;
+      text-decoration: none;
+      font-weight: 700;
+      border-radius: 12px;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="badge">Privacy Policy</div>
+      <h1>Testament: The Living Word</h1>
+      <div class="effective-date">Effective Date: October 2026 • Version 1.23</div>
+    </div>
+
+    <section>
+      <h2>1. Our Privacy Pledge</h2>
+      <p>
+        <strong>Testament is built with privacy-by-default architecture.</strong> We believe your spiritual reflections, prayers, and scripture study habits are deeply personal. We do not sell your data, we do not track you across other apps or websites, and we do not run third-party advertising networks.
+      </p>
+    </section>
+
+    <section>
+      <h2>2. What Data We Store Locally On Your Device</h2>
+      <p>The vast majority of app state is stored strictly in your device's private local storage (browser LocalStorage / app sandbox) and never transmitted to our servers:</p>
+      <ul>
+        <li><strong>Decision Journal & Free Reflections:</strong> Your personal responses and prayers stay 100% on your device.</li>
+        <li><strong>Study Progress & Scripture XP:</strong> Completed stories, memorized verses, streak count, and unlocked historical relics.</li>
+        <li><strong>Settings & Preferences:</strong> Reading font scale, narration voice choice, audio ambience volume, and selected language (English, Spanish, French).</li>
+      </ul>
+      <p>You can completely wipe this data at any time inside the app via Settings or by clearing your browser/app storage.</p>
+    </section>
+
+    <section>
+      <h2>3. Network Communications & Cloud Services</h2>
+      <p>To provide high-quality learning features, Testament makes limited, stateless network requests:</p>
+      <ul>
+        <li><strong>Public Scripture Text:</strong> Bible chapters and verses are fetched from public Scripture APIs (<a href="https://bible-api.com" target="_blank" rel="noopener">bible-api.com</a> and <a href="https://bolls.life" target="_blank" rel="noopener">bolls.life</a>) and cached on your device for offline reading.</li>
+        <li><strong>High-Fidelity Audio Narration:</strong> When you tap "Listen", text is sent to our serverless narration proxy to stream audio. No personal identifiers are logged or attached to audio requests.</li>
+        <li><strong>AI Engagement & Reflections:</strong> Contextual plain-language questions and scenario insights are processed through a stateless serverless function powered by Google Gemini. No user identity or account profile is transmitted or stored by Google.</li>
+        <li><strong>Web Push Reminders (Optional):</strong> If you explicitly grant notification permissions, an anonymous push token is created solely to dispatch scheduled daily verses. No contact lists, emails, or phone numbers are accessed.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>4. Third-Party Libraries & Telemetry</h2>
+      <p>Testament does not integrate third-party ad networks, social media trackers, or invasive telemetry frameworks. We do not use Google Analytics or Facebook SDKs inside the app.</p>
+    </section>
+
+    <section>
+      <h2>5. Children's Privacy</h2>
+      <p>Testament is designed as an educational and discipleship tool for all audiences. We do not knowingly collect personal identifiable information from children under 13.</p>
+    </section>
+
+    <section>
+      <h2>6. Contact Us</h2>
+      <p>If you have any questions about this Privacy Policy or app security practices, please contact the development team at:</p>
+      <p>
+        <strong>Website:</strong> <a href="https://testament-bible-learning.vercel.app">testament-bible-learning.vercel.app</a><br />
+        <strong>Repository:</strong> <a href="https://github.com/JD011089/Testament" target="_blank" rel="noopener">github.com/JD011089/Testament</a>
+      </p>
+      <div style="text-align: center; margin-top: 24px;">
+        <a href="/" class="back-btn">Return to Testament</a>
+      </div>
+    </section>
+
+    <div class="footer">
+      © 2026 Testament — The Living Word. All rights reserved.
+    </div>
+  </div>
+</body>
+</html>

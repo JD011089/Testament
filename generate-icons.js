@@ -2,7 +2,7 @@ import sharp from 'sharp';
 import fs from 'fs';
 import path from 'path';
 
-const SRC_MASTER = path.resolve('public/icons/icon-master.png');
+const SRC_MASTER = path.resolve('src/assets/icons/icon-master.png');
 
 function pngIco(images) {
   const count = images.length;
@@ -48,10 +48,10 @@ async function run() {
 
   // Primary PWA Icons
   console.log('Generating public/icons/icon-512.png...');
-  await sharp(masked1024).resize(512, 512).png().toFile(path.join(iconsDir, 'icon-512.png'));
+  await sharp(masked1024).resize(512, 512).png({ compressionLevel: 9, effort: 10 }).toFile(path.join(iconsDir, 'icon-512.png'));
 
   console.log('Generating public/icons/icon-192.png...');
-  await sharp(masked1024).resize(192, 192).png().toFile(path.join(iconsDir, 'icon-192.png'));
+  await sharp(masked1024).resize(192, 192).png({ compressionLevel: 9, effort: 10 }).toFile(path.join(iconsDir, 'icon-192.png'));
 
   // WebP versions
   console.log('Generating public/icons/icon-128.webp & icon-64.webp...');
@@ -60,13 +60,13 @@ async function run() {
 
   // Notification rich icon
   console.log('Generating public/icons/notification-icon.png...');
-  await sharp(masked1024).resize(192, 192).png().toFile(path.join(iconsDir, 'notification-icon.png'));
+  await sharp(masked1024).resize(192, 192).png({ compressionLevel: 9, effort: 10 }).toFile(path.join(iconsDir, 'notification-icon.png'));
 
   // Apple touch icon (180x180)
   console.log('Generating public/apple-touch-icon.png...');
-  await sharp(SRC_MASTER).resize(180, 180).png().toFile(path.join(publicDir, 'apple-touch-icon.png'));
+  await sharp(SRC_MASTER).resize(180, 180).png({ compressionLevel: 9, effort: 10 }).toFile(path.join(publicDir, 'apple-touch-icon.png'));
 
-  // 2. Android Maskable Icon (512x512)
+  // 2. Android Maskable Icon (512x512) - Unmasked master within safe zone (80% / 410px) on full-bleed background
   console.log('Generating public/icons/maskable-512.png...');
   const bgSvg = Buffer.from(`
     <svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
@@ -82,20 +82,20 @@ async function run() {
     </svg>
   `);
 
-  const scaledEmblem = await sharp(masked1024)
-    .resize(416, 416)
+  const scaledMaster = await sharp(SRC_MASTER)
+    .resize(410, 410, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
     .png()
     .toBuffer();
 
   await sharp(bgSvg)
     .composite([
       {
-        input: scaledEmblem,
-        top: Math.round((512 - 416) / 2),
-        left: Math.round((512 - 416) / 2)
+        input: scaledMaster,
+        top: Math.round((512 - 410) / 2),
+        left: Math.round((512 - 410) / 2)
       }
     ])
-    .png()
+    .png({ compressionLevel: 9, effort: 10 })
     .toFile(path.join(iconsDir, 'maskable-512.png'));
 
   // 3. Multi-resolution favicon.ico (16, 32, 48)

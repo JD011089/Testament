@@ -723,8 +723,16 @@ class SoundEngine {
 
         playBlob(blob);
       })
-      .catch(() => {
+      .catch((err) => {
         if (controller.signal.aborted) return;
+        console.warn('[SoundEngine] Narration API unavailable, using on-device reader:', (err as Error)?.message);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(
+            new CustomEvent('testament:narration-fallback', {
+              detail: { reason: (err as Error)?.message || 'Narration server error' }
+            })
+          );
+        }
         this.fallbackWithAssetOrSpeech(cleanText, onFinished, audioAssetUrl);
       });
   }

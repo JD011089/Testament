@@ -153,22 +153,7 @@ function classifyStance(text: string): DecisionStance {
   return 'general';
 }
 
-function getApiKey(): string {
-  // Check localStorage explicit override first
-  if (typeof localStorage !== 'undefined') {
-    const stored = localStorage.getItem('testament_gemini_api_key');
-    if (stored !== null) return stored.trim();
-  }
-  try {
-    if (typeof import.meta !== 'undefined' && import.meta?.env?.VITE_GEMINI_API_KEY) {
-      return import.meta.env.VITE_GEMINI_API_KEY.trim();
-    }
-  } catch {
-    // ignore
-  }
-  // Default empty key if not configured
-  return '';
-}
+import { callServerGemini } from './geminiClient';
 
 /**
  * Immediate, zero-latency local personalization generator.
@@ -257,9 +242,6 @@ export async function fetchGeminiPersonalization(
   act: StoryAct,
   quest: StoryQuest
 ): Promise<Partial<MissionPersonalization> | null> {
-  const apiKey = getApiKey();
-  if (!apiKey) return null; // With key removed, safely returns null
-
   const prompt = `You are a warm, tactical Bible guide for Testament, an app for ADHD learners.
 STORY: ${quest.title} — ${act.actTitle} (${quest.heroName})
 CONTEXT: ${act.historicalContext}
@@ -277,48 +259,25 @@ INSTRUCTIONS:
   "actionLine": "string"
 }`;
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 3500);
+  try {
+    const rawText = await callServerGemini(prompt, {
+      maxTokens: 200,
+      responseMimeType: 'application/json',
+      timeoutMs: 4000,
+    });
+    if (!rawText) return null;
 
-  const candidateModels = ['gemini-flash-lite-latest', 'gemini-3.5-flash-lite', 'gemini-flash-latest'];
-
-  for (const model of candidateModels) {
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.6,
-            maxOutputTokens: 200,
-            responseMimeType: 'application/json'
-          }
-        }),
-        signal: controller.signal
-      });
-
-      if (!res.ok) continue;
-
-      const data = await res.json();
-      const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!rawText) continue;
-
-      const parsed = JSON.parse(rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim());
-      if (parsed.mirrorBack && parsed.actionLine) {
-        clearTimeout(timeoutId);
-        return {
-          mirrorBack: String(parsed.mirrorBack).trim(),
-          actionLine: String(parsed.actionLine).trim(),
-          source: 'gemini'
-        };
-      }
-    } catch {
-      // try next model or fall back cleanly
+    const parsed = JSON.parse(rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim());
+    if (parsed.mirrorBack && parsed.actionLine) {
+      return {
+        mirrorBack: String(parsed.mirrorBack).trim(),
+        actionLine: String(parsed.actionLine).trim(),
+        source: 'gemini'
+      };
     }
+  } catch {
+    // fallback cleanly
   }
 
-  clearTimeout(timeoutId);
   return null;
 }

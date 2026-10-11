@@ -216,7 +216,27 @@ export const getDailyStreakCount = (): number => {
   if (typeof window === 'undefined') return 0;
   try {
     const stored = Number(localStorage.getItem('testament_streak'));
-    return Number.isFinite(stored) && stored > 0 ? stored : 0;
+    if (!Number.isFinite(stored) || stored <= 0) return 0;
+
+    const lastActive = localStorage.getItem('testament_last_active');
+    if (!lastActive) return 0;
+
+    const today = new Date().toDateString();
+    if (lastActive === today) return stored;
+
+    const diffDays = Math.round((new Date(today).getTime() - new Date(lastActive).getTime()) / (1000 * 60 * 60 * 24));
+    if (diffDays <= 1) return stored;
+
+    const now = new Date();
+    const currentWeekKey = `${now.getFullYear()}-W${Math.ceil((now.getDate() + new Date(now.getFullYear(), now.getMonth(), 1).getDay()) / 7)}`;
+    const lastGraceWeek = localStorage.getItem('testament_last_grace_week');
+
+    // Grace day forgiveness protects a 2-day gap if not already used this week
+    if (diffDays === 2 && lastGraceWeek !== currentWeekKey) {
+      return stored;
+    }
+
+    return 0;
   } catch {
     return 0;
   }

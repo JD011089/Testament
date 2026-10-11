@@ -405,24 +405,9 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
     });
   };
 
-  const handleSelectPlaybookCard = (playId: string, isRecommended: boolean) => {
+  const handleSelectPlaybookCard = (playId: string, _isRecommended: boolean) => {
     soundEngine.playSnap();
     setRevealedPlayId(playId);
-
-    if (isRecommended && !completedDilemmas.includes(dilemma.id)) {
-      soundEngine.playVictory();
-      confetti({
-        particleCount: 50,
-        spread: 60,
-        origin: { y: 0.75 },
-        colors: ['#ea580c', '#f59e0b', '#10b981']
-      });
-      const updated = [...completedDilemmas, dilemma.id];
-      setCompletedDilemmas(updated);
-      localStorage.setItem('testament_completed_dilemmas', JSON.stringify(updated));
-      onRewardXP(40);
-      window.dispatchEvent(new CustomEvent('testament-dilemma-completed', { detail: { dilemmaId: dilemma.id } }));
-    }
   };
 
   return (

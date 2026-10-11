@@ -14,6 +14,14 @@ export interface DecisionJournalEntry {
 
 const STORAGE_KEY = 'testament_decision_journal';
 
+function getLocalTodayKey(): string {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 /**
  * Saves a decision to the private on-device journal.
  * Strictly local storage: no network requests or external persistence.
@@ -25,12 +33,19 @@ export function saveDecisionJournalEntry(
     if (typeof localStorage === 'undefined') return;
 
     const existing = getDecisionJournalEntries();
-    // Update existing entry for the same date or prepend new one
-    const filtered = existing.filter((e) => e.dateKey !== entry.dateKey);
+    const targetType = entry.entryType || 'mission_decision';
+    // Preserve free reflections and only replace same-day mission decisions
+    const filtered = existing.filter((e) => {
+      if (e.entryType === 'free_reflection') return true;
+      if (targetType === 'mission_decision' && (e.entryType || 'mission_decision') === 'mission_decision' && e.dateKey === entry.dateKey) {
+        return false;
+      }
+      return true;
+    });
 
     const newEntry: DecisionJournalEntry = {
       ...entry,
-      entryType: entry.entryType || 'mission_decision',
+      entryType: targetType,
       id: `journal-${entry.dateKey}-${Date.now()}`,
       timestamp: Date.now()
     };
@@ -52,7 +67,7 @@ export function saveUserFreeTextJournalEntry(text: string): DecisionJournalEntry
   try {
     if (typeof localStorage === 'undefined') return null;
 
-    const todayKey = new Date().toISOString().split('T')[0];
+    const todayKey = getLocalTodayKey();
     const newEntry: DecisionJournalEntry = {
       id: `journal-free-${Date.now()}`,
       dateKey: todayKey,

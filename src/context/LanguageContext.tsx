@@ -86,6 +86,13 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.remindersCount': '{sent} of {total} today',
     'dashboard.settings': 'Settings',
     'dashboard.dueReview': 'Review {count} Due Verses Now',
+    'dashboard.startTodayMission': "Start today's mission",
+    'dashboard.reviewTodayMission': "Review today's mission",
+    'dashboard.listen45s': 'Listen (45 sec)',
+    'dashboard.pauseStory': 'Pause story',
+    'dashboard.activeSeries': 'Active Study Series',
+    'dashboard.changeSeries': 'Change',
+    'dashboard.collection': 'Collection',
 
     // Daily Campaign Card
     'campaign.title': "Today's plan",
@@ -643,6 +650,13 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.remindersCount': '{sent} de {total} hoy',
     'dashboard.settings': 'Configurar',
     'dashboard.dueReview': 'Repasar {count} versículos pendientes',
+    'dashboard.startTodayMission': 'Comenzar misión de hoy',
+    'dashboard.reviewTodayMission': 'Repasar misión de hoy',
+    'dashboard.listen45s': 'Escuchar (45 seg)',
+    'dashboard.pauseStory': 'Pausar historia',
+    'dashboard.activeSeries': 'Serie de Estudio Activa',
+    'dashboard.changeSeries': 'Cambiar',
+    'dashboard.collection': 'Colección',
 
     // Daily Campaign Card
     'campaign.title': 'Campaña Táctica de Hoy',
@@ -1199,6 +1213,13 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.remindersCount': '{sent} sur {total} aujourd\'hui',
     'dashboard.settings': 'Paramètres',
     'dashboard.dueReview': 'Réviser {count} versets dus',
+    'dashboard.startTodayMission': 'Commencer la mission du jour',
+    'dashboard.reviewTodayMission': 'Revoir la mission du jour',
+    'dashboard.listen45s': 'Écouter (45 sec)',
+    'dashboard.pauseStory': 'Mettre en pause',
+    'dashboard.activeSeries': 'Série d\'Étude Active',
+    'dashboard.changeSeries': 'Changer',
+    'dashboard.collection': 'Collection',
 
     // Daily Campaign Card
     'campaign.title': 'Campagne Tactique du Jour',

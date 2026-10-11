@@ -36,7 +36,11 @@ test-results/
 
 # Android / TWA build artifacts & secrets
 *.keystore
+**/*.keystore
 *.jks
+**/*.jks
+*.p12
+**/*.p12
 twa/.gradle/
 twa/build/
 twa/app/build/

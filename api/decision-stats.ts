@@ -62,6 +62,53 @@ function calculateStats(tally?: DecisionTally) {
   };
 }
 
+const hits: Map<string, { count: number; reset: number }> =
+  (globalThis as unknown as { __decisionHits?: Map<string, { count: number; reset: number }> }).__decisionHits
+  ?? new Map();
+
+(globalThis as unknown as { __decisionHits: Map<string, { count: number; reset: number }> }).__decisionHits = hits;
+
+const WINDOW_MS = 60_000;
+const MAX_REQUESTS = 40;
+
+function firstHeader(value: HeaderValue): string {
+  if (Array.isArray(value)) return value[0] || '';
+  return value || '';
+}
+
+function clientIp(req: ApiRequest): string {
+  const forwarded = firstHeader(req.headers['x-forwarded-for']);
+  return forwarded.split(',')[0].trim() || 'unknown';
+}
+
+function allow(ip: string): boolean {
+  const now = Date.now();
+  const entry = hits.get(ip);
+  if (!entry || now > entry.reset) {
+    hits.set(ip, { count: 1, reset: now + WINDOW_MS });
+    return true;
+  }
+  entry.count += 1;
+  return entry.count <= MAX_REQUESTS;
+}
+
+function isOriginAllowed(originOrReferer: string): boolean {
+  if (!originOrReferer) return true;
+  try {
+    const url = new URL(originOrReferer);
+    const host = url.hostname.toLowerCase();
+    return (
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      host === 'testament-bible-learning.vercel.app' ||
+      host.endsWith('.vercel.app') ||
+      originOrReferer.startsWith('android-app://')
+    );
+  } catch {
+    return false;
+  }
+}
+
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   // CORS & Security Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -70,6 +117,18 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
 
   if (req.method === 'OPTIONS') {
     res.status(200).end();
+    return;
+  }
+
+  const origin = firstHeader(req.headers['origin']) || firstHeader(req.headers['referer']);
+  if (!isOriginAllowed(origin)) {
+    res.status(403).json({ error: 'Forbidden origin' });
+    return;
+  }
+
+  if (!allow(clientIp(req))) {
+    res.setHeader('Retry-After', '60');
+    res.status(429).json({ error: 'Too many requests' });
     return;
   }
 

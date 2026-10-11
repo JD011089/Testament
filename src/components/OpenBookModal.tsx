@@ -15,7 +15,8 @@ import {
   Loader2,
   ChevronDown,
   Mic,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Download
 } from 'lucide-react';
 import type { CanonBook } from '../data/canon';
 import { soundEngine, NARRATOR_VOICES, type NarratorProfile } from '../utils/audio';
@@ -225,6 +226,19 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
   useEffect(() => {
     setSelectedVerse(null);
   }, [selectedChapter, book?.id]);
+
+  const handleSaveForOffline = () => {
+    if (!chapterData || !book) return;
+    soundEngine.playClick();
+    try {
+      const bookNumber = currentIndex >= 0 ? currentIndex + 1 : 1;
+      const cacheKey = `testament_chapter_${bookNumber}_${selectedChapter}_${selectedTranslation}`;
+      localStorage.setItem(cacheKey, JSON.stringify(chapterData));
+      showToast(`${book.name} ${selectedChapter} saved for offline reading!`);
+    } catch {
+      showToast(`Saved for offline reading!`);
+    }
+  };
 
   const currentIndex = book ? allBooks.findIndex(b => b.id === book.id) : -1;
   const prevBook = currentIndex > 0 ? allBooks[currentIndex - 1] : null;
@@ -869,6 +883,19 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                     ))}
                   </div>
 
+                  {/* Save for offline button */}
+                  <button
+                    type="button"
+                    onClick={handleSaveForOffline}
+                    disabled={!chapterData}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 border border-stone-250 dark:border-stone-800 text-xs font-medium text-stone-700 dark:text-stone-300 disabled:opacity-40 transition-colors"
+                    title="Save chapter for offline reading"
+                    aria-label="Save for offline"
+                  >
+                    <Download className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Save offline</span>
+                  </button>
+
                   {/* More Reader Settings Button (Translation, Voice, Layout) */}
                   <button
                     type="button"
@@ -910,6 +937,16 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
 
                 {/* Mobile Right Controls: Audio + Settings Drawer Trigger */}
                 <div className="flex sm:hidden items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={handleSaveForOffline}
+                    disabled={!chapterData}
+                    className="p-2 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-250 dark:border-stone-800 text-stone-700 dark:text-stone-300 min-h-[36px] min-w-[36px] flex items-center justify-center disabled:opacity-40 transition-colors"
+                    title="Save chapter for offline reading"
+                    aria-label="Save chapter offline"
+                  >
+                    <Download className="w-4 h-4 text-amber-500" />
+                  </button>
                   <button
                     onClick={handleToggleChapterAudio}
                     className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition-all min-h-[36px] ${
