@@ -26,13 +26,12 @@ pipelines:
             - sudo apt-get update && sudo apt-get install -y curl
             - npm install -g @bubblewrap/cli
             - echo "=== Decoding release signing keystore ==="
-            - echo "$KEYSTORE_BASE64" | base64 -d > /tmp/testament-release.keystore
+            - python3 -c "import os, base64; open('/tmp/testament-release.keystore', 'wb').write(base64.b64decode(os.environ['KEYSTORE_BASE64'].strip()))"
             - cd twa
             - echo "=== Building signed APK and AAB bundle ==="
-            - bubblewrap build --skipPwaValidation --signingKeyPath=/tmp/testament-release.keystore --signingKeyAlias=$KEY_ALIAS <<EOF
-$KEYSTORE_PASSWORD
-$KEY_PASSWORD
-EOF
+            - export BUBBLEWRAP_KEYSTORE_PASSWORD="$KEYSTORE_PASSWORD"
+            - export BUBBLEWRAP_KEY_PASSWORD="$KEY_PASSWORD"
+            - bubblewrap build --skipPwaValidation --signingKeyPath=/tmp/testament-release.keystore --signingKeyAlias=$KEY_ALIAS
             - rm -f /tmp/testament-release.keystore
             - echo "=== Build complete ==="
             - ls -la app-release-signed.apk app-release-bundle.aab
