@@ -50,7 +50,7 @@ function getApiKey(): string {
   } catch {
     // ignore
   }
-  return 'REDACTED_API_KEY';
+  return '';
 }
 
 function wordCount(paragraphs: string[]): number {
