@@ -40,14 +40,21 @@ jobs:
           EOF
 
       - name: Decode Release Keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > /tmp/testament-release.keystore
+          python3 -c "import os, base64; open('/tmp/testament-release.keystore', 'wb').write(base64.b64decode(os.environ['KEYSTORE_BASE64'].strip()))"
+          ls -lh /tmp/testament-release.keystore
 
       - name: Build Signed APK & AAB
         working-directory: twa
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         run: |
-          printf '%s\n%s\n' "${{ secrets.KEYSTORE_PASSWORD }}" "${{ secrets.KEY_PASSWORD }}" | \
-          bubblewrap build --skipPwaValidation --signingKeyPath=/tmp/testament-release.keystore --signingKeyAlias="${{ secrets.KEY_ALIAS }}"
+          printf '%s\n%s\n' "$KEYSTORE_PASSWORD" "$KEY_PASSWORD" | \
+          bubblewrap build --skipPwaValidation --signingKeyPath=/tmp/testament-release.keystore --signingKeyAlias="$KEY_ALIAS"
 
       - name: Clean Keystore Temp File
         if: always()
