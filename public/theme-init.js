@@ -1,11 +1,12 @@
 (function () {
   try {
     var saved = localStorage.getItem('testament_theme');
-    var prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
-    var isDark = saved === 'dark' || (!saved && !prefersLight);
-    var color = isDark ? '#090b0e' : '#fcfbfa';
+    // Daybreak (light) is default unless user explicitly chose dark
+    var isDark = saved === 'dark';
+    var color = isDark ? '#131722' : '#F8F1E0';
     if (isDark) {
       document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
       document.documentElement.style.colorScheme = 'dark';
     } else {
       document.documentElement.classList.remove('dark');

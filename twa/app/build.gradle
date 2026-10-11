@@ -26,13 +26,13 @@ def twaManifest = [
     launchUrl: '/', // The start path for the TWA. Must be relative to the domain.
     name: 'Testament', // The application name.
     launcherName: 'Testament', // The name shown on the Android Launcher.
-    themeColor: '#090B0E', // The color used for the status bar.
-    themeColorDark: '#000000', // The color used for the dark status bar.
-    navigationColor: '#000000', // The color used for the navigation bar.
-    navigationColorDark: '#000000', // The color used for the dark navbar.
-    navigationDividerColor: '#000000', // The navbar divider color.
-    navigationDividerColorDark: '#000000', // The dark navbar divider color.
-    backgroundColor: '#090B0E', // The color used for the splash screen background.
+    themeColor: '#F8F1E0', // The color used for the status bar.
+    themeColorDark: '#131722', // The color used for the dark status bar.
+    navigationColor: '#F8F1E0', // The color used for the navigation bar.
+    navigationColorDark: '#131722', // The color used for the dark navbar.
+    navigationDividerColor: '#E3D4B4', // The navbar divider color.
+    navigationDividerColorDark: '#333B50', // The dark navbar divider color.
+    backgroundColor: '#F8F1E0', // The color used for the splash screen background.
     enableNotifications: true, // Set to true to enable notification delegation.
     // Every shortcut must include the following fields:
     // - name: String that will show up in the shortcut.
@@ -57,8 +57,8 @@ android {
         applicationId "app.testament.bible"
         minSdkVersion 24
         targetSdkVersion 36
-        versionCode 3
-        versionName "1.23.1"
+        versionCode 4
+        versionName "1.24.0"
 
         // The name for the application
         resValue "string", "appName", twaManifest.name
