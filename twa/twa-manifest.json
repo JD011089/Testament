@@ -22,14 +22,7 @@
   },
   "appVersionName": "1.23.1",
   "appVersionCode": 3,
-  "shortcuts": [
-    {
-      "name": "Daily Reminder",
-      "short_name": "Reminder",
-      "url": "/settings/reminders",
-      "icon": "ic_notification_icon"
-    }
-  ],
+  "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://testament-bible-learning.vercel.app/manifest.webmanifest",
   "fallbackType": "customtabs",
