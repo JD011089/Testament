@@ -33,3 +33,14 @@ test-results/
 
 .vercel
 .env*
+
+# Android / TWA build artifacts & secrets
+*.keystore
+*.jks
+twa/.gradle/
+twa/build/
+twa/app/build/
+twa/*.apk
+twa/*.aab
+twa/*.idsig
+twa/signing.properties

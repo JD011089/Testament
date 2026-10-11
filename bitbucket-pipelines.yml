@@ -1,0 +1,41 @@
+# Bitbucket Pipelines - Build & Release Signed Android APK / AAB (TWA)
+# Triggered on tags (e.g. v1.23.0, v*)
+# Secrets required in Bitbucket Repository Variables (NEVER commit to git):
+#   - KEYSTORE_BASE64 : Base64 representation of testament-release.keystore
+#   - KEYSTORE_PASSWORD : Password for the keystore
+#   - KEY_ALIAS : Alias of the signing key (e.g. testament)
+#   - KEY_PASSWORD : Password for the signing key
+#
+# GitHub Actions equivalent:
+# If mirrored to GitHub, the same sequence maps to .github/workflows/android-release.yml
+# using GitHub Secrets (KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD)
+# and actions/upload-artifact or softprops/action-gh-release.
+
+image: cimg/android:2024.01.1-node
+
+pipelines:
+  tags:
+    'v*':
+      - step:
+          name: Build Signed Android APK & AAB
+          caches:
+            - gradle
+            - node
+          script:
+            - echo "=== Preparing build environment ==="
+            - sudo apt-get update && sudo apt-get install -y curl
+            - npm install -g @bubblewrap/cli
+            - echo "=== Decoding release signing keystore ==="
+            - echo "$KEYSTORE_BASE64" | base64 -d > /tmp/testament-release.keystore
+            - cd twa
+            - echo "=== Building signed APK and AAB bundle ==="
+            - bubblewrap build --skipPwaValidation --signingKeyPath=/tmp/testament-release.keystore --signingKeyAlias=$KEY_ALIAS <<EOF
+$KEYSTORE_PASSWORD
+$KEY_PASSWORD
+EOF
+            - rm -f /tmp/testament-release.keystore
+            - echo "=== Build complete ==="
+            - ls -la app-release-signed.apk app-release-bundle.aab
+          artifacts:
+            - twa/app-release-signed.apk
+            - twa/app-release-bundle.aab
