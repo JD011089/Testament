@@ -1017,7 +1017,7 @@ export const WordForge: React.FC<WordForgeProps> = ({
       </div>
 
       {/* Category Pills */}
-      <div className="flex gap-2 overflow-x-auto pb-3 mb-6 scrollbar-none" role="tablist" aria-label={t('dilemma.category')}>
+      <div className="flex flex-wrap gap-2 pb-3 mb-6" role="tablist" aria-label={t('dilemma.category')}>
         {categories.map(cat => {
           const catLabel = cat === 'All' ? t('forge.all')
             : cat === 'Courage & Facing Giants' ? t('forge.courage')

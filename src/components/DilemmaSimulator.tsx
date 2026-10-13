@@ -551,7 +551,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
       ) : (
         <>
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none" role="tablist" aria-label={t('dilemma.category')}>
+            <div className="flex flex-wrap items-center gap-2 pb-2" role="tablist" aria-label={t('dilemma.category')}>
               <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400 flex items-center gap-1 pl-1">
                 <Filter className="w-3 h-3 text-amber-800 dark:text-amber-500" /> {t('dilemma.category')}
               </span>

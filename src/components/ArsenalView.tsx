@@ -162,7 +162,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
           />
         </div>
 
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+        <div className="flex flex-wrap gap-2 pb-1">
           {filters.map(f => (
             <button
               key={f.id}

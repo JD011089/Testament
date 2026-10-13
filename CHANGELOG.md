@@ -5,6 +5,12 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.25.1] - 2026-10-13
+
+### Fixed (Mobile Layout)
+- **No more clipped filter chips**: Category, division, and theme filter rows on Practice and the Library now wrap instead of hiding behind an invisible horizontal scroll, so every option is visible at 320–390px widths.
+- Long shelf labels such as "The Beginning: Books of Moses (Genesis–Deuteronomy)" now wrap inside their pill instead of running off the right edge.
+
 ## [1.25.0] - 2026-10-13
 
 ### Fixed (Scripture Integrity)

@@ -390,7 +390,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
           )}
 
           {/* Division Pill Buttons */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <div className="flex flex-wrap items-center gap-2 pb-1">
             <button
               onClick={() => {
                 soundEngine.playClick();
@@ -411,13 +411,13 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                   soundEngine.playClick();
                   setSelectedDivision(div.id);
                 }}
-                className={`text-xs px-3 py-1.5 rounded-full font-medium whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                className={`text-xs px-3 py-1.5 rounded-full font-medium max-w-full text-left transition-all flex items-center gap-1.5 ${
                   selectedDivision === div.id
                     ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
                     : 'bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 shadow-xs'
                 }`}
               >
-                <span>{getDivisionLabel(div.id, div.label)}</span>
+                <span className="min-w-0">{getDivisionLabel(div.id, div.label)}</span>
                 <span className={`text-[11px] px-1.5 py-0.2 rounded-full ${
                   selectedDivision === div.id ? 'bg-black/20 text-stone-950 font-extrabold' : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400'
                 }`}>
@@ -428,7 +428,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
           </div>
 
           {/* Life Situation Chips */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          <div className="flex flex-wrap items-center gap-1.5 pb-1">
             <span className="text-[11px] font-mono uppercase text-stone-500 shrink-0 mr-1">
               {t('library.filterByBattle')}
             </span>
