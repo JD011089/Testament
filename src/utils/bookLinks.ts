@@ -1,5 +1,6 @@
 import { CANON_BOOKS, type CanonBook } from '../data/canon';
 import { REAL_LIFE_DILEMMAS } from '../data/dilemmas';
+import { resolveBookName } from './scriptureRef';
 
 const NAME_ALIASES: Record<string, string> = {
   psalm: 'Psalms',
@@ -9,9 +10,13 @@ const NAME_ALIASES: Record<string, string> = {
 };
 
 export function findCanonBookByName(raw: string): CanonBook | undefined {
-  const key = raw.trim().toLowerCase();
-  const resolved = NAME_ALIASES[key] ?? raw.trim();
-  return CANON_BOOKS.find((book) => book.name.toLowerCase() === resolved.toLowerCase());
+  const resolvedName = resolveBookName(raw);
+  const key = resolvedName.trim().toLowerCase();
+  const resolved = NAME_ALIASES[key] ?? resolvedName.trim();
+  return CANON_BOOKS.find((book) => 
+    book.name.toLowerCase() === resolved.toLowerCase() ||
+    book.id.toLowerCase() === resolved.toLowerCase()
+  );
 }
 
 function matchNames(bookName: string): string[] {

@@ -1,6 +1,5 @@
 import { recordFSRSReview, getFSRSCard } from './fsrsEngine';
 import { getTodayDateKey } from './dailyEngine';
-import { getDailyCuratedPassage } from '../data/dailyPassages';
 
 export interface MemoryVerseData {
   id?: string;
@@ -141,18 +140,8 @@ export function getYesterdayRecallVerse(): MemoryVerseData | null {
     // ignore
   }
 
-  // 2. Fall back to yesterday's curated rotation passage
-  try {
-    const yesterdayPassage = getDailyCuratedPassage(-1);
-    return {
-      id: yesterdayPassage.keyVerseReference,
-      reference: yesterdayPassage.keyVerseReference,
-      text: yesterdayPassage.keyVerseText,
-      heroName: yesterdayPassage.heroName,
-    };
-  } catch {
-    return null;
-  }
+  // No previous day memory verse recorded -> Day 1 (no fake yesterday verse)
+  return null;
 }
 
 /**

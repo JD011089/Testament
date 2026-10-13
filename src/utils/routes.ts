@@ -14,8 +14,8 @@ export const TAB_PATHS: Record<NavTab, string> = {
 export function tabFromPath(pathname: string): AppTab {
   const path = pathname.replace(/\/+$/, '') || '/';
   if (path === '/') return 'dashboard';
-  if (path === '/library') return 'library';
-  if (path === '/practice') return 'practice';
+  if (path === '/library' || path.startsWith('/read/')) return 'library';
+  if (path === '/practice' || path.startsWith('/practice/')) return 'practice';
   if (path === '/memorize' || path === '/wordforge') return 'practice';
   if (path === '/dilemmas') return 'practice';
   if (path === '/saved' || path === '/arsenal') return 'arsenal';

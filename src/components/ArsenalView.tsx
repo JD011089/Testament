@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getAllVerses } from '../utils/verseRegistry';
+import { getAllVerses, normalizeVerseSlug } from '../utils/verseRegistry';
+import { isVerseMastered } from '../utils/fsrsEngine';
 import { STORY_QUESTS } from '../data/stories';
 import type { MemoryVerse } from '../types';
 import { soundEngine } from '../utils/audio';
@@ -65,16 +66,40 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
   })();
   const allVerses = getAllVerses(language);
 
-  const savedIdSet = new Set([...memorizedVerses, ...bookmarkedVerses]);
-  const savedVerses = allVerses.filter((v) => savedIdSet.has(v.id));
+  // Helper matching function across IDs and references
+  const matchesIdentifier = (verse: MemoryVerse, idList: string[]): boolean => {
+    const vId = verse.id.toLowerCase();
+    const vRef = verse.reference.toLowerCase();
+    const vSlug = normalizeVerseSlug(verse.reference);
+    const vIdSlug = normalizeVerseSlug(verse.id);
+
+    return idList.some(raw => {
+      const clean = raw.toLowerCase();
+      const slug = normalizeVerseSlug(raw);
+      return (
+        clean === vId ||
+        clean === vRef ||
+        slug === vSlug ||
+        slug === vIdSlug ||
+        clean === `story-${vId}` ||
+        clean === verse.actId?.toLowerCase() ||
+        clean === verse.storyQuestId?.toLowerCase()
+      );
+    });
+  };
+
+  const isVerseBookmarked = (v: MemoryVerse) => matchesIdentifier(v, bookmarkedVerses);
+  const isVerseMemorized = (v: MemoryVerse) => matchesIdentifier(v, memorizedVerses) || isVerseMastered(v.id) || isVerseMastered(v.reference);
+
+  const savedVerses = allVerses.filter((v) => isVerseBookmarked(v) || isVerseMemorized(v));
 
   const filteredVerses = savedVerses.filter((verse: MemoryVerse) => {
-    const isMastered = memorizedVerses.includes(verse.id);
-    const isBookmarked = bookmarkedVerses.includes(verse.id);
+    const mastered = isVerseMemorized(verse);
+    const bookmarked = isVerseBookmarked(verse);
     const matchesFilter =
       activeFilter === 'saved' ||
-      (activeFilter === 'mastered' && isMastered) ||
-      (activeFilter === 'bookmarked' && isBookmarked);
+      (activeFilter === 'mastered' && mastered) ||
+      (activeFilter === 'bookmarked' && bookmarked);
     const matchesSearch =
       verse.reference.toLowerCase().includes(searchQuery.toLowerCase()) ||
       verse.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -96,8 +121,8 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
     }
   };
 
-  const masteredVerses = savedVerses.filter((v) => memorizedVerses.includes(v.id));
-  const bookmarkedList = savedVerses.filter((v) => bookmarkedVerses.includes(v.id));
+  const masteredVerses = savedVerses.filter((v) => isVerseMemorized(v));
+  const bookmarkedList = savedVerses.filter((v) => isVerseBookmarked(v));
 
   const filters: { id: ArsenalFilter; label: string; count: number }[] = [
     { id: 'saved', label: t('arsenal.allSaved'), count: savedVerses.length },

@@ -41,9 +41,12 @@ function wordCount(paragraphs: string[]): number {
 /**
  * Builds a mission from a curated passage's static fallback
  */
+/**
+ * Builds a mission from a curated passage's static fallback
+ */
 export function buildStaticFallbackMission(passage: CuratedPassage, dateKey: string): GeneratedDailyMission {
   return {
-    id: `mission-${dateKey}`,
+    id: `mission-${passage.id}-${dateKey}`,
     dateKey,
     passageId: passage.id,
     passageReference: passage.reference,
@@ -69,7 +72,8 @@ export function getDailyMissionSync(
   dayOffset = 0,
   battlefieldId?: string | null
 ): GeneratedDailyMission {
-  const cacheKey = `testament_daily_generated_mission_${dateKey}`;
+  const passage = getDailyCuratedPassage(dayOffset, battlefieldId);
+  const cacheKey = `testament_daily_generated_mission_${passage.id}_${dateKey}`;
   try {
     if (typeof localStorage !== 'undefined') {
       const stored = localStorage.getItem(cacheKey);
@@ -84,13 +88,12 @@ export function getDailyMissionSync(
     // ignore cache failure
   }
 
-  const passage = getDailyCuratedPassage(dayOffset, battlefieldId);
   return buildStaticFallbackMission(passage, dateKey);
 }
 
 /**
  * Asynchronous Daily Generation Pipeline.
- * 1. Checks cache for dateKey.
+ * 1. Checks cache for dateKey + passage.id.
  * 2. If not cached, calls Gemini with in-context verbatim passage text and strict grounding rules.
  * 3. Enforces max 150-word story retelling and no-invention constraints.
  * 4. Caches and returns mission; falls back seamlessly to static fallback if key removed or API fails.
@@ -100,10 +103,10 @@ export async function getDailyMission(
   dayOffset = 0,
   battlefieldId?: string | null
 ): Promise<GeneratedDailyMission> {
-  const cacheKey = `testament_daily_generated_mission_${dateKey}`;
   const passage = getDailyCuratedPassage(dayOffset, battlefieldId);
+  const cacheKey = `testament_daily_generated_mission_${passage.id}_${dateKey}`;
 
-  // 1. Return from cache if already generated today
+  // 1. Return from cache if already generated today for this passage
   try {
     if (typeof localStorage !== 'undefined') {
       const stored = localStorage.getItem(cacheKey);
@@ -180,7 +183,7 @@ Return ONLY a valid JSON object matching this structure:
         }
 
         const generatedMission: GeneratedDailyMission = {
-          id: `mission-${dateKey}`,
+          id: `mission-${passage.id}-${dateKey}`,
           dateKey,
           passageId: passage.id,
           passageReference: passage.reference,

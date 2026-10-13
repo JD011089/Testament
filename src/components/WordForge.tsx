@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { MemoryVerse } from '../types';
-import { getAllVerses } from '../utils/verseRegistry';
+import { getAllVerses, getVerseById, normalizeVerseSlug } from '../utils/verseRegistry';
 import { soundEngine } from '../utils/audio';
 import { getDailyVerse } from '../utils/dailyEngine';
 import { CalendarRemindersModal } from './CalendarRemindersModal';
 import confetti from 'canvas-confetti';
-import { recordFSRSReview, getFSRSCard, previewFSRSDays } from '../utils/fsrsEngine';
+import { recordFSRSReview, getFSRSCard, previewFSRSDays, getDueFSRSCards, isVerseMastered } from '../utils/fsrsEngine';
 import { 
   RotateCcw, 
   Eye, 
@@ -166,12 +166,9 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
           spread: 70,
           origin: { y: 0.7 }
         });
-        if (!fsrsRated) {
-          const updated = recordFSRSReview(verse.id, 3);
-          setFsrsRated(true);
-          setScheduledNextDays(updated.stability);
+        if (isVerseMastered(verse.id)) {
+          onVerseMastered(verse.id);
         }
-        onVerseMastered(verse.id);
       }
     } else {
       soundEngine.playClick();
@@ -185,7 +182,8 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
   };
 
   const currentFsrs = getFSRSCard(verse.id);
-  const [useFirstLetters] = useState(() => getFSRSCard(verse.id).reps === 0);
+  // Full-word tiles for new verses; only graduate to first-letter tiles after 3+ successful reviews
+  const [useFirstLetters] = useState(() => getFSRSCard(verse.id).reps >= 3);
 
   const firstLetterOf = (word: string) => {
     const match = word.match(/[A-Za-z0-9]/);
@@ -203,6 +201,9 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
     const updated = recordFSRSReview(verse.id, rating);
     setScheduledNextDays(updated.stability);
     setFsrsRated(true);
+    if (isVerseMastered(verse.id)) {
+      onVerseMastered(verse.id);
+    }
   };
 
   useEffect(() => {
@@ -210,6 +211,16 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
       soundEngine.stopSpeaking();
     };
   }, []);
+
+  const handleAdvance = () => {
+    if (!fsrsRated && !hasPeeked) {
+      recordFSRSReview(verse.id, 3);
+      if (isVerseMastered(verse.id)) {
+        onVerseMastered(verse.id);
+      }
+    }
+    onNextVerse();
+  };
 
   const resetPuzzle = () => {
     soundEngine.playSnap();
@@ -292,12 +303,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
               origin: { y: 0.75 },
               colors: ['#ea580c', '#f59e0b', '#10b981', '#fbbf24']
             });
-            if (!hasPeeked) {
-              if (!fsrsRated) {
-                const updated = recordFSRSReview(verse.id, 3);
-                setFsrsRated(true);
-                setScheduledNextDays(updated.stability);
-              }
+            if (!hasPeeked && isVerseMastered(verse.id)) {
               onVerseMastered(verse.id);
             }
           }
@@ -315,12 +321,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
             origin: { y: 0.75 },
             colors: ['#ea580c', '#f59e0b', '#10b981', '#fbbf24']
           });
-          if (!hasPeeked) {
-            if (!fsrsRated) {
-              const updated = recordFSRSReview(verse.id, 3);
-              setFsrsRated(true);
-              setScheduledNextDays(updated.stability);
-            }
+          if (!hasPeeked && isVerseMastered(verse.id)) {
             onVerseMastered(verse.id);
           }
         }
@@ -341,12 +342,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
         origin: { y: 0.75 },
         colors: ['#ea580c', '#f59e0b', '#10b981', '#fbbf24']
       });
-      if (!hasPeeked) {
-        if (!fsrsRated) {
-          const updated = recordFSRSReview(verse.id, 3);
-          setFsrsRated(true);
-          setScheduledNextDays(updated.stability);
-        }
+      if (!hasPeeked && isVerseMastered(verse.id)) {
         onVerseMastered(verse.id);
       }
     }
@@ -762,8 +758,15 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                   </motion.button>
                 ))}
                 {availableWords.length === 0 && !isCompleted && (
-                  <div className="text-xs text-stone-500 dark:text-stone-400 italic py-2">
-                    {t('forge.allWordsPlaced')}
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs w-full">
+                    <span>Some tiles are out of order. Tap any red tile above to return it to the bank.</span>
+                    <button
+                      type="button"
+                      onClick={resetPuzzle}
+                      className="px-3 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-parchment-200 hover:bg-stone-300 dark:hover:bg-stone-700 font-semibold text-xs transition-colors shrink-0"
+                    >
+                      Reset Tiles
+                    </button>
                   </div>
                 )}
               </div>
@@ -851,7 +854,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
 
               <div className="mt-4 pt-3 border-t border-emerald-200/50 dark:border-emerald-900/40 flex justify-end">
                 <button
-                  onClick={onNextVerse}
+                  onClick={handleAdvance}
                   className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-stone-950 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm focus-visible:ring-2 focus-visible:ring-emerald-400"
                 >
                   <span>{t('forge.next')} →</span>
@@ -879,17 +882,46 @@ export const WordForge: React.FC<WordForgeProps> = ({
 
   const findVerseIndex = (targetId: string | null | undefined, list: MemoryVerse[]): number => {
     if (!targetId) return -1;
-    return list.findIndex(v => 
-      v.id === targetId || 
-      v.actId === targetId || 
-      v.id === `story-${targetId}`
+    const clean = targetId.trim().toLowerCase();
+    const slug = normalizeVerseSlug(targetId);
+
+    // 1. Direct ID, actId, story ID match
+    const directIdx = list.findIndex(v => 
+      v.id.toLowerCase() === clean || 
+      v.actId?.toLowerCase() === clean || 
+      v.id.toLowerCase() === `story-${clean}` ||
+      normalizeVerseSlug(v.id) === slug
     );
+    if (directIdx !== -1) return directIdx;
+
+    // 2. Reference match (case insensitive or normalized)
+    const refIdx = list.findIndex(v =>
+      v.reference.toLowerCase() === clean ||
+      normalizeVerseSlug(v.reference) === slug
+    );
+    if (refIdx !== -1) return refIdx;
+
+    // 3. Fallback to getVerseById to see if it exists in ALL_AVAILABLE_VERSES
+    const resolved = getVerseById(targetId, language);
+    if (resolved) {
+      const idxInList = list.findIndex(v => v.id === resolved.id || normalizeVerseSlug(v.reference) === normalizeVerseSlug(resolved.reference));
+      if (idxInList !== -1) return idxInList;
+    }
+
+    return -1;
   };
 
   const [activeVerseIndex, setActiveVerseIndex] = useState<number>(() => {
     if (targetVerseId) {
       const idx = findVerseIndex(targetVerseId, allVerses);
       if (idx !== -1) return idx;
+    }
+    // If no target verse specified, check if any FSRS reviews are due!
+    const dueCards = getDueFSRSCards();
+    if (dueCards.length > 0) {
+      const dueId = dueCards[0].verseId;
+      const dueIdx = findVerseIndex(dueId, allVerses);
+      if (dueIdx !== -1) return dueIdx;
     }
     return 0;
   });
@@ -911,27 +943,39 @@ export const WordForge: React.FC<WordForgeProps> = ({
   const safeIndex = activeVerseIndex >= filteredVerses.length ? 0 : activeVerseIndex;
   const currentVerse: MemoryVerse = filteredVerses[safeIndex] || allVerses[0];
 
-  const [prevTargetId, setPrevTargetId] = useState<string | null | undefined>(null);
-
-  if (targetVerseId && targetVerseId !== prevTargetId) {
-    setPrevTargetId(targetVerseId);
-    const verseIdx = findVerseIndex(targetVerseId, filteredVerses);
-    if (verseIdx !== -1) {
-      setActiveVerseIndex(verseIdx);
-      if (onClearTargetVerse) onClearTargetVerse();
-    } else {
-      const allIdx = findVerseIndex(targetVerseId, allVerses);
-      if (allIdx !== -1) {
-        setSelectedCategory('All');
-        setActiveVerseIndex(allIdx);
-        if (onClearTargetVerse) onClearTargetVerse();
+  useEffect(() => {
+    if (targetVerseId) {
+      const verseIdx = findVerseIndex(targetVerseId, filteredVerses);
+      if (verseIdx !== -1) {
+        setActiveVerseIndex(verseIdx);
+        setVerseNotice(null);
+        onClearTargetVerse?.();
       } else {
-        setVerseNotice('That verse is not available. Showing the first verse instead.');
-        setActiveVerseIndex(0);
-        if (onClearTargetVerse) onClearTargetVerse();
+        const allIdx = findVerseIndex(targetVerseId, allVerses);
+        if (allIdx !== -1) {
+          setSelectedCategory('All');
+          setActiveVerseIndex(allIdx);
+          setVerseNotice(null);
+          onClearTargetVerse?.();
+        } else {
+          setVerseNotice('That verse is not available. Showing the first verse instead.');
+          setActiveVerseIndex(0);
+          onClearTargetVerse?.();
+        }
+      }
+    } else {
+      // If opened without a specific target, default to the first due review if one exists!
+      const dueCards = getDueFSRSCards();
+      if (dueCards.length > 0) {
+        const dueId = dueCards[0].verseId;
+        const dueIdx = findVerseIndex(dueId, allVerses);
+        if (dueIdx !== -1) {
+          setActiveVerseIndex(dueIdx);
+          setVerseNotice(null);
+        }
       }
     }
-  }
+  }, [targetVerseId]);
 
   const handleNextVerse = () => {
     soundEngine.playClick();

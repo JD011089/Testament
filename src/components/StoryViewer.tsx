@@ -39,13 +39,15 @@ import {
   lockInMemoryVerse, 
   checkRankPromotion 
 } from '../utils/memoryVerseEngine';
-import { getTodayDateKey } from '../utils/dailyEngine';
+import { getTodayDateKey, recordDailyActivityStreak } from '../utils/dailyEngine';
 import { sanitizeGrammarArticles } from '../utils/textUtils';
 import { paraphraseVerseSimpler } from '../utils/geminiFeatures';
 import { ReportIssueModal } from './ReportIssueModal';
 import { fetchDecisionStats, submitAnonymousDecisionVote } from '../utils/decisionStatsClient';
 import { StorytellerModal } from './StorytellerModal';
 import { getDailyCuratedPassage } from '../data/dailyPassages';
+import { registerDynamicBibleVerse } from '../utils/verseRegistry';
+import { getShowXpPreference } from '../utils/userPreferences';
 
 interface StoryViewerProps {
   quest?: StoryQuest | null;
@@ -155,10 +157,12 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     return undefined;
   })();
 
+  const inProgressKey = `testament_in_progress_mission_${missionIdentifier}`;
+
   // M-10: Retrieve in-progress mission state from localStorage so interruptions resume exact step
   const inProgressInitial = (() => {
     try {
-      const raw = localStorage.getItem('testament_in_progress_mission');
+      const raw = localStorage.getItem(inProgressKey) || localStorage.getItem('testament_in_progress_mission');
       if (raw) {
         const parsed = JSON.parse(raw);
         if (parsed && parsed.missionId === missionIdentifier) {
@@ -279,15 +283,16 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
           isCustomMode,
           isSkipped,
           recordedDecisionText,
+          startedDateKey: inProgressInitial?.startedDateKey || getTodayDateKey(),
           dateKey: getTodayDateKey(),
           updatedAt: Date.now()
         };
-        localStorage.setItem('testament_in_progress_mission', JSON.stringify(stateToSave));
+        localStorage.setItem(inProgressKey, JSON.stringify(stateToSave));
       } catch {
         // ignore storage errors
       }
     }
-  }, [missionIdentifier, currentScreen, selectedChoiceId, customText, isCustomMode, isSkipped, recordedDecisionText, hasCompletedCurrentAct]);
+  }, [inProgressKey, missionIdentifier, currentScreen, selectedChoiceId, customText, isCustomMode, isSkipped, recordedDecisionText, hasCompletedCurrentAct]);
 
   // Clean audio on unmount
   useEffect(() => {
@@ -477,11 +482,14 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
       // ignore
     }
 
-    // 2. Check rank promotion
-    const prevPoints = currentXp ?? 0;
-    const promotion = checkRankPromotion(prevPoints, prevPoints + 50);
-    if (promotion.promoted) {
-      setRankPromotion(promotion.newRank);
+    // 2. Check rank promotion if XP is enabled
+    const isXpEnabled = getShowXpPreference();
+    if (isXpEnabled) {
+      const prevPoints = currentXp ?? 0;
+      const promotion = checkRankPromotion(prevPoints, prevPoints + 50);
+      if (promotion.promoted) {
+        setRankPromotion(promotion.newRank);
+      }
     }
 
     // Sound transition
@@ -496,14 +504,21 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
       if (dailyMission?.passageId) {
         markSeriesMomentCompleted(dailyMission.passageId);
       }
+      recordDailyActivityStreak(inProgressInitial?.startedDateKey || dailyMission?.dateKey || getTodayDateKey());
       onRewardXP?.(50);
+      try {
+        localStorage.removeItem(inProgressKey);
+        localStorage.removeItem('testament_in_progress_mission');
+      } catch {
+        // ignore
+      }
     }
   };
 
   const handleShareCard = async () => {
     soundEngine.playSnap();
-    const userChoiceText = recordedDecisionText || getDecisionString() || 'Faced today\'s crossroad';
-    const shareText = `✝️ TESTAMENT — TODAY'S MISSION COMPLETE\n\nScenario: "${scenarioQuestion}"\nMy Move: "${userChoiceText}"\n\nScripture: ${keyVerseRef}\n"${keyVerseText}"\n\nToday's Move: ${personalization.actionLine}\n\nNo 40-minute reading plans. Just today's mission.\ntestament-bible-learning.vercel.app`;
+    // Tester 4/Sam fix: Omit private custom reflection/choice text from public card share for user privacy
+    const shareText = `✝️ TESTAMENT — TODAY'S MISSION COMPLETE\n\nScripture: ${keyVerseRef}\n"${keyVerseText}"\n\nToday's Move: ${personalization.actionLine}\n\nNo 40-minute reading plans. Just today's mission.\nhttps://testament-bible-learning.vercel.app`;
 
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
@@ -533,6 +548,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     soundEngine.playClick();
     soundEngine.stopSpeaking();
     try {
+      localStorage.removeItem(inProgressKey);
       localStorage.removeItem('testament_in_progress_mission');
     } catch {
       // ignore
@@ -578,11 +594,14 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     }
   };
 
-  // Save verse card: saves to Saved collection (bookmarks)
+  // Save verse card: registers verse in catalog and bookmarks it in Saved collection
   const handleSaveVerseCard = () => {
     soundEngine.playSnap();
     try {
+      // Auto-register so it appears in allVerses and Saved filters
+      const registered = registerDynamicBibleVerse(keyVerseRef, keyVerseText, useKjv ? 'KJV' : 'WEB');
       if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('testament-verse-bookmarked', { detail: registered.id }));
         window.dispatchEvent(new CustomEvent('testament-verse-bookmarked', { detail: keyVerseRef }));
       }
       setVerseCardFeedback('Saved to your collection!');
@@ -1004,7 +1023,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                     }}
                     className="text-[11px] sm:text-xs font-mono px-2.5 py-1 rounded-lg bg-stone-200/80 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
                   >
-                    {useKjv ? 'Showing KJV' : 'CSB (Tap for KJV)'}
+                    {useKjv ? 'Showing KJV' : 'WEB (Tap for KJV)'}
                   </button>
 
                   {/* Save to Saved collection */}
@@ -1337,7 +1356,10 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   <span className="text-xs text-fg-muted font-medium">Ready to memorize?</span>
                   <button
                     type="button"
-                    onClick={() => onOpenWordForge(keyVerseRef)}
+                    onClick={() => {
+                      const registered = registerDynamicBibleVerse(keyVerseRef, keyVerseText, useKjv ? 'KJV' : 'WEB');
+                      onOpenWordForge(registered.id);
+                    }}
                     className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-stone-200/70 hover:bg-stone-300/70 dark:bg-stone-800 dark:hover:bg-stone-700 text-fg transition-all cursor-pointer"
                   >
                     Practice your verse

@@ -9,11 +9,11 @@ export interface FontScaleConfig {
 }
 
 export const FONT_SCALE_STEPS: FontScaleConfig[] = [
-  { step: 'xs', label: 'XS', scale: 0.85 },
-  { step: 's', label: 'S', scale: 0.925 },
+  { step: 'xs', label: 'XS', scale: 0.88 },
+  { step: 's', label: 'S', scale: 0.95 },
   { step: 'm', label: 'M', scale: 1.0 },
-  { step: 'l', label: 'L', scale: 1.1 },
-  { step: 'xl', label: 'XL', scale: 1.2 },
+  { step: 'l', label: 'L', scale: 1.15 },
+  { step: 'xl', label: 'XL', scale: 1.35 },
 ];
 
 const STORAGE_KEY = 'testament_font_scale_step';

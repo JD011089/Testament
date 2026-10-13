@@ -244,11 +244,13 @@ export const getDailyStreakCount = (): number => {
 
 /**
  * Records daily activity and updates the streak with weekly grace day forgiveness.
+ * Can be credited to an explicit effectiveDate (e.g. session start date) for midnight rollovers.
  */
-export const recordDailyActivityStreak = (): number => {
+export const recordDailyActivityStreak = (effectiveDate?: string | Date): number => {
   if (typeof window === 'undefined') return 0;
   try {
-    const today = new Date().toDateString();
+    const targetDateObj = effectiveDate ? new Date(effectiveDate) : new Date();
+    const today = (Number.isNaN(targetDateObj.getTime()) ? new Date() : targetDateObj).toDateString();
     const lastActive = localStorage.getItem('testament_last_active');
     const stored = getDailyStreakCount();
     if (lastActive === today) return stored;
@@ -266,6 +268,8 @@ export const recordDailyActivityStreak = (): number => {
       next = 1;
     } else if (diffDays === 1) {
       next = stored + 1;
+    } else if (diffDays === 0) {
+      next = stored;
     } else if (diffDays === 2 && lastGraceWeek !== currentWeekKey) {
       // Missed yesterday, but protected by weekly grace day!
       localStorage.setItem('testament_last_grace_week', currentWeekKey);

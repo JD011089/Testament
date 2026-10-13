@@ -25,6 +25,7 @@ import { getComposedDailyMission } from './utils/missionComposer';
 import { pathForTab, tabFromPath, type AppTab } from './utils/routes';
 import { loadReadingPlace } from './utils/readingPlace';
 import { getDailyMission, type GeneratedDailyMission } from './utils/dailyMissionPipeline';
+import { isVerseMastered } from './utils/fsrsEngine';
 
 const DossierModal = lazy(() => import('./components/DossierModal').then(m => ({ default: m.DossierModal })));
 const ProverbsCodexModal = lazy(() => import('./components/ProverbsCodexModal').then(m => ({ default: m.ProverbsCodexModal })));
@@ -73,7 +74,7 @@ export function App() {
     setCurrentTabState(tab);
     const next = pathForTab(tab);
     if (window.location.pathname !== next) {
-      window.history.pushState({ tab }, '', next);
+      window.history.replaceState({ tab }, '', next);
     }
   };
   const [activeQuest, setActiveQuest] = useState<StoryQuest | null>(null);
@@ -96,6 +97,40 @@ export function App() {
   const [isHowItWorksOpen, setIsHowItWorksOpen] = useState<boolean>(false);
   // Part 9: First-run experience drops the user straight into the mission with zero popup modals
   const [isOnboardingOpen, setIsOnboardingOpen] = useState<boolean>(false);
+
+  // Keep modal states in refs so the single window popstate listener closes modals before exiting the app
+  const modalsRef = useRef({
+    isSettingsOpen,
+    isDossierOpen,
+    isProverbsOpen,
+    isPsalmsOpen,
+    isDriveModeOpen,
+    isWhatsNewOpen,
+    isHowItWorksOpen,
+    isOnboardingOpen
+  });
+
+  useEffect(() => {
+    modalsRef.current = {
+      isSettingsOpen,
+      isDossierOpen,
+      isProverbsOpen,
+      isPsalmsOpen,
+      isDriveModeOpen,
+      isWhatsNewOpen,
+      isHowItWorksOpen,
+      isOnboardingOpen
+    };
+  }, [
+    isSettingsOpen,
+    isDossierOpen,
+    isProverbsOpen,
+    isPsalmsOpen,
+    isDriveModeOpen,
+    isWhatsNewOpen,
+    isHowItWorksOpen,
+    isOnboardingOpen
+  ]);
 
   const [userProfile, setUserProfile] = useState<UserCalibrationProfile | null>(() => {
     try {
@@ -180,6 +215,18 @@ export function App() {
   // Handle URL deep links cleanup and listen for Service Worker messages
   useEffect(() => {
     const onPop = (e: PopStateEvent) => {
+      // 1. Close open modals first on Back button
+      const m = modalsRef.current;
+      if (m.isSettingsOpen) { setIsSettingsOpen(false); return; }
+      if (m.isProverbsOpen) { setIsProverbsOpen(false); return; }
+      if (m.isPsalmsOpen) { setIsPsalmsOpen(false); return; }
+      if (m.isDossierOpen) { setIsDossierOpen(false); return; }
+      if (m.isDriveModeOpen) { setIsDriveModeOpen(false); return; }
+      if (m.isWhatsNewOpen) { setIsWhatsNewOpen(false); return; }
+      if (m.isHowItWorksOpen) { setIsHowItWorksOpen(false); return; }
+      if (m.isOnboardingOpen) { setIsOnboardingOpen(false); return; }
+
+      // 2. Close active mission or quest
       if (activeDailyMissionRef.current) {
         setActiveDailyMission(null);
         return;
@@ -188,6 +235,8 @@ export function App() {
         setActiveQuest(null);
         return;
       }
+
+      // 3. Navigate tab
       const nextTab = (e.state as { tab?: string } | null)?.tab || tabFromPath(window.location.pathname);
       setCurrentTabState(nextTab as NavTab);
     };
@@ -442,7 +491,6 @@ export function App() {
   };
 
   const handleVerseMastered = (verseId: string) => {
-    recordVerseMasteryDate(verseId);
     recordActivityStreak();
     const creditForgeStep = () => {
       const todayCampaign = getComposedDailyMission();
@@ -455,18 +503,21 @@ export function App() {
       }
     };
 
-    if (!memorizedVerses.includes(verseId)) {
-      const updated = [...memorizedVerses, verseId];
-      setMemorizedVerses(updated);
-      try {
-        localStorage.setItem('testament_memorized_verses', JSON.stringify(updated));
-      } catch {
-        // ignore
-      }
+    if (isVerseMastered(verseId)) {
+      recordVerseMasteryDate(verseId);
+      if (!memorizedVerses.includes(verseId)) {
+        const updated = [...memorizedVerses, verseId];
+        setMemorizedVerses(updated);
+        try {
+          localStorage.setItem('testament_memorized_verses', JSON.stringify(updated));
+        } catch {
+          // ignore
+        }
 
-      const newXp = xp + 40;
-      setXp(newXp);
-      persistNumber('testament_xp', newXp);
+        const newXp = xp + 40;
+        setXp(newXp);
+        persistNumber('testament_xp', newXp);
+      }
     }
     creditForgeStep();
   };

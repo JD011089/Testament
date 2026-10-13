@@ -4,9 +4,9 @@ export const MEMORY_VERSES: MemoryVerse[] = [
   {
     id: 'verse-1',
     reference: 'Joshua 1:9',
-    translation: 'CSB',
-    text: 'Have I not commanded you? Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go.',
-    plainEnglishSummary: 'Courage isn\'t having zero fear; courage is doing what needs to be done despite the knot in your gut, knowing God backed you before you took step one.',
+    translation: 'WEB',
+    text: "Haven't I commanded you? Be strong and courageous. Don't be afraid. Don't be dismayed, for Yahweh your God is with you wherever you go.",
+    plainEnglishSummary: "Courage isn't having zero fear; courage is doing what needs to be done despite the knot in your gut, knowing God backed you before you took step one.",
     category: 'Courage & Facing Giants',
     difficulty: 'Core',
     keyTakeaway: 'Step into today with your spine straight. Whatever meeting, conversation, or decision you dread—you are not walking in alone.'
@@ -14,8 +14,8 @@ export const MEMORY_VERSES: MemoryVerse[] = [
   {
     id: 'verse-2',
     reference: 'Philippians 4:6-7',
-    translation: 'CSB',
-    text: 'Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God.',
+    translation: 'WEB',
+    text: 'In nothing be anxious, but in everything, by prayer and petition with thanksgiving, let your requests be made known to God.',
     plainEnglishSummary: 'Stop letting anxious thoughts spin unchecked in your head at 3 AM. Transfer the weight off your shoulders through honest, gritty prayer.',
     category: 'Pressure & Anxiety',
     difficulty: 'Core',
@@ -24,8 +24,8 @@ export const MEMORY_VERSES: MemoryVerse[] = [
   {
     id: 'verse-3',
     reference: 'Proverbs 16:32',
-    translation: 'CSB',
-    text: 'Better a patient person than a warrior, one with self-control than one who takes a city.',
+    translation: 'WEB',
+    text: 'One who is slow to anger is better than the mighty; one who rules his spirit, than he who takes a city.',
     plainEnglishSummary: 'Any fool can explode in anger, smash things, or scream. The real strong man is the one who can keep his temper when provoked.',
     category: 'Anger & Self-Control',
     difficulty: 'Core',
@@ -34,8 +34,8 @@ export const MEMORY_VERSES: MemoryVerse[] = [
   {
     id: 'verse-4',
     reference: 'Romans 8:28',
-    translation: 'CSB',
-    text: 'We know that in all things God works for the good of those who love him, who have been called according to his purpose.',
+    translation: 'WEB',
+    text: 'We know that all things work together for good for those who love God, to those who are called according to his purpose.',
     plainEnglishSummary: 'Even the setbacks, the layoffs, the broken relationships, and the painful detours can be repurposed into wisdom and strength.',
     category: 'Restoration After Failure',
     difficulty: 'Deep',
@@ -44,8 +44,8 @@ export const MEMORY_VERSES: MemoryVerse[] = [
   {
     id: 'verse-5',
     reference: 'Proverbs 27:17',
-    translation: 'CSB',
-    text: 'Iron sharpens iron, and one man sharpens another.',
+    translation: 'WEB',
+    text: 'Iron sharpens iron; so a man sharpens his friend’s countenance.',
     plainEnglishSummary: 'Friction creates edge. If you only hang around people who coddle you, you will stay dull. You need honest brothers who tell you the truth.',
     category: 'Endurance & Brotherhood',
     difficulty: 'Core',
@@ -54,8 +54,8 @@ export const MEMORY_VERSES: MemoryVerse[] = [
   {
     id: 'verse-6',
     reference: '2 Timothy 1:7',
-    translation: 'CSB',
-    text: 'God has not given us a spirit of fear, but of power, love, and self-discipline.',
+    translation: 'WEB',
+    text: 'For God didn’t give us a spirit of fear, but of power, love, and self-control.',
     plainEnglishSummary: 'Paralyzing fear is never from God. When anxiety grips your chest, remind yourself what you were actually equipped with: power, love, and sound judgment.',
     category: 'Pressure & Anxiety',
     difficulty: 'Core',
@@ -64,8 +64,8 @@ export const MEMORY_VERSES: MemoryVerse[] = [
   {
     id: 'verse-7',
     reference: 'Micah 6:8',
-    translation: 'CSB',
-    text: 'He has told you what is good. What does the Lord require of you? To act justly and to love mercy and to walk humbly with your God.',
+    translation: 'WEB',
+    text: 'He has shown you, O man, what is good. What does Yahweh require of you, but to act justly, to love mercy, and to walk humbly with your God?',
     plainEnglishSummary: 'Keep it simple. You do not need a theology degree. Do the right thing, show mercy to people who don\'t deserve it, and check your ego.',
     category: 'Endurance & Brotherhood',
     difficulty: 'Core',

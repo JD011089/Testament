@@ -123,16 +123,16 @@ export const translations: Record<Language, Record<string, string>> = {
     'nexus.expand': 'Expand tactical nexus',
 
     // Arsenal View (Scripture Library)
-    'arsenal.badge': 'Saved Verses • Mastered & Bookmarked',
-    'arsenal.title': 'Scripture Library',
-    'arsenal.subtitle': "Verses you've mastered or bookmarked. Practice due reviews in Scripture Memory — this is your personal library, not the full catalog.",
+    'arsenal.badge': 'Saved Scriptures • Mastered & Bookmarked',
+    'arsenal.title': 'Saved Scriptures',
+    'arsenal.subtitle': "Verses you've mastered or bookmarked. Practice due reviews in Memorize — this is your personal saved collection.",
     'arsenal.searchPlaceholder': 'Search your saved verses...',
     'arsenal.allSaved': 'All Saved',
     'arsenal.mastered': 'Mastered',
     'arsenal.bookmarked': 'Bookmarked',
-    'arsenal.nothingSaved': 'Nothing saved yet. Master a verse in Word Forge or bookmark one from a story.',
+    'arsenal.nothingSaved': 'Nothing saved yet. Master a verse in Memorize or bookmark one from a story.',
     'arsenal.noMatch': 'No verses match "{query}".',
-    'arsenal.practice': 'Practice in Word Forge',
+    'arsenal.practice': 'Practice in Memorize',
     'arsenal.masteredBadge': '✓ Mastered',
     'arsenal.bookmarkedBadge': 'Bookmarked',
     'arsenal.audioRecital': 'Audio Recital',
@@ -141,8 +141,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'arsenal.personalJournal': 'Your Personal Reflections & Journal',
     'arsenal.reminders': 'Reminders',
 
-    // Word Forge
-    'forge.badge': 'The Word Forge • Scripture Retention',
+    // Word Forge / Memorize
+    'forge.badge': 'Scripture Memory • Retention Drills',
     'forge.title': 'Lock Truth Into Memory',
     'forge.subtitle': 'Tactile word assembly designed for adult retention. Assemble the verse by tapping words in sequence.',
     'forge.trainVerse': 'Train This Verse (Reminders)',

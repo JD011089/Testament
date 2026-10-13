@@ -278,9 +278,9 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
                 </div>
 
                 {/* Quick Presets */}
-                <div className="flex items-center gap-1.5 pt-1">
+                <div className="flex items-center gap-1.5 pt-1 flex-wrap">
                   <span className="text-[10px] text-stone-500 dark:text-stone-400">Presets:</span>
-                  {['06:30', '07:00', '08:00', '09:00'].map((preset) => (
+                  {['06:30', '07:00', '08:00', '09:00', '18:00', '20:00', '21:00'].map((preset) => (
                     <button
                       key={preset}
                       type="button"

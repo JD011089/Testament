@@ -195,38 +195,64 @@ export const getStoryVerses = (): MemoryVerse[] => {
 /**
  * Look up a verse by its ID (handles 'verse-1', 'story-david-journey', legacy 'story-david-act-1', 'david-act-1', etc.)
  */
+/**
+ * Normalize a reference or ID into a clean canonical slug for matching
+ * e.g. "1 Kings 19:12" -> "1-kings-19-12"
+ */
+export const normalizeVerseSlug = (refOrId: string): string => {
+  return refOrId.trim().toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+};
+
+/**
+ * Look up a verse by its ID or scripture reference
+ * Handles:
+ * - Direct IDs ('verse-1', 'story-david-journey', 'david-act-1')
+ * - Exact and normalized references ('1 Kings 19:12', '1-kings-19-12')
+ * - Dynamic custom verses
+ */
 export const getVerseById = (id?: string | null, lang?: SupportedLanguage): MemoryVerse | null => {
   if (!id) return null;
   hydrateCustomVerses();
   const activeLang = lang ?? getStoredLanguage();
+  const cleanTarget = id.trim().toLowerCase();
+  const targetSlug = normalizeVerseSlug(id);
   
-  // Exact match
-  const match = ALL_AVAILABLE_VERSES.find(v => v.id === id);
+  // 1. Exact ID match
+  const match = ALL_AVAILABLE_VERSES.find(v => v.id.toLowerCase() === cleanTarget);
   if (match) return getLocalizedVerse(match, activeLang);
 
-  // Check if stripped of 'story-' prefix or exact quest match
+  // 2. Reference match (exact or case-insensitive)
+  const refMatch = ALL_AVAILABLE_VERSES.find(v => 
+    v.reference.toLowerCase() === cleanTarget ||
+    normalizeVerseSlug(v.reference) === targetSlug
+  );
+  if (refMatch) return getLocalizedVerse(refMatch, activeLang);
+
+  // 3. Slug match on ID
+  const slugMatch = ALL_AVAILABLE_VERSES.find(v => normalizeVerseSlug(v.id) === targetSlug);
+  if (slugMatch) return getLocalizedVerse(slugMatch, activeLang);
+
+  // 4. Check if stripped of 'story-' prefix or exact quest match
   const storyMatch = ALL_AVAILABLE_VERSES.find(v => 
-    v.id === `story-${id}` || 
-    v.storyQuestId === id ||
-    `story-${v.storyQuestId}` === id ||
-    v.actId === id
+    v.id.toLowerCase() === `story-${cleanTarget}` || 
+    v.storyQuestId?.toLowerCase() === cleanTarget ||
+    `story-${v.storyQuestId?.toLowerCase()}` === cleanTarget ||
+    v.actId?.toLowerCase() === cleanTarget
   );
   if (storyMatch) return getLocalizedVerse(storyMatch, activeLang);
 
-  // Resolve legacy act IDs (e.g. 'story-david-act-1' or 'david-act-1') to the quest's one memory verse
+  // 5. Resolve legacy act IDs (e.g. 'story-david-act-1' or 'david-act-1') to the quest's one memory verse
   const parentQuest = STORY_QUESTS.find(q => 
-    q.acts.some(a => a.id === id || `story-${a.id}` === id) ||
-    id.startsWith(`story-${q.id.replace('-journey', '')}`) ||
-    id.startsWith(q.id.replace('-journey', ''))
+    q.acts.some(a => a.id.toLowerCase() === cleanTarget || `story-${a.id.toLowerCase()}` === cleanTarget) ||
+    cleanTarget.startsWith(`story-${q.id.replace('-journey', '').toLowerCase()}`) ||
+    cleanTarget.startsWith(q.id.replace('-journey', '').toLowerCase())
   );
   if (parentQuest) {
     const questVerse = STORY_MEMORY_VERSES.find(v => v.storyQuestId === parentQuest.id);
     if (questVerse) return getLocalizedVerse(questVerse, activeLang);
   }
 
-  // Fallback to reference match
-  const refMatch = ALL_AVAILABLE_VERSES.find(v => v.reference.toLowerCase() === id.toLowerCase());
-  return refMatch ? getLocalizedVerse(refMatch, activeLang) : null;
+  return null;
 };
 
 /**
@@ -247,12 +273,16 @@ export const getStoryVerseForAct = (questId: string, _actId?: string, lang?: Sup
 };
 
 /**
- * Register any dynamic Bible verse selected from the full chapter reader
+ * Register any dynamic Bible verse selected from the full chapter reader or daily mission
  * so it can be practiced immediately in Word Forge and saved in Arsenal
  */
-export const registerDynamicBibleVerse = (reference: string, text: string, translation: string = 'CSB'): MemoryVerse => {
-  const cleanId = `custom-bible-${reference.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
-  const existing = ALL_AVAILABLE_VERSES.find(v => v.id === cleanId || v.reference.toLowerCase() === reference.toLowerCase());
+export const registerDynamicBibleVerse = (reference: string, text: string, translation: string = 'WEB'): MemoryVerse => {
+  const cleanId = `custom-bible-${normalizeVerseSlug(reference)}`;
+  const existing = ALL_AVAILABLE_VERSES.find(v => 
+    v.id === cleanId || 
+    v.reference.toLowerCase() === reference.toLowerCase() ||
+    normalizeVerseSlug(v.reference) === normalizeVerseSlug(reference)
+  );
   if (existing) return existing;
 
   const newVerse: MemoryVerse = {

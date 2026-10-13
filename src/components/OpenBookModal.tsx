@@ -49,6 +49,7 @@ import {
   type ReadingFontSize,
   type ReadingLayout,
 } from '../utils/readingPlace';
+import { parseScriptureReference } from '../utils/scriptureRef';
 import { BookConnections } from './BookConnections';
 
 interface OpenBookModalProps {
@@ -146,16 +147,44 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
 
   const handleSearchSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    const query = chapterSearch.trim().toLowerCase();
+    const query = chapterSearch.trim();
     if (!query) return;
 
-    // Pattern 1: pure number, e.g. "3" or "ch 3"
-    const numberMatch = query.match(/^(\d+)$/) || query.match(/^ch(?:apter)?\s*(\d+)$/);
+    // Pattern 1: parseScriptureReference (handles "Ps 23", "Psalm 23", "Rom 8:28", "John 3", "1 Kgs 19:12")
+    const parsedRef = parseScriptureReference(query);
+    if (parsedRef) {
+      const foundBook = allBooks.find(b => 
+        b.name.toLowerCase() === parsedRef.book.toLowerCase() ||
+        b.id.toLowerCase() === parsedRef.book.toLowerCase() ||
+        b.name.toLowerCase().startsWith(parsedRef.book.toLowerCase())
+      );
+
+      if (foundBook) {
+        const bookMaxChapters = getBookChapterCount(foundBook.name);
+        const validChapter = Math.min(Math.max(1, parsedRef.chapter), bookMaxChapters);
+        soundEngine.playPageTurn();
+        onSelectBook(foundBook);
+        setSelectedChapter(validChapter);
+        setActiveMode('reader');
+        if (parsedRef.verseStart) {
+          setSelectedVerse(parsedRef.verseStart);
+        }
+        setChapterSearch('');
+        readerScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+        showToast(`Opened ${foundBook.name} ${validChapter}${parsedRef.verseStart > 1 ? `:${parsedRef.verseStart}` : ''}`);
+        return;
+      }
+    }
+
+    // Pattern 2: pure number, e.g. "3" or "ch 3"
+    const lowerQuery = query.toLowerCase();
+    const numberMatch = lowerQuery.match(/^(\d+)$/) || lowerQuery.match(/^ch(?:apter)?\s*(\d+)$/);
     if (numberMatch && numberMatch[1]) {
       const chNum = parseInt(numberMatch[1], 10);
       if (chNum >= 1 && chNum <= totalChapters) {
         soundEngine.playPageTurn();
         setSelectedChapter(chNum);
+        setActiveMode('reader');
         setChapterSearch('');
         readerScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
         showToast(`Jumped to Chapter ${chNum}`);
@@ -163,40 +192,17 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
       }
     }
 
-    // Pattern 2: "Book Chapter", e.g. "John 3", "1 Corinthians 13", "Gen 1"
-    const bookChapterMatch = query.match(/^(.+?)\s+(\d+)$/);
-    if (bookChapterMatch) {
-      const targetBookName = bookChapterMatch[1].trim();
-      const targetChapter = parseInt(bookChapterMatch[2], 10);
-      const foundBook = allBooks.find(b => 
-        b.name.toLowerCase() === targetBookName ||
-        b.id.toLowerCase() === targetBookName ||
-        b.name.toLowerCase().startsWith(targetBookName)
-      );
-
-      if (foundBook) {
-        const bookMaxChapters = getBookChapterCount(foundBook.name);
-        const validChapter = Math.min(Math.max(1, targetChapter), bookMaxChapters);
-        soundEngine.playPageTurn();
-        onSelectBook(foundBook);
-        setSelectedChapter(validChapter);
-        setChapterSearch('');
-        readerScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-        showToast(`Opened ${foundBook.name} ${validChapter}`);
-        return;
-      }
-    }
-
     // Pattern 3: Just book name, e.g. "Romans"
     const foundBookOnly = allBooks.find(b => 
-      b.name.toLowerCase() === query ||
-      b.id.toLowerCase() === query ||
-      b.name.toLowerCase().startsWith(query)
+      b.name.toLowerCase() === lowerQuery ||
+      b.id.toLowerCase() === lowerQuery ||
+      b.name.toLowerCase().startsWith(lowerQuery)
     );
     if (foundBookOnly) {
       soundEngine.playPageTurn();
       onSelectBook(foundBookOnly);
       setSelectedChapter(1);
+      setActiveMode('reader');
       setChapterSearch('');
       readerScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
       showToast(`Opened ${foundBookOnly.name}`);
@@ -1382,15 +1388,27 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                       </button>
 
                       <button
-                        disabled={selectedChapter >= totalChapters}
                         onClick={() => {
                           soundEngine.playPageTurn();
-                          setSelectedChapter(c => Math.min(totalChapters, c + 1));
-                          readerScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                          if (selectedChapter < totalChapters) {
+                            setSelectedChapter(c => c + 1);
+                            readerScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                          } else {
+                            // Find next canonical book
+                            const currentIndex = allBooks.findIndex(b => b.id === book.id);
+                            if (currentIndex >= 0 && currentIndex < allBooks.length - 1) {
+                              const nextBook = allBooks[currentIndex + 1];
+                              onSelectBook(nextBook);
+                              setSelectedChapter(1);
+                              readerScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                              showToast(`Advanced to ${nextBook.name} 1`);
+                            }
+                          }
                         }}
-                        className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-xs font-bold text-stone-950 disabled:opacity-30 disabled:pointer-events-none shadow-xs transition-colors"
+                        disabled={selectedChapter >= totalChapters && allBooks.findIndex(b => b.id === book.id) >= allBooks.length - 1}
+                        className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-xs font-bold text-stone-950 disabled:opacity-30 disabled:pointer-events-none shadow-xs transition-colors cursor-pointer"
                       >
-                        <span>Next Ch</span>
+                        <span>{selectedChapter >= totalChapters && allBooks.findIndex(b => b.id === book.id) < allBooks.length - 1 ? 'Next Book →' : 'Next Ch'}</span>
                         <ChevronRight className="w-4 h-4 shrink-0" />
                       </button>
                     </div>

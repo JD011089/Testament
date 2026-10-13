@@ -183,7 +183,13 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
   const selectedBattleObj = BATTLES.find(b => b.id === battle) || BATTLES[0];
 
+  const lastStepChangeRef = React.useRef<number>(0);
+
   const handleNextStep = () => {
+    const now = Date.now();
+    if (now - lastStepChangeRef.current < 400) return; // Debounce rapid double-taps
+    lastStepChangeRef.current = now;
+
     soundEngine.playSnap();
     if (step === 4) {
       // Reached reveal
@@ -201,6 +207,10 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   };
 
   const handlePrevStep = () => {
+    const now = Date.now();
+    if (now - lastStepChangeRef.current < 300) return;
+    lastStepChangeRef.current = now;
+
     soundEngine.playClick();
     if (step > 1) {
       setStep(prev => prev - 1);

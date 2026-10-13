@@ -13,6 +13,7 @@ import {
   Settings,
   RotateCw,
   Check,
+  CheckCircle2,
   BookMarked,
   Users,
   ShieldCheck,
@@ -27,14 +28,11 @@ import type { DailyCampaignStep } from '../data/dailyCampaigns';
 import { getComposedDailyMission } from '../utils/missionComposer';
 import { 
   getTodayFormatted, 
-  getDailyVerse, 
-  getDailyBriefing,
   getTodayBattlefieldId,
   getTodayDateKey,
 } from '../utils/dailyEngine';
 import { getDueFSRSCards, getDueFSRSCount } from '../utils/fsrsEngine';
 import { loadReadingPlace } from '../utils/readingPlace';
-import { BATTLEFIELD_OPTIONS } from './BattlefieldCheckInModal';
 import { 
   getDailyMissionSync, 
   getDailyMission, 
@@ -213,16 +211,45 @@ export const Dashboard: React.FC<DashboardProps> = ({
     };
   }, []);
 
+  const [currentDateKey, setCurrentDateKey] = useState<string>(() => getTodayDateKey());
+
   useEffect(() => {
     let isMounted = true;
-    const dateKey = getTodayDateKey();
-    getDailyMission(dateKey, 0, activeBattlefieldId).then((m) => {
+    getDailyMission(currentDateKey, 0, activeBattlefieldId).then((m) => {
       if (isMounted) setDailyMission(m);
     });
     return () => {
       isMounted = false;
     };
-  }, [activeBattlefieldId]);
+  }, [currentDateKey, activeBattlefieldId]);
+
+  // Midnight rollover listener: automatically refreshes mission when rolling over to a new day
+  useEffect(() => {
+    const checkDateRollover = () => {
+      const today = getTodayDateKey();
+      if (today !== currentDateKey) {
+        setCurrentDateKey(today);
+        setDailyMission(getDailyMissionSync(today, 0, activeBattlefieldId));
+        getDailyMission(today, 0, activeBattlefieldId).then((m) => setDailyMission(m));
+        setYesterdayVerse(getYesterdayRecallVerse());
+      }
+    };
+
+    const interval = setInterval(checkDateRollover, 30000);
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        checkDateRollover();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('focus', checkDateRollover);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('focus', checkDateRollover);
+    };
+  }, [currentDateKey, activeBattlefieldId]);
 
   useEffect(() => {
     const handleRecallUpdate = () => {
@@ -261,11 +288,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
     || STORY_QUESTS.find(q => q.id === 'david-journey') 
     || STORY_QUESTS[0];
 
-  const featuredAct = featuredQuest.acts.find(a => a.id === (composedMission.actId || 'david-act-2')) 
-    || featuredQuest.acts.find(a => !completedActs.includes(a.id))
-    || featuredQuest.acts[0];
-
-  const isTodayMissionDone = completedActs.includes(dailyMission.id) || completedActs.includes(featuredAct.id);
+  const isTodayMissionDone = completedActs.includes(dailyMission.id);
 
   // Weekly Series resolution
   const activeSeries = activeSeriesState ? getWeeklySeriesById(activeSeriesState.seriesId) : null;
@@ -298,15 +321,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
       return;
     }
     setIsPlayingBriefing(true);
-    const dailyVerse = getDailyVerse(0, language);
-    const briefing = getDailyBriefing();
-    const activeBattlefield = BATTLEFIELD_OPTIONS.find(b => b.id === activeBattlefieldId);
-    soundEngine.playMorningTacticalBriefing({
-      title: briefing.title,
-      battlefieldFocus: activeBattlefield ? activeBattlefield.title : 'Daily Focus & Spiritual Resilience',
-      memoryVerse: `${dailyVerse.reference}: ${dailyVerse.text}`,
-      proverb: language === 'es' ? 'Proverbios 15:1: La blanda respuesta quita la ira.' : language === 'fr' ? 'Proverbes 15:1: Une réponse douce calme la fureur.' : 'Proverbs 15:1: A gentle answer turns away wrath.'
-    }, () => {
+    // Read the actual card on screen: Hero, scenario question, story retelling, key verse
+    const storyExcerpt = dailyMission.storyRetelling?.slice(0, 2).join(' ') || '';
+    const textToRead = `${dailyMission.heroName}. ${dailyMission.scenarioQuestion}. ${storyExcerpt} Scripture anchor from ${dailyMission.keyVerseReference}: "${dailyMission.keyVerseText}". Today's move: ${dailyMission.actionLine}`;
+    soundEngine.speakVerse(textToRead, () => {
       setIsPlayingBriefing(false);
     });
   };
@@ -362,9 +380,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 Testament
               </h1>
               {showXp && (
-                <span className="text-[11px] font-mono px-2 py-0.2 rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 font-bold">
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playClick();
+                    onOpenSettings ? onOpenSettings() : window.dispatchEvent(new CustomEvent('testament-open-settings'));
+                  }}
+                  className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-amber-500/15 hover:bg-amber-500/25 text-amber-800 dark:text-amber-300 font-bold transition-colors cursor-pointer"
+                  title="View profile and level in Settings"
+                >
                   {getRankTitle(xp)}
-                </span>
+                </button>
               )}
               <button
                 type="button"
@@ -390,25 +416,35 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {/* Right: Streak, XP (if enabled), Single Settings Entry */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 relative">
           {streakCount > 0 ? (
-            <div 
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/60 dark:bg-stone-900 text-xs font-mono font-bold text-orange-700 dark:text-orange-300"
-              title="Daily Streak"
+            <button
+              type="button"
+              onClick={() => {
+                soundEngine.playClick();
+                setShowCalendarModal(true);
+              }}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/60 hover:bg-stone-300/70 dark:bg-stone-900 dark:hover:bg-stone-850 text-xs font-mono font-bold text-orange-700 dark:text-orange-300 transition-colors cursor-pointer"
+              title="Daily Streak • Tap to set daily reminder"
               role="status"
               aria-label={`${streakCount} day streak`}
             >
               <Flame aria-hidden="true" className="w-3.5 h-3.5 fill-orange-500/20 text-orange-500" />
               <span>{streakCount}d</span>
-            </div>
+            </button>
           ) : (
-            <div 
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/40 dark:bg-stone-900/60 text-xs font-mono font-medium text-stone-500 dark:text-stone-400"
-              title="Start your streak today"
+            <button
+              type="button"
+              onClick={() => {
+                soundEngine.playClick();
+                setShowCalendarModal(true);
+              }}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/40 hover:bg-stone-200/70 dark:bg-stone-900/60 dark:hover:bg-stone-850 text-xs font-mono font-medium text-stone-500 dark:text-stone-400 transition-colors cursor-pointer"
+              title="Start your streak today • Tap to set daily reminder"
               role="status"
               aria-label="Fresh start"
             >
               <Flame aria-hidden="true" className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500" />
               <span>Fresh start</span>
-            </div>
+            </button>
           )}
 
           {showXp && (
@@ -467,10 +503,23 @@ export const Dashboard: React.FC<DashboardProps> = ({
               "{dailyMission.scenarioQuestion}"
             </h2>
 
-            {/* Plain, encouraging subtext (M-1) */}
-            <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed mb-5 max-w-xl">
-              No 40-minute reading plans. Just today's decision: what would you do before seeing what {dailyMission.heroName} did?
-            </p>
+            {/* Plain, encouraging subtext or Done card */}
+            {isTodayMissionDone ? (
+              <div className="p-4 sm:p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-fg space-y-2 mb-5">
+                <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-bold text-xs sm:text-sm">
+                  <CheckCircle2 aria-hidden="true" className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                  <span>Done for today • {dailyMission.keyVerseReference}</span>
+                </div>
+                <div className="text-xs sm:text-sm text-stone-700 dark:text-parchment-100 font-serif font-medium leading-relaxed">
+                  <strong className="font-mono text-[10px] uppercase tracking-wide text-emerald-800 dark:text-emerald-300 block mb-0.5">Today's Move:</strong>
+                  {dailyMission.actionLine}
+                </div>
+              </div>
+            ) : (
+              <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed mb-5 max-w-xl">
+                No 40-minute reading plans. Just today's decision: what would you do before seeing what {dailyMission.heroName} did?
+              </p>
+            )}
 
             {/* Action Row: Start mission CTA + 45s audio story */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
@@ -479,7 +528,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 onClick={handleStartMission}
                 className="btn-gold flex-1 sm:flex-initial px-7 lg:px-8 py-3.5 lg:py-4 rounded-2xl text-sm sm:text-base flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span>{isTodayMissionDone ? t('dashboard.reviewTodayMission') : t('dashboard.startTodayMission')}</span>
+                <span>{isTodayMissionDone ? 'Review today\'s mission' : t('dashboard.startTodayMission')}</span>
                 <ArrowRight aria-hidden="true" className="w-4 h-4" />
               </button>
 
@@ -642,15 +691,36 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
               {/* Character Arc Pills Preview */}
               <div className="flex flex-wrap gap-2 mb-4">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-stone-200/60 dark:bg-stone-800/70 text-xs text-stone-800 dark:text-stone-200 font-medium">
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playSnap();
+                    setShowSeriesPicker(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-stone-200/60 hover:bg-stone-300/70 dark:bg-stone-800/70 dark:hover:bg-stone-750 text-xs text-stone-800 dark:text-stone-200 font-medium cursor-pointer transition-colors"
+                >
                   <span>👑</span> David (7 Decisions)
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-stone-200/60 dark:bg-stone-800/70 text-xs text-stone-800 dark:text-stone-200 font-medium">
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playSnap();
+                    setShowSeriesPicker(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-stone-200/60 hover:bg-stone-300/70 dark:bg-stone-800/70 dark:hover:bg-stone-750 text-xs text-stone-800 dark:text-stone-200 font-medium cursor-pointer transition-colors"
+                >
                   <span>✨</span> Esther (For Such a Time)
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-stone-200/60 dark:bg-stone-800/70 text-xs text-stone-800 dark:text-stone-200 font-medium">
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playSnap();
+                    setShowSeriesPicker(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-stone-200/60 hover:bg-stone-300/70 dark:bg-stone-800/70 dark:hover:bg-stone-750 text-xs text-stone-800 dark:text-stone-200 font-medium cursor-pointer transition-colors"
+                >
                   <span>🌊</span> Moses (Deliverer)
-                </span>
+                </button>
               </div>
 
               <button
