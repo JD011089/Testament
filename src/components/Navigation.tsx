@@ -10,6 +10,7 @@ import {
   Flame, 
   Award, 
   Sparkles,
+  Gamepad2,
   Settings
 } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
@@ -18,7 +19,7 @@ import { LanguageToggle } from './LanguageToggle';
 import { useLanguage } from '../context/LanguageContext';
 import { APP_VERSION } from '../config/version';
 
-export type NavTab = 'dashboard' | 'library' | 'practice' | 'arsenal' | 'wordforge' | 'dilemmas';
+export type NavTab = 'dashboard' | 'library' | 'game' | 'practice' | 'arsenal' | 'wordforge' | 'dilemmas';
 
 interface NavigationProps {
   currentTab: NavTab | 'not-found';
@@ -66,6 +67,13 @@ export const Navigation: React.FC<NavigationProps> = ({
       mobileLabel: language === 'fr' ? 'Bible' : language === 'es' ? 'Biblia' : t('nav.library'),
       tooltip: t('nav.libraryTooltip'), 
       icon: <BookOpen className="w-4 h-4 md:w-4 md:h-4" /> 
+    },
+    { 
+      tab: 'game', 
+      label: t('nav.game'), 
+      mobileLabel: language === 'fr' ? 'Jeu' : language === 'es' ? 'Juego' : t('nav.game'),
+      tooltip: t('nav.gameTooltip'), 
+      icon: <Gamepad2 className="w-4 h-4 md:w-4 md:h-4" /> 
     },
     { 
       tab: 'practice', 
@@ -244,7 +252,7 @@ export const Navigation: React.FC<NavigationProps> = ({
         aria-label="Mobile Navigation" 
         className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-ink/95 backdrop-blur-lg border-t border-stone-200 dark:border-stone-800/90 px-1 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg"
       >
-        <div className="grid grid-cols-4 items-center w-full max-w-lg mx-auto">
+        <div className="grid grid-cols-5 items-center w-full max-w-lg mx-auto">
           {navItems.map((item) => {
             const isActive = isTabActive(item.tab);
             return (

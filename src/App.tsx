@@ -36,6 +36,7 @@ const HowTestamentWorksModal = lazy(() => import('./components/HowTestamentWorks
 const SettingsModal = lazy(() => import('./components/SettingsModal').then(m => ({ default: m.SettingsModal })));
 const PracticeView = lazy(() => import('./components/PracticeView').then((m) => ({ default: m.PracticeView })));
 const CanonLibraryPage = lazy(() => import('./components/CanonLibraryPage').then((m) => ({ default: m.CanonLibraryPage })));
+const TriviaGauntlet = lazy(() => import('./components/TriviaGauntlet').then((m) => ({ default: m.TriviaGauntlet })));
 const DriveModePlayer = lazy(() => import('./components/DriveModePlayer').then((m) => ({ default: m.DriveModePlayer })));
 
 function ViewFallback() {
@@ -786,6 +787,12 @@ export function App() {
                 passageTarget={libraryPassage}
                 onPassageOpened={() => setLibraryPassage(null)}
               />
+              </Suspense>
+            )}
+
+            {currentTab === 'game' && (
+              <Suspense fallback={<ViewFallback />}>
+                <TriviaGauntlet onRewardXP={handleRewardXP} onStudyVerse={handlePracticeVerseFromArsenal} />
               </Suspense>
             )}
 

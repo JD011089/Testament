@@ -5,6 +5,18 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.26.0] - 2026-10-13
+
+### Added (Trivia Gauntlet Game)
+- **Scripture Trivia Arcade**: A new **Game** tab (`/game`) runs an arcade quiz built entirely from the Bible already inside the app — verses, story quests, and the 66-book canon — with a shrinking per-question timer, 3 lives, a combo multiplier, and a double-points final boss question.
+- **Hundreds of Dynamic Questions**: A deterministic bank of 700+ Scripture questions is generated across 8 question types (which passage, match the words, fill the blank, verse → life theme, hero → story/title, story anchor Scripture, book → theme, book anchor Scripture), with distractors drawn from other real passages and reshuffled every run.
+- **Learn-on-Miss Teaching**: A wrong answer now pauses the round and opens a "Learn this Scripture" panel that shows the exact passage, its reference and translation, and a plain-language explanation, plus a one-tap **Practice this verse in Word Forge** action before continuing.
+- **Spaced Review Queue**: Missed questions are saved on-device (`testament_trivia_missed`) and reappear in later runs, marked as a "Review round", until answered correctly.
+- **Persisted Progress**: High score (`testament_trivia_highscore`) and best combo (`testament_trivia_best_combo`) persist between sessions; XP up to 300 per run is awarded through the existing XP system.
+
+### Changed
+- Replaced the earlier Campaign level-map experiment with the Trivia Gauntlet; the navigation tab and route are now **Game** / `/game`.
+
 ## [1.25.1] - 2026-10-13
 
 ### Fixed (Mobile Layout)

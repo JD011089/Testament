@@ -22,7 +22,8 @@ import {
   Languages,
   Clock,
   Calendar,
-  ShieldCheck
+  ShieldCheck,
+  Gamepad2
 } from 'lucide-react';
 
 import { APP_VERSION, APP_VERSION_NAME } from '../config/version';
@@ -47,9 +48,37 @@ interface ReleaseMilestone {
 const ACTIVE_RELEASES: ReleaseMilestone[] = [
   {
     version: APP_VERSION,
-    tagline: 'Scripture Integrity, Smarter Memory & Calmer Mobile',
+    tagline: 'Trivia Gauntlet — A Scripture Game That Teaches',
     dateBadge: 'Current Release',
     isLatest: true,
+    highlights: [
+      {
+        icon: <Gamepad2 className="w-4 h-4 text-amber-400" />,
+        title: 'Scripture Trivia Arcade',
+        description: 'A new Game tab runs a fast arcade quiz built entirely from the Bible inside the app — beat the clock, build combos, guard three lives, and survive a double-points boss question.'
+      },
+      {
+        icon: <Brain className="w-4 h-4 text-amber-400" />,
+        title: '700+ Questions From Your Bible',
+        description: 'Eight question types are generated from the verses, story quests, and all 66 books — which passage, match the words, fill the blank, hero and theme matching, and anchor Scriptures — reshuffled every run.'
+      },
+      {
+        icon: <BookOpen className="w-4 h-4 text-amber-400" />,
+        title: 'Learn the Passage When You Miss',
+        description: 'A wrong answer pauses the round and points you straight to the Scripture — the exact reference, text, and a plain-language explanation — with one-tap practice in Word Forge.'
+      },
+      {
+        icon: <Flame className="w-4 h-4 text-amber-400" />,
+        title: 'Missed Questions Come Back',
+        description: 'Questions you miss are saved on your device and reappear in later runs as "Review round" until you get them right, so the game keeps teaching instead of just scoring.'
+      }
+    ]
+  },
+  {
+    version: 'v1.25.1',
+    tagline: 'Scripture Integrity, Smarter Memory & Calmer Mobile',
+    dateBadge: 'Previous Release',
+    isLatest: false,
     highlights: [
       {
         icon: <BookOpen className="w-4 h-4 text-amber-400" />,
@@ -1032,7 +1061,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
         {/* MODAL FOOTER */}
         <div className="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800/90 bg-stone-50 dark:bg-black/40 flex items-center justify-between gap-3 relative z-10">
           <div className="text-xs font-mono text-stone-500 dark:text-stone-400 hidden sm:block">
-            Testament v1.21.0 • The Living Word
+            Testament {APP_VERSION} • The Living Word
           </div>
 
 
