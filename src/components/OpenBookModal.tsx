@@ -153,15 +153,20 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
     // Pattern 1: parseScriptureReference (handles "Ps 23", "Psalm 23", "Rom 8:28", "John 3", "1 Kgs 19:12")
     const parsedRef = parseScriptureReference(query);
     if (parsedRef) {
-      const foundBook = allBooks.find(b => 
-        b.name.toLowerCase() === parsedRef.book.toLowerCase() ||
-        b.id.toLowerCase() === parsedRef.book.toLowerCase() ||
-        b.name.toLowerCase().startsWith(parsedRef.book.toLowerCase())
+      // Prefer exact book match before prefix match (e.g. John vs 1 John, Jude vs Judges).
+      const queryBook = parsedRef.book.toLowerCase();
+      const foundBook = allBooks.find(b =>
+        b.name.toLowerCase() === queryBook ||
+        b.id.toLowerCase() === queryBook
+      ) ?? allBooks.find(b =>
+        b.name.toLowerCase().startsWith(queryBook)
       );
 
       if (foundBook) {
         const bookMaxChapters = getBookChapterCount(foundBook.name);
-        const validChapter = Math.min(Math.max(1, parsedRef.chapter), bookMaxChapters);
+        const requestedChapter = parsedRef.chapter;
+        const validChapter = Math.min(Math.max(1, requestedChapter), bookMaxChapters);
+        const clamped = validChapter !== requestedChapter;
         soundEngine.playPageTurn();
         onSelectBook(foundBook);
         setSelectedChapter(validChapter);
@@ -169,9 +174,15 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
         if (parsedRef.verseStart) {
           setSelectedVerse(parsedRef.verseStart);
         }
+        // Honor verse ranges from the parser with the reader's selected-verse state.
+        if (typeof parsedRef.verseEnd === 'number' && parsedRef.verseEnd > parsedRef.verseStart) {
+          showToast(`Opened ${foundBook.name} ${validChapter}:${parsedRef.verseStart}-${parsedRef.verseEnd}`);
+        }
         setChapterSearch('');
         readerScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-        showToast(`Opened ${foundBook.name} ${validChapter}${parsedRef.verseStart > 1 ? `:${parsedRef.verseStart}` : ''}`);
+        showToast(clamped
+          ? `Opened ${foundBook.name} ${validChapter} (chapter ${requestedChapter} not found, clamped to max)`
+          : `Opened ${foundBook.name} ${validChapter}${parsedRef.verseStart > 1 ? `:${parsedRef.verseStart}` : ''}`);
         return;
       }
     }
@@ -436,7 +447,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
   const handleCopyVerse = (verseNum: number, text: string) => {
     soundEngine.playSnap();
     const reference = `${book.name} ${selectedChapter}:${verseNum}`;
-    const fullCitation = `"${text}" — ${reference} (${chapterData?.translation || 'CSB'})`;
+    const fullCitation = `"${text}" — ${reference} (${chapterData?.translation || 'WEB'})`;
     navigator.clipboard.writeText(fullCitation);
     showToast(t('reader.copied', { ref: reference }));
   };
@@ -847,7 +858,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                       <span className="text-[11px] uppercase text-stone-400 dark:text-stone-500 font-semibold">
                         {lens === 'street' 
                           ? (language === 'fr' ? 'Appliqué Moderne' : language === 'es' ? 'Aplicado Moderno' : 'Modern Applied') 
-                          : (getVerseById(book.id, language)?.translation || (language === 'fr' ? 'LSG 1910' : language === 'es' ? 'RVR 1960' : 'CSB / ESV'))}
+                          : (getVerseById(book.id, language)?.translation || (language === 'fr' ? 'LSG 1910' : language === 'es' ? 'RVR 1960' : 'WEB'))}
                       </span>
                     </div>
 

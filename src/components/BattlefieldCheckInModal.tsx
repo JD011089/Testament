@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, 
@@ -100,6 +100,16 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
 }) => {
   const { t, language } = useLanguage();
   const modalRef = useModalLock(isOpen);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const getBattlefieldTitle = (id: string, fallback: string) => {
@@ -182,6 +192,7 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
         onClick={onClose}
         role="dialog"
         aria-modal="true"
+        aria-labelledby="battlefield-checkin-title"
       >
         <motion.div
           ref={modalRef}
@@ -207,7 +218,7 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
               <Swords className="w-4 h-4" />
               <span>{t('battlefield.modalTitle')}</span>
             </div>
-            <h3 className="text-xl md:text-2xl font-serif font-bold text-stone-900 dark:text-parchment-50">
+            <h3 id="battlefield-checkin-title" className="text-xl md:text-2xl font-serif font-bold text-stone-900 dark:text-parchment-50">
               {t('battlefield.modalHeading')}
             </h3>
             <p className="text-xs md:text-sm text-stone-600 dark:text-stone-400 mt-1">

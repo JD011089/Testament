@@ -102,6 +102,7 @@ export function normalizeScriptureForSpeech(text: string): string {
     // 1. Strip badges & annotations (AI reflection badges must NEVER be spoken)
     .replace(/[\u2728\u2729\u2605\u2B50]?\s*AI\s+reflection\s*[•\-–—·*]?\s*Not\s+Scripture/gi, ' ')
     .replace(/[\u2728\u2729\u2605\u2B50]?\s*Plain\s+English\s*[•\-–—·*]?\s*AI\s+reflection/gi, ' ')
+    .replace(/[\u2728\u2729\u2605\u2B50]?\s*Plain\s+English\s+takeaway\s*:?/gi, ' ')
     .replace(/[\u2728\u2729\u2605\u2B50]?\s*AI\s+reflection/gi, ' ')
     .replace(/Scripture\s*\(Verbatim\)/gi, ' ')
     // 2. Strip URLs & web links
@@ -110,7 +111,7 @@ export function normalizeScriptureForSpeech(text: string): string {
     // 3. Strip emojis
     .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}]/gu, ' ')
     // 4. Expand verse references: "Genesis 45:5" -> "Genesis forty-five, verse five"
-    .replace(/\b(\d?\s*[A-Za-z]+(?:\s+[A-Za-z]+)?)\s+(\d+):(\d+)(?:-(\d+))?\b/g, (_match, book, ch, vs, endVs) => {
+    .replace(/\b(\d?\s*[A-Za-z]+(?:\s+[A-Za-z]+){0,3})\s+(\d+):(\d+)(?:-(\d+))?\b/g, (_match, book, ch, vs, endVs) => {
       const chWord = numberToWordsEn(ch);
       const vsWord = numberToWordsEn(vs);
       if (endVs) {

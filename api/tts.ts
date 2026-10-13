@@ -47,8 +47,14 @@ function firstHeader(value: HeaderValue): string {
 }
 
 function clientIp(req: TtsRequest): string {
+  const realIp = firstHeader(req.headers['x-real-ip']) || firstHeader(req.headers['x-vercel-ip']);
+  if (realIp) return realIp.trim();
   const forwarded = firstHeader(req.headers['x-forwarded-for']);
-  return forwarded.split(',')[0].trim() || 'unknown';
+  if (forwarded) {
+    const parts = forwarded.split(',').map((s) => s.trim()).filter(Boolean);
+    return parts[parts.length - 1] || parts[0] || 'unknown';
+  }
+  return 'unknown';
 }
 
 function queryValue(req: TtsRequest, key: string): string {

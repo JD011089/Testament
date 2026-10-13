@@ -14,10 +14,10 @@ test.describe('Testament — Font Size Picker & Voice API Overhaul Suite', () =>
     expect(stepM?.scale).toBe(1.0);
 
     const stepXS = FONT_SCALE_STEPS.find(s => s.step === 'xs');
-    expect(stepXS?.scale).toBe(0.85);
+    expect(stepXS?.scale).toBe(0.88);
 
     const stepXL = FONT_SCALE_STEPS.find(s => s.step === 'xl');
-    expect(stepXL?.scale).toBe(1.2);
+    expect(stepXL?.scale).toBe(1.35);
 
     expect(getStoredFontScaleStep()).toBe('m');
   });

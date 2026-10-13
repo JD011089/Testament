@@ -204,7 +204,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
   const [isSkipped, setIsSkipped] = useState<boolean>(() => inProgressInitial?.isSkipped ?? false);
   const [recordedDecisionText, setRecordedDecisionText] = useState<string | null>(() => inProgressInitial?.recordedDecisionText ?? null);
 
-  // Translation toggle: default modern (CSB), KJV behind toggle
+  // Translation toggle: default modern (WEB), KJV behind toggle
   const [useKjv, setUseKjv] = useState<boolean>(false);
 
   // M-3: Say it simpler & tap-to-define state

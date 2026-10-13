@@ -17,6 +17,7 @@ import {
   BookMarked,
   Users,
   ShieldCheck,
+  Sparkles,
   Compass
 } from 'lucide-react';
 import { SeriesPickerModal } from './SeriesPickerModal';
@@ -1047,6 +1048,58 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
             <ArrowRight className="w-4 h-4 text-stone-400 shrink-0" />
           </button>
+        )}
+
+        {/* Starter Toolkit: keeps the desktop right rail balanced and meaningful
+            whenever there is no recall/review/continue content to show yet. */}
+        {!(yesterdayVerse && !yesterdayRecalled) && dueFSRSCount === 0 && !readingPlace && (
+          <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-500/10 via-stone-100/60 to-stone-100/30 dark:from-amber-500/10 dark:via-stone-900/60 dark:to-stone-900/40 border border-stone-200/80 dark:border-stone-800/80">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold flex items-center gap-1.5">
+              <ShieldCheck aria-hidden="true" className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+              <span>Your toolkit</span>
+            </span>
+            <h3 className="text-base font-serif font-bold text-stone-900 dark:text-parchment-50 mt-2 mb-1.5">
+              Start anywhere, no pressure
+            </h3>
+            <p className="text-xs lg:text-sm text-stone-600 dark:text-stone-300 leading-relaxed mb-4">
+              Pick a path below. Missed a day? Fresh start is always one tap away — no streaks to lose.
+            </p>
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => onOpenLibrary?.()}
+                className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-white/70 dark:bg-stone-900/60 hover:bg-white dark:hover:bg-stone-850/80 text-left transition-all"
+              >
+                <span className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-stone-800 dark:text-parchment-100">
+                  <BookOpen aria-hidden="true" className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  Browse the 66-book library
+                </span>
+                <ArrowRight aria-hidden="true" className="w-4 h-4 text-stone-400 shrink-0" />
+              </button>
+              <button
+                type="button"
+                onClick={() => onOpenWordForge()}
+                className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-white/70 dark:bg-stone-900/60 hover:bg-white dark:hover:bg-stone-850/80 text-left transition-all"
+              >
+                <span className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-stone-800 dark:text-parchment-100">
+                  <Brain aria-hidden="true" className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  Practice a verse in Memorize
+                </span>
+                <ArrowRight aria-hidden="true" className="w-4 h-4 text-stone-400 shrink-0" />
+              </button>
+              <button
+                type="button"
+                onClick={() => onOpenHowItWorks?.()}
+                className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-white/70 dark:bg-stone-900/60 hover:bg-white dark:hover:bg-stone-850/80 text-left transition-all"
+              >
+                <span className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-stone-800 dark:text-parchment-100">
+                  <Sparkles aria-hidden="true" className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  How Testament works
+                </span>
+                <ArrowRight aria-hidden="true" className="w-4 h-4 text-stone-400 shrink-0" />
+              </button>
+            </div>
+          </div>
         )}
         </div>
       </div>

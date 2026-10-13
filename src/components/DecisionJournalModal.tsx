@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BookHeart, 
@@ -33,6 +33,15 @@ export const DecisionJournalModal: React.FC<DecisionJournalModalProps> = ({
   const { t } = useLanguage();
   const modalRef = useModalLock(isOpen);
   const [entries, setEntries] = useState<DecisionJournalEntry[]>(() => getDecisionJournalEntries());
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
   const [isConfirmingClear, setIsConfirmingClear] = useState<boolean>(false);
   const [reflectionText, setReflectionText] = useState<string>('');
 
@@ -84,8 +93,9 @@ export const DecisionJournalModal: React.FC<DecisionJournalModalProps> = ({
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-5 bg-black/60 dark:bg-black/85 backdrop-blur-md overflow-y-auto overscroll-contain"
           onClick={handleDismiss}
-          role="region"
-          aria-label="Decision Journal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="journal-modal-title"
         >
           <motion.div
             ref={modalRef}

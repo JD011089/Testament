@@ -161,6 +161,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
         onClick={onClose}
         role="dialog"
         aria-modal="true"
+        aria-labelledby="proverbs-codex-title"
       >
         <motion.div
           ref={modalRef}
@@ -179,7 +180,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-base sm:text-lg font-serif font-black text-stone-900 dark:text-parchment-50 leading-tight">
+                  <h3 id="proverbs-codex-title" className="text-base sm:text-lg font-serif font-black text-stone-900 dark:text-parchment-50 leading-tight">
                     {t('proverbs.title')}
                   </h3>
                   <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/60 text-amber-900 dark:text-amber-300 font-bold uppercase tracking-wider">

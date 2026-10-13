@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X, ShieldCheck, BookOpen, Sparkles, Lock, Check } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
 import { useModalLock } from '../utils/useModalLock';
@@ -13,6 +13,15 @@ export const HowTestamentWorksModal: React.FC<HowTestamentWorksModalProps> = ({
   onClose,
 }) => {
   const modalRef = useModalLock(isOpen);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -68,7 +77,7 @@ export const HowTestamentWorksModal: React.FC<HowTestamentWorksModalProps> = ({
             </h3>
           </div>
           <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed pl-10">
-            Scripture in the reader defaults to the <strong className="text-stone-900 dark:text-stone-100">World English Bible (WEB)</strong> for clear, copyright-free modern English, with seamless switching to the classic <strong className="text-stone-900 dark:text-stone-100">King James Version (KJV)</strong> and curated modern passages (CSB/BSB). Reina-Valera (RVR1960) and Louis Segond (LSG) power our Spanish and French experiences.
+            Scripture in the reader defaults to the <strong className="text-stone-900 dark:text-stone-100">World English Bible (WEB)</strong> for clear, copyright-free modern English, with seamless switching to the classic <strong className="text-stone-900 dark:text-stone-100">King James Version (KJV)</strong> and curated plain-English reflections. Reina-Valera (RVR1960) and Louis Segond (LSG) power our Spanish and French experiences.
           </p>
         </div>
 

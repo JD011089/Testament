@@ -3,6 +3,7 @@ import { Type, Volume2, Mic, Check, Sun, Moon, Globe, BookOpen, Award } from 'lu
 import { useFontSize, FONT_SCALE_STEPS, type FontScaleStep } from '../context/FontSizeContext';
 import { useLanguage, type Language } from '../context/LanguageContext';
 import { soundEngine, NARRATOR_VOICES, type NarratorProfile } from '../utils/audio';
+import { useModalLock } from '../utils/useModalLock';
 import { getStoredTheme, applyTheme, type AppTheme } from '../utils/theme';
 import { getShowXpPreference, setShowXpPreference } from '../utils/userPreferences';
 import { loadReadingPlace, saveReadingPlace } from '../utils/readingPlace';
@@ -37,6 +38,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   activeLearnerMode,
   relicsCount,
 }) => {
+  const modalRef = useModalLock(isOpen);
   const { currentStep, setFontScaleStep } = useFontSize();
   const { t, language, setLanguage } = useLanguage();
   const [isPreviewingVoice, setIsPreviewingVoice] = useState(false);
@@ -111,6 +113,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       onClick={handleClose}
     >
       <div
+        ref={modalRef}
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"

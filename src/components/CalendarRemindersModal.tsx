@@ -57,6 +57,15 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
     }
   }, [isOpen, initialType]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleTimeChange = (type: ReminderType, newTime: string) => {
@@ -157,8 +166,9 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
       <div 
         className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-950/70 backdrop-blur-xs overflow-y-auto overscroll-contain"
         onClick={onClose}
-        role="region"
-        aria-label="Calendar Reminders"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="calendar-reminders-title"
       >
         <motion.div
           ref={modalRef}

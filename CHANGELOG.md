@@ -5,6 +5,41 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.25.0] - 2026-10-13
+
+### Fixed (Scripture Integrity)
+- **Uniform Scripture vs. Reflection labeling**: Plain-English takeaways in Saved Scriptures and the Memorize workbench now carry the `✨ AI reflection • Not Scripture` badge, matching StoryViewer and the Open Book reader. Verbatim peek text is labeled `Scripture (Verbatim)`.
+- **Licensed translations only**: Removed mislabeled `CSB`, `BSB`, and `ESV` tags from the verse registry, curated story passages, reader fallbacks, and the "How Testament Works" copy. Modern text is now consistently presented as the World English Bible (WEB), with KJV behind its toggle.
+- **Audio reads Scripture only**: Text-to-speech no longer narrates AI reflections as if they were Scripture, and the normalizer strips leftover `Plain English takeaway:` prefixes.
+
+### Fixed (Memory & Retention Accuracy)
+- **Ratings are explicit**: Quick Recall, Progressive Reveal, and skipping no longer mark a verse "locked in" or auto-log `Good` without a real self-grade. Retention is only scheduled when you choose Again / Hard / Good / Easy.
+- **Reset Tiles is safe**: Resetting the tile bank no longer clears an already-logged review, preventing inflated repetition counts toward mastery.
+- **Tile progression is live**: Full-word tiles graduate to first-letter ghost tiles the moment a verse reaches 3 successful reviews, without needing to leave the screen.
+
+### Fixed (Mobile & Accessibility)
+- **Android Back dismisses modals first**: Settings, Proverbs, Psalms, Dossiers, Drive Mode, What's New, How It Works, and Onboarding now push a history entry so the phone Back button closes them before exiting the app.
+- **Settings modal lock**: Settings now locks background scroll and traps focus like every other modal.
+- **Escape to close**: Mode Selector, Calendar Reminders, Decision Journal, Battlefield Check-In, What's New, and How Testament Works now close on Escape with proper dialog semantics.
+
+### Fixed (Parsing & State)
+- **Multi-word book references**: `Song of Solomon 2:1` (and similar three-word books) now parse correctly in both the reference parser and the speech normalizer.
+- **Safer chapter search**: Book search prefers exact matches before prefixes (`John` vs `1 John`), clamps out-of-range chapters with clear feedback, and reflects verse ranges.
+
+### Added
+- **Your Toolkit card**: A new home dashboard card (Browse the library, Practice a verse, How Testament works) balances the desktop layout whenever there is no recall, review, or continue-reading content to show, with a zero-guilt "fresh start" reassurance.
+
+### Changed
+- Font-scale regression test now asserts the shipped retiree-friendly scale (XS 0.88, XL 1.35).
+- Version surfaced consistently across the What's New modal header and release list.
+
+## [1.24.0] - 2026-10-08
+
+### Changed (Daybreak Redesign)
+- **Daybreak palette & lit gold buttons**: Warm parchment and celestial sunrise hues with WCAG AA-compliant contrast in both light (Daybreak) and dark (Vespers) modes, paired with tactile lit gold primary buttons.
+- **Calm 3-item home & 4-tab navigation**: Streamlined Home focused on Today's mission, memory verse, and weekly series; Practice tab consolidates Memorize and Dilemmas.
+- **Toned-down XP & calmer tone**: Military ranks and XP distractions quiet by default, keeping focus on Scripture and daily rhythm.
+
 ## [1.23.0] - 2026-10-08
 
 ### Added (Weekly Study Series)

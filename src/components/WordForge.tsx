@@ -183,7 +183,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
 
   const currentFsrs = getFSRSCard(verse.id);
   // Full-word tiles for new verses; only graduate to first-letter tiles after 3+ successful reviews
-  const [useFirstLetters] = useState(() => getFSRSCard(verse.id).reps >= 3);
+  const useFirstLetters = currentFsrs.reps >= 3;
 
   const firstLetterOf = (word: string) => {
     const match = word.match(/[A-Za-z0-9]/);
@@ -213,16 +213,11 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
   }, []);
 
   const handleAdvance = () => {
-    if (!fsrsRated && !hasPeeked) {
-      recordFSRSReview(verse.id, 3);
-      if (isVerseMastered(verse.id)) {
-        onVerseMastered(verse.id);
-      }
-    }
+    // Never auto-log a review: explicit 1-4 rating required to schedule retention.
     onNextVerse();
   };
 
-  const resetPuzzle = () => {
+  const resetTilesOnly = () => {
     soundEngine.playSnap();
     setCurrentPhraseIdx(0);
     setCompletedPhrases([]);
@@ -234,9 +229,6 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
     setRecallError(null);
     setHintLevel(0);
     setIsPeeking(false);
-    setHasPeeked(false);
-    setFsrsRated(false);
-    setScheduledNextDays(null);
 
     if (forgeMode === 'phrases') {
       const firstPhrase = phrases[0] || verse.text;
@@ -244,6 +236,13 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
     } else {
       setAvailableWords(shuffleWords(verse));
     }
+  };
+
+  const resetPuzzle = () => {
+    resetTilesOnly();
+    setHasPeeked(false);
+    setFsrsRated(false);
+    setScheduledNextDays(null);
   };
 
   useEffect(() => {
@@ -333,18 +332,9 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
     soundEngine.playSnap();
     if (revealedPhraseCount < phrases.length) {
       setRevealedPhraseCount(prev => prev + 1);
-    } else {
-      setIsCompleted(true);
-      soundEngine.playVictory();
-      confetti({
-        particleCount: 60,
-        spread: 70,
-        origin: { y: 0.75 },
-        colors: ['#ea580c', '#f59e0b', '#10b981', '#fbbf24']
-      });
-      if (!hasPeeked && isVerseMastered(verse.id)) {
-        onVerseMastered(verse.id);
-      }
+    } else if (!fsrsRated) {
+      // Reading through is exposure only — require explicit 1-4 rating to schedule retention.
+      setIsCompleted(false);
     }
   };
 
@@ -363,10 +353,8 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
       setIsSpeaking(false);
     } else {
       setIsSpeaking(true);
-      const spoken = isCompleted
-        ? `${verse.reference}. ${verse.text}`
-        : `${verse.reference}. ${verse.plainEnglishSummary}`;
-      soundEngine.speakVerse(spoken, () => setIsSpeaking(false));
+      // Scripture-only utterance: never speak the AI reflection as Scripture.
+      soundEngine.speakVerse(`${verse.reference}. ${verse.text}`, () => setIsSpeaking(false));
     }
   };
 
@@ -425,7 +413,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                 <span>{t('forge.hint')}</span>
               </button>
               <button
-                onClick={resetPuzzle}
+                onClick={resetTilesOnly}
                 title={t('forge.resetWords')}
                 aria-label={t('forge.resetWords')}
                 className="p-2 rounded-lg bg-stone-200/70 hover:bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 transition-colors focus-visible:ring-2 focus-visible:ring-amber-500"
@@ -436,7 +424,10 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
           </div>
 
           <div className="p-3 bg-stone-200/50 dark:bg-stone-950/70 rounded-xl text-xs md:text-sm text-stone-700 dark:text-stone-300 italic">
-            "{verse.plainEnglishSummary}"
+            <span className="not-italic inline-flex items-center gap-1 text-[10px] font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-300 bg-amber-500/15 px-2 py-0.5 rounded-full mb-1.5" role="note" aria-label="AI reflection, Not Scripture">
+              <span aria-hidden="true">✨ </span>AI reflection • Not Scripture
+            </span>
+            <span className="block">"{verse.plainEnglishSummary}"</span>
           </div>
           <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-3">
             {useFirstLetters ? t('forge.tilesFirstLetter') : t('forge.tilesMeaning')}
@@ -685,7 +676,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
               <div className="min-h-[140px] md:min-h-[160px] p-4 md:p-5 rounded-2xl bg-stone-100/50 dark:bg-ink border border-dashed border-stone-300/70 dark:border-stone-800/70 flex flex-wrap items-center content-start gap-2.5 transition-colors">
                 {isPeeking ? (
                   <div className="w-full rounded-xl bg-stone-900 text-white p-4 md:p-5">
-                    <p className="text-xs font-mono uppercase tracking-widest text-amber-300 mb-2">{t('forge.showingVerseAgain')}</p>
+                    <p className="text-xs font-mono uppercase tracking-widest text-amber-300 mb-2">Scripture (Verbatim)</p>
                     <p className="font-reading text-base md:text-lg italic leading-relaxed text-white">&ldquo;{verse.text}&rdquo;</p>
                   </div>
                 ) : (
@@ -758,11 +749,11 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                   </motion.button>
                 ))}
                 {availableWords.length === 0 && !isCompleted && (
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs w-full">
-                    <span>Some tiles are out of order. Tap any red tile above to return it to the bank.</span>
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs w-full" role="alert">
+                    <span>Tiles out of order. Tap any red tile above to return it to the bank.</span>
                     <button
                       type="button"
-                      onClick={resetPuzzle}
+                      onClick={resetTilesOnly}
                       className="px-3 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-parchment-200 hover:bg-stone-300 dark:hover:bg-stone-700 font-semibold text-xs transition-colors shrink-0"
                     >
                       Reset Tiles

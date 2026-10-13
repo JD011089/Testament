@@ -56,7 +56,7 @@ export const PROVERB_MEMORY_VERSES: MemoryVerse[] = PROVERB_SCENARIOS.map((p) =>
   return {
     id: p.id,
     reference: p.reference,
-    translation: 'BSB',
+    translation: 'WEB',
     text: p.formalText,
     plainEnglishSummary: p.streetTranslation,
     category,
@@ -81,7 +81,7 @@ export const PSALM_MEMORY_VERSES: MemoryVerse[] = PSALM_PRESCRIPTIONS.map((ps) =
   return {
     id: ps.id,
     reference: ps.reference,
-    translation: 'BSB',
+    translation: 'WEB',
     text: ps.formalText,
     plainEnglishSummary: ps.streetTranslation,
     category,
@@ -110,7 +110,7 @@ export const CANON_MEMORY_VERSES: MemoryVerse[] = CANON_BOOKS.map((b) => {
   return {
     id: b.id,
     reference: b.anchorScripture.reference,
-    translation: 'BSB',
+    translation: 'WEB',
     text: b.anchorScripture.canonicalText,
     plainEnglishSummary: b.anchorScripture.streetTranslation,
     category,

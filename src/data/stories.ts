@@ -52,7 +52,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Mark 4:39-40',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'He got up, rebuked the wind, and said to the sea, "Silence! Be still!" The wind ceased, and there was a great calm. Then he said to them, "Why are you afraid? Do you still have no faith?"',
           deepDive: 'The Greek word used for "be still" literally means "be muzzled." Jesus treated the violent chaos of nature like an unruly beast that instantly recognizes its Creator\'s voice.'
         },
@@ -120,7 +120,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'John 13:14-15',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: '"If I then, your Lord and Teacher, have washed your feet, you also ought to wash one another’s feet. For I have given you an example, that you also should do just as I have done to you."',
           deepDive: 'Jesus didn’t merely teach humility as an abstract philosophy; he enacted it physically before dying on a Roman cross for the very people who mocked him.'
         },
@@ -188,7 +188,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Luke 24:5-6',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: '"Why do you look for the living among the dead? He is not here, but has risen!"',
           deepDive: 'The resurrection is the cornerstone of Christian faith. Christianity did not survive because of a clever philosophy, but because an empty tomb proved Jesus conquered the grave.'
         },
@@ -284,7 +284,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: '1 Samuel 17:45',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'David said to the Philistine: "You come against me with a sword, spear, and javelin, but I come against you in the name of the Lord of Armies, the God of the ranks of Israel—whom you have defied."',
           deepDive: "Notice David didn't pretend Goliath wasn't lethal. He acknowledged the weapons in Goliath's hands, but put them next to an infinite God. Perspective changes everything."
         },
@@ -368,7 +368,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: '1 Samuel 22:2',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'All who were in distress, in debt, or discontented gathered to him, and he became their commander. There were about four hundred men with him.',
           deepDive: "God doesn't look for pre-packaged champions. He gathers people who know what failure and struggle taste like, and builds them into leaders."
         },
@@ -458,7 +458,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Exodus 14:13-14',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'Moses said to the people: "Don’t be afraid. Stand firm and see the Lord’s salvation that he will accomplish for you today. The Lord will fight for you, and you must be quiet."',
           deepDive: 'Notice the command: "You must be quiet." The biggest threat when crisis strikes isn’t the enemy outside—it’s the runaway panic inside your own head.'
         },
@@ -553,7 +553,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: '1 Kings 18:37-38',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: '"Answer me, Lord, answer me, so that this people will know that you, the Lord, are God, and that you have turned their hearts back." Then the Lord’s fire fell and consumed the burnt offering.',
           deepDive: 'Elijah didn’t pray a long, fancy, pious speech. In the moments of highest crisis, simple, raw prayers carry the most power.'
         },
@@ -648,7 +648,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Genesis 50:20',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'You planned evil against me; God planned it for good to bring about the present result—the survival of many people.',
           deepDive: 'This is one of the most mature statements in human literature. Joseph didn’t deny their evil ("You planned evil"), but he recognized that human malice cannot veto God’s purpose.'
         },
@@ -743,7 +743,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Luke 22:31-32',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: '"Simon, Simon, look out. Satan has asked to sift you like wheat. But I have prayed for you that your faith may not fail. And when you have turned back, strengthen your brothers."',
           deepDive: 'Notice Jesus said: "When you have turned back"—not IF. Jesus knew Peter would fall before it even happened, and had already mapped out his restoration.'
         },
@@ -838,7 +838,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Philippians 4:11-13',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'I have learned how to be content with whatever I have. I know how to live on almost nothing or with everything. I can do all things through Christ who strengthens me.',
           deepDive: 'This famous verse was not written from a comfortable luxury villa. Paul wrote this from a Roman prison cell. Real strength isn’t having an easy life; it’s being unbreakable when life is hard.'
         },
@@ -933,7 +933,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Daniel 1:8',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'Daniel resolved in his heart that he would not defile himself with the king\'s food or with the wine that he drank.',
           deepDive: 'Notice the sequence: Daniel decided in his heart BEFORE the tray was placed in front of him. If you wait until the pressure is in your face, you will compromise every time.'
         },
@@ -995,7 +995,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Daniel 3:17-18',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'If we are thrown into the blazing furnace, the God we serve is able to deliver us... But even if he does not, we want you to know, Your Majesty, that we will not serve your gods.',
           deepDive: '"Even if not." That is mature, battle-tested faith. They didn’t serve God as an insurance policy to avoid pain; they served Him because He is God.'
         },
@@ -1057,7 +1057,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Daniel 6:10',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'Now when Daniel learned that the decree had been published, he went home to his upstairs room where the windows opened toward Jerusalem. Three times a day he got down on his knees and prayed, giving thanks to his God, just as he had done before.',
           deepDive: '"Just as he had done before." Daniel’s courage was not a sudden burst of adrenaline; it was the compound dividend of a lifetime of steady, quiet daily discipline.'
         },
@@ -1142,7 +1142,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Esther 2:10',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'Esther had not revealed her people or her kindred, for Mordecai had commanded her not to make it known.',
           deepDive: 'Wisdom knows when to speak and when to hold your tongue. Timing is everything in high-stakes environments.'
         },
@@ -1204,7 +1204,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Esther 4:14',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'And who knows whether you have not come to the kingdom for such a time as this?',
           deepDive: 'You were not placed in your family, your job, or your neighborhood by accident. God positions His people ahead of crises to be agents of redemption.'
         },
@@ -1266,7 +1266,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Esther 7:3',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'If I have found favor in your eyes, O king, and if it please the king, let my life be granted me for my wish, and my people for my request!',
           deepDive: 'Notice Esther didn\'t play the victim. She framed her plea in the language of honor, clarity, and bold truth.'
         },
@@ -1351,7 +1351,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Nehemiah 2:17',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'Then I said to them, "You see the trouble we are in, how Jerusalem lies in ruins with its gates burned. Come, let us build the wall of Jerusalem, that we may no longer suffer derision."',
           deepDive: 'Notice the pronoun: "we." Nehemiah didn’t say "you people messed up." He identified with their pain and shared the burden.'
         },
@@ -1413,7 +1413,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Nehemiah 4:14',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'Do not be afraid of them. Remember the Lord, who is great and awesome, and fight for your brothers, your sons, your daughters, your wives, and your homes.',
           deepDive: 'Connect your grind to your loved ones. When work gets brutal, remember who you are fighting for: your family, your integrity, your legacy.'
         },
@@ -1475,7 +1475,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Nehemiah 6:3',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'I am doing a great work and I cannot come down. Why should the work stop while I leave it and come down to you?',
           deepDive: 'Guard your focus ruthlessly. The enemy doesn\'t need to destroy your character if he can simply distract your attention.'
         },
@@ -1560,7 +1560,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Judges 6:12',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'The angel of the Lord appeared to him and said, "The Lord is with you, mighty warrior!"',
           deepDive: 'God speaks to your future identity, not your present insecurity. He called Gideon a "mighty warrior" while he was still hiding in a hole.'
         },
@@ -1622,7 +1622,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Judges 7:7',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'The Lord said to Gideon, "With the 300 men who lapped I will save you and deliver the Midianites into your hands. Let all the other people go home."',
           deepDive: 'God loves impossible math. When your resources are cut to the bone, you are set up for a miracle where God gets 100% of the credit.'
         },
@@ -1684,7 +1684,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Judges 7:20',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'The three companies blew the trumpets and broke the jars. Holding the torches in their left hands and the trumpets in their right hands... they shouted, "A sword for the Lord and for Gideon!"',
           deepDive: 'The light was hidden inside the jar until the jar was broken. Your deepest impact on others happens when your ego and self-sufficiency are broken open.'
         },
@@ -1769,7 +1769,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Jonah 1:9',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'He said to them, "I am a Hebrew, and I fear the Lord, the God of heaven, who made the sea and the dry land."',
           deepDive: 'Notice the contradiction in Jonah\'s mouth: He claimed to worship the God who made the sea, while simultaneously trying to use the sea to hide from Him.'
         },
@@ -1831,7 +1831,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Jonah 2:7',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'When my life was fainting away, I remembered the Lord, and my prayer came to you, into your holy temple.',
           deepDive: 'Rock bottom is the solid foundation upon which God rebuilds a genuine leader. When you run out of human options, you finally discover God.'
         },
@@ -1893,7 +1893,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Jonah 4:2',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'I knew that you are a gracious and compassionate God, slow to anger and abounding in love, a God who relents from sending calamity.',
           deepDive: 'The most tragic irony in scripture: Jonah used God’s most beautiful attributes as an accusation against Him because he wanted revenge.'
         },
@@ -1978,7 +1978,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Ruth 1:16',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'Ruth replied, "Don\'t urge me to leave you or to turn back from you. Where you go I will go, and where you stay I will stay. Your people will be my people and your God my God."',
           deepDive: 'The Hebrew word is "Hesed"—covenant loyalty that never quits even when there is zero practical benefit to the giver.'
         },
@@ -2040,7 +2040,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Ruth 2:12',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'May the Lord repay you for what you have done. May you be richly rewarded by the Lord, the God of Israel, under whose wings you have come to take refuge.',
           deepDive: 'Boaz prayed that God would protect Ruth under His wings—and then Boaz became the very answer to his own prayer.'
         },
@@ -2102,7 +2102,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Ruth 3:9',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: '"Who are you?" he asked. "I am your servant Ruth," she said. "Spread the corner of your covering over me, for you are a family redeemer."',
           deepDive: 'Ruth asked Boaz to spread his "wing" (garment) over her—the exact Hebrew word Boaz had used earlier when praying God would shelter her under His wings.'
         },
@@ -2187,7 +2187,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Joshua 2:18',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'Unless, when we enter the land, you tie this scarlet cord in the window through which you let us down, and gather your father and mother, your brothers, and all your family into your house.',
           deepDive: 'The scarlet cord hanging from the wall is a stunning foretaste of the blood of Christ: an outsider saved by placing her faith behind a scarlet boundary of grace.'
         },
@@ -2249,7 +2249,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Joshua 5:14',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: '"Neither," he replied, "but as commander of the army of the Lord I have now come." Then Joshua fell facedown to the ground in reverence, and asked him, "What does my Lord say to his servant?"',
           deepDive: 'Stop praying for God to bless your clever ideas. Pray for the humility to align with His master blueprint.'
         },
@@ -2311,7 +2311,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Joshua 6:20',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'So the people shouted, and the trumpets were blown. As soon as the people heard the sound of the trumpet, the people shouted a great shout, and the wall fell down flat.',
           deepDive: 'The shout came BEFORE the wall fell. Faith shouts while the stone is still standing, confident that God’s word is already accomplished.'
         },
@@ -2396,7 +2396,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Matthew 3:3',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'He is a voice of one calling in the wilderness: "Prepare the way for the Lord; make his paths straight!"',
           deepDive: 'Notice John called himself just "a voice." Not a celebrity, not a brand. When your identity is centered on the message rather than your image, you become fearless.'
         },
@@ -2458,7 +2458,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'John 3:30',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'He must increase, but I must decrease.',
           deepDive: 'The six most liberating words in human history. When your life is about elevating Christ rather than promoting yourself, insecurity vanishes.'
         },
@@ -2520,7 +2520,7 @@ export const STORY_QUESTS: StoryQuest[] = [
         ],
         unlockedScripture: {
           reference: 'Mark 6:18',
-          translation: 'CSB / Modern Plain English',
+          translation: 'WEB',
           text: 'For John had been saying to Herod, "It is not lawful for you to have your brother\'s wife."',
           deepDive: 'Truth does not bend for royal titles, billionaire status, or corporate executives. John held rulers to the exact same moral standard as peasants.'
         },

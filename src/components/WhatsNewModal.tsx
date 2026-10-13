@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { soundEngine } from '../utils/audio';
 import { useModalLock } from '../utils/useModalLock';
@@ -25,7 +25,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 
-import { APP_VERSION } from '../config/version';
+import { APP_VERSION, APP_VERSION_NAME } from '../config/version';
 
 interface WhatsNewModalProps {
   isOpen: boolean;
@@ -47,9 +47,37 @@ interface ReleaseMilestone {
 const ACTIVE_RELEASES: ReleaseMilestone[] = [
   {
     version: APP_VERSION,
-    tagline: 'Daybreak Redesign — Calmer, Simpler & Gold Lit Palette',
+    tagline: 'Scripture Integrity, Smarter Memory & Calmer Mobile',
     dateBadge: 'Current Release',
     isLatest: true,
+    highlights: [
+      {
+        icon: <BookOpen className="w-4 h-4 text-amber-400" />,
+        title: 'Honest Scripture Labeling Everywhere',
+        description: 'Every plain-English takeaway is now explicitly badged as AI reflection • Not Scripture — including Saved Scriptures and Memorize — and only verbatim WEB/KJV text is ever read aloud.'
+      },
+      {
+        icon: <Brain className="w-4 h-4 text-amber-400" />,
+        title: 'Memory You Can Trust',
+        description: 'Retention is only scheduled when you grade a verse yourself. Quick Recall, Progressive Reveal, and Reset Tiles no longer inflate or double-count your progress, and tiles graduate from full words to first-letter hints as you grow.'
+      },
+      {
+        icon: <ShieldCheck className="w-4 h-4 text-amber-400" />,
+        title: 'Predictable Back Button & Modals',
+        description: 'The Android Back button now dismisses Settings, Proverbs, Psalms, Dossiers, Onboarding and What\'s New before ever leaving the app, with consistent focus handling across dialogs.'
+      },
+      {
+        icon: <Sparkles className="w-4 h-4 text-amber-400" />,
+        title: 'Balanced Home & Better Search',
+        description: 'A new Your Toolkit card fills and balances the home dashboard, references like "Song of Solomon 2:1" now parse correctly, and chapter searches clamp safely with clear feedback.'
+      }
+    ]
+  },
+  {
+    version: 'v1.24.0',
+    tagline: 'Daybreak Redesign — Calmer, Simpler & Gold Lit Palette',
+    dateBadge: 'Previous Release',
+    isLatest: false,
     highlights: [
       {
         icon: <Sparkles className="w-4 h-4 text-amber-400" />,
@@ -828,7 +856,7 @@ const ARCHIVED_RELEASES: ReleaseMilestone[] = [
 
 export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose }) => {
   const modalRef = useModalLock(isOpen);
-  const [activeTab, setActiveTab] = useState<string>('v1.22.2');
+  const [activeTab, setActiveTab] = useState<string>(APP_VERSION);
   const [showArchive, setShowArchive] = useState(false);
 
   const RELEASES = showArchive ? [...ACTIVE_RELEASES, ...ARCHIVED_RELEASES] : ACTIVE_RELEASES;
@@ -836,12 +864,22 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
   const handleDismiss = () => {
     soundEngine.playClick();
     try {
-      localStorage.setItem('testament_last_seen_version', '1.22.2');
+      localStorage.setItem('testament_last_seen_version', APP_VERSION_NAME);
     } catch {
       // ignore
     }
     onClose();
   };
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleDismiss();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const selectedRelease = RELEASES.find(r => r.version === activeTab) || RELEASES[0];
 
@@ -853,6 +891,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
           onClick={handleDismiss}
           role="dialog"
           aria-modal="true"
+          aria-labelledby="whatsnew-modal-title"
         >
           <motion.div 
             ref={modalRef}
@@ -875,11 +914,11 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg sm:text-xl font-serif font-black text-stone-900 dark:text-parchment-50">
+                <h2 id="whatsnew-modal-title" className="text-lg sm:text-xl font-serif font-black text-stone-900 dark:text-parchment-50">
                   Field Update Dispatches
                 </h2>
                 <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 font-bold">
-                  v1.21.0 Live
+                  {APP_VERSION} Live
                 </span>
               </div>
 

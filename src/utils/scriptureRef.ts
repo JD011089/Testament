@@ -28,7 +28,7 @@ export const BOOK_ABBREVIATIONS: Record<string, string> = {
   ps: 'Psalms', psa: 'Psalms', psm: 'Psalms', pss: 'Psalms', psalm: 'Psalms', psalms: 'Psalms',
   prov: 'Proverbs', pro: 'Proverbs', prv: 'Proverbs', pr: 'Proverbs', proverb: 'Proverbs', proverbs: 'Proverbs',
   eccles: 'Ecclesiastes', eccl: 'Ecclesiastes', ecc: 'Ecclesiastes', ec: 'Ecclesiastes', qoh: 'Ecclesiastes',
-  song: 'Song of Solomon', songs: 'Song of Solomon', sos: 'Song of Solomon', cant: 'Song of Solomon', 'song of songs': 'Song of Solomon',
+  song: 'Song of Solomon', songs: 'Song of Solomon', sos: 'Song of Solomon', cant: 'Song of Solomon', 'song of songs': 'Song of Solomon', 'song of solomon': 'Song of Solomon',
   isa: 'Isaiah', is: 'Isaiah',
   jer: 'Jeremiah', je: 'Jeremiah', jr: 'Jeremiah',
   lam: 'Lamentations', la: 'Lamentations',
@@ -95,8 +95,8 @@ export function parseScriptureReference(reference: string): ParsedScriptureRef |
   const trimmed = reference.trim();
   if (!trimmed) return null;
 
-  // 1. Chapter and verse: "Romans 8:28", "Rom 8:28-30", "1 Kings 19:12"
-  const cvMatch = trimmed.match(/^([1-3]?\s*[A-Za-z]+(?:\s+[A-Za-z]+)?)\s+(\d+):(\d+)(?:\s*-\s*(\d+))?$/);
+  // 1. Chapter and verse: "Romans 8:28", "Rom 8:28-30", "1 Kings 19:12", "Song of Solomon 2:1"
+  const cvMatch = trimmed.match(/^([1-3]?\s*[A-Za-z]+(?:\s+[A-Za-z]+){0,3})\s+(\d+):(\d+)(?:\s*-\s*(\d+))?$/);
   if (cvMatch) {
     const book = resolveBookName(cvMatch[1]);
     const chapter = Number(cvMatch[2]);
@@ -106,8 +106,8 @@ export function parseScriptureReference(reference: string): ParsedScriptureRef |
     return { book, chapter, verseStart, verseEnd };
   }
 
-  // 2. Chapter only: "Psalm 23", "Ps 23", "John 3", "Genesis 1"
-  const cMatch = trimmed.match(/^([1-3]?\s*[A-Za-z]+(?:\s+[A-Za-z]+)?)\s+(\d+)$/);
+  // 2. Chapter only: "Psalm 23", "Ps 23", "John 3", "Genesis 1", "Song of Solomon 2"
+  const cMatch = trimmed.match(/^([1-3]?\s*[A-Za-z]+(?:\s+[A-Za-z]+){0,3})\s+(\d+)$/);
   if (cMatch) {
     const book = resolveBookName(cMatch[1]);
     const chapter = Number(cMatch[2]);

@@ -113,9 +113,11 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
       soundEngine.stopSpeaking();
       setActiveAudioVerseId(null);
     } else {
+      soundEngine.stopSpeaking();
       setActiveAudioVerseId(verse.id);
+      // Scripture-only utterance: reflection is visual-only with its badge.
       soundEngine.speakVerse(
-        `${verse.reference}. ${verse.text}. Plain English takeaway: ${verse.plainEnglishSummary}`,
+        `${verse.reference}. ${verse.text}`,
         () => setActiveAudioVerseId(null)
       );
     }
@@ -191,8 +193,8 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {filteredVerses.map((verse) => {
-            const isMastered = memorizedVerses.includes(verse.id);
-            const isBookmarked = bookmarkedVerses.includes(verse.id);
+            const isMastered = isVerseMemorized(verse);
+            const isBookmarked = isVerseBookmarked(verse);
             const isSpeakingThis = activeAudioVerseId === verse.id;
 
             return (
@@ -255,9 +257,9 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
                   </blockquote>
 
                   <div className="my-3 p-3.5 rounded-xl bg-white/80 dark:bg-stone-950/70 text-xs md:text-sm text-stone-700 dark:text-stone-300">
-                    <div className="flex items-center gap-1.5 text-amber-800 dark:text-amber-400 font-semibold mb-1">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>{t('arsenal.plainEnglish')}</span>
+                    <div className="flex items-center gap-1.5 text-amber-800 dark:text-amber-400 font-semibold mb-1" role="note" aria-label="AI reflection, Not Scripture">
+                      <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
+                      <span>{t('arsenal.plainEnglish')} • AI reflection • Not Scripture</span>
                     </div>
                     <p className="leading-relaxed">{verse.plainEnglishSummary}</p>
                   </div>

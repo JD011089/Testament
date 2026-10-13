@@ -49,6 +49,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   const [learnerMode, setSelectedLearnerMode] = useState<LearnerMode>(() => {
     return initialProfile?.learnerMode || loadLearnerModesState().activeMode;
   });
+  const lastStepChangeRef = React.useRef<number>(0);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -182,8 +183,6 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   ];
 
   const selectedBattleObj = BATTLES.find(b => b.id === battle) || BATTLES[0];
-
-  const lastStepChangeRef = React.useRef<number>(0);
 
   const handleNextStep = () => {
     const now = Date.now();

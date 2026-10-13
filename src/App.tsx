@@ -99,8 +99,7 @@ export function App() {
   const [isOnboardingOpen, setIsOnboardingOpen] = useState<boolean>(false);
 
   // Keep modal states in refs so the single window popstate listener closes modals before exiting the app
-  const modalsRef = useRef({
-    isSettingsOpen,
+  const modalsRef = useRef({    isSettingsOpen,
     isDossierOpen,
     isProverbsOpen,
     isPsalmsOpen,
@@ -181,11 +180,27 @@ export function App() {
     setStreakCount(next);
   };
 
+  const openModalWithHistory = (name: string, open: () => void) => {
+    open();
+    try {
+      if (window.history.state?.modal !== name) {
+        window.history.pushState({ modal: name, tab: currentTabRef.current }, '', window.location.pathname + window.location.search);
+      }
+    } catch {
+      // ignore
+    }
+  };
+
   // Keep activeQuestRef & activeDailyMissionRef in sync with state for popstate listener closure
   const activeQuestRef = useRef(activeQuest);
   useEffect(() => {
     activeQuestRef.current = activeQuest;
   }, [activeQuest]);
+
+  const currentTabRef = useRef(currentTab);
+  useEffect(() => {
+    currentTabRef.current = currentTab;
+  }, [currentTab]);
 
   const activeDailyMissionRef = useRef(activeDailyMission);
   useEffect(() => {
@@ -214,17 +229,22 @@ export function App() {
 
   // Handle URL deep links cleanup and listen for Service Worker messages
   useEffect(() => {
+    const closeTopModalFromHistory = (): boolean => {
+      const m = modalsRef.current;
+      if (m.isSettingsOpen) { setIsSettingsOpen(false); return true; }
+      if (m.isProverbsOpen) { setIsProverbsOpen(false); return true; }
+      if (m.isPsalmsOpen) { setIsPsalmsOpen(false); return true; }
+      if (m.isDossierOpen) { setIsDossierOpen(false); return true; }
+      if (m.isDriveModeOpen) { setIsDriveModeOpen(false); return true; }
+      if (m.isWhatsNewOpen) { setIsWhatsNewOpen(false); return true; }
+      if (m.isHowItWorksOpen) { setIsHowItWorksOpen(false); return true; }
+      if (m.isOnboardingOpen) { setIsOnboardingOpen(false); return true; }
+      return false;
+    };
+
     const onPop = (e: PopStateEvent) => {
       // 1. Close open modals first on Back button
-      const m = modalsRef.current;
-      if (m.isSettingsOpen) { setIsSettingsOpen(false); return; }
-      if (m.isProverbsOpen) { setIsProverbsOpen(false); return; }
-      if (m.isPsalmsOpen) { setIsPsalmsOpen(false); return; }
-      if (m.isDossierOpen) { setIsDossierOpen(false); return; }
-      if (m.isDriveModeOpen) { setIsDriveModeOpen(false); return; }
-      if (m.isWhatsNewOpen) { setIsWhatsNewOpen(false); return; }
-      if (m.isHowItWorksOpen) { setIsHowItWorksOpen(false); return; }
-      if (m.isOnboardingOpen) { setIsOnboardingOpen(false); return; }
+      if (closeTopModalFromHistory()) return;
 
       // 2. Close active mission or quest
       if (activeDailyMissionRef.current) {
@@ -287,15 +307,15 @@ export function App() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    const handleOpenProverbs = () => setIsProverbsOpen(true);
-    const handleOpenPsalms = () => setIsPsalmsOpen(true);
+    const handleOpenProverbs = () => openModalWithHistory('proverbs', () => setIsProverbsOpen(true));
+    const handleOpenPsalms = () => openModalWithHistory('psalms', () => setIsPsalmsOpen(true));
 
     window.addEventListener('open-canon-library', handleOpenLibrary);
     window.addEventListener('open-canon-codex', handleOpenLibrary);
     window.addEventListener('open-proverbs-codex', handleOpenProverbs);
     window.addEventListener('open-psalms-medic', handleOpenPsalms);
 
-    const handleOpenSettings = () => setIsSettingsOpen(true);
+    const handleOpenSettings = () => openModalWithHistory('settings', () => setIsSettingsOpen(true));
     window.addEventListener('testament-open-settings', handleOpenSettings);
 
     return () => {
@@ -373,9 +393,9 @@ export function App() {
       setCurrentTab('library');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (step.type === 'proverb') {
-      setIsProverbsOpen(true);
+      openModalWithHistory('proverbs', () => setIsProverbsOpen(true));
     } else if (step.type === 'psalm') {
-      setIsPsalmsOpen(true);
+      openModalWithHistory('psalms', () => setIsPsalmsOpen(true));
     }
   };
 
@@ -395,17 +415,17 @@ export function App() {
     }
     if (type === 'psalm') {
       setTargetPsalmId(id);
-      setIsPsalmsOpen(true);
+      openModalWithHistory('psalms', () => setIsPsalmsOpen(true));
       return;
     }
     if (type === 'proverb') {
       setTargetProverbId(id);
-      setIsProverbsOpen(true);
+      openModalWithHistory('proverbs', () => setIsProverbsOpen(true));
       return;
     }
     if (type === 'dossier') {
       setTargetDossierId(id);
-      setIsDossierOpen(true);
+      openModalWithHistory('dossier', () => setIsDossierOpen(true));
     }
   };
 
@@ -727,10 +747,10 @@ export function App() {
                 currentAmbience={currentAmbience}
                 onToggleAmbience={handleToggleAmbience}
                 userProfile={userProfile}
-                onOpenOnboarding={() => setIsOnboardingOpen(true)}
-                onOpenWhatsNew={() => setIsWhatsNewOpen(true)}
-                onOpenHowItWorks={() => setIsHowItWorksOpen(true)}
-                onOpenSettings={() => setIsSettingsOpen(true)}
+                onOpenOnboarding={() => openModalWithHistory('onboarding', () => setIsOnboardingOpen(true))}
+                onOpenWhatsNew={() => openModalWithHistory('whatsnew', () => setIsWhatsNewOpen(true))}
+                onOpenHowItWorks={() => openModalWithHistory('howitworks', () => setIsHowItWorksOpen(true))}
+                onOpenSettings={() => openModalWithHistory('settings', () => setIsSettingsOpen(true))}
                 onRewardXP={handleRewardXP}
                 onLaunchCampaignStep={handleLaunchCampaignStep}
               />
@@ -832,11 +852,11 @@ export function App() {
           }}
           currentAmbience={currentAmbience}
           onToggleAmbience={handleCycleAmbience}
-          onOpenDriveMode={() => setIsDriveModeOpen(true)}
+          onOpenDriveMode={() => openModalWithHistory('drivemode', () => setIsDriveModeOpen(true))}
           streakCount={streakCount}
           xp={xp}
-          onOpenSettings={() => setIsSettingsOpen(true)}
-          onOpenWhatsNew={() => setIsWhatsNewOpen(true)}
+          onOpenSettings={() => openModalWithHistory('settings', () => setIsSettingsOpen(true))}
+          onOpenWhatsNew={() => openModalWithHistory('whatsnew', () => setIsWhatsNewOpen(true))}
         />
       )}
 
@@ -846,6 +866,9 @@ export function App() {
         onClose={() => {
           setIsDossierOpen(false);
           setTargetDossierId(null);
+          if (window.history.state?.modal === 'dossier') {
+            try { window.history.back(); } catch { /* ignore */ }
+          }
         }}
         onSelectCharacterQuest={handleSelectQuestById}
         initialCharacterId={targetDossierId}
@@ -856,6 +879,9 @@ export function App() {
         onClose={() => {
           setIsProverbsOpen(false);
           setTargetProverbId(null);
+          if (window.history.state?.modal === 'proverbs') {
+            try { window.history.back(); } catch { /* ignore */ }
+          }
         }}
         onOpenWordForge={(verseId) => {
           setIsProverbsOpen(false);
@@ -876,6 +902,9 @@ export function App() {
         onClose={() => {
           setIsPsalmsOpen(false);
           setTargetPsalmId(null);
+          if (window.history.state?.modal === 'psalms') {
+            try { window.history.back(); } catch { /* ignore */ }
+          }
         }}
         onOpenWordForge={(verseId) => {
           setIsPsalmsOpen(false);
@@ -897,7 +926,12 @@ export function App() {
         <Suspense fallback={null}>
           <DriveModePlayer
             isOpen={isDriveModeOpen}
-            onClose={() => setIsDriveModeOpen(false)}
+            onClose={() => {
+              setIsDriveModeOpen(false);
+              if (window.history.state?.modal === 'drivemode') {
+                try { window.history.back(); } catch { /* ignore */ }
+              }
+            }}
             currentAmbience={currentAmbience}
             onToggleAmbience={handleToggleAmbience}
           />
@@ -907,13 +941,23 @@ export function App() {
       {/* Onboarding Battle Plan Calibration Modal */}
       <WhatsNewModal
         isOpen={isWhatsNewOpen}
-        onClose={() => setIsWhatsNewOpen(false)}
+        onClose={() => {
+          setIsWhatsNewOpen(false);
+          if (window.history.state?.modal === 'whatsnew') {
+            try { window.history.back(); } catch { /* ignore */ }
+          }
+        }}
       />
 
       {/* M-8: How Testament Works Transparency Modal */}
       <HowTestamentWorksModal
         isOpen={isHowItWorksOpen}
-        onClose={() => setIsHowItWorksOpen(false)}
+        onClose={() => {
+          setIsHowItWorksOpen(false);
+          if (window.history.state?.modal === 'howitworks') {
+            try { window.history.back(); } catch { /* ignore */ }
+          }
+        }}
       />
 
       <OnboardingModal
@@ -926,6 +970,9 @@ export function App() {
             // ignore
           }
           setIsOnboardingOpen(false);
+          if (window.history.state?.modal === 'onboarding') {
+            try { window.history.back(); } catch { /* ignore */ }
+          }
           window.dispatchEvent(new Event('testament-onboarding-settled'));
         }}
         initialProfile={userProfile}
@@ -936,10 +983,15 @@ export function App() {
         <Suspense fallback={null}>
           <SettingsModal
             isOpen={isSettingsOpen}
-            onClose={() => setIsSettingsOpen(false)}
+            onClose={() => {
+              setIsSettingsOpen(false);
+              if (window.history.state?.modal === 'settings') {
+                try { window.history.back(); } catch { /* ignore */ }
+              }
+            }}
             onOpenOnboarding={() => {
               setIsSettingsOpen(false);
-              setIsOnboardingOpen(true);
+              openModalWithHistory('onboarding', () => setIsOnboardingOpen(true));
             }}
             onOpenReminders={() => {
               setIsSettingsOpen(false);
@@ -959,7 +1011,7 @@ export function App() {
             }}
             onOpenHowItWorks={() => {
               setIsSettingsOpen(false);
-              setIsHowItWorksOpen(true);
+              openModalWithHistory('howitworks', () => setIsHowItWorksOpen(true));
             }}
             onOpenLearnerMode={() => {
               setIsSettingsOpen(false);

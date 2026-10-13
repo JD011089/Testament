@@ -34,8 +34,14 @@ function firstHeader(value: HeaderValue): string {
 }
 
 function clientIp(req: ApiRequest): string {
+  const realIp = firstHeader(req.headers['x-real-ip']) || firstHeader(req.headers['x-vercel-ip']);
+  if (realIp) return realIp.trim();
   const forwarded = firstHeader(req.headers['x-forwarded-for']);
-  return forwarded.split(',')[0].trim() || 'unknown';
+  if (forwarded) {
+    const parts = forwarded.split(',').map((s) => s.trim()).filter(Boolean);
+    return parts[parts.length - 1] || parts[0] || 'unknown';
+  }
+  return 'unknown';
 }
 
 function allow(ip: string): boolean {
@@ -54,23 +60,34 @@ function isOriginAllowed(originOrReferer: string): boolean {
   try {
     const url = new URL(originOrReferer);
     const host = url.hostname.toLowerCase();
-    return (
-      host === 'localhost' ||
-      host === '127.0.0.1' ||
-      host === 'testament-bible-learning.vercel.app' ||
-      host.endsWith('.vercel.app') ||
-      originOrReferer.startsWith('android-app://')
-    );
+    const isLocal = host === 'localhost' || host === '127.0.0.1' || host === '[::1]';
+    const isProd = host === 'testament-bible-learning.vercel.app';
+    const isVercelPreview =
+      (host.startsWith('testament-bible-learning') && host.endsWith('.vercel.app')) ||
+      (host.endsWith('.vercel.app') && host.includes('jd011089'));
+    const isAndroidTwa = originOrReferer.startsWith('android-app://app.testament.bible');
+    return isLocal || isProd || isVercelPreview || isAndroidTwa;
   } catch {
     return false;
   }
 }
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
-  // CORS & Security headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const originHeader = firstHeader(req.headers['origin']);
+  const refererHeader = firstHeader(req.headers['referer']);
+  const incomingOrigin = originHeader || refererHeader;
+  const originValid = isOriginAllowed(incomingOrigin);
+
+  // Dynamic and safe CORS headers
+  if (originValid && originHeader) {
+    res.setHeader('Access-Control-Allow-Origin', originHeader);
+  } else if (!originHeader) {
+    res.setHeader('Access-Control-Allow-Origin', 'https://testament-bible-learning.vercel.app');
+  }
+  res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-user-gemini-key');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
 
   if (req.method === 'OPTIONS') {
     res.status(200).end();
@@ -83,8 +100,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return;
   }
 
-  const origin = firstHeader(req.headers['origin']) || firstHeader(req.headers['referer']);
-  if (!isOriginAllowed(origin)) {
+  if (!originValid) {
     res.status(403).json({ error: 'Forbidden origin' });
     return;
   }
@@ -117,9 +133,23 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return;
   }
 
+  if (prompt.length > 25000) {
+    res.status(413).json({ error: 'Prompt exceeds maximum length' });
+    return;
+  }
+
   // Allow optional user-supplied key from header, or fall back to secure server environment key
-  const userKey = firstHeader(req.headers['x-user-gemini-key']).trim();
-  const apiKey = userKey || process.env.GEMINI_API_KEY;
+  const rawUserKey = firstHeader(req.headers['x-user-gemini-key']).trim();
+  let apiKey = process.env.GEMINI_API_KEY;
+
+  if (rawUserKey) {
+    // Validate custom API key format
+    if (!/^[A-Za-z0-9_-]{20,80}$/.test(rawUserKey)) {
+      res.status(400).json({ error: 'Invalid Gemini API key format' });
+      return;
+    }
+    apiKey = rawUserKey;
+  }
 
   if (!apiKey) {
     res.status(503).json({ error: 'Gemini API is not configured on the server' });
