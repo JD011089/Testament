@@ -4,7 +4,7 @@ export const MEMORY_VERSES: MemoryVerse[] = [
   {
     id: 'verse-1',
     reference: 'Joshua 1:9',
-    translation: 'WEB',
+    translation: 'Plain English',
     text: "Haven't I commanded you? Be strong and courageous. Don't be afraid. Don't be dismayed, for Yahweh your God is with you wherever you go.",
     plainEnglishSummary: "Courage isn't having zero fear; courage is doing what needs to be done despite the knot in your gut, knowing God backed you before you took step one.",
     category: 'Courage & Facing Giants',
@@ -14,7 +14,7 @@ export const MEMORY_VERSES: MemoryVerse[] = [
   {
     id: 'verse-2',
     reference: 'Philippians 4:6-7',
-    translation: 'WEB',
+    translation: 'Plain English',
     text: 'In nothing be anxious, but in everything, by prayer and petition with thanksgiving, let your requests be made known to God.',
     plainEnglishSummary: 'Stop letting anxious thoughts spin unchecked in your head at 3 AM. Transfer the weight off your shoulders through honest, gritty prayer.',
     category: 'Pressure & Anxiety',
@@ -24,7 +24,7 @@ export const MEMORY_VERSES: MemoryVerse[] = [
   {
     id: 'verse-3',
     reference: 'Proverbs 16:32',
-    translation: 'WEB',
+    translation: 'Plain English',
     text: 'One who is slow to anger is better than the mighty; one who rules his spirit, than he who takes a city.',
     plainEnglishSummary: 'Any fool can explode in anger, smash things, or scream. The real strong man is the one who can keep his temper when provoked.',
     category: 'Anger & Self-Control',
@@ -34,7 +34,7 @@ export const MEMORY_VERSES: MemoryVerse[] = [
   {
     id: 'verse-4',
     reference: 'Romans 8:28',
-    translation: 'WEB',
+    translation: 'Plain English',
     text: 'We know that all things work together for good for those who love God, to those who are called according to his purpose.',
     plainEnglishSummary: 'Even the setbacks, the layoffs, the broken relationships, and the painful detours can be repurposed into wisdom and strength.',
     category: 'Restoration After Failure',
@@ -44,7 +44,7 @@ export const MEMORY_VERSES: MemoryVerse[] = [
   {
     id: 'verse-5',
     reference: 'Proverbs 27:17',
-    translation: 'WEB',
+    translation: 'Plain English',
     text: 'Iron sharpens iron; so a man sharpens his friend’s countenance.',
     plainEnglishSummary: 'Friction creates edge. If you only hang around people who coddle you, you will stay dull. You need honest brothers who tell you the truth.',
     category: 'Endurance & Brotherhood',
@@ -54,7 +54,7 @@ export const MEMORY_VERSES: MemoryVerse[] = [
   {
     id: 'verse-6',
     reference: '2 Timothy 1:7',
-    translation: 'WEB',
+    translation: 'Plain English',
     text: 'For God didn’t give us a spirit of fear, but of power, love, and self-control.',
     plainEnglishSummary: 'Paralyzing fear is never from God. When anxiety grips your chest, remind yourself what you were actually equipped with: power, love, and sound judgment.',
     category: 'Pressure & Anxiety',
@@ -64,7 +64,7 @@ export const MEMORY_VERSES: MemoryVerse[] = [
   {
     id: 'verse-7',
     reference: 'Micah 6:8',
-    translation: 'WEB',
+    translation: 'Plain English',
     text: 'He has shown you, O man, what is good. What does Yahweh require of you, but to act justly, to love mercy, and to walk humbly with your God?',
     plainEnglishSummary: 'Keep it simple. You do not need a theology degree. Do the right thing, show mercy to people who don\'t deserve it, and check your ego.',
     category: 'Endurance & Brotherhood',

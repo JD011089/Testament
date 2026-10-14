@@ -43,20 +43,27 @@ export const STORY_MEMORY_VERSES: MemoryVerse[] = STORY_QUESTS.map((quest) => {
 });
 
 /**
+ * Explicit theme -> category mapping for the Proverbs Codex. Every known
+ * scenario is listed so nothing silently falls into a catch-all bucket.
+ */
+export const PROVERB_CATEGORY_BY_SCENARIO: Record<string, MemoryVerse['category']> = {
+  'money-debt': 'Anger & Self-Control',
+  'ego-criticism': 'Anger & Self-Control',
+  'tongue-conflict': 'Anger & Self-Control',
+  'sluggard-work': 'Courage & Facing Giants',
+  'toxic-allies': 'Endurance & Brotherhood',
+};
+
+/**
  * Maps Proverbs Tactical Codex entries into MemoryVerse format
  */
 export const PROVERB_MEMORY_VERSES: MemoryVerse[] = PROVERB_SCENARIOS.map((p) => {
-  let category: MemoryVerse['category'] = 'Endurance & Brotherhood';
-  if (p.category === 'money-debt' || p.category === 'ego-criticism') {
-    category = 'Anger & Self-Control';
-  } else if (p.category === 'sluggard-work') {
-    category = 'Courage & Facing Giants';
-  }
+  const category = PROVERB_CATEGORY_BY_SCENARIO[p.category] ?? 'Endurance & Brotherhood';
 
   return {
     id: p.id,
     reference: p.reference,
-    translation: 'WEB',
+    translation: 'Plain English',
     text: p.formalText,
     plainEnglishSummary: p.streetTranslation,
     category,
@@ -81,7 +88,7 @@ export const PSALM_MEMORY_VERSES: MemoryVerse[] = PSALM_PRESCRIPTIONS.map((ps) =
   return {
     id: ps.id,
     reference: ps.reference,
-    translation: 'WEB',
+    translation: 'Plain English',
     text: ps.formalText,
     plainEnglishSummary: ps.streetTranslation,
     category,
@@ -95,24 +102,30 @@ export const PSALM_MEMORY_VERSES: MemoryVerse[] = PSALM_PRESCRIPTIONS.map((ps) =
 });
 
 /**
+ * Explicit life-theme -> category mapping for the Canon Codex, so the 66 books
+ * no longer share one catch-all theme.
+ */
+export const CANON_CATEGORY_BY_THEME: Record<string, MemoryVerse['category']> = {
+  'Anxiety & Fear': 'Pressure & Anxiety',
+  'Burnout & Meaning': 'Pressure & Anxiety',
+  'Courage Under Fire': 'Courage & Facing Giants',
+  'Action Over Cheap Talk': 'Courage & Facing Giants',
+  'Workplace & Career Pressure': 'Anger & Self-Control',
+  'Integrity in Toxic Cultures': 'Anger & Self-Control',
+  'Unfair Pain & Betrayal': 'Restoration After Failure',
+  'Family & Conflict Resolution': 'Restoration After Failure',
+};
+
+/**
  * Maps all 66 Canon Codex books' anchor scriptures into MemoryVerse format
  */
 export const CANON_MEMORY_VERSES: MemoryVerse[] = CANON_BOOKS.map((b) => {
-  let category: MemoryVerse['category'] = 'Endurance & Brotherhood';
-  if (b.lifeTheme === 'Anxiety & Fear' || b.lifeTheme === 'Burnout & Meaning') {
-    category = 'Pressure & Anxiety';
-  } else if (b.lifeTheme === 'Courage Under Fire') {
-    category = 'Courage & Facing Giants';
-  } else if (b.lifeTheme === 'Workplace & Career Pressure') {
-    category = 'Anger & Self-Control';
-  } else if (b.lifeTheme === 'Unfair Pain & Betrayal' || b.lifeTheme === 'Family & Conflict Resolution') {
-    category = 'Restoration After Failure';
-  }
+  const category = CANON_CATEGORY_BY_THEME[b.lifeTheme] ?? 'Endurance & Brotherhood';
 
   return {
     id: b.id,
     reference: b.anchorScripture.reference,
-    translation: 'WEB',
+    translation: 'Plain English',
     text: b.anchorScripture.canonicalText,
     plainEnglishSummary: b.anchorScripture.streetTranslation,
     category,

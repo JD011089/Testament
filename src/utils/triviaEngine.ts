@@ -2,6 +2,7 @@ import type { MemoryVerse, StoryQuest } from '../types';
 import type { RealLifeDilemma } from '../data/dilemmas';
 import type { CanonBook } from '../data/canon';
 import { getAllVerses } from './verseRegistry';
+import { cleanWord, normalizeWord, VERSE_STOP_WORDS } from './verseText';
 import { STORY_QUESTS } from '../data/stories';
 import { REAL_LIFE_DILEMMAS } from '../data/dilemmas';
 import { CANON_BOOKS } from '../data/canon';
@@ -50,14 +51,7 @@ const DIVISION_SECTION: Record<string, string> = {
 
 const SECTION_NAMES = Object.values(DIVISION_SECTION);
 
-const STOP_WORDS = new Set([
-  'the', 'and', 'but', 'for', 'nor', 'yet', 'so', 'that', 'this', 'these', 'those',
-  'with', 'from', 'into', 'onto', 'upon', 'will', 'shall', 'have', 'has', 'had',
-  'they', 'them', 'their', 'you', 'your', 'yours', 'him', 'his', 'her', 'hers',
-  'she', 'who', 'whom', 'whose', 'which', 'what', 'when', 'where', 'why', 'how',
-  'not', 'are', 'was', 'were', 'been', 'being', 'does', 'did', 'doing', 'than',
-  'then', 'there', 'here', 'about', 'over', 'under', 'some', 'such',
-]);
+const STOP_WORDS = VERSE_STOP_WORDS;
 
 function shuffle<T>(input: T[]): T[] {
   const copy = [...input];
@@ -70,10 +64,6 @@ function shuffle<T>(input: T[]): T[] {
 
 function pick<T>(input: T[]): T {
   return input[Math.floor(Math.random() * input.length)];
-}
-
-function cleanWord(word: string): string {
-  return word.replace(/[^\w']/g, '');
 }
 
 function truncate(text: string, max: number): string {
@@ -186,7 +176,7 @@ function fillBlankQuestion(verse: MemoryVerse, pool: string[]): TriviaQuestion |
 
   const eligible: number[] = [];
   words.forEach((word, idx) => {
-    const clean = cleanWord(word).toLowerCase();
+    const clean = normalizeWord(word);
     if (clean.length >= 5 && !STOP_WORDS.has(clean)) eligible.push(idx);
   });
   if (eligible.length === 0) return null;
@@ -277,7 +267,7 @@ export function buildTriviaBank(lang?: SupportedLanguage): TriviaQuestion[] {
   for (const verse of verses) {
     for (const word of verse.text.split(/\s+/)) {
       const clean = cleanWord(word);
-      if (clean.length >= 5 && clean.length <= 12 && !STOP_WORDS.has(clean.toLowerCase())) {
+      if (clean.length >= 5 && clean.length <= 12 && !STOP_WORDS.has(normalizeWord(word))) {
         blankWordPool.push(clean);
       }
     }

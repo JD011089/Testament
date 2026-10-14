@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { MemoryVerse } from '../types';
 import { getAllVerses, getVerseById, normalizeVerseSlug } from '../utils/verseRegistry';
+import { cleanWord, normalizeWord, VERSE_STOP_WORDS } from '../utils/verseText';
 import { soundEngine } from '../utils/audio';
 import { getDailyVerse } from '../utils/dailyEngine';
 import { CalendarRemindersModal } from './CalendarRemindersModal';
@@ -94,11 +95,10 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
   // Part 7: Simplified drill — 1 quick fill-in-the-blank recall round per session
   const verseWords = useMemo(() => verse.text.split(/\s+/), [verse.text]);
   const blankIndices = useMemo(() => {
-    const STOP_WORDS = new Set(['the', 'and', 'a', 'an', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'up', 'about', 'into', 'over', 'after', 'is', 'was', 'are', 'were', 'be', 'been', 'being', 'he', 'she', 'it', 'they', 'we', 'you', 'his', 'her', 'their', 'my', 'your', 'our', 'that', 'this', 'then', 'so', 'as', 'but', 'or', 'if']);
     const eligible: number[] = [];
     verseWords.forEach((w, idx) => {
-      const clean = w.replace(/[^\w]/g, '').toLowerCase();
-      if (clean.length >= 4 && !STOP_WORDS.has(clean)) {
+      const clean = normalizeWord(w);
+      if (clean.length >= 4 && !VERSE_STOP_WORDS.has(clean)) {
         eligible.push(idx);
       }
     });
@@ -112,7 +112,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
   const [recallError, setRecallError] = useState<string | null>(null);
 
   const candidateChips = useMemo(() => {
-    const missing = blankIndices.map(idx => verseWords[idx]?.replace(/[^\w]/g, '')).filter(Boolean);
+    const missing = blankIndices.map(idx => cleanWord(verseWords[idx] || '')).filter(Boolean);
     const pool = ['strength', 'courage', 'peace', 'grace', 'wisdom', 'heart', 'light', 'truth'];
     const distractors = pool.filter(p => !missing.some(m => m.toLowerCase() === p.toLowerCase()));
     const combined = [...missing, ...distractors.slice(0, Math.max(0, 4 - missing.length))];
@@ -148,8 +148,8 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
 
   const handleSelectRecallChip = (word: string) => {
     const targetIdx = blankIndices[activeBlankStep];
-    const expectedWord = verseWords[targetIdx]?.replace(/[^\w]/g, '').toLowerCase();
-    if (word.toLowerCase() === expectedWord) {
+    const expectedWord = normalizeWord(verseWords[targetIdx] || '');
+    if (normalizeWord(word) === expectedWord) {
       soundEngine.playSnap();
       const nextFilled = { ...filledBlanks, [targetIdx]: verseWords[targetIdx] };
       setFilledBlanks(nextFilled);

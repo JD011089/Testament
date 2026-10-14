@@ -3,6 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { soundEngine } from '../utils/audio';
 import { useLanguage } from '../context/LanguageContext';
 import { buildTriviaBank, pickRunFromBank, type TriviaQuestion } from '../utils/triviaEngine';
+import { getVerseById } from '../utils/verseRegistry';
+import { getDailyVerse } from '../utils/dailyEngine';
+import { getDueFSRSCards, recordFSRSReview } from '../utils/fsrsEngine';
 import { useShowXpPreference } from '../utils/userPreferences';
 import { PageHeader } from './PageHeader';
 import {
@@ -30,6 +33,9 @@ const BEST_COMBO_KEY = 'testament_trivia_best_combo';
 const MISSED_KEY = 'testament_trivia_missed';
 const DAILY_XP_KEY_PREFIX = 'testament_trivia_xp_';
 const MAX_DAILY_GAME_XP = 300;
+const RUN_KEY = 'testament_trivia_run';
+const MODE_KEY = 'testament_trivia_mode';
+const RELAXED_SECONDS = 20;
 
 function todayKey(): string {
   return new Date().toISOString().slice(0, 10);
@@ -53,6 +59,7 @@ function addDailyGameXp(amount: number): void {
 
 type Phase = 'intro' | 'playing' | 'result';
 type Outcome = 'victory' | 'defeat' | null;
+type GameMode = 'relaxed' | 'arcade';
 
 interface Answered {
   pickedIndex: number | null;
@@ -60,15 +67,67 @@ interface Answered {
   earned: number;
 }
 
+interface SavedRun {
+  questions: TriviaQuestion[];
+  index: number;
+  score: number;
+  lives: number;
+  combo: number;
+  bestCombo: number;
+  correctCount: number;
+  attempted: number;
+  runMissed: string[];
+  thisRunMissed: string[];
+  mode: GameMode;
+}
+
 interface TriviaGauntletProps {
   onRewardXP?: (amount: number) => void;
   onStudyVerse?: (reference: string) => void;
 }
 
-function timeForIndex(index: number): number {
+function timeForIndex(index: number, mode: GameMode): number {
+  if (mode === 'relaxed') return RELAXED_SECONDS;
   const base = Math.max(6, 13 - index);
   const isBoss = index === QUESTIONS_PER_RUN - 1;
   return isBoss ? base + 5 : base;
+}
+
+function readMode(): GameMode {
+  try {
+    return localStorage.getItem(MODE_KEY) === 'arcade' ? 'arcade' : 'relaxed';
+  } catch {
+    return 'relaxed';
+  }
+}
+
+function writeMode(mode: GameMode): void {
+  try {
+    localStorage.setItem(MODE_KEY, mode);
+  } catch {
+    // ignore
+  }
+}
+
+function readSavedRun(): SavedRun | null {
+  try {
+    const raw = localStorage.getItem(RUN_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as SavedRun;
+    if (!parsed || !Array.isArray(parsed.questions) || parsed.questions.length === 0) return null;
+    if (typeof parsed.index !== 'number' || parsed.index < 0 || parsed.index >= parsed.questions.length) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function clearSavedRun(): void {
+  try {
+    localStorage.removeItem(RUN_KEY);
+  } catch {
+    // ignore
+  }
 }
 
 function readNumber(key: string): number {
@@ -113,14 +172,54 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
   const [missedIds, setMissedIds] = useState<string[]>(() => readMissed());
   const [attempted, setAttempted] = useState(0);
   const [runMissed, setRunMissed] = useState<string[]>([]);
+  const [thisRunMissed, setThisRunMissed] = useState<string[]>([]);
   const [paused, setPaused] = useState(false);
+  const [mode, setMode] = useState<GameMode>(() => readMode());
+  const [savedRun, setSavedRun] = useState<SavedRun | null>(() => readSavedRun());
   const answerLock = useRef(false);
+  const revealRef = useRef<HTMLDivElement | null>(null);
   const showXp = useShowXpPreference();
 
   const question = questions[index];
+  // Only offer the Practice link when the reference resolves to a verse we actually have.
+  const practiceReference = useMemo(() => {
+    if (!question?.scripture) return null;
+    return getVerseById(question.scripture.reference, language)?.reference ?? null;
+  }, [question, language]);
   const isBoss = index === questions.length - 1 && questions.length > 0;
   // The badge marks a question that came back from an earlier run, not one just missed.
   const isReviewQuestion = Boolean(question && runMissed.includes(question.id));
+
+  // Question ids tied to today's mission verse and to verses currently due for review,
+  // so a run always mixes in what the player is working on right now.
+  const todayQuestionIds = useMemo(() => {
+    const references = new Set<string>();
+    try {
+      references.add(getDailyVerse(0, language).reference);
+    } catch {
+      // ignore
+    }
+    try {
+      for (const card of getDueFSRSCards()) references.add(card.verseId);
+    } catch {
+      // ignore
+    }
+    if (references.size === 0) return [];
+    return bank
+      .filter((q) => {
+        const reference = q.scripture?.reference;
+        if (reference && references.has(reference)) return true;
+        return Array.from(references).some((value) => q.id.endsWith(`:${value}`));
+      })
+      .map((q) => q.id);
+  }, [bank, language]);
+
+  const missedThisRun = useMemo(() => {
+    const byId = new Map(bank.map((q) => [q.id, q]));
+    return thisRunMissed
+      .map((id) => byId.get(id))
+      .filter((q): q is TriviaQuestion => Boolean(q));
+  }, [bank, thisRunMissed]);
 
   useEffect(() => {
     try {
@@ -130,9 +229,52 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
     }
   }, [missedIds]);
 
+  // Persist the live run so Back, tab switch or a reload pauses instead of destroying it.
+  useEffect(() => {
+    if (phase !== 'playing' || questions.length === 0) return;
+    const payload: SavedRun = {
+      questions,
+      index,
+      score,
+      lives,
+      combo,
+      bestCombo,
+      correctCount,
+      attempted,
+      runMissed,
+      thisRunMissed,
+      mode,
+    };
+    try {
+      localStorage.setItem(RUN_KEY, JSON.stringify(payload));
+    } catch {
+      // ignore quota failures
+    }
+  }, [phase, questions, index, score, lives, combo, bestCombo, correctCount, attempted, runMissed, thisRunMissed, mode]);
+
+  // Warn before a reload/close while a run is live.
+  useEffect(() => {
+    if (phase !== 'playing') return;
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, [phase]);
+
+  // Keep the reveal and Next button on screen once an answer lands.
+  useEffect(() => {
+    if (answered && revealRef.current) {
+      revealRef.current.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }, [answered]);
+
   const finish = useCallback((result: Exclude<Outcome, null>, finalScore: number, finalBestCombo: number) => {
     setOutcome(result);
     setPhase('result');
+    clearSavedRun();
+    setSavedRun(null);
     // Replays cannot farm unlimited XP: each day is capped across all runs.
     const rawXp = Math.min(300, Math.round(finalScore / 6));
     const remaining = Math.max(0, MAX_DAILY_GAME_XP - readDailyGameXp());
@@ -198,10 +340,20 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
       setCombo(0);
       setLives((l) => Math.max(0, l - 1));
       setMissedIds((prev) => (prev.includes(question.id) ? prev : [...prev, question.id]));
+      setThisRunMissed((prev) => (prev.includes(question.id) ? prev : [...prev, question.id]));
+      // Feed the miss into the Practice review schedule so it comes back in Word Forge.
+      const verse = question.scripture ? getVerseById(question.scripture.reference, language) : null;
+      if (verse) {
+        try {
+          recordFSRSReview(verse.id, 1);
+        } catch {
+          // ignore storage failures
+        }
+      }
       soundEngine.playClick();
       setAnswered({ pickedIndex, correct: false, earned: 0 });
     }
-  }, [answered, question, index, questions.length, timeLeft, timeTotal, combo]);
+  }, [answered, question, index, questions.length, timeLeft, timeTotal, combo, language]);
 
   const handleNext = useCallback(() => {
     if (lives <= 0) {
@@ -216,15 +368,17 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
     setIndex(nextIndex);
     setAnswered(null);
     answerLock.current = false;
-    const total = timeForIndex(nextIndex);
+    const total = timeForIndex(nextIndex, mode);
     setTimeTotal(total);
     setTimeLeft(total);
-  }, [lives, score, bestCombo, index, questions.length, finish]);
+  }, [lives, score, bestCombo, index, questions.length, finish, mode]);
 
   const startGame = useCallback(() => {
     soundEngine.playSnap();
-    const run = pickRunFromBank(bank, QUESTIONS_PER_RUN, missedIds);
+    const run = pickRunFromBank(bank, QUESTIONS_PER_RUN, [...todayQuestionIds, ...missedIds]);
     if (run.length === 0) return;
+    clearSavedRun();
+    setSavedRun(null);
     setQuestions(run);
     setIndex(0);
     setScore(0);
@@ -234,24 +388,59 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
     setCorrectCount(0);
     setAttempted(0);
     setRunMissed(missedIds);
+    setThisRunMissed([]);
     setAnswered(null);
     answerLock.current = false;
     setOutcome(null);
     setEarnedXp(0);
     setNewBest(false);
-    const total = timeForIndex(0);
+    setPaused(false);
+    const total = timeForIndex(0, mode);
     setTimeTotal(total);
     setTimeLeft(total);
     setPhase('playing');
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [bank, missedIds]);
+  }, [bank, missedIds, mode, todayQuestionIds]);
+
+  const resumeRun = useCallback(() => {
+    if (!savedRun) return;
+    soundEngine.playSnap();
+    setQuestions(savedRun.questions);
+    setIndex(savedRun.index);
+    setScore(savedRun.score);
+    setLives(savedRun.lives);
+    setCombo(savedRun.combo);
+    setBestCombo(savedRun.bestCombo);
+    setCorrectCount(savedRun.correctCount);
+    setAttempted(savedRun.attempted);
+    setRunMissed(savedRun.runMissed);
+    setThisRunMissed(savedRun.thisRunMissed ?? []);
+    setMode(savedRun.mode);
+    setAnswered(null);
+    answerLock.current = false;
+    setOutcome(null);
+    setEarnedXp(0);
+    setNewBest(false);
+    setPaused(false);
+    const total = timeForIndex(savedRun.index, savedRun.mode);
+    setTimeTotal(total);
+    setTimeLeft(total);
+    setPhase('playing');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [savedRun]);
 
   const quitToIntro = useCallback(() => {
+    if (phase === 'playing' && typeof window !== 'undefined') {
+      const confirmed = window.confirm('Quit this run? Your current score and combo will be lost.');
+      if (!confirmed) return;
+    }
     soundEngine.playClick();
+    clearSavedRun();
+    setSavedRun(null);
     setPhase('intro');
     setAnswered(null);
     setQuestions([]);
-  }, []);
+  }, [phase]);
 
   // Countdown timer — stops while the app is hidden so players cannot look up answers
   useEffect(() => {
@@ -307,15 +496,17 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
   const accuracy = attempted > 0 ? Math.round((correctCount / attempted) * 100) : 0;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-8 pb-6 text-left">
-      {/* Header */}
-      <PageHeader
-        className="mb-6"
-        eyebrow="Scripture Arcade"
-        eyebrowIcon={<Gamepad2 className="w-4 h-4" />}
-        title="Trivia Gauntlet"
-        subtitle="Ten rapid questions drawn straight from the verses, stories, and books inside your Bible. Miss one and you'll be pointed to the exact passage to study it — then it comes back later until you get it. Beat the clock, build a combo, and survive a double-points boss round."
-      />
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-8 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] text-left">
+      {/* The intro owns the header; during play it would only push options off screen. */}
+      {phase === 'intro' && (
+        <PageHeader
+          className="mb-6"
+          eyebrow="Scripture Arcade"
+          eyebrowIcon={<Gamepad2 className="w-4 h-4" />}
+          title="Trivia Gauntlet"
+          subtitle="Ten questions drawn straight from the verses, stories, and books inside your Bible. Miss one and you'll be pointed to the exact passage to study it — then it comes back later until you get it."
+        />
+      )}
 
       <AnimatePresence mode="wait">
         {phase === 'intro' && (
@@ -326,6 +517,41 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
             exit={{ opacity: 0, y: -10 }}
             className="space-y-4"
           >
+            {savedRun && (
+              <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/30">
+                <span className="text-xs text-indigo-800 dark:text-indigo-300">
+                  Paused run — question {savedRun.index + 1} of {savedRun.questions.length}, {savedRun.score} points.
+                </span>
+                <button
+                  type="button"
+                  onClick={resumeRun}
+                  className="btn-gold px-4 py-2 rounded-xl text-xs cursor-pointer"
+                >
+                  Resume run
+                </button>
+              </div>
+            )}
+
+            <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-stone-100/70 dark:bg-stone-900/50">
+              {(['relaxed', 'arcade'] as GameMode[]).map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => {
+                    setMode(option);
+                    writeMode(option);
+                  }}
+                  className={`flex-1 px-4 py-2.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+                    mode === option
+                      ? 'bg-amber-500 text-stone-950'
+                      : 'text-stone-600 dark:text-stone-300 hover:bg-stone-200/60 dark:hover:bg-stone-800'
+                  }`}
+                >
+                  {option === 'relaxed' ? 'Relaxed · 20s each' : 'Arcade · accelerating clock'}
+                </button>
+              ))}
+            </div>
+
             <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-stone-100/60 dark:to-stone-900/60 border border-amber-500/20">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
                 <div className="p-3 rounded-2xl bg-white/70 dark:bg-stone-900/60">
@@ -361,8 +587,10 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
               )}
 
               <p className="text-xs text-stone-600 dark:text-stone-400 mt-4">
-                Answer before the timer empties. The clock gets shorter every question — the final boss question is
-                worth double. Keyboard: press <kbd className="px-1.5 py-0.5 rounded bg-stone-200 dark:bg-stone-800 font-mono text-[10px]">1–4</kbd> to
+                {mode === 'relaxed'
+                  ? 'Relaxed gives you 20 seconds on every question — the clock never shrinks. Change the mode above anytime.'
+                  : 'Arcade starts at 13 seconds and shortens each question; the final boss question is worth double. Miss one and you lose a life.'}
+                {' '}Keyboard: press <kbd className="px-1.5 py-0.5 rounded bg-stone-200 dark:bg-stone-800 font-mono text-[10px]">1–4</kbd> to
                 answer, <kbd className="px-1.5 py-0.5 rounded bg-stone-200 dark:bg-stone-800 font-mono text-[10px]">Enter</kbd> to continue.
               </p>
             </div>
@@ -519,6 +747,7 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
             <AnimatePresence>
               {answered && (
                 <motion.div
+                  ref={revealRef}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
@@ -575,17 +804,17 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
                         {question.explain}
                       </p>
 
-                      {onStudyVerse && question.scripture && (
+                      {onStudyVerse && practiceReference && (
                         <button
                           type="button"
                           onClick={() => {
                             soundEngine.playSnap();
-                            onStudyVerse(question.scripture!.reference);
+                            onStudyVerse(practiceReference);
                           }}
                           className="mt-3 w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-900 dark:text-amber-200 text-xs font-bold transition-colors cursor-pointer"
                         >
                           <BookOpen className="w-3.5 h-3.5" />
-                          <span>Practice this verse in Word Forge</span>
+                          <span>Practice this verse in Memorize</span>
                         </button>
                       )}
                     </div>
@@ -667,10 +896,46 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
                 <span className="flex items-center gap-1"><Flame className="w-3.5 h-3.5 text-orange-500" /> Best combo: <strong className="text-stone-900 dark:text-parchment-50">{bestComboEver}×</strong></span>
               </div>
 
-              {missedIds.length > 0 && (
-                <div className="mt-4 flex items-center justify-center gap-2 text-xs text-indigo-800 dark:text-indigo-300">
-                  <BookOpen className="w-3.5 h-3.5" />
-                  <span>{missedIds.length} question{missedIds.length === 1 ? '' : 's'} saved for review — study them and Play Again.</span>
+              {missedThisRun.length > 0 && (
+                <div className="mt-5 text-left">
+                  <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-wider text-indigo-800 dark:text-indigo-300 mb-2">
+                    <BookOpen className="w-3.5 h-3.5" />
+                    {missedThisRun.length} missed this run — added to your review
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {missedThisRun.map((q) => {
+                      const reference = q.scripture?.reference;
+                      const resolvable = Boolean(reference && getVerseById(reference, language));
+                      if (reference && resolvable && onStudyVerse) {
+                        return (
+                          <button
+                            key={q.id}
+                            type="button"
+                            onClick={() => {
+                              soundEngine.playSnap();
+                              onStudyVerse(reference);
+                            }}
+                            className="px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-800 dark:text-indigo-300 text-xs font-mono cursor-pointer"
+                          >
+                            {reference}
+                          </button>
+                        );
+                      }
+                      return (
+                        <span
+                          key={q.id}
+                          className="px-3 py-1.5 rounded-xl bg-stone-200/60 dark:bg-stone-800/60 text-stone-600 dark:text-stone-400 text-xs font-mono"
+                        >
+                          {reference ?? q.tag}
+                        </span>
+                      );
+                    })}
+                  </div>
+                  {missedIds.length > missedThisRun.length && (
+                    <p className="mt-2 text-[11px] text-stone-500 dark:text-stone-400">
+                      {missedIds.length} questions total are queued to come back until you get them right.
+                    </p>
+                  )}
                 </div>
               )}
             </div>

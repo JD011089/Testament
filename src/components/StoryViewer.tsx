@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { StoryQuest, StoryAct } from '../types';
 import { soundEngine } from '../utils/audio';
+import { normalizeWord } from '../utils/verseText';
 import { 
   ArrowLeft, 
   ArrowRight, 
@@ -84,7 +85,7 @@ const HARD_WORDS_DICTIONARY: Record<string, string> = {
 };
 
 function cleanWordKey(word: string): string {
-  return word.toLowerCase().replace(/[^a-z]/g, '');
+  return normalizeWord(word);
 }
 
 function getAiConnectionText(mirrorBack: string, heroName: string): string {
