@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { soundEngine } from '../utils/audio';
 import { useLanguage } from '../context/LanguageContext';
 import { buildTriviaBank, pickRunFromBank, type TriviaQuestion } from '../utils/triviaEngine';
+import { useShowXpPreference } from '../utils/userPreferences';
 import { PageHeader } from './PageHeader';
 import {
   Gamepad2,
@@ -27,6 +28,28 @@ const STARTING_LIVES = 3;
 const HIGH_SCORE_KEY = 'testament_trivia_highscore';
 const BEST_COMBO_KEY = 'testament_trivia_best_combo';
 const MISSED_KEY = 'testament_trivia_missed';
+const DAILY_XP_KEY_PREFIX = 'testament_trivia_xp_';
+const MAX_DAILY_GAME_XP = 300;
+
+function todayKey(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function readDailyGameXp(): number {
+  try {
+    return Number(localStorage.getItem(`${DAILY_XP_KEY_PREFIX}${todayKey()}`)) || 0;
+  } catch {
+    return 0;
+  }
+}
+
+function addDailyGameXp(amount: number): void {
+  try {
+    localStorage.setItem(`${DAILY_XP_KEY_PREFIX}${todayKey()}`, String(readDailyGameXp() + amount));
+  } catch {
+    // ignore quota failures
+  }
+}
 
 type Phase = 'intro' | 'playing' | 'result';
 type Outcome = 'victory' | 'defeat' | null;
@@ -88,10 +111,16 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
   const [highScore, setHighScore] = useState<number>(() => readNumber(HIGH_SCORE_KEY));
   const [bestComboEver, setBestComboEver] = useState<number>(() => readNumber(BEST_COMBO_KEY));
   const [missedIds, setMissedIds] = useState<string[]>(() => readMissed());
+  const [attempted, setAttempted] = useState(0);
+  const [runMissed, setRunMissed] = useState<string[]>([]);
+  const [paused, setPaused] = useState(false);
+  const answerLock = useRef(false);
+  const showXp = useShowXpPreference();
 
   const question = questions[index];
   const isBoss = index === questions.length - 1 && questions.length > 0;
-  const isReviewQuestion = Boolean(question && missedIds.includes(question.id));
+  // The badge marks a question that came back from an earlier run, not one just missed.
+  const isReviewQuestion = Boolean(question && runMissed.includes(question.id));
 
   useEffect(() => {
     try {
@@ -104,9 +133,15 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
   const finish = useCallback((result: Exclude<Outcome, null>, finalScore: number, finalBestCombo: number) => {
     setOutcome(result);
     setPhase('result');
-    const xp = Math.min(300, Math.round(finalScore / 6));
+    // Replays cannot farm unlimited XP: each day is capped across all runs.
+    const rawXp = Math.min(300, Math.round(finalScore / 6));
+    const remaining = Math.max(0, MAX_DAILY_GAME_XP - readDailyGameXp());
+    const xp = Math.min(rawXp, remaining);
     setEarnedXp(xp);
-    if (xp > 0) onRewardXP?.(xp);
+    if (xp > 0) {
+      addDailyGameXp(xp);
+      onRewardXP?.(xp);
+    }
 
     if (finalScore > highScore) {
       setHighScore(finalScore);
@@ -134,7 +169,11 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
   }, [highScore, bestComboEver, onRewardXP]);
 
   const handleAnswer = useCallback((pickedIndex: number | null) => {
-    if (answered || !question) return;
+    // A ref lock closes the race where a scripted double-click (or a click racing
+    // the countdown) dispatches two answers before `answered` re-renders.
+    if (answerLock.current || answered || !question) return;
+    answerLock.current = true;
+    setAttempted((n) => n + 1);
 
     const correct = pickedIndex !== null && pickedIndex === question.correctIndex;
     const boss = index === questions.length - 1;
@@ -176,6 +215,7 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
     }
     setIndex(nextIndex);
     setAnswered(null);
+    answerLock.current = false;
     const total = timeForIndex(nextIndex);
     setTimeTotal(total);
     setTimeLeft(total);
@@ -192,7 +232,10 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
     setCombo(0);
     setBestCombo(0);
     setCorrectCount(0);
+    setAttempted(0);
+    setRunMissed(missedIds);
     setAnswered(null);
+    answerLock.current = false;
     setOutcome(null);
     setEarnedXp(0);
     setNewBest(false);
@@ -210,16 +253,33 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
     setQuestions([]);
   }, []);
 
-  // Countdown timer
+  // Countdown timer — stops while the app is hidden so players cannot look up answers
   useEffect(() => {
-    if (phase !== 'playing' || answered) return;
+    if (phase !== 'playing' || answered || paused) return;
     if (timeLeft <= 0) {
       handleAnswer(null);
       return;
     }
     const id = setTimeout(() => setTimeLeft((v) => Math.max(0, Number((v - 0.1).toFixed(1)))), 100);
     return () => clearTimeout(id);
-  }, [phase, answered, timeLeft, handleAnswer]);
+  }, [phase, answered, paused, timeLeft, handleAnswer]);
+
+  // Pause the run whenever the tab/app is hidden (switching apps, tab change, lock screen).
+  useEffect(() => {
+    if (phase !== 'playing') return;
+    const onVisibility = () => {
+      const hidden = typeof document !== 'undefined' && document.hidden;
+      setPaused(hidden);
+    };
+    const onPageHide = () => setPaused(true);
+    onVisibility();
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('pagehide', onPageHide);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('pagehide', onPageHide);
+    };
+  }, [phase]);
 
   // Keyboard controls: 1-4 to answer, Enter/Space to advance
   useEffect(() => {
@@ -244,7 +304,7 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
   const timePct = Math.max(0, Math.min(100, (timeLeft / Math.max(1, timeTotal)) * 100));
   const timerColor = timePct > 50 ? 'bg-emerald-500' : timePct > 25 ? 'bg-amber-500' : 'bg-red-500';
 
-  const accuracy = questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0;
+  const accuracy = attempted > 0 ? Math.round((correctCount / attempted) * 100) : 0;
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-8 pb-6 text-left">
@@ -580,9 +640,9 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
                 Points
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className={`grid grid-cols-2 ${showXp ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-3`}>
                 <div className="p-3 rounded-2xl bg-white/70 dark:bg-stone-900/60">
-                  <div className="text-lg font-serif font-black text-stone-900 dark:text-parchment-50">{correctCount}/{questions.length}</div>
+                  <div className="text-lg font-serif font-black text-stone-900 dark:text-parchment-50">{correctCount}/{attempted}</div>
                   <div className="text-[10px] font-mono uppercase tracking-wider text-stone-500 dark:text-stone-400">Correct</div>
                 </div>
                 <div className="p-3 rounded-2xl bg-white/70 dark:bg-stone-900/60">
@@ -593,10 +653,12 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
                   <div className="text-lg font-serif font-black text-stone-900 dark:text-parchment-50">{bestCombo}×</div>
                   <div className="text-[10px] font-mono uppercase tracking-wider text-stone-500 dark:text-stone-400">Best combo</div>
                 </div>
-                <div className="p-3 rounded-2xl bg-white/70 dark:bg-stone-900/60">
-                  <div className="text-lg font-serif font-black text-stone-900 dark:text-parchment-50">+{earnedXp}</div>
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-stone-500 dark:text-stone-400">XP</div>
-                </div>
+                {showXp && (
+                  <div className="p-3 rounded-2xl bg-white/70 dark:bg-stone-900/60">
+                    <div className="text-lg font-serif font-black text-stone-900 dark:text-parchment-50">+{earnedXp}</div>
+                    <div className="text-[10px] font-mono uppercase tracking-wider text-stone-500 dark:text-stone-400">XP</div>
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center justify-center gap-3 text-xs font-mono text-stone-500 dark:text-stone-400 mt-4">

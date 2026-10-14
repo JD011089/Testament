@@ -87,7 +87,9 @@ export const PSALM_MEMORY_VERSES: MemoryVerse[] = PSALM_PRESCRIPTIONS.map((ps) =
     category,
     difficulty: 'Core',
     keyTakeaway: ps.keyTakeaway,
-    heroName: 'David (Psalms Field Medic)',
+    heroName: /sons of korah/i.test(ps.caveBackstory)
+      ? 'Sons of Korah'
+      : 'David (Psalms Field Medic)',
     storyTitle: ps.title
   };
 });

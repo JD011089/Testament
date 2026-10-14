@@ -32,13 +32,23 @@ interface TriviaSources {
   books: CanonBook[];
 }
 
-const VERSE_CATEGORIES: MemoryVerse['category'][] = [
-  'Pressure & Anxiety',
-  'Courage & Facing Giants',
-  'Anger & Self-Control',
-  'Restoration After Failure',
-  'Endurance & Brotherhood',
-];
+const KEY_TOKEN_LENGTH = 4;
+
+/**
+ * Plain, non-branded section names for the canonical divisions, so canon
+ * questions test Bible structure instead of in-app branding.
+ */
+const DIVISION_SECTION: Record<string, string> = {
+  'Torah & Origins': 'The Law (Torah)',
+  'War & Chronicles': 'The Historical Books',
+  'Wisdom & Soul Triage': 'Wisdom & Poetry',
+  'Prophet Intelligence': 'The Prophets',
+  "The King's Manifesto": 'The Gospels & Acts',
+  'Field Dispatches': 'The Letters',
+  'The Cosmic Endgame': 'Revelation & Apocalypse',
+};
+
+const SECTION_NAMES = Object.values(DIVISION_SECTION);
 
 const STOP_WORDS = new Set([
   'the', 'and', 'but', 'for', 'nor', 'yet', 'so', 'that', 'this', 'these', 'those',
@@ -81,11 +91,57 @@ function uniqueStrings(values: string[]): string[] {
   return Array.from(new Set(values.map((v) => v.trim()).filter(Boolean)));
 }
 
-function uniqueOptions(correct: string, pool: string[]): { options: string[]; correctIndex: number } | null {
+function significantTokens(text: string): string[] {
+  return text
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((word) => word.length >= KEY_TOKEN_LENGTH && !STOP_WORDS.has(word));
+}
+
+function tokenSet(text: string): Set<string> {
+  return new Set(significantTokens(text));
+}
+
+/** True when a candidate option repeats a significant word from the question stem. */
+function sharesToken(value: string, forbidden: Set<string>): boolean {
+  return significantTokens(value).some((token) => forbidden.has(token));
+}
+
+/** Strips in-app branding suffixes so hero options are plain biblical figures. */
+function cleanHeroName(name: string): string {
+  return name.replace(/\s*\((?:Canon Codex|Proverbs Codex|Psalms Field Medic)\)\s*$/i, '').trim();
+}
+
+const CANON_BY_NAME = new Map<string, CanonBook>();
+for (const book of CANON_BOOKS) {
+  CANON_BY_NAME.set(book.name.toLowerCase(), book);
+  CANON_BY_NAME.set(book.name.toLowerCase().replace(/s$/, ''), book);
+}
+
+function referenceBookName(reference: string): string {
+  const match = reference.match(/^((?:[1-3]\s+)?[A-Za-z][A-Za-z\s]*?)\s*\d/);
+  return (match ? match[1] : reference.split(/[\s:]/)[0]).trim();
+}
+
+function canonBookFor(reference: string): CanonBook | undefined {
+  const name = referenceBookName(reference).toLowerCase();
+  return CANON_BY_NAME.get(name) ?? CANON_BY_NAME.get(name.replace(/s$/, ''));
+}
+
+function referenceFamily(reference: string): string {
+  return canonBookFor(reference)?.division ?? 'Other';
+}
+
+function uniqueOptions(
+  correct: string,
+  pool: string[],
+  forbidden: Set<string>,
+): { options: string[]; correctIndex: number } | null {
   const distractors: string[] = [];
   for (const candidate of shuffle(pool)) {
     const value = candidate.trim();
     if (!value || value === correct || distractors.includes(value)) continue;
+    if (sharesToken(value, forbidden)) continue;
     distractors.push(value);
     if (distractors.length === 3) break;
   }
@@ -107,7 +163,9 @@ interface ChoiceSpec {
 }
 
 function buildChoice(spec: ChoiceSpec): TriviaQuestion | null {
-  const built = uniqueOptions(spec.correct, spec.pool);
+  const forbidden = tokenSet(spec.prompt);
+  if (sharesToken(spec.correct, forbidden)) return null;
+  const built = uniqueOptions(spec.correct, spec.pool, forbidden);
   if (!built) return null;
   return {
     id: spec.id,
@@ -138,7 +196,9 @@ function fillBlankQuestion(verse: MemoryVerse, pool: string[]): TriviaQuestion |
   if (!answer) return null;
 
   const rendered = words.map((w, i) => (i === blankIdx ? '_____' : w)).join(' ');
-  const built = uniqueOptions(answer, pool);
+  const forbidden = tokenSet('Which word completes the passage?');
+  if (sharesToken(answer, forbidden)) return null;
+  const built = uniqueOptions(answer, pool, forbidden);
   if (!built) return null;
 
   return {
@@ -180,15 +240,38 @@ export function buildTriviaBank(lang?: SupportedLanguage): TriviaQuestion[] {
   const referencePool = uniqueStrings(verses.map((v) => v.reference));
   const snippetPool = uniqueStrings(verses.map((v) => snippet(v.text)));
   const heroPool = uniqueStrings(
-    verses.map((v) => v.heroName || '').concat(quests.map((q) => q.heroName))
+    verses.map((v) => cleanHeroName(v.heroName || '')).concat(quests.map((q) => cleanHeroName(q.heroName)))
   );
-  const anchorReferencePool = uniqueStrings(
-    quests.map((q) => q.acts[0]?.unlockedScripture.reference || '')
-  );
-  const bookThemePool = uniqueStrings(books.map((b) => b.lifeTheme));
-  const bookReferencePool = uniqueStrings(books.map((b) => b.anchorScripture.reference));
-  const dilemmaHeroPool = uniqueStrings(dilemmas.map((d) => d.biblicalParallel.hero));
-  const dilemmaReferencePool = uniqueStrings(dilemmas.map((d) => d.anchorScripture.reference));
+  const dilemmaHeroPool = uniqueStrings(dilemmas.map((d) => cleanHeroName(d.biblicalParallel.hero)));
+
+  const referenceCandidates = uniqueStrings([
+    ...referencePool,
+    ...quests.map((q) => q.acts[0]?.unlockedScripture.reference || ''),
+    ...books.map((b) => b.anchorScripture.reference),
+    ...dilemmas.map((d) => d.anchorScripture.reference),
+  ]);
+
+  // Distractors for reference questions come from the same division (book family),
+  // never from the same book, so no option gives the answer away.
+  const familyPoolFor = (reference: string, excludeSameBook: boolean): string[] => {
+    const family = referenceFamily(reference);
+    const book = referenceBookName(reference).toLowerCase();
+    const sameFamily = referenceCandidates.filter(
+      (candidate) =>
+        referenceFamily(candidate) === family &&
+        (!excludeSameBook || referenceBookName(candidate).toLowerCase() !== book)
+    );
+    if (sameFamily.length >= 3) return sameFamily;
+    return referenceCandidates.filter((candidate) => referenceBookName(candidate).toLowerCase() !== book);
+  };
+
+  const bookOptionsFor = (book: CanonBook): string[] => {
+    const siblings = books
+      .filter((b) => b.name !== book.name && b.division === book.division)
+      .map((b) => b.name);
+    if (siblings.length >= 3) return siblings;
+    return books.filter((b) => b.name !== book.name).map((b) => b.name);
+  };
 
   const blankWordPool: string[] = [];
   for (const verse of verses) {
@@ -202,7 +285,14 @@ export function buildTriviaBank(lang?: SupportedLanguage): TriviaQuestion[] {
   const uniqueBlankPool = uniqueStrings(blankWordPool);
 
   // ---- Verse-grounded questions ----
+  // A reference must map to one question set: duplicate references (e.g. a memory
+  // verse that also appears as a canon anchor) would otherwise yield contradictory
+  // "correct" answers, so only the first occurrence is used.
+  const seenReference = new Set<string>();
   for (const verse of verses) {
+    if (seenReference.has(verse.reference)) continue;
+    seenReference.add(verse.reference);
+
     const scripture: TriviaScripture = {
       reference: verse.reference,
       text: verse.text,
@@ -216,7 +306,7 @@ export function buildTriviaBank(lang?: SupportedLanguage): TriviaQuestion[] {
       prompt: 'Which passage says this?',
       context: `“${truncate(verse.text, 180)}”`,
       correct: verse.reference,
-      pool: referencePool,
+      pool: familyPoolFor(verse.reference, true),
       explain: `${verse.reference} — ${truncate(verse.plainEnglishSummary, 150)}`,
       scripture,
     }));
@@ -232,18 +322,6 @@ export function buildTriviaBank(lang?: SupportedLanguage): TriviaQuestion[] {
       scripture,
     }));
 
-    push(buildChoice({
-      id: `v-theme:${verse.id}`,
-      kind: 'verse-theme',
-      tag: 'Life theme',
-      prompt: `Which life theme fits ${verse.reference}?`,
-      context: `“${snippet(verse.text, 12, 1)}”`,
-      correct: verse.category,
-      pool: VERSE_CATEGORIES,
-      explain: `${verse.reference} is filed under “${verse.category}”. ${truncate(verse.keyTakeaway, 120)}`,
-      scripture,
-    }));
-
     push(fillBlankQuestion(verse, uniqueBlankPool));
 
     if (verse.heroName) {
@@ -252,7 +330,7 @@ export function buildTriviaBank(lang?: SupportedLanguage): TriviaQuestion[] {
         kind: 'verse-hero',
         tag: 'Hero & story',
         prompt: `Which story hero is tied to ${verse.reference}?`,
-        correct: verse.heroName,
+        correct: cleanHeroName(verse.heroName),
         pool: heroPool,
         explain: `${verse.heroName}${verse.storyTitle ? ` — ${verse.storyTitle}` : ''}. ${truncate(verse.keyTakeaway, 110)}`,
         scripture,
@@ -278,17 +356,6 @@ export function buildTriviaBank(lang?: SupportedLanguage): TriviaQuestion[] {
       scripture,
     }));
 
-    push(buildChoice({
-      id: `q-char:${quest.id}`,
-      kind: 'hero-title',
-      tag: 'Hero & title',
-      prompt: `“${quest.heroName}” is known as which title?`,
-      correct: quest.characterTitle,
-      pool: uniqueStrings(quests.map((q) => q.characterTitle)),
-      explain: `${quest.heroName} is called “${quest.characterTitle}” (${quest.badgeName}).`,
-      scripture,
-    }));
-
     if (anchor) {
       push(buildChoice({
         id: `q-anchor:${quest.id}`,
@@ -296,7 +363,7 @@ export function buildTriviaBank(lang?: SupportedLanguage): TriviaQuestion[] {
         tag: 'Story Scripture',
         prompt: `Which Scripture anchors ${quest.heroName}'s story?`,
         correct: anchor.reference,
-        pool: anchorReferencePool,
+        pool: familyPoolFor(anchor.reference, true),
         explain: `“${truncate(anchor.text, 130)}” — ${anchor.reference}`,
         scripture,
       }));
@@ -311,24 +378,25 @@ export function buildTriviaBank(lang?: SupportedLanguage): TriviaQuestion[] {
     };
 
     push(buildChoice({
-      id: `b-theme:${book.id}`,
-      kind: 'book-theme',
-      tag: 'Book & theme',
-      prompt: `How is the book of ${book.name} themed in the Canon Codex?`,
-      correct: book.lifeTheme,
-      pool: bookThemePool,
-      explain: `${book.name} — “${book.codename}”: ${truncate(book.anchorScripture.takeaway, 130)}`,
+      id: `b-section:${book.id}`,
+      kind: 'book-section',
+      tag: 'Where in the Bible?',
+      prompt: `Which part of the Bible is the book of ${book.name} found in?`,
+      correct: DIVISION_SECTION[book.division] ?? book.division,
+      pool: SECTION_NAMES,
+      explain: `${book.name} sits in “${DIVISION_SECTION[book.division] ?? book.division}”. ${truncate(book.subtitle, 120)}`,
       scripture,
     }));
 
     push(buildChoice({
-      id: `b-ref:${book.id}`,
-      kind: 'book-reference',
-      tag: 'Book Scripture',
-      prompt: `Which passage is the anchor Scripture of ${book.name}?`,
-      correct: book.anchorScripture.reference,
-      pool: bookReferencePool,
-      explain: `“${truncate(book.anchorScripture.canonicalText, 130)}” — ${book.anchorScripture.reference}`,
+      id: `b-book:${book.id}`,
+      kind: 'book-identify',
+      tag: 'Name that book',
+      prompt: 'Which book of the Bible contains this passage?',
+      context: `“${truncate(book.anchorScripture.canonicalText, 180)}”`,
+      correct: book.name,
+      pool: bookOptionsFor(book),
+      explain: `“${truncate(book.anchorScripture.canonicalText, 120)}” — ${book.anchorScripture.reference}`,
       scripture,
     }));
   }
@@ -345,7 +413,7 @@ export function buildTriviaBank(lang?: SupportedLanguage): TriviaQuestion[] {
       kind: 'dilemma-figure',
       tag: 'Ancient parallel',
       prompt: `Which biblical figure parallels “${dilemma.title}”?`,
-      correct: dilemma.biblicalParallel.hero,
+      correct: cleanHeroName(dilemma.biblicalParallel.hero),
       pool: dilemmaHeroPool,
       explain: truncate(dilemma.biblicalParallel.event, 160),
       scripture,
@@ -357,7 +425,7 @@ export function buildTriviaBank(lang?: SupportedLanguage): TriviaQuestion[] {
       tag: 'Counsel Scripture',
       prompt: `Which Scripture anchors the counsel for “${dilemma.title}”?`,
       correct: dilemma.anchorScripture.reference,
-      pool: dilemmaReferencePool,
+      pool: familyPoolFor(dilemma.anchorScripture.reference, true),
       explain: truncate(dilemma.anchorScripture.streetMeaning, 150),
       scripture,
     }));

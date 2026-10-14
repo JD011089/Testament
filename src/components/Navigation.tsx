@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Compass, 
   BookOpen, 
@@ -18,6 +18,7 @@ import { ThemeToggle } from './ThemeToggle';
 import { LanguageToggle } from './LanguageToggle';
 import { useLanguage } from '../context/LanguageContext';
 import { APP_VERSION } from '../config/version';
+import { getShowXpPreference, SHOW_XP_CHANGED_EVENT } from '../utils/userPreferences';
 
 export type NavTab = 'dashboard' | 'library' | 'game' | 'practice' | 'arsenal' | 'wordforge' | 'dilemmas';
 
@@ -45,6 +46,16 @@ export const Navigation: React.FC<NavigationProps> = ({
   onOpenWhatsNew
 }) => {
   const { t, language } = useLanguage();
+
+  const [showXp, setShowXp] = useState(() => getShowXpPreference());
+  useEffect(() => {
+    const onChange = (event: Event) => {
+      const detail = (event as CustomEvent<{ show?: boolean }>).detail;
+      setShowXp(typeof detail?.show === 'boolean' ? detail.show : getShowXpPreference());
+    };
+    window.addEventListener(SHOW_XP_CHANGED_EVENT, onChange);
+    return () => window.removeEventListener(SHOW_XP_CHANGED_EVENT, onChange);
+  }, []);
 
   const isTabActive = (itemTab: NavTab) => {
     if (itemTab === 'practice') {
@@ -210,13 +221,15 @@ export const Navigation: React.FC<NavigationProps> = ({
             )}
 
             {/* XP Badge */}
-            <div 
-              title={t('nav.scriptureXp')} 
-              className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs font-mono font-bold text-amber-800 dark:text-amber-300"
-            >
-              <Award className="w-3.5 h-3.5 text-amber-500" />
-              <span>{xp} XP</span>
-            </div>
+            {showXp && (
+              <div 
+                title={t('nav.scriptureXp')} 
+                className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs font-mono font-bold text-amber-800 dark:text-amber-300"
+              >
+                <Award className="w-3.5 h-3.5 text-amber-500" />
+                <span>{xp} XP</span>
+              </div>
+            )}
 
             {/* Language Switcher Button */}
             <LanguageToggle />

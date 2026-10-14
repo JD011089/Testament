@@ -544,7 +544,15 @@ export function App() {
   };
 
   const handleRewardXP = (amount: number) => {
-    const newXp = xp + amount;
+    // Read the persisted total so rapid awards cannot clobber each other via a stale closure.
+    let current = xp;
+    try {
+      const stored = localStorage.getItem('testament_xp');
+      if (stored !== null) current = Number(stored) || 0;
+    } catch {
+      // ignore storage failures
+    }
+    const newXp = current + amount;
     setXp(newXp);
     persistNumber('testament_xp', newXp);
   };
