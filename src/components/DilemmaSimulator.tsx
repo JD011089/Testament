@@ -1207,7 +1207,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                       handleSelectDilemma(filteredDilemmas[nextIndex].id);
                       window.scrollTo({ top: 120, behavior: 'smooth' });
                     }}
-                    className="text-xs px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold transition-all flex items-center gap-1 shadow-sm"
+                    className="btn-primary text-xs flex items-center gap-1 shadow-sm"
                   >
                     <span>Next Dilemma</span>
                     <ArrowRight className="w-3.5 h-3.5" />

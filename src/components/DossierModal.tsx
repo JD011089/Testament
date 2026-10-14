@@ -179,7 +179,7 @@ export const DossierModal: React.FC<DossierModalProps> = ({
                 onSelectCharacterQuest(character.relatedQuestId);
                 onClose();
               }}
-              className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center gap-2 shadow-sm transition-all"
+              className="btn-primary text-xs flex items-center gap-2 shadow-sm transition-all"
             >
               <span>Play {character.name}'s Journey</span>
               <ArrowRight className="w-4 h-4" />

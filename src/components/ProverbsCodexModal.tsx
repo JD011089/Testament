@@ -445,7 +445,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
 
                           <button
                             onClick={handleNextScenario}
-                            className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center gap-1.5 shadow-md ml-auto transition-all"
+                            className="btn-primary text-xs flex items-center gap-1.5 shadow-md ml-auto"
                           >
                             <span>{t('proverbs.nextScenario')}</span>
                             <ArrowRight className="w-3.5 h-3.5" />
@@ -563,7 +563,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                                 setSelectedOptionId(null);
                                 setActiveTab('simulator');
                               }}
-                              className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-bold transition-all shadow-sm flex items-center gap-1"
+                              className="btn-primary text-xs shadow-sm flex items-center gap-1"
                             >
                               <span>{t('proverbs.playDilemma')}</span>
                               <ArrowRight className="w-3 h-3" />

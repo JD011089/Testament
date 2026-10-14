@@ -119,7 +119,7 @@ export const ReportIssueModal: React.FC<ReportIssueModalProps> = ({
               <button
                 type="button"
                 onClick={handleClose}
-                className="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs transition-all cursor-pointer"
+                className="btn-primary w-full text-xs cursor-pointer"
               >
                 Done
               </button>
@@ -168,7 +168,7 @@ export const ReportIssueModal: React.FC<ReportIssueModalProps> = ({
             <div className="pt-2 flex items-center gap-2">
               <button
                 type="submit"
-                className="flex-1 py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs transition-all cursor-pointer"
+                className="btn-primary flex-1 text-xs cursor-pointer"
               >
                 Submit Report
               </button>

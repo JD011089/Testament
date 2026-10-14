@@ -210,7 +210,7 @@ export const DecisionJournalModal: React.FC<DecisionJournalModalProps> = ({
                               <button
                                 type="button"
                                 onClick={() => handleDeleteEntry(entry.id)}
-                                className="p-1 rounded-md text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
+                                className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] -my-2 -mr-2 rounded-md text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer"
                                 title={t('journal.deleteEntry')}
                                 aria-label={t('journal.deleteEntry')}
                               >
@@ -290,7 +290,7 @@ export const DecisionJournalModal: React.FC<DecisionJournalModalProps> = ({
               <button
                 type="button"
                 onClick={handleDismiss}
-                className="px-5 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 dark:bg-stone-100 dark:hover:bg-white text-white dark:text-stone-900 font-bold text-xs transition-colors"
+                className="btn-primary text-xs"
               >
                 {t('journal.close')}
               </button>

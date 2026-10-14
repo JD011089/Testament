@@ -5,6 +5,7 @@ import { STORY_QUESTS } from '../data/stories';
 import type { MemoryVerse } from '../types';
 import { soundEngine } from '../utils/audio';
 import { CalendarRemindersModal } from './CalendarRemindersModal';
+import { PageHeader } from './PageHeader';
 import { 
   Shield, 
   Bookmark, 
@@ -134,20 +135,12 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-8 pb-2 md:pb-6 text-left">
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
-            <Shield className="w-4 h-4" />
-            <span>{t('arsenal.badge')}</span>
-          </div>
-          <h1 className="text-2xl md:text-4xl font-serif font-black text-stone-900 dark:text-parchment-50">
-            {t('arsenal.title')}
-          </h1>
-          <p className="text-xs md:text-sm text-stone-600 dark:text-stone-400 mt-1 max-w-2xl">
-            {t('arsenal.subtitle')}
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        eyebrow={t('arsenal.badge')}
+        eyebrowIcon={<Shield className="w-4 h-4" />}
+        title={t('arsenal.title')}
+        subtitle={t('arsenal.subtitle')}
+      />
 
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         <div className="relative flex-1">

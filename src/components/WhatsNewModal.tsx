@@ -1067,7 +1067,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
 
           <button
             onClick={handleDismiss}
-            className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all"
+            className="btn-primary w-full sm:w-auto text-xs flex items-center justify-center gap-2 shadow-md"
           >
             <span>Got It • Enter Field HQ</span>
             <ChevronRight className="w-4 h-4" />

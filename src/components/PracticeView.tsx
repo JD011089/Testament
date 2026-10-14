@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Brain, GitFork } from 'lucide-react';
 import { WordForge } from './WordForge';
 import { DilemmaSimulator } from './DilemmaSimulator';
+import { PageHeader } from './PageHeader';
 import { soundEngine } from '../utils/audio';
 
 export type PracticeSubTab = 'memorize' | 'dilemmas';
@@ -45,6 +46,10 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
 
   return (
     <div className="space-y-4">
+      <div className="max-w-md mx-auto px-4 pt-2">
+        <PageHeader title="Practice" className="mb-4" />
+      </div>
+
       {/* 2-pill Sub-tab Switcher: Memorize vs Dilemmas */}
       <div className="max-w-md mx-auto px-4 pt-2">
         <div 

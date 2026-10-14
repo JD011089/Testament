@@ -367,8 +367,8 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
       {/* LEFT COLUMN: VERSE CARD & SUMMARY */}
       <div className="lg:col-span-5 space-y-5">
         <div className="p-5 md:p-6 rounded-2xl bg-stone-100/70 dark:bg-stone-900/50 transition-colors">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="text-lg font-serif font-bold text-amber-800 dark:text-amber-400">
                 {verse.reference}
               </span>
@@ -389,7 +389,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
               )}
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={handleToggleSpeak}
                 title={isSpeaking ? t('forge.stopSpeech') : t('forge.listen')}
@@ -629,7 +629,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                 <button
                   type="button"
                   onClick={handleRevealNext}
-                  className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs sm:text-sm shadow-md flex items-center gap-1.5 transition-all"
+                  className="btn-primary text-xs sm:text-sm shadow-md flex items-center gap-1.5"
                 >
                   <span>{revealedPhraseCount < phrases.length ? `Reveal Next Phrase (${revealedPhraseCount + 1}/${phrases.length})` : 'Confirm Mastered'}</span>
                   <ArrowRight className="w-4 h-4" />

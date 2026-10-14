@@ -97,7 +97,7 @@ export const UpdateNotificationBanner: React.FC = () => {
               <button
                 onClick={handleApplyUpdate}
                 disabled={isUpdating}
-                className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                className="btn-primary text-xs shadow-xs flex items-center gap-1.5 cursor-pointer"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isUpdating ? 'animate-spin' : ''}`} />
                 <span>{isUpdating ? t('update.updating') : t('update.reload')}</span>

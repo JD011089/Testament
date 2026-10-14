@@ -196,7 +196,7 @@ export const VoiceSelectorModal: React.FC<VoiceSelectorModalProps> = ({ isOpen, 
                 soundEngine.playClick();
                 onClose();
               }}
-              className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-bold shadow-xs"
+              className="btn-primary text-xs shadow-xs"
             >
               Done
             </button>

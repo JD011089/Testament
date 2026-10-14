@@ -27,7 +27,7 @@ export const BookConnections: React.FC<BookConnectionsProps> = ({
         <button
           type="button"
           onClick={onOpenModule}
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-bold transition-colors"
+          className="btn-primary text-xs transition-colors"
         >
           <span>{moduleLabel}</span>
           <ExternalLink className="w-3.5 h-3.5" />

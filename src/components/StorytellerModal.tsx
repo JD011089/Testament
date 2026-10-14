@@ -246,7 +246,7 @@ export const StorytellerModal: React.FC<StorytellerModalProps> = ({
               <button
                 type="button"
                 onClick={handleSaveAndFinish}
-                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center gap-1.5 cursor-pointer"
+                className="btn-primary text-xs flex items-center gap-1.5 cursor-pointer"
               >
                 <span>Save Retelling</span>
                 <Check aria-hidden="true" className="w-4 h-4 stroke-[3]" />
@@ -255,7 +255,7 @@ export const StorytellerModal: React.FC<StorytellerModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs cursor-pointer"
+                className="btn-primary text-xs cursor-pointer"
               >
                 Done
               </button>

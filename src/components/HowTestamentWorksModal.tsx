@@ -151,7 +151,7 @@ export const HowTestamentWorksModal: React.FC<HowTestamentWorksModalProps> = ({
           <button
             type="button"
             onClick={handleClose}
-            className="w-full py-3 px-6 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs sm:text-sm transition-all cursor-pointer"
+            className="btn-primary w-full text-xs sm:text-sm cursor-pointer"
           >
             Got it
           </button>

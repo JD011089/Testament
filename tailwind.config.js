@@ -58,7 +58,9 @@ export default {
         },
 
         // Remapped stone scale: light end is warm parchment, dark end is night navy
-        // Defines stone-250 so previously broken borders render reliably
+        // Defines stone-250 so previously broken borders render reliably.
+        // stone-400/500 are theme-driven greys so dark mode no longer reuses the
+        // light browns (#76695A / #645749) that fell to 2.1-3.4:1 on navy.
         stone: {
           50: '#FBF8F1',
           100: '#F6EEDD',
@@ -66,8 +68,8 @@ export default {
           200: '#E7D7BA',
           250: '#DECBA8',
           300: '#D5BF97',
-          400: '#76695A', // Passed AA contrast (replaces low-contrast stone-400)
-          500: '#645749',
+          400: 'rgb(var(--stone-400) / <alpha-value>)', // #76695A light / #A89C86 dark
+          500: 'rgb(var(--stone-500) / <alpha-value>)', // #645749 light / #9C9483 dark
           600: '#53483C',
           700: '#433A31',
           750: '#383028',
@@ -77,14 +79,16 @@ export default {
           950: '#131722',
         },
 
-        // Remapped amber scale: tuned with gold accent highlights
+        // Remapped amber scale: tuned with gold accent highlights.
+        // amber-500 is theme-driven so flat-gold buttons/accents stop reusing
+        // the light-theme gold (#D49D5F) in dark mode; dark renders #E4B879.
         amber: {
           50: '#FFFDF8',
           100: '#FFF5E0',
           200: '#FCE7BF',
           300: '#F7D69B',
           400: '#EDCB93',
-          500: '#D49D5F',
+          500: 'rgb(var(--amber-500) / <alpha-value>)', // #D49D5F light / #E4B879 dark
           600: '#8A5424', // Passed AA contrast (replaces low-contrast #d97706 on light)
           700: '#A04E14',
           800: '#783A0E',

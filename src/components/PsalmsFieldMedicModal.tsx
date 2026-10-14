@@ -377,7 +377,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
 
                   <button
                     onClick={handleApplyPrescription}
-                    className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all ml-auto"
+                    className="btn-primary text-xs flex items-center gap-1.5 shadow-sm ml-auto"
                   >
                     <CheckCircle2 className="w-4 h-4" />
                     <span>{t('medic.applyPrescription', { xp: activeItem.xpReward })}</span>

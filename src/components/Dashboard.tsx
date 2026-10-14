@@ -362,7 +362,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {/* =========================================================================
           TOP BAR: Mobile Status Bar (Hidden on md/lg desktop where top nav is unified)
           ========================================================================= */}
-      <div className="flex md:hidden items-center justify-between gap-3 mb-5">
+      <div className="flex xl:hidden items-center justify-between gap-3 mb-5">
         {/* Left: Emblem & Brand Title */}
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-10 h-10 rounded-xl overflow-hidden shadow-xs bg-stone-100 dark:bg-stone-900 shrink-0">
@@ -377,9 +377,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <h1 className="text-base font-serif font-bold text-stone-900 dark:text-parchment-100 tracking-wide">
+              <span className="text-label font-bold text-amber-800 dark:text-amber-400">
                 Testament
-              </h1>
+              </span>
               {showXp && (
                 <button
                   type="button"
@@ -399,12 +399,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   soundEngine.playClick();
                   onOpenWhatsNew?.();
                 }}
-                className="text-[11px] font-mono px-1.5 py-0.2 rounded-full text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-amber-300 transition-colors"
+                className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] -my-2 px-1.5 rounded-full text-[11px] font-mono text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-amber-300 transition-colors"
                 title={t('dashboard.versionTooltip')}
+                aria-label={t('dashboard.versionTooltip')}
               >
                 {APP_VERSION}
               </button>
             </div>
+            <h1 className="text-title-1 text-stone-900 dark:text-parchment-100 leading-tight mt-0.5">
+              {t('nav.home')}
+            </h1>
             {/* N-1: No truncated kicker on 390px screens */}
             <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-tight">
               <span className="text-amber-700 dark:text-amber-400 font-medium">{todayFormatted}</span>
@@ -730,7 +734,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   soundEngine.playSnap();
                   setShowSeriesPicker(true);
                 }}
-                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs sm:text-sm inline-flex items-center justify-center gap-2 shadow-xs hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer"
+                className="btn-primary w-full sm:w-auto text-xs sm:text-sm shadow-xs cursor-pointer"
               >
                 <span>Explore all 6 weekly series</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -896,7 +900,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowRelics(false)}
-                  className="text-xs text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 cursor-pointer"
+                  className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] -my-2 -mr-1 px-2 rounded-lg text-xs text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer"
                 >
                   Close
                 </button>
@@ -979,7 +983,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <button
                     type="button"
                     onClick={() => handleYesterdayRecallResponse('got_it')}
-                    className="flex-1 py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer"
+                    className="flex-1 py-2.5 px-3 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer"
                   >
                     <Check className="w-3.5 h-3.5" />
                     <span>Got it!</span>

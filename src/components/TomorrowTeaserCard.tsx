@@ -73,9 +73,13 @@ export const TomorrowTeaserCard: React.FC = () => {
             <CheckCircle2 aria-hidden="true" className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
             <span>Not yet — this one's still being prepared. See you tomorrow!</span>
           </div>
-          <span className="text-[10px] font-mono text-amber-700 dark:text-amber-300 uppercase tracking-wider">
+          <button
+            type="button"
+            aria-label="Dismiss"
+            className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] -my-2 -mr-1 px-1 text-[10px] font-mono text-amber-700 dark:text-amber-300 uppercase tracking-wider cursor-pointer"
+          >
             Dismiss
-          </span>
+          </button>
         </div>
       )}
 

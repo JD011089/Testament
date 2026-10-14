@@ -24,6 +24,19 @@
     <meta name="twitter:description" content="An interactive graphic-novel Bible study experience for adults. Plain English, real history, actionable wisdom." />
     <meta name="twitter:image" content="https://testament-bible-learning.vercel.app/images/hero_banner-1376.webp" />
     <script src="/theme-init.js"></script>
+    <script>
+      // Apply the stored text-size scale before first paint to avoid layout shift.
+      (function () {
+        try {
+          var map = { xs: 0.88, s: 0.95, m: 1, l: 1.15, xl: 1.35 };
+          var step = localStorage.getItem('testament_font_scale_step');
+          var scale = step && map[step] ? map[step] : 1;
+          document.documentElement.style.setProperty('--app-font-scale', String(scale));
+        } catch (e) {
+          /* ignore */
+        }
+      })();
+    </script>
     <title>Testament — The Living Word</title>
   </head>
   <body class="bg-surface text-stone-900 dark:bg-ink dark:text-parchment-100 font-sans antialiased">

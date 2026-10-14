@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { soundEngine } from '../utils/audio';
 import { useLanguage } from '../context/LanguageContext';
 import { buildTriviaBank, pickRunFromBank, type TriviaQuestion } from '../utils/triviaEngine';
+import { PageHeader } from './PageHeader';
 import {
   Gamepad2,
   Heart,
@@ -248,20 +249,13 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-8 pb-6 text-left">
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
-          <Gamepad2 className="w-4 h-4" />
-          <span>Scripture Arcade</span>
-        </div>
-        <h1 className="text-2xl md:text-4xl font-serif font-black text-stone-900 dark:text-parchment-50">
-          Trivia Gauntlet
-        </h1>
-        <p className="text-xs md:text-sm text-stone-600 dark:text-stone-400 mt-1 max-w-2xl">
-          Ten rapid questions drawn straight from the verses, stories, and books inside your Bible. Miss one and you'll be
-          pointed to the exact passage to study it — then it comes back later until you get it. Beat the clock, build a
-          combo, and survive a double-points boss round.
-        </p>
-      </div>
+      <PageHeader
+        className="mb-6"
+        eyebrow="Scripture Arcade"
+        eyebrowIcon={<Gamepad2 className="w-4 h-4" />}
+        title="Trivia Gauntlet"
+        subtitle="Ten rapid questions drawn straight from the verses, stories, and books inside your Bible. Miss one and you'll be pointed to the exact passage to study it — then it comes back later until you get it. Beat the clock, build a combo, and survive a double-points boss round."
+      />
 
       <AnimatePresence mode="wait">
         {phase === 'intro' && (

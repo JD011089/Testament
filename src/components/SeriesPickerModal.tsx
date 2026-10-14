@@ -230,7 +230,7 @@ export const SeriesPickerModal: React.FC<SeriesPickerModalProps> = ({
                         <button
                           type="button"
                           onClick={() => handleSelectSeries(s.id)}
-                          className="px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-semibold hover:bg-amber-700 transition-colors flex items-center gap-1.5 cursor-pointer"
+                          className="btn-primary text-xs flex items-center gap-1.5 cursor-pointer"
                         >
                           <span>{activeState ? `Restart with ${s.heroName} (Day 1)` : `Begin Week with ${s.heroName}`}</span>
                           <ArrowRight className="w-3.5 h-3.5" />
@@ -251,7 +251,7 @@ export const SeriesPickerModal: React.FC<SeriesPickerModalProps> = ({
             <button
               type="button"
               onClick={handleClearSeries}
-              className="text-amber-800 dark:text-amber-400 hover:underline font-mono text-xs flex items-center gap-1 cursor-pointer"
+              className="btn-quiet font-mono text-xs"
             >
               <RotateCcw className="w-3 h-3" />
               Return to standard daily rotation

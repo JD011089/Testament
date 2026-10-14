@@ -312,7 +312,7 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
                 <button
                   type="button"
                   onClick={() => handleAddToCalendar('morning')}
-                  className="w-full py-3.5 px-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+                  className="btn-primary w-full text-xs sm:text-sm"
                 >
                   <Calendar aria-hidden="true" className="w-4 h-4" />
                   <span>Add to calendar</span>
@@ -400,7 +400,7 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
                 <button
                   type="button"
                   onClick={() => handleAddToCalendar('recall')}
-                  className="w-full py-3.5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+                  className="w-full py-3.5 px-4 rounded-2xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
                 >
                   <Calendar aria-hidden="true" className="w-4 h-4" />
                   <span>Add to calendar</span>

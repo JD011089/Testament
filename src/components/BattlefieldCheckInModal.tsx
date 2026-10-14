@@ -290,7 +290,7 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
 
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold transition-all"
+              className="btn-primary transition-all"
             >
               {t('battlefield.done')}
             </button>

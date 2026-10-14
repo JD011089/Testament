@@ -42,7 +42,7 @@ export class AppErrorBoundary extends Component<Props, State> {
           <button
             type="button"
             onClick={this.resetAppData}
-            className="px-4 py-2.5 rounded-xl bg-amber-500 text-stone-950 text-sm font-bold"
+            className="btn-primary text-sm"
           >
             Reset app data
           </button>

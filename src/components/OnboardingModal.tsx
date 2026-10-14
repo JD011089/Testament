@@ -345,7 +345,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       }}
                       className={`w-full text-left p-3.5 sm:p-4 rounded-2xl border transition-all flex items-start gap-3.5 ${
                         isSelected 
-                          ? 'bg-amber-50 dark:bg-gradient-to-r dark:from-amber-950/50 dark:to-stone-900 border-amber-500 shadow-sm dark:shadow-glow ring-1 ring-amber-500/50 text-stone-950 dark:text-parchment-50' 
+                          ? 'bg-amber-50 dark:bg-stone-950 dark:bg-gradient-to-r dark:from-amber-950/50 dark:to-stone-900 border-amber-500 shadow-sm dark:shadow-glow ring-1 ring-amber-500/50 text-stone-950 dark:text-parchment-50' 
                           : 'bg-stone-50 dark:bg-stone-900/70 border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-850/60'
                       }`}
                     >
@@ -678,7 +678,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
             <button
               onClick={handleNextStep}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs sm:text-sm transition-all shadow-md cursor-pointer"
+              className="btn-primary flex items-center gap-2 text-xs sm:text-sm shadow-md cursor-pointer"
             >
               <span>{step === 4 ? 'Build My Battle Plan' : 'Continue'}</span>
               <ArrowRight className="w-4 h-4" />

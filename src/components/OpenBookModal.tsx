@@ -598,7 +598,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
         >
           {/* Top Header Bar (Combined with Mode Selector on Mobile) */}
           <div className="flex items-center justify-between px-3 sm:px-6 py-2 sm:py-3 bg-stone-50 dark:bg-ink border-b border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 shrink-0 gap-2">
-            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
               {/* Mobile Back Button */}
               <button
                 onClick={() => {
@@ -613,7 +613,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
               </button>
 
               <BookOpen className="w-4 h-4 text-amber-800 dark:text-amber-500 shrink-0 hidden sm:inline" />
-              <span className="text-xs font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold truncate">
+              <span className="text-xs font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold truncate flex-1 min-w-0">
                 {book.name}{' '}<span className="hidden sm:inline">•{' '}Volume #{String(book.order).padStart(2, '0')}{' '}of 66</span>
               </span>
             </div>
@@ -935,9 +935,9 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
               className="flex-1 overflow-x-hidden overflow-y-auto flex flex-col bg-surface dark:bg-ink w-full max-w-full touch-pan-y"
             >
               {/* READER CONTROLS TOOLBAR */}
-              <div className="sticky top-0 z-20 px-3 sm:px-6 py-2.5 bg-white/95 dark:bg-ink-raised/95 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 flex flex-wrap items-center justify-between gap-2 shadow-xs w-full max-w-full">
+              <div className="sticky top-0 z-20 px-2 sm:px-6 py-1.5 sm:py-2.5 bg-white/95 dark:bg-ink-raised/95 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 shadow-xs w-full max-w-full">
                 {/* Left: Chapter Selector Controls */}
-                <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+                <div className="flex flex-wrap items-center gap-1 sm:gap-2 min-w-0">
                   <button
                     disabled={selectedChapter <= 1}
                     onClick={() => {
@@ -952,7 +952,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                   </button>
 
                   {/* Chapter Dropdown Picker with truncation */}
-                  <div className="relative min-w-0 max-w-[130px] sm:max-w-xs">
+                  <div className="relative min-w-0 max-w-[96px] sm:max-w-xs">
                     <select
                       value={selectedChapter}
                       onChange={(e) => {
@@ -990,7 +990,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                       value={chapterSearch}
                       onChange={(e) => setChapterSearch(e.target.value)}
                       placeholder='Jump e.g. "John 3" or "5"'
-                      className="w-28 sm:w-44 pl-7 pr-2 py-1.5 text-xs rounded-xl bg-stone-100 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                      className="w-24 sm:w-44 pl-7 pr-2 py-1.5 text-xs rounded-xl bg-stone-100 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
                     />
                     <Search className="w-3.5 h-3.5 text-stone-400 absolute left-2 pointer-events-none" />
                   </form>
@@ -1248,7 +1248,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setShowReadingPrefs(false)}
-                      className="w-full py-3 rounded-xl bg-amber-500 text-stone-950 font-bold text-xs uppercase tracking-wider shadow-sm mt-2"
+                      className="btn-primary w-full text-xs uppercase tracking-wider shadow-sm mt-2"
                     >
                       Done
                     </button>
@@ -1275,7 +1275,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                     </p>
                     <button
                       onClick={() => setRetryNonce((value) => value + 1)}
-                      className="px-4 py-2 rounded-xl bg-amber-500 text-stone-950 text-xs font-bold"
+                      className="btn-primary text-xs"
                     >
                       {t('reader.retry')}
                     </button>

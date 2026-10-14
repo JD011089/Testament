@@ -94,9 +94,9 @@ export const Navigation: React.FC<NavigationProps> = ({
   return (
     <>
       {/* ============================================================ */}
-      {/* 1. DESKTOP TOP NAVIGATION BAR (Visible on md: screens & up) */}
+      {/* 1. DESKTOP TOP NAVIGATION BAR (Visible on xl: screens & up) */}
       {/* ============================================================ */}
-      <header className="hidden md:block fixed top-0 left-0 right-0 z-40 bg-white/90 dark:bg-ink/90 backdrop-blur-md border-b border-stone-200 dark:border-stone-800/80 transition-all">
+      <header className="hidden xl:block fixed top-0 left-0 right-0 z-40 bg-white/90 dark:bg-ink/90 backdrop-blur-md border-b border-stone-200 dark:border-stone-800/80 transition-all">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
           
           {/* Brand Logo & Title */}
@@ -127,7 +127,8 @@ export const Navigation: React.FC<NavigationProps> = ({
                       onOpenWhatsNew();
                     }}
                     title={`What's new in ${APP_VERSION}`}
-                    className="text-[10px] font-mono px-1.5 py-0.2 rounded-full text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-amber-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer"
+                    aria-label={`What's new in ${APP_VERSION}`}
+                    className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] -my-2 px-1.5 rounded-full text-[10px] font-mono text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-amber-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer"
                   >
                     {APP_VERSION}
                   </button>
@@ -245,12 +246,12 @@ export const Navigation: React.FC<NavigationProps> = ({
       </header>
 
       {/* ============================================================ */}
-      {/* 3. MOBILE BOTTOM NAVIGATION BAR (Visible only on < md screens) */}
+      {/* 3. BOTTOM NAVIGATION BAR (Visible below xl: screens) */}
       {/* ============================================================ */}
       <nav 
         role="navigation" 
         aria-label="Mobile Navigation" 
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-ink/95 backdrop-blur-lg border-t border-stone-200 dark:border-stone-800/90 px-1 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg"
+        className="xl:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-ink/95 backdrop-blur-lg border-t border-stone-200 dark:border-stone-800/90 px-1 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg"
       >
         <div className="grid grid-cols-5 items-center w-full max-w-lg mx-auto">
           {navItems.map((item) => {
@@ -272,7 +273,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                 <div className="shrink-0">
                   {item.icon}
                 </div>
-                <span className="text-[10px] leading-tight font-medium truncate w-full text-center block mt-0.5">
+                <span className="text-[10px] leading-[1.15] font-medium w-full text-center block mt-0.5 px-0.5 break-words">
                   {item.mobileLabel || item.label}
                 </span>
               </button>

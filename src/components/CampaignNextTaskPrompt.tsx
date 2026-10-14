@@ -90,7 +90,7 @@ export const CampaignNextTaskPrompt: React.FC<CampaignNextTaskPromptProps> = ({
                 soundEngine.playClick();
                 onProceed(nextStep);
               }}
-              className="flex-1 py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all transform active:scale-98 cursor-pointer"
+              className="btn-primary flex-1 text-xs flex items-center justify-center gap-2 shadow-md cursor-pointer"
             >
               <span>{t('nextTask.goNext')}</span>
               <ArrowRight className="w-4 h-4" />

@@ -336,7 +336,7 @@ export const ReciterModal: React.FC<ReciterModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsCalendarOpen(true)}
-                  className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold shrink-0 cursor-pointer flex items-center gap-1"
+                  className="btn-primary shrink-0 cursor-pointer flex items-center gap-1"
                 >
                   <Calendar aria-hidden="true" className="w-3.5 h-3.5" />
                   <span>Set time</span>
@@ -409,7 +409,7 @@ export const ReciterModal: React.FC<ReciterModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs cursor-pointer"
+                className="btn-primary text-xs cursor-pointer"
               >
                 Done
               </button>

@@ -654,10 +654,10 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-surface dark:bg-iron-950 text-stone-900 dark:text-parchment-100 transition-colors duration-200 w-full relative">
-      <main className={`w-full pt-3 sm:pt-4 md:pt-16 ${
+      <main className={`w-full pt-3 sm:pt-4 xl:pt-16 ${
         activeQuest || activeDailyMission
-          ? 'pb-4 md:pb-8'
-          : 'pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:pb-10'
+          ? 'pb-4 xl:pb-8'
+          : 'pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] xl:pb-10'
       }`}>
         {activeDailyMission ? (
           <StoryViewer 
@@ -838,7 +838,7 @@ export function App() {
                     soundEngine.playClick();
                     setCurrentTab('dashboard');
                   }}
-                  className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs shadow-md transition-all cursor-pointer"
+                  className="btn-primary text-xs shadow-md transition-all cursor-pointer"
                 >
                   Return to Home
                 </button>

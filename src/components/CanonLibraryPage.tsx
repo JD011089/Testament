@@ -21,6 +21,7 @@ import {
 } from '../data/canon';
 import { BookSpine } from './BookSpine';
 import { OpenBookModal } from './OpenBookModal';
+import { PageHeader } from './PageHeader';
 import { soundEngine } from '../utils/audio';
 import { parseScriptureReference } from '../utils/scriptureRef';
 import { findCanonBookByName } from '../utils/bookLinks';
@@ -248,18 +249,13 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
         </div>
 
         {/* HERO TITLE BANNER */}
-        <div className="pt-6 pb-6 text-left">
-          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold mb-1">
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span>{t('library.heroBadge')}</span>
-          </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-black text-stone-900 dark:text-parchment-50 leading-tight">
-            {t('library.heroTitle')}
-          </h1>
-          <p className="text-sm sm:text-base text-stone-600 dark:text-stone-300 max-w-3xl mt-2 leading-relaxed font-sans">
-            {t('library.heroSubtitle')}
-          </p>
-        </div>
+        <PageHeader
+          className="pt-6 pb-6"
+          eyebrow={t('library.heroBadge')}
+          eyebrowIcon={<Sparkles className="w-3.5 h-3.5 text-amber-500" />}
+          title={t('library.heroTitle')}
+          subtitle={t('library.heroSubtitle')}
+        />
 
         {readingPlace && (
           <button
@@ -276,7 +272,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
               <div className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
                 {t('library.continueReading')}
               </div>
-              <div className="font-serif text-lg font-bold text-stone-900 dark:text-parchment-50">
+              <div className="text-title-3 text-stone-900 dark:text-parchment-50">
                 {readingPlace.bookName} {readingPlace.chapter}
               </div>
             </div>
@@ -320,7 +316,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
               soundEngine.playSnap();
               setIsSeriesModalOpen(true);
             }}
-            className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 self-start sm:self-center shrink-0 cursor-pointer"
+            className="btn-primary text-xs shadow-xs flex items-center justify-center gap-1.5 self-start sm:self-center shrink-0 cursor-pointer"
           >
             <span>{activeSeriesState ? 'Manage Series' : 'Explore 6 Series'}</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -482,7 +478,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                       {shelfIndex + 1}
                     </div>
                     <div>
-                      <h3 className="text-base sm:text-lg font-serif font-black text-stone-900 dark:text-amber-200 tracking-wide uppercase flex items-center gap-2">
+                      <h3 className="text-title-2 text-stone-900 dark:text-amber-200 tracking-wide uppercase flex items-center gap-2">
                         <span>{getDivisionLabel(shelfGroup.division.id, shelfGroup.division.label)}</span>
                         <span className="text-xs font-mono font-normal text-amber-800 dark:text-amber-400/70">
                           {t('library.volumesCount', { count: shelfGroup.books.length })}
@@ -556,7 +552,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
             {shelvedDivisions.map((shelfGroup) => (
               <section key={shelfGroup.division.id}>
                 <div className="mb-3">
-                  <h3 className="text-base sm:text-lg font-serif font-bold text-stone-900 dark:text-parchment-50">
+                  <h3 className="text-title-2 text-stone-900 dark:text-parchment-50">
                     {getDivisionLabel(shelfGroup.division.id, shelfGroup.division.label)}
                   </h3>
                   <p className="text-sm text-stone-600 dark:text-stone-400 mt-0.5">
@@ -570,7 +566,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                       <li key={book.id} className="py-4 flex flex-col sm:flex-row sm:items-center gap-3">
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <h4 className="font-serif text-lg font-bold text-stone-900 dark:text-parchment-50">
+                            <h4 className="text-title-3 text-stone-900 dark:text-parchment-50">
                               {book.name}
                             </h4>
                             <span className="text-xs font-semibold text-stone-500 dark:text-stone-400">
@@ -594,7 +590,7 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
                               soundEngine.playClick();
                               openReader(book, lastChapter);
                             }}
-                            className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-bold"
+                            className="btn-primary text-xs"
                           >
                             {lastChapter ? t('library.continueCh', { chapter: lastChapter }) : t('library.read')}
                           </button>

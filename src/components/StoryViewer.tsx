@@ -1412,7 +1412,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   soundEngine.playClick();
                   setIsCalendarModalOpen(true);
                 }}
-                className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 shadow-xs"
+                className="btn-primary text-xs flex items-center justify-center gap-1.5 cursor-pointer shrink-0 shadow-xs"
               >
                 <Calendar aria-hidden="true" className="w-3.5 h-3.5" />
                 <span>Add to calendar</span>
@@ -1436,7 +1436,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   soundEngine.playSnap();
                   setIsStorytellerOpen(true);
                 }}
-                className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 shadow-xs"
+                className="btn-primary text-xs flex items-center justify-center gap-1.5 cursor-pointer shrink-0 shadow-xs"
               >
                 <span>Tell it back</span>
               </button>
