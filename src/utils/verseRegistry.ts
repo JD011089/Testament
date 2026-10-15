@@ -138,6 +138,7 @@ export const CANON_MEMORY_VERSES: MemoryVerse[] = CANON_BOOKS.map((b) => {
 
 import { getLocalizedVerse } from './localizedScripture';
 import { getStoredLanguage, type SupportedLanguage } from '../context/LanguageContext';
+import { canonicalVerseKey, isVerseKey, verseCanonicalKey } from './verseKey';
 
 /**
  * All available verses (Core arsenal + all story unlocked scriptures + Proverbs Codex + Psalms Field Medic + 66 Canon Books)
@@ -231,7 +232,16 @@ export const getVerseById = (id?: string | null, lang?: SupportedLanguage): Memo
   const activeLang = lang ?? getStoredLanguage();
   const cleanTarget = id.trim().toLowerCase();
   const targetSlug = normalizeVerseSlug(id);
-  
+  const targetKey = isVerseKey(id) ? id.trim().toUpperCase() : canonicalVerseKey(id);
+
+  // 0. Canonical verse key match ("1KI.19.12"). This is the single source of
+  //    truth for cross-surface lookups so a mission reference always resolves
+  //    to the exact verse the mission cites.
+  if (targetKey) {
+    const keyMatch = ALL_AVAILABLE_VERSES.find(v => verseCanonicalKey(v) === targetKey);
+    if (keyMatch) return getLocalizedVerse(keyMatch, activeLang);
+  }
+
   // 1. Exact ID match
   const match = ALL_AVAILABLE_VERSES.find(v => v.id.toLowerCase() === cleanTarget);
   if (match) return getLocalizedVerse(match, activeLang);
@@ -293,10 +303,12 @@ export const getStoryVerseForAct = (questId: string, _actId?: string, lang?: Sup
  */
 export const registerDynamicBibleVerse = (reference: string, text: string, translation: string = 'WEB'): MemoryVerse => {
   const cleanId = `custom-bible-${normalizeVerseSlug(reference)}`;
-  const existing = ALL_AVAILABLE_VERSES.find(v => 
-    v.id === cleanId || 
+  const refKey = canonicalVerseKey(reference);
+  const existing = ALL_AVAILABLE_VERSES.find(v =>
+    v.id === cleanId ||
     v.reference.toLowerCase() === reference.toLowerCase() ||
-    normalizeVerseSlug(v.reference) === normalizeVerseSlug(reference)
+    normalizeVerseSlug(v.reference) === normalizeVerseSlug(reference) ||
+    (refKey !== null && verseCanonicalKey(v) === refKey)
   );
   if (existing) return existing;
 

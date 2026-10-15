@@ -5,6 +5,26 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-beta] - 2026-10-15
+
+### Added (Phase 1 — Critical fixes)
+- **Canonical verse key**: a single normalized key (`"1KI.19.12"`) with `canonicalVerseKey` /
+  `resolveVerseKey` (`src/utils/verseKey.ts`) is now the source of truth for verse lookups,
+  so a mission reference always resolves to the exact verse it cites.
+- **Book + verse validation**: the reference parser now rejects impossible references such as
+  `Romans 8:99` and `Genesis 51` with a friendly message (`src/utils/bookVerseCounts.ts`).
+- **Cross-book chapter navigation**: reader Previous/Next now cross book boundaries
+  (Malachi 4 → Matthew 1) via `nextChapter` / `previousChapter`.
+- **Testable bookmark store** (`src/utils/bookmarks.ts`) so saved verse cards persist across reloads.
+- Unit tests: `tests/verseKey.test.ts`, `tests/scriptureRef.test.ts`, `tests/bookmarks.test.ts`.
+
+### Fixed (Phase 1)
+- **Practice no longer falls back to Joshua 1:9**: when a requested verse cannot be resolved,
+  Practice shows a clear "we couldn't find that verse" state instead of silently swapping verses.
+- **Save card now persists**: the Saved collection writes to storage (and no longer stores a raw
+  reference instead of the verse id), so a saved story verse survives a reload.
+- Chapter-only references (`Psalm 23`, `Ps 23`, `John 3`) and abbreviations resolve correctly.
+
 ## [1.26.0] - 2026-10-13
 
 ### Added (Trivia Gauntlet Game)

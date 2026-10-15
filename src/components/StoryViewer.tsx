@@ -603,7 +603,6 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
       const registered = registerDynamicBibleVerse(keyVerseRef, keyVerseText, useKjv ? 'KJV' : 'WEB');
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('testament-verse-bookmarked', { detail: registered.id }));
-        window.dispatchEvent(new CustomEvent('testament-verse-bookmarked', { detail: keyVerseRef }));
       }
       setVerseCardFeedback('Saved to your collection!');
       setTimeout(() => setVerseCardFeedback(null), 3000);

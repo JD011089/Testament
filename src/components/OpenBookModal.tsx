@@ -49,7 +49,7 @@ import {
   type ReadingFontSize,
   type ReadingLayout,
 } from '../utils/readingPlace';
-import { parseScriptureReference } from '../utils/scriptureRef';
+import { parseScriptureReference, nextChapter, previousChapter } from '../utils/scriptureRef';
 import { BookConnections } from './BookConnections';
 
 interface OpenBookModalProps {
@@ -328,6 +328,40 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
   const currentIndex = book ? allBooks.findIndex(b => b.id === book.id) : -1;
   const prevBook = currentIndex > 0 ? allBooks[currentIndex - 1] : null;
   const nextBook = currentIndex >= 0 && currentIndex < allBooks.length - 1 ? allBooks[currentIndex + 1] : null;
+
+  // Chapter navigation that crosses book boundaries (Malachi 4 -> Matthew 1).
+  const canGoPrevChapter = book ? previousChapter(book.name, selectedChapter) !== null : false;
+  const canGoNextChapter = book ? nextChapter(book.name, selectedChapter) !== null : false;
+
+  const goToPreviousChapter = () => {
+    if (!book) return;
+    const target = previousChapter(book.name, selectedChapter);
+    if (!target) return;
+    soundEngine.playPageTurn();
+    setIsPlayingAudio(false);
+    setIsPlayingChapterAudio(false);
+    soundEngine.stopSpeaking();
+    if (target.book !== book.name) {
+      const targetBook = allBooks.find(b => b.name === target.book);
+      if (targetBook) onSelectBook(targetBook);
+    }
+    setSelectedChapter(target.chapter);
+  };
+
+  const goToNextChapter = () => {
+    if (!book) return;
+    const target = nextChapter(book.name, selectedChapter);
+    if (!target) return;
+    soundEngine.playPageTurn();
+    setIsPlayingAudio(false);
+    setIsPlayingChapterAudio(false);
+    soundEngine.stopSpeaking();
+    if (target.book !== book.name) {
+      const targetBook = allBooks.find(b => b.name === target.book);
+      if (targetBook) onSelectBook(targetBook);
+    }
+    setSelectedChapter(target.chapter);
+  };
 
   const goToNext = useCallback(() => {
     if (nextBook) {
@@ -939,11 +973,8 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                 {/* Left: Chapter Selector Controls */}
                 <div className="flex flex-wrap items-center gap-1 sm:gap-2 min-w-0">
                   <button
-                    disabled={selectedChapter <= 1}
-                    onClick={() => {
-                      soundEngine.playPageTurn();
-                      setSelectedChapter(c => Math.max(1, c - 1));
-                    }}
+                    disabled={!canGoPrevChapter}
+                    onClick={goToPreviousChapter}
                     className="p-1.5 sm:p-2 rounded-xl bg-stone-100 dark:bg-stone-850 hover:bg-stone-200 dark:hover:bg-stone-800 disabled:opacity-30 disabled:pointer-events-none text-stone-700 dark:text-stone-300 transition-colors"
                     title={t('reader.prevChapter')}
                     aria-label={t('reader.prevChapter')}
@@ -971,11 +1002,8 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                   </div>
 
                   <button
-                    disabled={selectedChapter >= totalChapters}
-                    onClick={() => {
-                      soundEngine.playPageTurn();
-                      setSelectedChapter(c => Math.min(totalChapters, c + 1));
-                    }}
+                    disabled={!canGoNextChapter}
+                    onClick={goToNextChapter}
                     className="p-1.5 sm:p-2 rounded-xl bg-stone-100 dark:bg-stone-850 hover:bg-stone-200 dark:hover:bg-stone-800 disabled:opacity-30 disabled:pointer-events-none text-stone-700 dark:text-stone-300 transition-colors"
                     title={t('reader.nextChapter')}
                     aria-label={t('reader.nextChapter')}

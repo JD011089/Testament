@@ -24,6 +24,7 @@ import type { DailyCampaignStep } from './data/dailyCampaigns';
 import { getComposedDailyMission } from './utils/missionComposer';
 import { pathForTab, tabFromPath, type AppTab } from './utils/routes';
 import { loadReadingPlace } from './utils/readingPlace';
+import { addBookmark, removeBookmark } from './utils/bookmarks';
 import { getDailyMission, type GeneratedDailyMission } from './utils/dailyMissionPipeline';
 import { isVerseMastered } from './utils/fsrsEngine';
 
@@ -294,7 +295,10 @@ export function App() {
     const onBookmark = (event: Event) => {
       const id = (event as CustomEvent<string>).detail;
       if (typeof id !== 'string') return;
-      setBookmarkedVerses((prev) => (prev.includes(id) ? prev : [...prev, id]));
+      setBookmarkedVerses((prev) => {
+        if (prev.includes(id)) return prev;
+        return addBookmark(id);
+      });
     };
     window.addEventListener('testament-verse-bookmarked', onBookmark);
     return () => window.removeEventListener('testament-verse-bookmarked', onBookmark);
@@ -559,21 +563,14 @@ export function App() {
 
   const handleToggleBookmark = (verseId: string) => {
     const updated = bookmarkedVerses.includes(verseId)
-      ? bookmarkedVerses.filter(id => id !== verseId)
-      : [...bookmarkedVerses, verseId];
+      ? removeBookmark(verseId)
+      : addBookmark(verseId);
     setBookmarkedVerses(updated);
-    localStorage.setItem('testament_bookmarked_verses', JSON.stringify(updated));
   };
 
   const handleSaveBookmark = (verseId: string) => {
     if (bookmarkedVerses.includes(verseId)) return false;
-    const updated = [...bookmarkedVerses, verseId];
-    setBookmarkedVerses(updated);
-    try {
-      localStorage.setItem('testament_bookmarked_verses', JSON.stringify(updated));
-    } catch {
-      // ignore quota failures
-    }
+    setBookmarkedVerses(addBookmark(verseId));
     return true;
   };
 

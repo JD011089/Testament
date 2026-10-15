@@ -20,7 +20,8 @@ import {
   Sparkles, 
   Brain,
   Clock,
-  Calendar
+  Calendar,
+  BookOpen
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -917,6 +918,7 @@ export const WordForge: React.FC<WordForgeProps> = ({
     return 0;
   });
   const [verseNotice, setVerseNotice] = useState<string | null>(null);
+  const [unresolvedTarget, setUnresolvedTarget] = useState<string | null>(null);
 
   const categories = [
     'All',
@@ -940,6 +942,7 @@ export const WordForge: React.FC<WordForgeProps> = ({
       if (verseIdx !== -1) {
         setActiveVerseIndex(verseIdx);
         setVerseNotice(null);
+        setUnresolvedTarget(null);
         onClearTargetVerse?.();
       } else {
         const allIdx = findVerseIndex(targetVerseId, allVerses);
@@ -947,10 +950,12 @@ export const WordForge: React.FC<WordForgeProps> = ({
           setSelectedCategory('All');
           setActiveVerseIndex(allIdx);
           setVerseNotice(null);
+          setUnresolvedTarget(null);
           onClearTargetVerse?.();
         } else {
-          setVerseNotice('That verse is not available. Showing the first verse instead.');
-          setActiveVerseIndex(0);
+          // Never silently substitute a different verse (e.g. Joshua 1:9).
+          setVerseNotice(null);
+          setUnresolvedTarget(targetVerseId);
           onClearTargetVerse?.();
         }
       }
@@ -979,6 +984,31 @@ export const WordForge: React.FC<WordForgeProps> = ({
     soundEngine.stopSpeaking();
     setActiveVerseIndex(prev => (prev - 1 + filteredVerses.length) % filteredVerses.length);
   };
+
+  if (unresolvedTarget) {
+    return (
+      <div className="max-w-md mx-auto px-4 py-10 text-center space-y-4">
+        <div className="w-14 h-14 mx-auto rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center">
+          <BookOpen aria-hidden="true" className="w-6 h-6 text-amber-600" />
+        </div>
+        <h2 className="text-title-3 text-fg">We couldn't find that verse</h2>
+        <p className="text-small text-fg-muted">
+          "{unresolvedTarget}" isn't in your available verses yet. Pick one below to practice.
+        </p>
+        <button
+          type="button"
+          onClick={() => {
+            soundEngine.playClick();
+            setUnresolvedTarget(null);
+            setVerseNotice(null);
+          }}
+          className="btn-primary"
+        >
+          Choose a verse
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-8 pb-2 md:pb-6 text-left">

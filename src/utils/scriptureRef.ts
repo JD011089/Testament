@@ -1,9 +1,25 @@
+import { BIBLE_BOOK_CHAPTER_COUNTS } from './bibleService';
+import { getVerseCount } from './bookVerseCounts';
+
 export interface ParsedScriptureRef {
   book: string;
   chapter: number;
   verseStart: number;
   verseEnd: number;
 }
+
+/** Canonical book order (39 OT + 27 NT) used for cross-book navigation. */
+export const CANONICAL_BOOK_ORDER: string[] = [
+  'Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy', 'Joshua', 'Judges', 'Ruth',
+  '1 Samuel', '2 Samuel', '1 Kings', '2 Kings', '1 Chronicles', '2 Chronicles', 'Ezra',
+  'Nehemiah', 'Esther', 'Job', 'Psalms', 'Proverbs', 'Ecclesiastes', 'Song of Solomon',
+  'Isaiah', 'Jeremiah', 'Lamentations', 'Ezekiel', 'Daniel', 'Hosea', 'Joel', 'Amos',
+  'Obadiah', 'Jonah', 'Micah', 'Nahum', 'Habakkuk', 'Zephaniah', 'Haggai', 'Zechariah',
+  'Malachi', 'Matthew', 'Mark', 'Luke', 'John', 'Acts', 'Romans', '1 Corinthians',
+  '2 Corinthians', 'Galatians', 'Ephesians', 'Philippians', 'Colossians', '1 Thessalonians',
+  '2 Thessalonians', '1 Timothy', '2 Timothy', 'Titus', 'Philemon', 'Hebrews', 'James',
+  '1 Peter', '2 Peter', '1 John', '2 John', '3 John', 'Jude', 'Revelation'
+];
 
 export const BOOK_ABBREVIATIONS: Record<string, string> = {
   // Old Testament
@@ -85,37 +101,95 @@ export function resolveBookName(rawBook: string): string {
   return rawBook.trim();
 }
 
+export type ReferenceParseResult =
+  | { ok: true; ref: ParsedScriptureRef }
+  | { ok: false; error: string };
+
 /**
  * Parses scripture references like:
  * - "Romans 8:28", "Rom 8:28", "Rom 8:28-30"
  * - "Psalm 23", "Ps 23", "John 3" (chapter-only defaults to verse 1)
  * - "1 Kings 19:12", "1 Kgs 19:12"
+ * and validates the book, chapter, and (where bundled) verse range.
  */
-export function parseScriptureReference(reference: string): ParsedScriptureRef | null {
+export function parseScriptureReferenceDetailed(reference: string): ReferenceParseResult {
   const trimmed = reference.trim();
-  if (!trimmed) return null;
+  if (!trimmed) return { ok: false, error: 'Type a book, chapter, and verse — for example, "John 3:16".' };
 
-  // 1. Chapter and verse: "Romans 8:28", "Rom 8:28-30", "1 Kings 19:12", "Song of Solomon 2:1"
   const cvMatch = trimmed.match(/^([1-3]?\s*[A-Za-z]+(?:\s+[A-Za-z]+){0,3})\s+(\d+):(\d+)(?:\s*-\s*(\d+))?$/);
-  if (cvMatch) {
-    const book = resolveBookName(cvMatch[1]);
-    const chapter = Number(cvMatch[2]);
-    const verseStart = Number(cvMatch[3]);
-    const verseEnd = Number(cvMatch[4] || cvMatch[3]);
-    if (!chapter || !verseStart || verseEnd < verseStart) return null;
-    return { book, chapter, verseStart, verseEnd };
+  const cMatch = cvMatch ? null : trimmed.match(/^([1-3]?\s*[A-Za-z]+(?:\s+[A-Za-z]+){0,3})\s+(\d+)$/);
+  if (!cvMatch && !cMatch) {
+    return { ok: false, error: `We couldn't read "${trimmed}" as a reference. Try something like "Psalm 23" or "Romans 8:28".` };
   }
 
-  // 2. Chapter only: "Psalm 23", "Ps 23", "John 3", "Genesis 1", "Song of Solomon 2"
-  const cMatch = trimmed.match(/^([1-3]?\s*[A-Za-z]+(?:\s+[A-Za-z]+){0,3})\s+(\d+)$/);
-  if (cMatch) {
-    const book = resolveBookName(cMatch[1]);
-    const chapter = Number(cMatch[2]);
-    if (!chapter) return null;
-    return { book, chapter, verseStart: 1, verseEnd: 1 };
+  const book = resolveBookName((cvMatch ?? cMatch)![1]);
+  const chapter = Number((cvMatch ?? cMatch)![2]);
+  const verseStart = cvMatch ? Number(cvMatch[3]) : 1;
+  const verseEnd = cvMatch ? Number(cvMatch[4] || cvMatch[3]) : 1;
+
+  if (!book || !chapter || !verseStart) {
+    return { ok: false, error: `"${trimmed}" is missing a chapter or verse number.` };
+  }
+  if (verseEnd < verseStart) {
+    return { ok: false, error: `The verse range in "${trimmed}" runs backwards.` };
   }
 
-  return null;
+  const totalChapters = BIBLE_BOOK_CHAPTER_COUNTS[book];
+  if (!totalChapters) {
+    // Unknown book: only reject clearly-English-looking gibberish so localized
+    // book names still flow through to their own resolvers.
+    if (/^[\x20-\x7E]+$/.test(book)) {
+      return { ok: false, error: `We don't know a Bible book called "${book}".` };
+    }
+    return { ok: true, ref: { book, chapter, verseStart, verseEnd } };
+  }
+  if (chapter > totalChapters) {
+    return { ok: false, error: `${book} has ${totalChapters} chapter${totalChapters === 1 ? '' : 's'} — there is no chapter ${chapter}.` };
+  }
+
+  const verseCount = getVerseCount(book, chapter);
+  if (verseCount && (verseStart > verseCount || verseEnd > verseCount)) {
+    return { ok: false, error: `${book} ${chapter} has ${verseCount} verse${verseCount === 1 ? '' : 's'} — there is no verse ${Math.max(verseStart, verseEnd)}.` };
+  }
+
+  return { ok: true, ref: { book, chapter, verseStart, verseEnd } };
+}
+
+/** Returns the parsed reference, or null when it is not a valid reference. */
+export function parseScriptureReference(reference: string): ParsedScriptureRef | null {
+  const result = parseScriptureReferenceDetailed(reference);
+  return result.ok ? result.ref : null;
+}
+
+/** Friendly message explaining why a reference could not be parsed, or null. */
+export function getReferenceError(reference: string): string | null {
+  if (!reference.trim()) return null;
+  const result = parseScriptureReferenceDetailed(reference);
+  return result.ok ? null : result.error;
+}
+
+export interface ChapterLink {
+  book: string;
+  chapter: number;
+}
+
+/** Next chapter, crossing into the next book at a book's final chapter. */
+export function nextChapter(book: string, chapter: number): ChapterLink | null {
+  const total = BIBLE_BOOK_CHAPTER_COUNTS[book];
+  if (total && chapter < total) return { book, chapter: chapter + 1 };
+  const index = CANONICAL_BOOK_ORDER.indexOf(book);
+  if (index === -1 || index === CANONICAL_BOOK_ORDER.length - 1) return null;
+  return { book: CANONICAL_BOOK_ORDER[index + 1], chapter: 1 };
+}
+
+/** Previous chapter, crossing back into the previous book at chapter 1. */
+export function previousChapter(book: string, chapter: number): ChapterLink | null {
+  if (chapter > 1) return { book, chapter: chapter - 1 };
+  const index = CANONICAL_BOOK_ORDER.indexOf(book);
+  if (index <= 0) return null;
+  const prevBook = CANONICAL_BOOK_ORDER[index - 1];
+  const prevTotal = BIBLE_BOOK_CHAPTER_COUNTS[prevBook] ?? 1;
+  return { book: prevBook, chapter: prevTotal };
 }
 
 /** A few verses of context around the cited range. */
