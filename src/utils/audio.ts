@@ -158,6 +158,8 @@ class SoundEngine {
   private currentAbortController: AbortController | null = null;
   private cachedVoices: SpeechSynthesisVoice[] = [];
   private currentPlaybackState: VoicePlaybackState = 'idle';
+  /** Once the TTS endpoint fails, stop retrying it this session (avoids console/network noise). */
+  private ttsEndpointUnavailable = false;
 
   public getPlaybackState(): VoicePlaybackState {
     return this.currentPlaybackState;
@@ -682,6 +684,13 @@ class SoundEngine {
 
     const cleanText = normalizeScriptureForSpeech(text);
 
+    // If the network TTS endpoint already failed this session, go straight to
+    // the on-device reader instead of hammering a dead endpoint on every card.
+    if (this.ttsEndpointUnavailable) {
+      this.fallbackWithAssetOrSpeech(cleanText, onFinished, audioAssetUrl);
+      return;
+    }
+
     // Primary: High-fidelity ElevenLabs via Vite local proxy
     const streamUrl = `/api/tts?text=${encodeURIComponent(cleanText)}&voice=${encodeURIComponent(this.currentNarratorProfile)}`;
 
@@ -750,6 +759,7 @@ class SoundEngine {
       })
       .catch((err) => {
         if (controller.signal.aborted) return;
+        this.ttsEndpointUnavailable = true;
         console.warn('[SoundEngine] Narration API unavailable, using on-device reader:', (err as Error)?.message);
         this.setPlaybackState('error', (err as Error)?.message || 'Narration unavailable');
         if (typeof window !== 'undefined') {
