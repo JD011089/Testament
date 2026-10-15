@@ -69,6 +69,14 @@ test.describe('Trivia Gauntlet — generated question bank integrity', () => {
     }
   });
 
+  test('no invented in-app story titles are asked as questions', () => {
+    for (const q of bank) {
+      // The removed "Which story belongs to X?" generator produced this kind.
+      expect(['hero-story']).not.toContain(q.kind);
+      expect(q.prompt, `invented-title prompt in ${q.id}`).not.toMatch(/which story belongs to/i);
+    }
+  });
+
   test('no duplicate references produce two question sets', () => {
     const references = bank
       .filter((q) => q.id.startsWith('v-ref:'))
