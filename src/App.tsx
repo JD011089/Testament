@@ -3,7 +3,6 @@ import type { StoryQuest } from './types';
 import { STORY_QUESTS } from './data/stories';
 import { Dashboard } from './components/Dashboard';
 import { StoryViewer } from './components/StoryViewer';
-import { ArsenalView } from './components/ArsenalView';
 import { Navigation } from './components/Navigation';
 import type { NavTab } from './components/Navigation';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
@@ -24,7 +23,8 @@ import type { DailyCampaignStep } from './data/dailyCampaigns';
 import { getComposedDailyMission } from './utils/missionComposer';
 import { pathForTab, tabFromPath, storyIdFromPath, pathForStory, type AppTab } from './utils/routes';
 import { loadReadingPlace } from './utils/readingPlace';
-import { addBookmark, removeBookmark } from './utils/bookmarks';
+import { addBookmark } from './utils/bookmarks';
+import { hasCompletedFirstRun } from './utils/firstRun';
 import { getDailyMission, type GeneratedDailyMission } from './utils/dailyMissionPipeline';
 import { isVerseMastered } from './utils/fsrsEngine';
 import { getStoryById } from './content/stories';
@@ -45,6 +45,7 @@ const StoryPlayer = lazy(() => import('./components/story/StoryPlayer').then((m)
 const TodayScreen = lazy(() => import('./screens/TodayScreen').then((m) => ({ default: m.TodayScreen })));
 const MapScreen = lazy(() => import('./screens/MapScreen').then((m) => ({ default: m.MapScreen })));
 const DeckScreen = lazy(() => import('./screens/DeckScreen').then((m) => ({ default: m.DeckScreen })));
+const FirstRun = lazy(() => import('./components/onboarding/FirstRun').then((m) => ({ default: m.FirstRun })));
 
 function ViewFallback() {
   return <div className="max-w-7xl mx-auto px-6 py-16 text-sm text-stone-500">Loading...</div>;
@@ -108,6 +109,9 @@ export function App() {
   const [isHowItWorksOpen, setIsHowItWorksOpen] = useState<boolean>(false);
   // Part 9: First-run experience drops the user straight into the mission with zero popup modals
   const [isOnboardingOpen, setIsOnboardingOpen] = useState<boolean>(false);
+
+  // First run: 3 short screens, then drop straight into David and Goliath.
+  const [showFirstRun, setShowFirstRun] = useState<boolean>(() => !hasCompletedFirstRun());
 
   // Keep modal states in refs so the single window popstate listener closes modals before exiting the app
   const modalsRef = useRef({    isSettingsOpen,
@@ -616,13 +620,6 @@ export function App() {
     persistNumber('testament_xp', newXp);
   };
 
-  const handleToggleBookmark = (verseId: string) => {
-    const updated = bookmarkedVerses.includes(verseId)
-      ? removeBookmark(verseId)
-      : addBookmark(verseId);
-    setBookmarkedVerses(updated);
-  };
-
   const handleSaveBookmark = (verseId: string) => {
     if (bookmarkedVerses.includes(verseId)) return false;
     setBookmarkedVerses(addBookmark(verseId));
@@ -714,6 +711,17 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-surface dark:bg-iron-950 text-stone-900 dark:text-parchment-100 transition-colors duration-200 w-full relative">
+      {showFirstRun && (
+        <Suspense fallback={null}>
+          <FirstRun
+            onDone={() => {
+              setShowFirstRun(false);
+              setCurrentTab('today');
+              try { window.history.replaceState({ tab: 'today' }, '', '/'); } catch { /* ignore */ }
+            }}
+          />
+        </Suspense>
+      )}
       <main className={`w-full pt-3 sm:pt-4 xl:pt-16 ${
         activeQuest || activeDailyMission || activeStory
           ? 'pb-4 xl:pb-8'
@@ -886,10 +894,10 @@ export function App() {
               </Suspense>
             )}
 
-            {(currentTab === 'practice' || currentTab === 'wordforge' || currentTab === 'dilemmas') && (
+            {currentTab === 'practice' && (
               <Suspense fallback={<ViewFallback />}>
                 <PracticeView
-                  initialSubTab={currentTab === 'dilemmas' ? 'dilemmas' : 'memorize'}
+                  initialSubTab="memorize"
                   memorizedVerses={memorizedVerses}
                   onVerseMastered={handleVerseMastered}
                   targetVerseId={targetWordForgeVerseId}
@@ -902,14 +910,7 @@ export function App() {
               </Suspense>
             )}
 
-            {currentTab === 'arsenal' && (
-              <ArsenalView 
-                memorizedVerses={memorizedVerses}
-                bookmarkedVerses={bookmarkedVerses}
-                onToggleBookmark={handleToggleBookmark}
-                onPracticeVerse={handlePracticeVerseFromArsenal}
-              />
-            )}
+            {/* Saved (arsenal) is retired; /saved and /arsenal redirect to Deck. */}
 
             {currentTab === 'not-found' && !activeStory && (
               <div className="max-w-md mx-auto px-6 py-20 text-center space-y-4">

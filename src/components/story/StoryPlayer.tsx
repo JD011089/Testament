@@ -221,11 +221,11 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
 
       {/* Footer actions */}
       <div className="px-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] pt-2 border-t border-line">
-        <div className="max-w-xl mx-auto flex items-center gap-3">
+        <div className="max-w-xl mx-auto flex flex-col sm:flex-row items-stretch gap-2 sm:gap-3">
           <button
             type="button"
             onClick={() => { celebrate('snap'); onReadChapter(story.passage); }}
-            className="btn-secondary flex-1 inline-flex items-center justify-center gap-2"
+            className="btn-secondary flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap"
           >
             <BookOpen className="w-4 h-4" /> Read the full chapter
           </button>

@@ -299,7 +299,7 @@ export const getStoryVerseForAct = (questId: string, _actId?: string, lang?: Sup
 
 /**
  * Register any dynamic Bible verse selected from the full chapter reader or daily mission
- * so it can be practiced immediately in Word Forge and saved in Arsenal
+ * so it can be practiced immediately in Practice and saved in Arsenal
  */
 export const registerDynamicBibleVerse = (reference: string, text: string, translation: string = 'WEB'): MemoryVerse => {
   const cleanId = `custom-bible-${normalizeVerseSlug(reference)}`;

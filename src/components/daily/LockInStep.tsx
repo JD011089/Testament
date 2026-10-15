@@ -94,7 +94,7 @@ function LadderTask({ text, level, onResult }: { text: string; level: LadderLeve
     return shuffled.every((t, i) => t.word === words[i]) ? shuffled.reverse() : shuffled;
   }, [task.mode, words]);
 
-  const [built, setBuilt] = useState<string[]>([]);
+  const [built, setBuilt] = useState<{ id: string; word: string }[]>([]);
   const [typed, setTyped] = useState('');
   const [msg, setMsg] = useState<string | null>(null);
 
@@ -168,18 +168,18 @@ function LadderTask({ text, level, onResult }: { text: string; level: LadderLeve
       )}
       <div className="min-h-[48px] rounded-xl border border-dashed border-line bg-surface-raised p-2 flex flex-wrap gap-1">
         {built.length === 0 && <span className="text-small text-fg-muted">Your verse appears here…</span>}
-        {built.map((word, i) => <span key={`${word}-${i}`} className="text-body text-fg">{word}</span>)}
+        {built.map((entry, i) => <span key={`${entry.id}-${i}`} className="text-body text-fg">{entry.word}</span>)}
       </div>
       <div className="flex flex-wrap gap-2">
-        {tiles.filter((t) => !built.includes(t.word)).map((tile) => (
+        {tiles.filter((t) => !built.some((b) => b.id === t.id)).map((tile) => (
           <button
             key={tile.id}
             type="button"
             onClick={() => {
-              const next = [...built, tile.word];
+              const next = [...built, { id: tile.id, word: tile.word }];
               setBuilt(next);
               if (next.length === words.length) {
-                const correct = validateOrder(next, text);
+                const correct = validateOrder(next.map((entry) => entry.word), text);
                 setMsg(correct ? 'In order — nice.' : 'Close. Try the order again.');
                 onResult(correct);
               }

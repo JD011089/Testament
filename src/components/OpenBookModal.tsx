@@ -481,7 +481,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
   const handleCopyVerse = (verseNum: number, text: string) => {
     soundEngine.playSnap();
     const reference = `${book.name} ${selectedChapter}:${verseNum}`;
-    const fullCitation = `"${text}" — ${reference} (${chapterData?.translation || 'WEB'})`;
+    const fullCitation = `"${text}" â€” ${reference} (${chapterData?.translation || 'WEB'})`;
     navigator.clipboard.writeText(fullCitation);
     showToast(t('reader.copied', { ref: reference }));
   };
@@ -544,7 +544,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
   const handleShareVerse = async (verseNum: number, text: string) => {
     soundEngine.playSnap();
     const reference = `${book.name} ${selectedChapter}:${verseNum}`;
-    const shareText = `"${text}" — ${reference} (${chapterData?.translation || 'WEB'})`;
+    const shareText = `"${text}" â€” ${reference} (${chapterData?.translation || 'WEB'})`;
     if (navigator.share) {
       try {
         await navigator.share({
@@ -593,10 +593,10 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
         <div className="p-3 rounded-xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/60 text-left space-y-1 animate-fadeIn">
           <div className="flex items-center gap-1 text-[10px] font-mono font-bold text-amber-800 dark:text-amber-400 uppercase tracking-wider">
             <Sparkles className="w-3 h-3 text-amber-500" />
-            <span>Simpler Words • AI Reflection (Not Scripture)</span>
+            <span>Simpler Words â€¢ AI Reflection (Not Scripture)</span>
           </div>
           <p className="text-xs sm:text-sm font-reading text-stone-800 dark:text-stone-100 leading-relaxed font-medium">
-            {isLoadingSimplerVerse && !simplerVerseMap[verseNum] ? 'Translating into plain everyday words…' : simplerVerseMap[verseNum]}
+            {isLoadingSimplerVerse && !simplerVerseMap[verseNum] ? 'Translating into plain everyday wordsâ€¦' : simplerVerseMap[verseNum]}
           </p>
         </div>
       )}
@@ -648,7 +648,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
 
               <BookOpen className="w-4 h-4 text-amber-800 dark:text-amber-500 shrink-0 hidden sm:inline" />
               <span className="text-xs font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold truncate flex-1 min-w-0">
-                {book.name}{' '}<span className="hidden sm:inline">•{' '}Volume #{String(book.order).padStart(2, '0')}{' '}of 66</span>
+                {book.name}{' '}<span className="hidden sm:inline">â€¢{' '}Volume #{String(book.order).padStart(2, '0')}{' '}of 66</span>
               </span>
             </div>
 
@@ -873,10 +873,10 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                       className="text-[11px] font-mono font-bold px-2.5 py-1 rounded-full bg-white dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-800 border border-amber-400/60 dark:border-amber-500/40 text-amber-800 dark:text-amber-300 transition-colors shadow-xs"
                     >
                       {language === 'fr' 
-                        ? (lens === 'street' ? '⚡ Langage Direct Appliqué' : '📜 Texte Canonique')
+                        ? (lens === 'street' ? 'âš¡ Langage Direct AppliquÃ©' : 'ðŸ“œ Texte Canonique')
                         : language === 'es'
-                          ? (lens === 'street' ? '⚡ Lenguaje Directo Aplicado' : '📜 Texto Canónico')
-                          : (lens === 'street' ? '⚡ Street Plain English' : '📜 Canonical Word-for-Word')}
+                          ? (lens === 'street' ? 'âš¡ Lenguaje Directo Aplicado' : 'ðŸ“œ Texto CanÃ³nico')
+                          : (lens === 'street' ? 'âš¡ Street Plain English' : 'ðŸ“œ Canonical Word-for-Word')}
                     </button>
                   </div>
 
@@ -891,7 +891,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                       </span>
                       <span className="text-[11px] uppercase text-stone-400 dark:text-stone-500 font-semibold">
                         {lens === 'street' 
-                          ? (language === 'fr' ? 'Appliqué Moderne' : language === 'es' ? 'Aplicado Moderno' : 'Modern Applied') 
+                          ? (language === 'fr' ? 'AppliquÃ© Moderne' : language === 'es' ? 'Aplicado Moderno' : 'Modern Applied') 
                           : (getVerseById(book.id, language)?.translation || (language === 'fr' ? 'LSG 1910' : language === 'es' ? 'RVR 1960' : 'WEB'))}
                       </span>
                     </div>
@@ -906,7 +906,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
 
                     <div className="mt-4 pt-3 border-t border-stone-200 dark:border-stone-800/80 flex items-start gap-2">
                       <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 uppercase tracking-wider font-bold shrink-0 mt-0.5">
-                        {language === 'fr' ? 'Règle de Base:' : language === 'es' ? 'Regla Fundamental:' : 'Ground Rule:'}
+                        {language === 'fr' ? 'RÃ¨gle de Base:' : language === 'es' ? 'Regla Fundamental:' : 'Ground Rule:'}
                       </span>
                       <p className="text-xs text-stone-700 dark:text-stone-300 leading-normal font-sans">
                         {(() => {
@@ -928,7 +928,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                   />
                 </div>
 
-                {/* Action Buttons: Word Forge & Pin Daily */}
+                {/* Action Buttons: Practice & Pin Daily */}
                 <div className="space-y-3 pt-2">
                   <div className="grid grid-cols-2 gap-3">
                     <button
@@ -942,7 +942,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                       className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-white hover:bg-stone-100 dark:bg-stone-900 dark:hover:bg-stone-800 border border-stone-200 dark:border-stone-700 hover:border-amber-500 text-xs text-stone-700 dark:text-stone-200 font-semibold transition-all shadow-xs"
                     >
                       <Brain className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
-                      <span>Train Word Forge</span>
+                      <span>Train Practice</span>
                     </button>
 
                     <button
@@ -1319,7 +1319,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                         Chapter {selectedChapter}
                       </h2>
                       <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
-                        {chapterData.verses.length} verses · {chapterData.translation}
+                        {chapterData.verses.length} verses Â· {chapterData.translation}
                       </p>
                       <p className="text-xs text-stone-500 dark:text-stone-400 mt-2">
                         Tap a verse to memorize, save, or hear it.
@@ -1447,7 +1447,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                         disabled={selectedChapter >= totalChapters && allBooks.findIndex(b => b.id === book.id) >= allBooks.length - 1}
                         className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-xs font-bold text-stone-950 disabled:opacity-30 disabled:pointer-events-none shadow-xs transition-colors cursor-pointer"
                       >
-                        <span>{selectedChapter >= totalChapters && allBooks.findIndex(b => b.id === book.id) < allBooks.length - 1 ? 'Next Book →' : 'Next Ch'}</span>
+                        <span>{selectedChapter >= totalChapters && allBooks.findIndex(b => b.id === book.id) < allBooks.length - 1 ? 'Next Book â†’' : 'Next Ch'}</span>
                         <ChevronRight className="w-4 h-4 shrink-0" />
                       </button>
                     </div>

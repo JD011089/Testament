@@ -2,6 +2,7 @@ import { STORY_ARCS, isFullStory, type StoryArc } from '../types/story';
 import { STORY_STOPS } from '../content/stories';
 import { isStoryCompleted } from '../utils/storyProgress';
 import { celebrate } from '../utils/feedback';
+import { PageHeader } from '../components/PageHeader';
 import { Lock, Play, Sparkles } from 'lucide-react';
 
 interface MapScreenProps {
@@ -15,21 +16,30 @@ export function MapScreen({ onPlayStory, onQuickPlay }: MapScreenProps) {
 
   return (
     <div className="max-w-2xl mx-auto px-4 pt-4 pb-8 space-y-6">
-      <header className="flex items-center justify-between">
-        <h1 className="text-title-1 font-serif text-fg">Story Map</h1>
-        {onQuickPlay && (
-          <button type="button" className="btn-secondary" onClick={() => { celebrate('tap'); onQuickPlay(); }}>
+      <PageHeader
+        title="Story Map"
+        subtitle="Follow the path from Creation to the early church."
+        actions={onQuickPlay && (
+          <button type="button" className="btn-quiet" onClick={() => { celebrate('tap'); onQuickPlay(); }}>
             Quick play
           </button>
         )}
-      </header>
+      />
 
       {STORY_ARCS.map((arc: StoryArc) => {
         const stops = STORY_STOPS.filter((stop) => stop.arc === arc);
         if (stops.length === 0) return null;
+        const arcDone = stops.length > 0 && stops.every((stop) => isStoryCompleted(stop.id));
         return (
           <section key={arc} className="space-y-3">
-            <h2 className="text-title-3 font-serif text-fg">{arc}</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-title-3 font-serif text-fg">{arc}</h2>
+              {arcDone && (
+                <span className="inline-flex items-center gap-1 text-label uppercase rounded-full border border-accent/50 bg-accent/10 text-accent px-2 py-0.5">
+                  <Sparkles className="w-3 h-3" /> Arc complete
+                </span>
+              )}
+            </div>
             <div className="relative border-l-2 border-line pl-4 space-y-3">
               {stops.map((stop) => {
                 const completed = isStoryCompleted(stop.id);

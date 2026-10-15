@@ -7,23 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.0-beta] - 2026-10-15
 
-### Added (Phase 2 — Story Swipes engine)
-- **Data-driven story player**: `src/content/stories/*.json` (one file per story) with a
-  typed schema (`src/types/story.ts`) and a dependency-free validator (`src/utils/storySchema.ts`).
-- **Full-screen player** (`src/components/story/StoryPlayer.tsx`): vertical cards, Instagram-style
-  progress segments, swipe or tap to advance, exact resume per story, tab-hidden pause,
-  narration auto-play, and a "Read the full chapter" button.
-- **Interactions**: `DragToTarget`, `HoldToContinue`, `TapReveal`, `TapSequence` — instant feedback,
-  haptics, sound, and no fail state (wrong tries only nudge).
-- **Choice moment**: pick an option, then see what really happened with the actual verse.
-- **David and Goliath** (1 Samuel 17, 8 cards, verified WEB text) plus stubs for all 24 map stops.
-- **Story progress keyed by storyId** (`src/utils/storyProgress.ts`) and a Deck store (`src/utils/deck.ts`);
-  the payoff card flips the verse into My Deck.
-- **Shared feedback** (`src/utils/feedback.ts`): one haptic + success-sound helper honoring settings.
-- **Translation integrity**: `src/content/sources/web.json` corpus + `src/utils/verifyVerses.ts`
-  and `scripts/verify-verses.ts` (`npm run verify:verses`) fail on any label/text mismatch.
-- Tests: `tests/storySchema.test.ts`, `tests/storyProgress.test.ts`, `tests/verifyVerses.test.ts`.
-
 ### Added (Phase 1 — Critical fixes)
 - **Canonical verse key**: a single normalized key (`"1KI.19.12"`) with `canonicalVerseKey` /
   `resolveVerseKey` (`src/utils/verseKey.ts`) is now the source of truth for verse lookups,
@@ -41,6 +24,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Save card now persists**: the Saved collection writes to storage (and no longer stores a raw
   reference instead of the verse id), so a saved story verse survives a reload.
 - Chapter-only references (`Psalm 23`, `Ps 23`, `John 3`) and abbreviations resolve correctly.
+
+### Added (Phase 2 — Story Swipes engine)
+- **Data-driven story player**: `src/content/stories/*.json` (one file per story) with a
+  typed schema (`src/types/story.ts`) and a dependency-free validator (`src/utils/storySchema.ts`).
+- **Full-screen player** (`src/components/story/StoryPlayer.tsx`): vertical cards, Instagram-style
+  progress segments, swipe or tap to advance, exact resume per story, tab-hidden pause,
+  narration auto-play, and a "Read the full chapter" button.
+- **Interactions**: `DragToTarget`, `HoldToContinue`, `TapReveal`, `TapSequence` — instant feedback,
+  haptics, sound, and no fail state (wrong tries only nudge).
+- **Choice moment**: pick an option, then see what really happened with the actual verse.
+- **David and Goliath** (1 Samuel 17, 8 cards, verified WEB text) plus stubs for all 24 map stops.
+- **Story progress keyed by storyId** (`src/utils/storyProgress.ts`) and a Deck store (`src/utils/deck.ts`);
+  the payoff card flips the verse into My Deck.
+- **Shared feedback** (`src/utils/feedback.ts`): one haptic + success-sound helper honoring settings.
+- **Translation integrity**: `src/content/sources/web.json` corpus + `src/utils/verifyVerses.ts`
+  and `scripts/verify-verses.ts` (`npm run verify:verses`) fail on any label/text mismatch.
+- Tests: `tests/storySchema.test.ts`, `tests/storyProgress.test.ts`, `tests/verifyVerses.test.ts`.
+
+### Added (Phase 3 — Daily loop)
+- **Today screen** (`src/screens/TodayScreen.tsx`): one big card and a four-step ring —
+  Swipe (play today's story) → Play (3 tap questions) → Lock in (today's verse + up to 2 due
+  reviews) → Collect (card flips into My Deck, then a clear "Done for today" state).
+- **Story quiz** (`src/components/daily/StoryQuiz.tsx`) with who/what/where questions drawn
+  only from the story just played; four options each; the distractor rule
+  (`src/utils/quizEngine.ts`) forbids an option that uniquely repeats a question word, and a
+  miss shows the verse. Tests: `tests/memoryAndQuiz.test.ts`.
+
+### Added (Phase 4 — Simplified memory)
+- **One fade-out ladder** (`src/utils/memoryLadder.ts`): Level 1 tap words in order, Level 2
+  fill blanks, Level 3 first letters, Level 4 type from memory; word order and accuracy are
+  validated with Unicode-safe matching (accents kept; case and punctuation normalized).
+- **Spaced repetition** (`src/utils/spacedRepetition.ts`): 1/3/7/14/30-day intervals; due
+  reviews appear automatically in Lock in; mastered only after a Level 4 recall on three
+  separate days. Test: `tests/spacedRepetition.test.ts`.
+
+### Added (Phase 5 — My Deck)
+- **My Deck** (`src/screens/DeckScreen.tsx`) replaces Saved: verse and character cards with a
+  bronze/silver/gold strength badge, tap-to-flip (story recap, verse, Practice, Read chapter),
+  filter by arc and strength, and share as a Daybreak image card with a story deep link
+  (`src/utils/shareCard.ts`). Private notes are never included in a share. Test: `tests/deck.test.ts`.
+
+### Added (Phase 6 — Story map)
+- **Story Map** (`src/screens/MapScreen.tsx`): a vertical path grouped into the seven arcs.
+  Completed stops glow gold, the next stop pulses, locked stops show titles only, finished
+  stories can be replayed, and a completed arc shows an "Arc complete" badge.
+
+### Added (Phase 7 — Merge and cut)
+- **4 tabs only**: Today, Map, Bible, Deck, plus a shared Settings header icon. The Game tab
+  is gone from navigation (its engine becomes loop step 2 and Map "Quick Play"); `/saved` and
+  `/arsenal` now resolve to Deck and `/dilemmas` resolves to Map.
+- **XP and ranks removed from the UI** (navigation badge, dashboard rank, gauntlet XP tile);
+  progress is the deck and the map. Results now read "Correct / answered" instead of "/10".
+- **Word Forge naming removed** and the invented-title trivia question deleted.
+
+### Added (Phase 8 — Onboarding and settings)
+- **First run** (`src/components/onboarding/FirstRun.tsx`): three short screens ("Play a Bible
+  story in 3 minutes a day", "Collect the verses you learn", "Pick a daily reminder time"),
+  then drops straight into David and Goliath.
+- **Settings that apply**: a Sound toggle, a Haptics toggle, and a Daily session length
+  (3 min / 10 min / Deep) now persist and broadcast their change events.
+
+### Quality
+- End-to-end daily loop for David and Goliath at 390x844 and 820x1180 (`npm run test:e2e`):
+  Back never exits mid-flow, the Done state appears, the card lands in Deck, and a reload resumes.
+- Version bumped to `2.0.0-beta`.
 
 ## [1.26.0] - 2026-10-13
 

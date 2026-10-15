@@ -48,24 +48,24 @@ interface ReleaseMilestone {
 const ACTIVE_RELEASES: ReleaseMilestone[] = [
   {
     version: APP_VERSION,
-    tagline: 'Trivia Gauntlet — A Scripture Game That Teaches',
+    tagline: 'Trivia Gauntlet â€” A Scripture Game That Teaches',
     dateBadge: 'Current Release',
     isLatest: true,
     highlights: [
       {
         icon: <Gamepad2 className="w-4 h-4 text-amber-400" />,
         title: 'Scripture Trivia Arcade',
-        description: 'A new Game tab runs a fast arcade quiz built entirely from the Bible inside the app — beat the clock, build combos, guard three lives, and survive a double-points boss question.'
+        description: 'A new Game tab runs a fast arcade quiz built entirely from the Bible inside the app â€” beat the clock, build combos, guard three lives, and survive a double-points boss question.'
       },
       {
         icon: <Brain className="w-4 h-4 text-amber-400" />,
         title: '700+ Questions From Your Bible',
-        description: 'Eight question types are generated from the verses, story quests, and all 66 books — which passage, match the words, fill the blank, hero and theme matching, and anchor Scriptures — reshuffled every run.'
+        description: 'Eight question types are generated from the verses, story quests, and all 66 books â€” which passage, match the words, fill the blank, hero and theme matching, and anchor Scriptures â€” reshuffled every run.'
       },
       {
         icon: <BookOpen className="w-4 h-4 text-amber-400" />,
         title: 'Learn the Passage When You Miss',
-        description: 'A wrong answer pauses the round and points you straight to the Scripture — the exact reference, text, and a plain-language explanation — with one-tap practice in Word Forge.'
+        description: 'A wrong answer pauses the round and points you straight to the Scripture â€” the exact reference, text, and a plain-language explanation â€” with one-tap practice in Practice.'
       },
       {
         icon: <Flame className="w-4 h-4 text-amber-400" />,
@@ -83,7 +83,7 @@ const ACTIVE_RELEASES: ReleaseMilestone[] = [
       {
         icon: <BookOpen className="w-4 h-4 text-amber-400" />,
         title: 'Honest Scripture Labeling Everywhere',
-        description: 'Every plain-English takeaway is now explicitly badged as AI reflection • Not Scripture — including Saved Scriptures and Memorize — and only verbatim WEB/KJV text is ever read aloud.'
+        description: 'Every plain-English takeaway is now explicitly badged as AI reflection â€¢ Not Scripture â€” including Saved Scriptures and Memorize â€” and only verbatim WEB/KJV text is ever read aloud.'
       },
       {
         icon: <Brain className="w-4 h-4 text-amber-400" />,
@@ -104,7 +104,7 @@ const ACTIVE_RELEASES: ReleaseMilestone[] = [
   },
   {
     version: 'v1.24.0',
-    tagline: 'Daybreak Redesign — Calmer, Simpler & Gold Lit Palette',
+    tagline: 'Daybreak Redesign â€” Calmer, Simpler & Gold Lit Palette',
     dateBadge: 'Previous Release',
     isLatest: false,
     highlights: [
@@ -152,7 +152,7 @@ const ACTIVE_RELEASES: ReleaseMilestone[] = [
       {
         icon: <Car className="w-4 h-4 text-amber-400" />,
         title: 'Drive Mode Mission Briefing (Track 0)',
-        description: 'Drive mode now opens directly with Today\'s Mission briefing — narrating the hero, scenario, story, and scripture hands-free on your commute.'
+        description: 'Drive mode now opens directly with Today\'s Mission briefing â€” narrating the hero, scenario, story, and scripture hands-free on your commute.'
       },
       {
         icon: <Calendar className="w-4 h-4 text-amber-400" />,
@@ -168,7 +168,7 @@ const ACTIVE_RELEASES: ReleaseMilestone[] = [
   },
   {
     version: 'v1.22.1',
-    tagline: 'Post-Sweep Polish — Calendar Handoff, Question Parity & ADHD Clarity',
+    tagline: 'Post-Sweep Polish â€” Calendar Handoff, Question Parity & ADHD Clarity',
     dateBadge: 'Previous Release',
     isLatest: false,
     highlights: [
@@ -191,7 +191,7 @@ const ACTIVE_RELEASES: ReleaseMilestone[] = [
   },
   {
     version: 'v1.21.0',
-    tagline: 'Calendar Reminders — Replaces Push Notifications',
+    tagline: 'Calendar Reminders â€” Replaces Push Notifications',
     dateBadge: 'Previous Release',
     isLatest: false,
     highlights: [
@@ -214,7 +214,7 @@ const ACTIVE_RELEASES: ReleaseMilestone[] = [
   },
   {
     version: 'v1.20.0',
-    tagline: 'Engagement Spec v2 — 7 Retention & Scripture Depth Features',
+    tagline: 'Engagement Spec v2 â€” 7 Retention & Scripture Depth Features',
     dateBadge: 'Previous Release',
     isLatest: false,
     highlights: [
@@ -226,38 +226,38 @@ const ACTIVE_RELEASES: ReleaseMilestone[] = [
       {
         icon: <BookOpen className="w-4 h-4 text-amber-400" />,
         title: 'Historical Backstory Layer',
-        description: 'Collapsed-by-default historical grounding: who wrote it, who these people were, and why it mattered then in 3–5 concrete sentences.'
+        description: 'Collapsed-by-default historical grounding: who wrote it, who these people were, and why it mattered then in 3â€“5 concrete sentences.'
       },
       {
         icon: <Layers className="w-4 h-4 text-amber-400" />,
         title: 'Private Decision Journal',
-        description: 'Reverse-chronological timeline of your exact decisions and takeaways. Saved strictly on your device—nobody sees this but you.'
+        description: 'Reverse-chronological timeline of your exact decisions and takeaways. Saved strictly on your deviceâ€”nobody sees this but you.'
       },
       {
         icon: <Award className="w-4 h-4 text-amber-400" />,
         title: 'Anonymous Decision Stats (100% Real)',
-        description: 'See how other believers weighed today\'s decision after you choose. Zero fake numbers—strictly honest aggregate counts.'
+        description: 'See how other believers weighed today\'s decision after you choose. Zero fake numbersâ€”strictly honest aggregate counts.'
       },
       {
         icon: <Compass className="w-4 h-4 text-amber-400" />,
         title: '"Previously On..." Weekly Recap',
-        description: 'A 60-second read summarizing the 7-day arc, overarching biblical thread, and what you\'ve explored—with zero guilt language.'
+        description: 'A 60-second read summarizing the 7-day arc, overarching biblical thread, and what you\'ve exploredâ€”with zero guilt language.'
       },
       {
         icon: <Flame className="w-4 h-4 text-amber-400" />,
         title: 'Follow a Person: Character Arcs',
-        description: 'Deep dive into 6 foundational figures (Jesus, Peter, David, Mary, Paul, Esther) across 10–12 pivotal moments each.'
+        description: 'Deep dive into 6 foundational figures (Jesus, Peter, David, Mary, Paul, Esther) across 10â€“12 pivotal moments each.'
       },
       {
         icon: <Sparkles className="w-4 h-4 text-amber-400" />,
         title: '"Carry It With You" Lock-Screen Card',
-        description: 'Generate high-res 1080×1920 phone lock-screen scripture cards directly on-device with one tap to save or share.'
+        description: 'Generate high-res 1080Ã—1920 phone lock-screen scripture cards directly on-device with one tap to save or share.'
       }
     ]
   },
   {
     version: 'v1.19.2',
-    tagline: 'Persona QA Round 2 — Screen Reader, ESL, Network Resilience & Trust',
+    tagline: 'Persona QA Round 2 â€” Screen Reader, ESL, Network Resilience & Trust',
     dateBadge: 'Previous Release',
     isLatest: false,
     highlights: [
@@ -297,12 +297,12 @@ const ACTIVE_RELEASES: ReleaseMilestone[] = [
       {
         icon: <Sparkles className="w-4 h-4 text-amber-400" />,
         title: 'Daily AI Generation Pipeline',
-        description: 'Vetted biblical passages dynamically generate grounded scenarios, modern retelling (≤140 words), and tailored mirror-back reflections with zero offline disruptions.'
+        description: 'Vetted biblical passages dynamically generate grounded scenarios, modern retelling (â‰¤140 words), and tailored mirror-back reflections with zero offline disruptions.'
       },
       {
         icon: <Brain className="w-4 h-4 text-amber-400" />,
         title: 'Unified Memory Verse Engine & 1-Round Drills',
-        description: 'Today’s mission verse automatically locks into tomorrow’s quick recall flip card, backed by simplified 1-round WordForge fill-in-the-blank drills.'
+        description: 'Todayâ€™s mission verse automatically locks into tomorrowâ€™s quick recall flip card, backed by simplified 1-round WordForge fill-in-the-blank drills.'
       },
       {
         icon: <Flame className="w-4 h-4 text-amber-400" />,
@@ -330,7 +330,7 @@ const ACTIVE_RELEASES: ReleaseMilestone[] = [
       {
         icon: <Brain className="w-4 h-4 text-amber-400" />,
         title: 'Intelligent Off-Topic Passage Bridging',
-        description: 'Story step Q&A gracefully bridges off-topic questions back to the anchor passage while strictly adhering to ≤3 sentence brevity.'
+        description: 'Story step Q&A gracefully bridges off-topic questions back to the anchor passage while strictly adhering to â‰¤3 sentence brevity.'
       }
     ]
   },
@@ -397,8 +397,8 @@ const ACTIVE_RELEASES: ReleaseMilestone[] = [
       },
       {
         icon: <Brain className="w-4 h-4 text-amber-400" />,
-        title: 'Chunked Word Forge & Memory Modes',
-        description: 'Memorize Scripture by short natural phrases (≤8 taps), progressive reveal, or full verse assembly without cognitive overload.'
+        title: 'Chunked Practice & Memory Modes',
+        description: 'Memorize Scripture by short natural phrases (â‰¤8 taps), progressive reveal, or full verse assembly without cognitive overload.'
       },
       {
         icon: <Clock className="w-4 h-4 text-amber-400" />,
@@ -416,7 +416,7 @@ const ACTIVE_RELEASES: ReleaseMilestone[] = [
       {
         icon: <Sparkles className="w-4 h-4 text-amber-400" />,
         title: 'Bite-Sized 5-Step Story Quests',
-        description: 'No more vertical scroll overwhelm. Quests now unfold one focused stage at a time: Decide First → What Unfolded → Unlocked Scripture → Real Talk → Wisdom Check Drill.'
+        description: 'No more vertical scroll overwhelm. Quests now unfold one focused stage at a time: Decide First â†’ What Unfolded â†’ Unlocked Scripture â†’ Real Talk â†’ Wisdom Check Drill.'
       },
       {
         icon: <BookOpen className="w-4 h-4 text-amber-400" />,
@@ -503,7 +503,7 @@ const ARCHIVED_RELEASES: ReleaseMilestone[] = [
       {
         icon: <Sparkles className="w-4 h-4 text-amber-400" />,
         title: 'Harmonized Actions & Authentic Localized Dates',
-        description: 'Step badges, action buttons ("Prendre la décision", "Lancer la simulation"), and the top dashboard date dynamically format in your chosen tongue.'
+        description: 'Step badges, action buttons ("Prendre la dÃ©cision", "Lancer la simulation"), and the top dashboard date dynamically format in your chosen tongue.'
       }
     ]
   },
@@ -520,8 +520,8 @@ const ARCHIVED_RELEASES: ReleaseMilestone[] = [
       },
       {
         icon: <Swords className="w-4 h-4 text-amber-400" />,
-        title: 'Localized Word Forge & Daily Truth',
-        description: 'Scripture tiles in Word Forge rebuild dynamically in Spanish and French with accurate punctuation, while daily anchors and briefings speak in your chosen tongue.'
+        title: 'Localized Practice & Daily Truth',
+        description: 'Scripture tiles in Practice rebuild dynamically in Spanish and French with accurate punctuation, while daily anchors and briefings speak in your chosen tongue.'
       },
       {
         icon: <BookOpen className="w-4 h-4 text-amber-400" />,
@@ -636,7 +636,7 @@ const ARCHIVED_RELEASES: ReleaseMilestone[] = [
       {
         icon: <BookOpen className="w-4 h-4 text-amber-400" />,
         title: 'Full-Screen Mobile Readers & Modals',
-        description: 'All dialogs—including the 66-Book Scripture Reader, Canon Codex, Timeline, Dossiers, and Spaced Memory Pulse—now open edge-to-edge on mobile touchscreens with zero horizontal scroll.'
+        description: 'All dialogsâ€”including the 66-Book Scripture Reader, Canon Codex, Timeline, Dossiers, and Spaced Memory Pulseâ€”now open edge-to-edge on mobile touchscreens with zero horizontal scroll.'
       },
       {
         icon: <Zap className="w-4 h-4 text-amber-400" />,
@@ -654,7 +654,7 @@ const ARCHIVED_RELEASES: ReleaseMilestone[] = [
       {
         icon: <BookOpen className="w-4 h-4 text-amber-400" />,
         title: 'Complete 66-Book Scripture Reader',
-        description: 'Unrestricted chapter and verse reading across all 66 books of the Bible. Seamlessly jump to any chapter, adjust typography, listen to audio narration, and send any verse directly to Word Forge or your Tactical Arsenal.'
+        description: 'Unrestricted chapter and verse reading across all 66 books of the Bible. Seamlessly jump to any chapter, adjust typography, listen to audio narration, and send any verse directly to Practice or your Tactical Arsenal.'
       },
       {
         icon: <Volume2 className="w-4 h-4 text-amber-400" />,
@@ -723,7 +723,7 @@ const ARCHIVED_RELEASES: ReleaseMilestone[] = [
       {
         icon: <Bell className="w-4 h-4 text-amber-400" />,
         title: 'Background & Open Update Push Notifications',
-        description: 'When a new version is released, receive an OS-level system push notification ("🚀 Update Available: Tap to update and open") on mobile lock screens and desktop.'
+        description: 'When a new version is released, receive an OS-level system push notification ("ðŸš€ Update Available: Tap to update and open") on mobile lock screens and desktop.'
       },
       {
         icon: <Sparkles className="w-4 h-4 text-amber-400" />,
@@ -745,7 +745,7 @@ const ARCHIVED_RELEASES: ReleaseMilestone[] = [
       {
         icon: <Target className="w-4 h-4 text-amber-400" />,
         title: 'Daily Guided Campaign System',
-        description: 'No more wandering around aimlessly. Follow a curated 4-step daily path: Story Quest Act → "What\'s the Play?" Dilemma → Word Forge Memory Lock → Scriptorium Codex Briefing.'
+        description: 'No more wandering around aimlessly. Follow a curated 4-step daily path: Story Quest Act â†’ "What\'s the Play?" Dilemma â†’ Practice Memory Lock â†’ Scriptorium Codex Briefing.'
       },
       {
         icon: <Layers className="w-4 h-4 text-amber-400" />,
@@ -861,7 +861,7 @@ const ARCHIVED_RELEASES: ReleaseMilestone[] = [
   },
   {
     version: 'v1.0.0',
-    tagline: 'Core Genesis: 14 Quests & Word Forge',
+    tagline: 'Core Genesis: 14 Quests & Practice',
     dateBadge: 'Initial Launch',
     highlights: [
       {
@@ -871,7 +871,7 @@ const ARCHIVED_RELEASES: ReleaseMilestone[] = [
       },
       {
         icon: <Brain className="w-4 h-4 text-amber-400" />,
-        title: 'Word Forge Memory Engine',
+        title: 'Practice Memory Engine',
         description: 'Multi-sensory scripture memory using interactive block builders, cloze deletion puzzles, and typing speed runs.'
       },
       {
@@ -1001,7 +1001,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
               }}
               className="text-xs px-3 py-1.5 rounded-xl font-mono whitespace-nowrap bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 transition-all"
             >
-              + Archive (v1.0–v1.16.0)
+              + Archive (v1.0â€“v1.16.0)
             </button>
           )}
           {showArchive && (
@@ -1013,7 +1013,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
               }}
               className="text-xs px-3 py-1.5 rounded-xl font-mono whitespace-nowrap bg-stone-300 dark:bg-stone-700 text-stone-700 dark:text-stone-300 hover:text-stone-900 dark:hover:text-stone-100 transition-all"
             >
-              − Hide Archive
+              âˆ’ Hide Archive
             </button>
           )}
         </div>
@@ -1031,7 +1031,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
             </div>
             {selectedRelease.isLatest && (
               <span className="text-xs font-mono text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/60 px-2.5 py-1 rounded-full font-bold shrink-0">
-                ✓ Installed
+                âœ“ Installed
               </span>
             )}
           </div>
@@ -1061,7 +1061,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
         {/* MODAL FOOTER */}
         <div className="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800/90 bg-stone-50 dark:bg-black/40 flex items-center justify-between gap-3 relative z-10">
           <div className="text-xs font-mono text-stone-500 dark:text-stone-400 hidden sm:block">
-            Testament {APP_VERSION} • The Living Word
+            Testament {APP_VERSION} â€¢ The Living Word
           </div>
 
 
@@ -1069,7 +1069,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
             onClick={handleDismiss}
             className="btn-primary w-full sm:w-auto text-xs flex items-center justify-center gap-2 shadow-md"
           >
-            <span>Got It • Enter Field HQ</span>
+            <span>Got It â€¢ Enter Field HQ</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>

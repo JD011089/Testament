@@ -335,17 +335,7 @@ export function buildTriviaBank(lang?: SupportedLanguage): TriviaQuestion[] {
       ? { reference: anchor.reference, text: anchor.text, translation: anchor.translation }
       : undefined;
 
-    push(buildChoice({
-      id: `q-title:${quest.id}`,
-      kind: 'hero-story',
-      tag: 'Hero & story',
-      prompt: `Which story belongs to ${quest.heroName}?`,
-      correct: quest.title,
-      pool: uniqueStrings(quests.map((q) => q.title)),
-      explain: `${quest.heroName} — ${quest.characterTitle}. ${truncate(quest.summary, 130)}`,
-      scripture,
-    }));
-
+    // "Which story belongs to X?" was an invented app-title question and is removed.
     if (anchor) {
       push(buildChoice({
         id: `q-anchor:${quest.id}`,

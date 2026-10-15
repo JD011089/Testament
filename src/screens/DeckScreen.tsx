@@ -4,6 +4,7 @@ import { getStoryStop } from '../content/stories';
 import { isStoryCompleted } from '../utils/storyProgress';
 import { celebrate } from '../utils/feedback';
 import { shareVerseCard } from '../utils/shareCard';
+import { PageHeader } from '../components/PageHeader';
 import { BookOpen, Dumbbell, Share2, RotateCw } from 'lucide-react';
 
 interface DeckScreenProps {
@@ -56,10 +57,10 @@ export function DeckScreen({ onPractice, onReadChapter }: DeckScreenProps) {
 
   return (
     <div className="max-w-2xl mx-auto px-4 pt-4 pb-8 space-y-5">
-      <header className="flex items-center justify-between">
-        <h1 className="text-title-1 font-serif text-fg">My Deck</h1>
-        <span className="text-small text-fg-muted">{cards.length} card{cards.length === 1 ? '' : 's'}</span>
-      </header>
+      <PageHeader
+        title="My Deck"
+        subtitle={cards.length > 0 ? `${cards.length} card${cards.length === 1 ? '' : 's'} collected.` : 'Finish a story and its verse lands here.'}
+      />
 
       <div className="flex flex-wrap gap-2">
         {(['all', 'bronze', 'silver', 'gold'] as StrengthFilter[]).map((s) => (

@@ -72,8 +72,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
       desc: 'Work burnout, leadership pressure, provider stress. Carrying heavy expectations in isolation.',
       recommendedQuestId: 'david-journey',
       questTitle: "David's Crucible: The Reluctant Warrior",
-      icon: '🛡️',
-      primaryVerse: 'Proverbs 27:17 • "Iron sharpens iron, and one man sharpens another."'
+      icon: 'ðŸ›¡ï¸',
+      primaryVerse: 'Proverbs 27:17 â€¢ "Iron sharpens iron, and one man sharpens another."'
     },
     {
       id: 'betrayal',
@@ -81,8 +81,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
       desc: 'Blindsided by unfair treatment, broken trust, or waiting endlessly in a difficult season.',
       recommendedQuestId: 'joseph-journey',
       questTitle: "Joseph's Rise: From Pit to Palace",
-      icon: '🔥',
-      primaryVerse: 'Genesis 50:20 • "You intended to harm me, but God intended it for good."'
+      icon: 'ðŸ”¥',
+      primaryVerse: 'Genesis 50:20 â€¢ "You intended to harm me, but God intended it for good."'
     },
     {
       id: 'regret',
@@ -90,8 +90,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
       desc: 'Letting down people who mattered. Wondering if your worst mistakes disqualify you.',
       recommendedQuestId: 'peter-journey',
       questTitle: "Peter's Crucible: Grace After Failure",
-      icon: '⚔️',
-      primaryVerse: 'Luke 22:32 • "When you have turned back, strengthen your brothers."'
+      icon: 'âš”ï¸',
+      primaryVerse: 'Luke 22:32 â€¢ "When you have turned back, strengthen your brothers."'
     },
     {
       id: 'purpose',
@@ -99,8 +99,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
       desc: 'Feeling stuck, questioning your calling, or reluctant to step up to a daunting assignment.',
       recommendedQuestId: 'moses-journey',
       questTitle: "Moses: From Fugitive to Deliverer",
-      icon: '🧭',
-      primaryVerse: 'Exodus 3:12 • "I will be with you. This will be the sign."'
+      icon: 'ðŸ§­',
+      primaryVerse: 'Exodus 3:12 â€¢ "I will be with you. This will be the sign."'
     },
     {
       id: 'discipline',
@@ -108,8 +108,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
       desc: 'Exhausted by compromise all around you. Battling cynicism, anger, or feeling like the only one trying.',
       recommendedQuestId: 'elijah-journey',
       questTitle: "Elijah: Standing Alone on Mount Carmel",
-      icon: '⚡',
-      primaryVerse: '1 Kings 19:12 • "After the fire came a gentle whisper."'
+      icon: 'âš¡',
+      primaryVerse: '1 Kings 19:12 â€¢ "After the fire came a gentle whisper."'
     }
   ];
 
@@ -118,25 +118,25 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
       id: 'visual' as const,
       title: 'Visual & Action-First',
       desc: 'Graphic novel illustration panels, gritty historical environments, seeing the scene unfold.',
-      icon: '🎬'
+      icon: 'ðŸŽ¬'
     },
     {
       id: 'audio' as const,
       title: 'Audio & Commute Narration',
       desc: 'Deep cinematic documentary narration for the truck, gym, or commute. Sub-bass atmosphere.',
-      icon: '🎧'
+      icon: 'ðŸŽ§'
     },
     {
       id: 'tactical' as const,
       title: 'Tactical & Hands-On Drills',
-      desc: 'Word Forge tile puzzles, memory retention drills, and real-life scenario simulators.',
-      icon: '🧠'
+      desc: 'Practice tile puzzles, memory retention drills, and real-life scenario simulators.',
+      icon: 'ðŸ§ '
     },
     {
       id: 'plain' as const,
       title: 'Zero Religious Jargon & Fluff',
       desc: 'Raw historical facts, street translation of ancient customs, and 3-minute plain-English takeaways.',
-      icon: '🔍'
+      icon: 'ðŸ”'
     }
   ];
 
@@ -166,19 +166,19 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
       id: '3min' as const,
       title: '3 Minutes / Quick Briefing',
       desc: 'Quick audio summary with your morning coffee or drive.',
-      icon: '☕'
+      icon: 'â˜•'
     },
     {
       id: '10min' as const,
       title: '7 to 10 Minutes / One Story Act',
       desc: 'One full story scene, dilemma choice, and unlocked scripture.',
-      icon: '⏱️'
+      icon: 'â±ï¸'
     },
     {
       id: 'deep' as const,
       title: 'Deep Dive / Flexible Session',
-      desc: 'Story act + Word Forge tile memory + scenario simulator.',
-      icon: '🛡️'
+      desc: 'Story act + Practice tile memory + scenario simulator.',
+      icon: 'ðŸ›¡ï¸'
     }
   ];
 
@@ -356,7 +356,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                           <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[11px] shrink-0 ${
                             isSelected ? 'bg-amber-500 text-stone-950 font-bold' : 'border border-stone-300 dark:border-stone-700'
                           }`}>
-                            {isSelected ? '✓' : ''}
+                            {isSelected ? 'âœ“' : ''}
                           </div>
                         </div>
                         <p className="text-xs text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">{b.desc}</p>
@@ -380,7 +380,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   }}
                   className="w-full py-2.5 px-4 rounded-xl border border-stone-200 dark:border-stone-800 text-xs font-semibold text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-850 hover:text-stone-900 dark:hover:text-stone-200 transition-colors text-center"
                 >
-                  Skip for now — take me to the app →
+                  Skip for now â€” take me to the app â†’
                 </button>
               </div>
             </div>
@@ -427,7 +427,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                         <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[11px] ${
                           isSelected ? 'bg-amber-500 text-stone-950 font-bold' : 'border border-stone-300 dark:border-stone-700'
                         }`}>
-                          {isSelected ? '✓' : ''}
+                          {isSelected ? 'âœ“' : ''}
                         </div>
                       </div>
                     </button>
@@ -481,7 +481,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       <div className={`w-4 h-4 rounded-full mt-1 flex items-center justify-center text-[11px] shrink-0 ${
                         isSelected ? 'bg-amber-500 text-stone-950 font-bold' : 'border border-stone-300 dark:border-stone-700'
                       }`}>
-                        {isSelected ? '✓' : ''}
+                        {isSelected ? 'âœ“' : ''}
                       </div>
                     </button>
                   );
@@ -530,7 +530,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[11px] shrink-0 ${
                         isSelected ? 'bg-amber-500 text-stone-950 font-bold' : 'border border-stone-300 dark:border-stone-700'
                       }`}>
-                        {isSelected ? '✓' : ''}
+                        {isSelected ? 'âœ“' : ''}
                       </div>
                     </button>
                   );
@@ -545,7 +545,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               <div className="text-center py-2">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-600/50 text-emerald-800 dark:text-emerald-300 text-xs font-mono font-bold mb-3 shadow-sm">
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>Calibration Complete • +50 Starter XP Awarded</span>
+                  <span>Calibration Complete â€¢ +50 Starter XP Awarded</span>
                 </div>
                 <h2 className="text-xl sm:text-2xl font-serif font-black text-stone-900 dark:text-parchment-50">
                   Your Personal Battle Plan

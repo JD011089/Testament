@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Type, Volume2, Mic, Check, Sun, Moon, Globe, BookOpen, Award } from 'lucide-react';
+import { Type, Volume2, Mic, Check, Sun, Moon, Globe, BookOpen, Award, Bell } from 'lucide-react';
 import { useFontSize, FONT_SCALE_STEPS, type FontScaleStep } from '../context/FontSizeContext';
 import { useLanguage, type Language } from '../context/LanguageContext';
 import { soundEngine, NARRATOR_VOICES, type NarratorProfile } from '../utils/audio';
@@ -8,6 +8,21 @@ import { getStoredTheme, applyTheme, type AppTheme } from '../utils/theme';
 import { getShowXpPreference, setShowXpPreference } from '../utils/userPreferences';
 import { loadReadingPlace, saveReadingPlace } from '../utils/readingPlace';
 import { BIBLE_TRANSLATIONS, type TranslationId } from '../utils/bibleService';
+import {
+  isSoundEnabled, setSoundEnabled, isHapticsEnabled, setHapticsEnabled
+} from '../utils/feedback';
+
+const SESSION_LENGTH_KEY = 'testament_session_length';
+type SessionLength = '3min' | '10min' | 'deep';
+
+function readSessionLength(): SessionLength {
+  try {
+    const raw = localStorage.getItem(SESSION_LENGTH_KEY);
+    return raw === '10min' || raw === 'deep' ? raw : '3min';
+  } catch {
+    return '3min';
+  }
+}
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -45,6 +60,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [currentVoice, setCurrentVoice] = useState<NarratorProfile>(() => soundEngine.getNarratorProfile());
   const [currentTheme, setCurrentTheme] = useState<AppTheme>(() => getStoredTheme());
   const [showXp, setShowXp] = useState<boolean>(() => getShowXpPreference());
+  const [soundOn, setSoundOn] = useState<boolean>(() => isSoundEnabled());
+  const [hapticsOn, setHapticsOn] = useState<boolean>(() => isHapticsEnabled());
+  const [sessionLength, setSessionLength] = useState<SessionLength>(() => readSessionLength());
   const [currentTranslation, setCurrentTranslation] = useState<TranslationId>(() => {
     const place = loadReadingPlace();
     return place?.translation || 'web';
@@ -251,6 +269,80 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </button>
               );
             })}
+          </div>
+        </div>
+
+        {/* Sound & Haptics */}
+        <div className="pt-3 border-t border-stone-200 dark:border-stone-800 space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Volume2 className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              <div>
+                <div className="text-xs sm:text-sm font-medium text-stone-800 dark:text-stone-200">Sound</div>
+                <div className="text-[11px] text-stone-500 dark:text-stone-400">Short sound on every success</div>
+              </div>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={soundOn}
+              onClick={() => { const next = !soundOn; setSoundOn(next); setSoundEnabled(next); if (next) soundEngine.playSnap(); }}
+              className={`w-12 h-7 rounded-full p-1 transition-colors cursor-pointer shrink-0 ${soundOn ? 'bg-amber-500' : 'bg-stone-300 dark:bg-stone-700'}`}
+            >
+              <div className={`w-5 h-5 rounded-full bg-white transition-transform ${soundOn ? 'translate-x-5' : 'translate-x-0'}`} />
+            </button>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Bell className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              <div>
+                <div className="text-xs sm:text-sm font-medium text-stone-800 dark:text-stone-200">Haptics</div>
+                <div className="text-[11px] text-stone-500 dark:text-stone-400">Gentle vibration on success</div>
+              </div>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={hapticsOn}
+              onClick={() => { const next = !hapticsOn; setHapticsOn(next); setHapticsEnabled(next); }}
+              className={`w-12 h-7 rounded-full p-1 transition-colors cursor-pointer shrink-0 ${hapticsOn ? 'bg-amber-500' : 'bg-stone-300 dark:bg-stone-700'}`}
+            >
+              <div className={`w-5 h-5 rounded-full bg-white transition-transform ${hapticsOn ? 'translate-x-5' : 'translate-x-0'}`} />
+            </button>
+          </div>
+        </div>
+
+        {/* Session length */}
+        <div className="space-y-2 pt-3 border-t border-stone-200 dark:border-stone-800">
+          <div className="flex items-center gap-2 text-stone-800 dark:text-stone-200 font-medium text-xs sm:text-sm">
+            <BookOpen className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+            <span>Daily session length</span>
+          </div>
+          <div className="grid grid-cols-3 gap-1.5">
+            {([
+              { id: '3min', label: '3 min' },
+              { id: '10min', label: '10 min' },
+              { id: 'deep', label: 'Deep' }
+            ] as { id: SessionLength; label: string }[]).map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => {
+                  soundEngine.playClick();
+                  setSessionLength(option.id);
+                  try { localStorage.setItem(SESSION_LENGTH_KEY, option.id); } catch { /* ignore */ }
+                  window.dispatchEvent(new CustomEvent('testament-session-length-changed', { detail: option.id }));
+                }}
+                aria-pressed={sessionLength === option.id}
+                className={`py-2 rounded-xl text-xs font-semibold min-h-[44px] flex items-center justify-center transition-all cursor-pointer ${
+                  sessionLength === option.id
+                    ? 'bg-amber-500 text-stone-950 font-bold shadow-xs'
+                    : 'bg-stone-100 dark:bg-stone-850 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-800'
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
           </div>
         </div>
 

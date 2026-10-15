@@ -8,7 +8,8 @@ import { StoryPlayer } from '../components/story/StoryPlayer';
 import { StoryQuiz } from '../components/daily/StoryQuiz';
 import { LockInStep } from '../components/daily/LockInStep';
 import { VerseLine } from '../components/story/VerseLine';
-import { Check, Flame, Map as MapIcon, Layers, Play } from 'lucide-react';
+import { PageHeader } from '../components/PageHeader';
+import { Check, Map as MapIcon, Layers, Play } from 'lucide-react';
 
 const STEPS = ['Swipe', 'Play', 'Lock in', 'Collect'] as const;
 
@@ -50,13 +51,12 @@ export function TodayScreen({ streakCount = 0, onOpenMap, onOpenDeck, onReadChap
 
   return (
     <div className="max-w-2xl mx-auto px-4 pt-4 pb-6 space-y-5">
-      <header className="flex items-center justify-between">
-        <h1 className="text-title-1 font-serif text-fg">Today</h1>
-        <div className="flex items-center gap-2 text-small text-fg-muted">
-          <Flame className="w-4 h-4 text-accent" />
-          <span>{streakCount} day{streakCount === 1 ? '' : 's'}</span>
-        </div>
-      </header>
+      <PageHeader
+        title="Today"
+        subtitle={streakCount > 0
+          ? `${streakCount}-day streak — kind and steady.`
+          : 'A fresh start today.'}
+      />
 
       {/* Progress ring / step dots */}
       <div className="rounded-3xl border border-accent/40 bg-surface-raised p-4 sm:p-5">

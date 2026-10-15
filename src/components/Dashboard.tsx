@@ -59,7 +59,6 @@ import {
 } from '../utils/learnerModes';
 import { formatSpaced } from '../utils/textUtils';
 import type { LearnerModesState } from '../types/learnerModes';
-import { getShowXpPreference } from '../utils/userPreferences';
 import { APP_VERSION } from '../config/version';
 
 interface DashboardProps {
@@ -122,7 +121,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   completedActs,
   unlockedRelics = [],
   streakCount,
-  xp,
+  xp: _xp,
   onOpenWhatsNew,
   onOpenOnboarding,
   onOpenHowItWorks,
@@ -160,7 +159,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
   // Weekly Series State
   const [activeSeriesState, setActiveSeriesState] = useState<ActiveSeriesState | null>(() => getActiveSeriesState());
   const [showSeriesPicker, setShowSeriesPicker] = useState<boolean>(false);
-  const [showXp, setShowXp] = useState<boolean>(() => getShowXpPreference());
 
   useEffect(() => {
     const handleSeriesChange = () => {
@@ -191,10 +189,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
     };
     const handleOpenRelics = () => setShowRelics(true);
     const handleOpenModes = () => setShowModeModal(true);
-    const handleShowXpChange = (e: Event) => {
-      const custom = e as CustomEvent<{ show: boolean }>;
-      if (custom.detail) setShowXp(custom.detail.show);
-    };
 
     window.addEventListener('testament-mode-changed', handleModeUpdate);
     window.addEventListener('testament-open-reminders', handleOpenReminders);
@@ -202,7 +196,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
     window.addEventListener('testament-open-people', handleOpenPeople);
     window.addEventListener('testament-open-relics', handleOpenRelics);
     window.addEventListener('testament-open-modes', handleOpenModes);
-    window.addEventListener('testament-show-xp-changed', handleShowXpChange);
 
     return () => {
       window.removeEventListener('testament-mode-changed', handleModeUpdate);
@@ -211,7 +204,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
       window.removeEventListener('testament-open-people', handleOpenPeople);
       window.removeEventListener('testament-open-relics', handleOpenRelics);
       window.removeEventListener('testament-open-modes', handleOpenModes);
-      window.removeEventListener('testament-show-xp-changed', handleShowXpChange);
     };
   }, []);
 
@@ -333,13 +325,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
     });
   };
 
-  const getRankTitle = (points: number) => {
-    if (points >= 500) return 'Iron Pillar';
-    if (points >= 300) return 'Mighty Man of Adullam';
-    if (points >= 150) return 'Story Explorer';
-    return 'Profile';
-  };
-
   const handleYesterdayRecallResponse = (rating: 'got_it' | 'need_review') => {
     if (!yesterdayVerse) return;
     soundEngine.playSnap();
@@ -385,19 +370,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <span className="text-label font-bold text-amber-800 dark:text-amber-400">
                 Testament
               </span>
-              {showXp && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    soundEngine.playClick();
-                    onOpenSettings ? onOpenSettings() : window.dispatchEvent(new CustomEvent('testament-open-settings'));
-                  }}
-                  className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-amber-500/15 hover:bg-amber-500/25 text-amber-800 dark:text-amber-300 font-bold transition-colors cursor-pointer"
-                  title="View profile and level in Settings"
-                >
-                  {getRankTitle(xp)}
-                </button>
-              )}
               <button
                 type="button"
                 onClick={() => {
@@ -423,7 +395,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
 
-        {/* Right: Streak, XP (if enabled), Single Settings Entry */}
+        {/* Right: Streak, Single Settings Entry */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 relative">
           {streakCount > 0 ? (
             <button
@@ -457,17 +429,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </button>
           )}
 
-          {showXp && (
-            <div 
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/60 dark:bg-stone-900 text-xs font-mono font-bold text-amber-800 dark:text-amber-300"
-              title="Scripture XP"
-              role="status"
-              aria-label={`${xp} Scripture XP`}
-            >
-              <Award aria-hidden="true" className="w-3.5 h-3.5 text-amber-500" />
-              <span>{xp}</span>
-            </div>
-          )}
+          {/* XP/rank display removed: progress is the deck and the map. */}
 
           {/* Settings Entry (44x44 touch target) */}
           <button
