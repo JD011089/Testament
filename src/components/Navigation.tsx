@@ -2,15 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { 
   Compass, 
   BookOpen, 
-  Brain, 
-  Shield, 
   Car, 
   Volume2, 
   VolumeX, 
   Flame, 
   Award, 
   Sparkles,
-  Gamepad2,
+  Map as MapIcon,
+  Layers,
   Settings
 } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
@@ -20,7 +19,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { APP_VERSION } from '../config/version';
 import { getShowXpPreference, SHOW_XP_CHANGED_EVENT } from '../utils/userPreferences';
 
-export type NavTab = 'dashboard' | 'library' | 'game' | 'practice' | 'arsenal' | 'wordforge' | 'dilemmas';
+export type NavTab = 'today' | 'dashboard' | 'map' | 'library' | 'game' | 'practice' | 'arsenal' | 'wordforge' | 'dilemmas' | 'deck';
 
 interface NavigationProps {
   currentTab: NavTab | 'not-found';
@@ -61,44 +60,40 @@ export const Navigation: React.FC<NavigationProps> = ({
     if (itemTab === 'practice') {
       return currentTab === 'practice' || currentTab === 'wordforge' || currentTab === 'dilemmas';
     }
+    if (itemTab === 'deck') {
+      return currentTab === 'deck' || currentTab === 'arsenal';
+    }
     return currentTab === itemTab;
   };
 
   const navItems: { tab: NavTab; label: string; mobileLabel?: string; tooltip: string; icon: React.ReactNode }[] = [
-    { 
-      tab: 'dashboard', 
-      label: t('nav.home'), 
-      mobileLabel: language === 'fr' ? 'Aujourd\'hui' : language === 'es' ? 'Hoy' : t('nav.home'),
-      tooltip: t('nav.homeTooltip'), 
-      icon: <Compass className="w-4 h-4 md:w-4 md:h-4" /> 
+    {
+      tab: 'today',
+      label: t('nav.home'),
+      mobileLabel: language === 'fr' ? 'Aujourd\'hui' : language === 'es' ? 'Hoy' : 'Today',
+      tooltip: t('nav.homeTooltip'),
+      icon: <Compass className="w-4 h-4 md:w-4 md:h-4" />
     },
-    { 
-      tab: 'library', 
-      label: t('nav.library'), 
+    {
+      tab: 'map',
+      label: 'Map',
+      mobileLabel: language === 'fr' ? 'Carte' : language === 'es' ? 'Mapa' : 'Map',
+      tooltip: 'Story map',
+      icon: <MapIcon className="w-4 h-4 md:w-4 md:h-4" />
+    },
+    {
+      tab: 'library',
+      label: t('nav.library'),
       mobileLabel: language === 'fr' ? 'Bible' : language === 'es' ? 'Biblia' : t('nav.library'),
-      tooltip: t('nav.libraryTooltip'), 
-      icon: <BookOpen className="w-4 h-4 md:w-4 md:h-4" /> 
+      tooltip: t('nav.libraryTooltip'),
+      icon: <BookOpen className="w-4 h-4 md:w-4 md:h-4" />
     },
-    { 
-      tab: 'game', 
-      label: t('nav.game'), 
-      mobileLabel: language === 'fr' ? 'Jeu' : language === 'es' ? 'Juego' : t('nav.game'),
-      tooltip: t('nav.gameTooltip'), 
-      icon: <Gamepad2 className="w-4 h-4 md:w-4 md:h-4" /> 
-    },
-    { 
-      tab: 'practice', 
-      label: t('nav.practice'), 
-      mobileLabel: language === 'fr' ? 'Pratique' : language === 'es' ? 'Práctica' : t('nav.practice'),
-      tooltip: t('nav.practiceTooltip'), 
-      icon: <Brain className="w-4 h-4 md:w-4 md:h-4" /> 
-    },
-    { 
-      tab: 'arsenal', 
-      label: t('nav.saved'), 
-      mobileLabel: language === 'fr' ? 'Favoris' : language === 'es' ? 'Guardados' : t('nav.saved'),
-      tooltip: t('nav.savedTooltip'), 
-      icon: <Shield className="w-4 h-4 md:w-4 md:h-4" /> 
+    {
+      tab: 'deck',
+      label: 'Deck',
+      mobileLabel: language === 'fr' ? 'Jeu' : language === 'es' ? 'Colección' : 'Deck',
+      tooltip: 'My Deck',
+      icon: <Layers className="w-4 h-4 md:w-4 md:h-4" />
     },
   ];
 

@@ -3,24 +3,30 @@ import type { NavTab } from '../components/Navigation';
 export type AppTab = NavTab | 'not-found';
 
 export const TAB_PATHS: Record<NavTab, string> = {
-  dashboard: '/',
+  today: '/',
+  dashboard: '/explore',
+  map: '/map',
   library: '/library',
   game: '/game',
   practice: '/practice',
   wordforge: '/practice',
-  dilemmas: '/practice',
+  dilemmas: '/map',
   arsenal: '/saved',
+  deck: '/deck',
 };
 
 export function tabFromPath(pathname: string): AppTab {
   const path = pathname.replace(/\/+$/, '') || '/';
-  if (path === '/') return 'dashboard';
+  if (path === '/') return 'today';
+  if (path === '/explore') return 'dashboard';
+  if (path === '/map') return 'map';
   if (path === '/library' || path.startsWith('/read/')) return 'library';
   if (path === '/game' || path.startsWith('/game/')) return 'game';
   if (path === '/practice' || path.startsWith('/practice/')) return 'practice';
   if (path === '/memorize' || path === '/wordforge') return 'practice';
-  if (path === '/dilemmas') return 'practice';
-  if (path === '/saved' || path === '/arsenal') return 'arsenal';
+  if (path === '/dilemmas') return 'map';
+  if (path === '/deck') return 'deck';
+  if (path === '/saved' || path === '/arsenal') return 'deck';
   if (path === '/privacy' || path === '/privacy.html') return 'dashboard';
   return 'not-found';
 }

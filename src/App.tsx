@@ -42,6 +42,9 @@ const CanonLibraryPage = lazy(() => import('./components/CanonLibraryPage').then
 const TriviaGauntlet = lazy(() => import('./components/TriviaGauntlet').then((m) => ({ default: m.TriviaGauntlet })));
 const DriveModePlayer = lazy(() => import('./components/DriveModePlayer').then((m) => ({ default: m.DriveModePlayer })));
 const StoryPlayer = lazy(() => import('./components/story/StoryPlayer').then((m) => ({ default: m.StoryPlayer })));
+const TodayScreen = lazy(() => import('./screens/TodayScreen').then((m) => ({ default: m.TodayScreen })));
+const MapScreen = lazy(() => import('./screens/MapScreen').then((m) => ({ default: m.MapScreen })));
+const DeckScreen = lazy(() => import('./screens/DeckScreen').then((m) => ({ default: m.DeckScreen })));
 
 function ViewFallback() {
   return <div className="max-w-7xl mx-auto px-6 py-16 text-sm text-stone-500">Loading...</div>;
@@ -756,6 +759,35 @@ export function App() {
           />
         ) : (
           <>
+            {currentTab === 'today' && (
+              <Suspense fallback={<ViewFallback />}>
+                <TodayScreen
+                  streakCount={streakCount}
+                  onOpenMap={() => setCurrentTab('map')}
+                  onOpenDeck={() => setCurrentTab('deck')}
+                  onReadChapter={handleReadChapterFromStory}
+                />
+              </Suspense>
+            )}
+
+            {currentTab === 'map' && (
+              <Suspense fallback={<ViewFallback />}>
+                <MapScreen
+                  onPlayStory={handlePlayStory}
+                  onQuickPlay={() => setCurrentTab('game')}
+                />
+              </Suspense>
+            )}
+
+            {currentTab === 'deck' && (
+              <Suspense fallback={<ViewFallback />}>
+                <DeckScreen
+                  onPractice={handlePracticeVerseFromArsenal}
+                  onReadChapter={handleReadChapterFromStory}
+                />
+              </Suspense>
+            )}
+
             {currentTab === 'dashboard' && (
               <Dashboard 
                 onSelectQuest={handleSelectQuest}
