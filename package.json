@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "test": "playwright test",
+    "verify:verses": "playwright test scripts/verify-verses.ts",
     "preview": "vite preview"
   },
   "dependencies": {

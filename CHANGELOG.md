@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.0-beta] - 2026-10-15
 
+### Added (Phase 2 — Story Swipes engine)
+- **Data-driven story player**: `src/content/stories/*.json` (one file per story) with a
+  typed schema (`src/types/story.ts`) and a dependency-free validator (`src/utils/storySchema.ts`).
+- **Full-screen player** (`src/components/story/StoryPlayer.tsx`): vertical cards, Instagram-style
+  progress segments, swipe or tap to advance, exact resume per story, tab-hidden pause,
+  narration auto-play, and a "Read the full chapter" button.
+- **Interactions**: `DragToTarget`, `HoldToContinue`, `TapReveal`, `TapSequence` — instant feedback,
+  haptics, sound, and no fail state (wrong tries only nudge).
+- **Choice moment**: pick an option, then see what really happened with the actual verse.
+- **David and Goliath** (1 Samuel 17, 8 cards, verified WEB text) plus stubs for all 24 map stops.
+- **Story progress keyed by storyId** (`src/utils/storyProgress.ts`) and a Deck store (`src/utils/deck.ts`);
+  the payoff card flips the verse into My Deck.
+- **Shared feedback** (`src/utils/feedback.ts`): one haptic + success-sound helper honoring settings.
+- **Translation integrity**: `src/content/sources/web.json` corpus + `src/utils/verifyVerses.ts`
+  and `scripts/verify-verses.ts` (`npm run verify:verses`) fail on any label/text mismatch.
+- Tests: `tests/storySchema.test.ts`, `tests/storyProgress.test.ts`, `tests/verifyVerses.test.ts`.
+
 ### Added (Phase 1 — Critical fixes)
 - **Canonical verse key**: a single normalized key (`"1KI.19.12"`) with `canonicalVerseKey` /
   `resolveVerseKey` (`src/utils/verseKey.ts`) is now the source of truth for verse lookups,

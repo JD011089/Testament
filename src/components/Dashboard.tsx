@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { StoryQuest } from '../types';
 import { STORY_QUESTS } from '../data/stories';
+import { TodayStoryStrip } from './TodayStoryStrip';
 import { soundEngine } from '../utils/audio';
 import { 
   Flame, 
@@ -64,6 +65,7 @@ import { APP_VERSION } from '../config/version';
 interface DashboardProps {
   onSelectQuest: (quest: StoryQuest) => void;
   onStartDailyMission?: (mission: GeneratedDailyMission) => void;
+  onPlayStory?: (storyId: string) => void;
   onOpenWordForge: (verseId?: string) => void;
   onOpenArsenal?: () => void;
   onOpenDilemmas?: () => void;
@@ -126,6 +128,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenHowItWorks,
   onOpenSettings,
   onStartDailyMission,
+  onPlayStory,
   onRewardXP
 }) => {
   const { language, t } = useLanguage();
@@ -358,6 +361,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
         TESTAMENT
       </div>
       <div aria-hidden="true" className="hidden lg:block absolute top-16 left-12 w-96 h-96 bg-amber-400/[0.035] dark:bg-amber-500/[0.025] rounded-full blur-3xl pointer-events-none -z-10" />
+
+      <TodayStoryStrip onPlay={onPlayStory} />
 
       {/* =========================================================================
           TOP BAR: Mobile Status Bar (Hidden on md/lg desktop where top nav is unified)

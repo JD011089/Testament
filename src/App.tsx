@@ -22,11 +22,13 @@ import { setActiveMemoryVerse } from './utils/calendarReminders';
 import { markCampaignStepCompleted } from './data/dailyCampaigns';
 import type { DailyCampaignStep } from './data/dailyCampaigns';
 import { getComposedDailyMission } from './utils/missionComposer';
-import { pathForTab, tabFromPath, type AppTab } from './utils/routes';
+import { pathForTab, tabFromPath, storyIdFromPath, pathForStory, type AppTab } from './utils/routes';
 import { loadReadingPlace } from './utils/readingPlace';
 import { addBookmark, removeBookmark } from './utils/bookmarks';
 import { getDailyMission, type GeneratedDailyMission } from './utils/dailyMissionPipeline';
 import { isVerseMastered } from './utils/fsrsEngine';
+import { getStoryById } from './content/stories';
+import { parseScriptureReference } from './utils/scriptureRef';
 
 const DossierModal = lazy(() => import('./components/DossierModal').then(m => ({ default: m.DossierModal })));
 const ProverbsCodexModal = lazy(() => import('./components/ProverbsCodexModal').then(m => ({ default: m.ProverbsCodexModal })));
@@ -39,6 +41,7 @@ const PracticeView = lazy(() => import('./components/PracticeView').then((m) => 
 const CanonLibraryPage = lazy(() => import('./components/CanonLibraryPage').then((m) => ({ default: m.CanonLibraryPage })));
 const TriviaGauntlet = lazy(() => import('./components/TriviaGauntlet').then((m) => ({ default: m.TriviaGauntlet })));
 const DriveModePlayer = lazy(() => import('./components/DriveModePlayer').then((m) => ({ default: m.DriveModePlayer })));
+const StoryPlayer = lazy(() => import('./components/story/StoryPlayer').then((m) => ({ default: m.StoryPlayer })));
 
 function ViewFallback() {
   return <div className="max-w-7xl mx-auto px-6 py-16 text-sm text-stone-500">Loading...</div>;
@@ -80,6 +83,9 @@ export function App() {
     }
   };
   const [activeQuest, setActiveQuest] = useState<StoryQuest | null>(null);
+  const [activeStoryId, setActiveStoryId] = useState<string | null>(() =>
+    typeof window === 'undefined' ? null : storyIdFromPath(window.location.pathname)
+  );
   const [activeDailyMission, setActiveDailyMission] = useState<GeneratedDailyMission | null>(null);
   const [libraryPassage, setLibraryPassage] = useState<{
     book: string;
@@ -209,6 +215,11 @@ export function App() {
     activeDailyMissionRef.current = activeDailyMission;
   }, [activeDailyMission]);
 
+  const activeStoryRef = useRef(activeStoryId);
+  useEffect(() => {
+    activeStoryRef.current = activeStoryId;
+  }, [activeStoryId]);
+
 
   // M-10: Restore in-progress daily mission on return if user was interrupted mid-mission
   useEffect(() => {
@@ -249,6 +260,10 @@ export function App() {
       if (closeTopModalFromHistory()) return;
 
       // 2. Close active mission or quest
+      if (activeStoryRef.current) {
+        setActiveStoryId(null);
+        return;
+      }
       if (activeDailyMissionRef.current) {
         setActiveDailyMission(null);
         return;
@@ -486,6 +501,43 @@ export function App() {
     }
   };
 
+  const handlePlayStory = (storyId: string) => {
+    soundEngine.playClick();
+    try {
+      window.history.pushState({ modal: 'story', storyId, tab: currentTabRef.current }, '', pathForStory(storyId));
+    } catch {
+      // ignore
+    }
+    setActiveQuest(null);
+    setActiveDailyMission(null);
+    setActiveStoryId(storyId);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleExitStory = () => {
+    soundEngine.playClick();
+    setActiveStoryId(null);
+    if (window.history.state?.modal === 'story') {
+      try { window.history.back(); } catch { /* ignore */ }
+    } else {
+      const next = pathForTab(currentTabRef.current);
+      try { window.history.replaceState({ tab: currentTabRef.current }, '', next); } catch { /* ignore */ }
+    }
+  };
+
+  const handleReadChapterFromStory = (passage: string) => {
+    soundEngine.stopSpeaking();
+    const parsed = parseScriptureReference(passage);
+    setActiveStoryId(null);
+    if (parsed) {
+      setLibraryPassage({ book: parsed.book, chapter: parsed.chapter, verseStart: parsed.verseStart, verseEnd: parsed.verseEnd });
+    }
+    setCurrentTab('library');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const activeStory = activeStoryId ? getStoryById(activeStoryId) : null;
+
   const handleCompleteAct = (actId: string, _questId: string, relicId?: string) => {
     if (!completedActs.includes(actId)) {
       const updated = [...completedActs, actId];
@@ -660,7 +712,7 @@ export function App() {
   return (
     <div className="min-h-screen bg-surface dark:bg-iron-950 text-stone-900 dark:text-parchment-100 transition-colors duration-200 w-full relative">
       <main className={`w-full pt-3 sm:pt-4 xl:pt-16 ${
-        activeQuest || activeDailyMission
+        activeQuest || activeDailyMission || activeStory
           ? 'pb-4 xl:pb-8'
           : 'pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] xl:pb-10'
       }`}>
@@ -708,6 +760,7 @@ export function App() {
               <Dashboard 
                 onSelectQuest={handleSelectQuest}
                 onStartDailyMission={handleStartDailyMission}
+                onPlayStory={handlePlayStory}
                 onOpenWordForge={(verseId?: string) => {
                   soundEngine.stopSpeaking();
                   if (verseId) setTargetWordForgeVerseId(verseId);
@@ -826,7 +879,7 @@ export function App() {
               />
             )}
 
-            {currentTab === 'not-found' && (
+            {currentTab === 'not-found' && !activeStory && (
               <div className="max-w-md mx-auto px-6 py-20 text-center space-y-4">
                 <div className="w-16 h-16 mx-auto rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-2xl font-serif font-black text-amber-500">
                   404
@@ -853,8 +906,19 @@ export function App() {
         )}
       </main>
 
+      {activeStory && (
+        <Suspense fallback={null}>
+          <StoryPlayer
+            key={activeStory.id}
+            story={activeStory}
+            onExit={handleExitStory}
+            onReadChapter={handleReadChapterFromStory}
+          />
+        </Suspense>
+      )}
+
       {/* Persistent Responsive Nav (Desktop Top Nav & Mobile Bottom Nav) */}
-      {!activeQuest && !activeDailyMission && (
+      {!activeQuest && !activeDailyMission && !activeStory && (
         <Navigation 
           currentTab={currentTab}
           onSelectTab={(tab) => {

@@ -29,3 +29,13 @@ export function pathForTab(tab: AppTab): string {
   if (tab === 'not-found') return window.location.pathname;
   return TAB_PATHS[tab] || '/';
 }
+
+/** Story Swipes deep link: /story/<storyId> */
+export function storyIdFromPath(pathname: string): string | null {
+  const match = pathname.replace(/\/+$/, '').match(/^\/story\/([a-z0-9-]+)$/i);
+  return match ? match[1] : null;
+}
+
+export function pathForStory(storyId: string): string {
+  return `/story/${storyId}`;
+}
