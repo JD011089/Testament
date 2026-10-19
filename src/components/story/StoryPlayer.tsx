@@ -4,6 +4,7 @@ import { getStoryCardIndex, markStoryComplete, saveStoryCursor } from '../../uti
 import { addVerseCard } from '../../utils/deck';
 import { celebrate, nudge } from '../../utils/feedback';
 import { soundEngine } from '../../utils/audio';
+import { useModalLock } from '../../utils/useModalLock';
 import { VerseLine } from './VerseLine';
 import { ChoiceMoment } from './ChoiceMoment';
 import { DragToTarget } from './interactions/DragToTarget';
@@ -48,7 +49,8 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
   const [completed, setCompleted] = useState(false);
   const [cardDone, setCardDone] = useState(false);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const rootRef = useModalLock(true);
   const payoffRecorded = useRef(false);
 
   const card: StoryCard = story.cards[index];
@@ -166,7 +168,7 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
   const canTapAdvance = card.type === 'narration' || card.type === 'payoff';
 
   return (
-    <div className="fixed inset-0 z-40 bg-bg text-fg flex flex-col">
+    <div ref={rootRef} className="fixed inset-0 z-40 bg-bg text-fg flex flex-col overscroll-none">
       {/* Progress segments + back */}
       <div className="px-3 pt-3 pb-2">
         <div className="flex items-center gap-2 mb-3">
@@ -192,10 +194,10 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
 
       {/* Card body */}
       <div
-        ref={containerRef}
+        ref={scrollRef}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
-        className="flex-1 overflow-y-auto px-4 pb-6"
+        className="flex-1 overflow-y-auto overscroll-contain px-4 pb-6"
       >
         <div className="max-w-xl mx-auto min-h-full flex flex-col justify-center gap-5 py-4">
           {card.type === 'narration' && (

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { celebrate } from '../../utils/feedback';
 import { markFirstRunDone, saveReminderTime } from '../../utils/firstRun';
+import { useModalLock } from '../../utils/useModalLock';
 import { Play, Layers, Bell, Sparkles } from 'lucide-react';
 
 interface FirstRunProps {
@@ -28,6 +29,7 @@ const SCREENS = [
 export function FirstRun({ onDone }: FirstRunProps) {
   const [index, setIndex] = useState(0);
   const [reminder, setReminder] = useState('08:00');
+  const rootRef = useModalLock(true);
   const isLast = index === SCREENS.length - 1;
   const screen = SCREENS[index];
 
@@ -45,7 +47,7 @@ export function FirstRun({ onDone }: FirstRunProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-bg text-fg flex flex-col">
+    <div ref={rootRef} className="fixed inset-0 z-50 bg-bg text-fg flex flex-col overscroll-none">
       <div className="flex-1 max-w-md mx-auto w-full px-6 flex flex-col justify-center gap-6 text-center">
         <div className="w-16 h-16 mx-auto rounded-2xl bg-accent/15 border border-accent/40 flex items-center justify-center text-accent">
           {screen.icon}
