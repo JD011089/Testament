@@ -101,9 +101,16 @@ async function answerQuiz(page: Page) {
 
 async function lockIn(page: Page) {
   await page.getByText('Tap the words in order.').waitFor({ state: 'visible' });
-  for (const word of VERSE_WORDS) {
-    // Placed tiles are removed from the pool, so the first remaining match is
-    // always the next available tile (works with repeated words).
+  await page.getByRole('button', { name: VERSE_WORDS[0], exact: true }).first().click();
+  const wrongWord = VERSE_WORDS[2];
+  await page.getByRole('button', { name: wrongWord, exact: true }).click();
+  await expect(page.getByRole('button', { name: wrongWord, exact: true })).toHaveCount(0);
+  const placedWord = page.getByRole('button', { name: `Remove ${wrongWord} from your verse`, exact: true });
+  await expect(placedWord).toBeVisible();
+  await placedWord.click();
+  await expect(page.getByRole('button', { name: wrongWord, exact: true })).toHaveCount(1);
+  await page.getByRole('button', { name: VERSE_WORDS[1], exact: true }).first().click();
+  for (const word of VERSE_WORDS.slice(2)) {
     await page.getByRole('button', { name: word, exact: true }).first().click();
   }
   await page.getByText(/In order|Close\./).waitFor({ state: 'visible' });
