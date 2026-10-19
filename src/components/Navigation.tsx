@@ -60,28 +60,28 @@ export const Navigation: React.FC<NavigationProps> = ({
       label: t('nav.home'),
       mobileLabel: language === 'fr' ? 'Aujourd\'hui' : language === 'es' ? 'Hoy' : 'Today',
       tooltip: t('nav.homeTooltip'),
-      icon: <Compass className="w-4 h-4 md:w-4 md:h-4" />
+      icon: <Compass className="w-6 h-6 xl:w-4 xl:h-4" strokeWidth={2} />
     },
     {
       tab: 'map',
       label: 'Map',
       mobileLabel: language === 'fr' ? 'Carte' : language === 'es' ? 'Mapa' : 'Map',
       tooltip: 'Story map',
-      icon: <MapIcon className="w-4 h-4 md:w-4 md:h-4" />
+      icon: <MapIcon className="w-6 h-6 xl:w-4 xl:h-4" strokeWidth={2} />
     },
     {
       tab: 'library',
       label: t('nav.library'),
       mobileLabel: language === 'fr' ? 'Bible' : language === 'es' ? 'Biblia' : t('nav.library'),
       tooltip: t('nav.libraryTooltip'),
-      icon: <BookOpen className="w-4 h-4 md:w-4 md:h-4" />
+      icon: <BookOpen className="w-6 h-6 xl:w-4 xl:h-4" strokeWidth={2} />
     },
     {
       tab: 'deck',
       label: 'Deck',
       mobileLabel: language === 'fr' ? 'Jeu' : language === 'es' ? 'Colección' : 'Deck',
       tooltip: 'My Deck',
-      icon: <Layers className="w-4 h-4 md:w-4 md:h-4" />
+      icon: <Layers className="w-6 h-6 xl:w-4 xl:h-4" strokeWidth={2} />
     },
   ];
 
@@ -238,9 +238,9 @@ export const Navigation: React.FC<NavigationProps> = ({
       <nav 
         role="navigation" 
         aria-label="Mobile Navigation" 
-        className="xl:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-ink/95 backdrop-blur-lg border-t border-stone-200 dark:border-stone-800/90 px-1 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg"
+        className="xl:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-ink/95 backdrop-blur-lg border-t border-stone-200 dark:border-stone-800/90 px-2 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_24px_rgba(0,0,0,0.08)]"
       >
-        <div className="grid grid-cols-5 items-center w-full max-w-lg mx-auto">
+        <div className="grid grid-cols-4 items-stretch w-full max-w-md mx-auto gap-1">
           {navItems.map((item) => {
             const isActive = isTabActive(item.tab);
             return (
@@ -251,16 +251,19 @@ export const Navigation: React.FC<NavigationProps> = ({
                   onSelectTab(item.tab);
                 }}
                 aria-current={isActive ? 'page' : undefined}
-                className={`flex flex-col items-center justify-center min-h-[44px] py-1 px-0.5 rounded-lg transition-all focus-visible:ring-2 focus-visible:ring-amber-500 w-full min-w-0 ${
+                className={`relative flex flex-col items-center justify-center min-h-[56px] py-1.5 px-1 rounded-xl transition-all focus-visible:ring-2 focus-visible:ring-amber-500 w-full min-w-0 active:scale-95 ${
                   isActive
                     ? 'text-amber-800 dark:text-amber-300 font-bold'
-                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                    : 'text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                 }`}
               >
+                {isActive && (
+                  <span aria-hidden="true" className="absolute top-0 h-0.5 w-8 rounded-full bg-amber-500" />
+                )}
                 <div className="shrink-0">
                   {item.icon}
                 </div>
-                <span className="text-[10px] leading-[1.15] font-medium w-full text-center block mt-0.5 px-0.5 break-words">
+                <span className="text-[11px] leading-tight font-semibold w-full text-center block mt-1 truncate">
                   {item.mobileLabel || item.label}
                 </span>
               </button>

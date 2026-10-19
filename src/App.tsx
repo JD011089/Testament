@@ -725,7 +725,7 @@ export function App() {
       <main className={`w-full pt-3 sm:pt-4 xl:pt-16 ${
         activeQuest || activeDailyMission || activeStory
           ? 'pb-4 xl:pb-8'
-          : 'pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] xl:pb-10'
+          : 'pb-[calc(6rem+env(safe-area-inset-bottom,0px))] xl:pb-10'
       }`}>
         {activeDailyMission ? (
           <StoryViewer 
