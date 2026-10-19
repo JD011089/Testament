@@ -710,7 +710,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-surface dark:bg-iron-950 text-stone-900 dark:text-parchment-100 transition-colors duration-200 w-full relative">
+    <div className="min-h-screen min-h-dvh bg-surface dark:bg-iron-950 text-stone-900 dark:text-parchment-100 transition-colors duration-200 w-full relative">
       {showFirstRun && (
         <Suspense fallback={null}>
           <FirstRun

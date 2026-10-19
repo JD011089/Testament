@@ -78,9 +78,8 @@
     /* Respect browser base font size preference without forcing fixed 16px */
     font-size: calc(100% * var(--app-font-scale, 1));
     overflow-x: hidden;
+    /* auto: scroll only when content actually overflows the viewport */
     overflow-y: auto;
-    overscroll-behavior-x: none;
-    overscroll-behavior-y: none;
     scroll-behavior: smooth;
     height: auto;
     min-height: 100%;
@@ -91,9 +90,9 @@
     @apply bg-surface text-stone-900 dark:bg-ink dark:text-parchment-100 font-sans antialiased;
     overflow-x: hidden;
     overflow-y: visible;
-    overscroll-behavior-x: none;
-    overscroll-behavior-y: none;
+    /* dvh matches the visible viewport so short pages don't get phantom scroll */
     min-height: 100vh;
+    min-height: 100dvh;
     height: auto;
     transition: background-color 0.2s ease, color 0.2s ease;
   }
@@ -124,6 +123,7 @@
 
   #root {
     min-height: 100vh;
+    min-height: 100dvh;
     height: auto;
     display: flex;
     flex-direction: column;

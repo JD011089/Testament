@@ -47,7 +47,7 @@ export function FirstRun({ onDone }: FirstRunProps) {
   };
 
   return (
-    <div ref={rootRef} className="fixed inset-0 z-50 bg-bg text-fg flex flex-col overscroll-none">
+    <div ref={rootRef} className="fixed inset-0 z-50 bg-bg text-fg flex flex-col overscroll-none touch-pan-y">
       <div className="flex-1 max-w-md mx-auto w-full px-6 flex flex-col justify-center gap-6 text-center">
         <div className="w-16 h-16 mx-auto rounded-2xl bg-accent/15 border border-accent/40 flex items-center justify-center text-accent">
           {screen.icon}

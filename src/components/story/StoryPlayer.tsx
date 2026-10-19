@@ -197,7 +197,7 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
         ref={scrollRef}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
-        className="flex-1 overflow-y-auto overscroll-contain px-4 pb-6"
+        className="flex-1 overflow-y-auto overscroll-contain touch-pan-y px-4 pb-6"
       >
         <div className="max-w-xl mx-auto min-h-full flex flex-col justify-center gap-5 py-4">
           {card.type === 'narration' && (
