@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, type TouchEvent } from 'react
 import type { InteractionCard, Story, StoryCard } from '../../types/story';
 import { getStoryCardIndex, markStoryComplete, saveStoryCursor } from '../../utils/storyProgress';
 import { addVerseCard } from '../../utils/deck';
-import { celebrate } from '../../utils/feedback';
+import { celebrate, nudge } from '../../utils/feedback';
 import { soundEngine } from '../../utils/audio';
 import { VerseLine } from './VerseLine';
 import { ChoiceMoment } from './ChoiceMoment';
@@ -47,7 +47,7 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
   const [index, setIndex] = useState(() => Math.min(getStoryCardIndex(story.id), lastIndex));
   const [completed, setCompleted] = useState(false);
   const [cardDone, setCardDone] = useState(false);
-  const touchStartY = useRef<number | null>(null);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const payoffRecorded = useRef(false);
 
@@ -117,6 +117,17 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
     setIndex((i) => Math.max(0, i - 1));
   }, []);
 
+  const requireCardDone = card.type === 'interaction' || card.type === 'choice';
+  const canSwipe = !requireCardDone || cardDone;
+
+  const tryAdvance = useCallback(() => {
+    if (!canSwipe) {
+      nudge();
+      return;
+    }
+    advance();
+  }, [advance, canSwipe]);
+
   const requestExit = () => {
     if (!completed && index > 0 && !window.confirm('Leave this story? Your spot is saved.')) return;
     soundEngine.stopSpeaking();
@@ -125,22 +136,30 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight') advance();
+      if (e.key === 'ArrowRight') tryAdvance();
       if (e.key === 'ArrowLeft') goBack();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [advance, goBack]);
+  }, [tryAdvance, goBack]);
 
   const onTouchStart = (e: TouchEvent<HTMLDivElement>) => {
-    touchStartY.current = e.touches[0]?.clientY ?? null;
+    const touch = e.touches[0];
+    touchStart.current = touch ? { x: touch.clientX, y: touch.clientY } : null;
   };
   const onTouchEnd = (e: TouchEvent<HTMLDivElement>) => {
-    if (touchStartY.current === null) return;
-    const delta = (e.changedTouches[0]?.clientY ?? touchStartY.current) - touchStartY.current;
-    touchStartY.current = null;
-    if (Math.abs(delta) < 60) return;
-    if (delta < 0) advance();
+    const start = touchStart.current;
+    touchStart.current = null;
+    if (!start) return;
+    const end = e.changedTouches[0];
+    if (!end) return;
+    const deltaX = end.clientX - start.x;
+    const deltaY = end.clientY - start.y;
+    // Require a deliberate horizontal swipe so vertical scrolling, diagonal
+    // drags, and in-card interactions are never mistaken for navigation.
+    if (Math.abs(deltaX) < 72) return;
+    if (Math.abs(deltaY) > Math.abs(deltaX) * 0.6) return;
+    if (deltaX < 0) tryAdvance();
     else goBack();
   };
 
@@ -196,6 +215,9 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
                   <p className="text-body text-accent font-semibold">{card.successText}</p>
                   <button type="button" onClick={advance} className="btn-primary w-full">Continue</button>
                 </div>
+              )}
+              {!cardDone && (
+                <p className="text-small text-fg-muted text-center">Finish this step to keep swiping forward.</p>
               )}
             </div>
           )}
