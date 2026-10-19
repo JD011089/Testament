@@ -48,7 +48,7 @@ const DeckScreen = lazy(() => import('./screens/DeckScreen').then((m) => ({ defa
 const FirstRun = lazy(() => import('./components/onboarding/FirstRun').then((m) => ({ default: m.FirstRun })));
 
 function ViewFallback() {
-  return <div className="max-w-7xl mx-auto px-6 py-16 text-sm text-stone-500">Loading...</div>;
+  return <div className="max-w-7xl mx-auto px-6 py-16 text-sm text-stone-500">Loading…</div>;
 }
 
 function readStringArray(key: string): string[] {

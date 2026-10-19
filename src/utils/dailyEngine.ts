@@ -34,6 +34,18 @@ export const getTodayDateKey = (): string => {
   return `${year}-${month}-${day}`;
 };
 
+/** Stable ISO-like week key (Mon-start) for weekly grace-day tracking. */
+export const isoWeekKey = (date: Date = new Date()): string => {
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const day = (d.getDay() + 6) % 7; // Mon=0 … Sun=6
+  d.setDate(d.getDate() - day + 3); // Thursday of this week
+  const week1 = new Date(d.getFullYear(), 0, 4);
+  const week1Day = (week1.getDay() + 6) % 7;
+  week1.setDate(week1.getDate() - week1Day + 3);
+  const week = 1 + Math.round((d.getTime() - week1.getTime()) / (7 * 24 * 60 * 60 * 1000));
+  return `${d.getFullYear()}-W${String(week).padStart(2, '0')}`;
+};
+
 /**
  * Formatted human-readable date
  */
@@ -228,7 +240,7 @@ export const getDailyStreakCount = (): number => {
     if (diffDays <= 1) return stored;
 
     const now = new Date();
-    const currentWeekKey = `${now.getFullYear()}-W${Math.ceil((now.getDate() + new Date(now.getFullYear(), now.getMonth(), 1).getDay()) / 7)}`;
+    const currentWeekKey = isoWeekKey(now);
     const lastGraceWeek = localStorage.getItem('testament_last_grace_week');
 
     // Grace day forgiveness protects a 2-day gap if not already used this week
@@ -260,7 +272,7 @@ export const recordDailyActivityStreak = (effectiveDate?: string | Date): number
       : 0;
 
     const now = new Date();
-    const currentWeekKey = `${now.getFullYear()}-W${Math.ceil((now.getDate() + new Date(now.getFullYear(), now.getMonth(), 1).getDay()) / 7)}`;
+    const currentWeekKey = isoWeekKey(now);
     const lastGraceWeek = localStorage.getItem('testament_last_grace_week');
 
     let next = 1;

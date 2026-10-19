@@ -503,7 +503,7 @@ const ARCHIVED_RELEASES: ReleaseMilestone[] = [
       {
         icon: <Sparkles className="w-4 h-4 text-amber-400" />,
         title: 'Harmonized Actions & Authentic Localized Dates',
-        description: 'Step badges, action buttons ("Prendre la dÃ©cision", "Lancer la simulation"), and the top dashboard date dynamically format in your chosen tongue.'
+        description: 'Step badges, action buttons ("Prendre la décision", "Lancer la simulation"), and the top dashboard date dynamically format in your chosen tongue.'
       }
     ]
   },
@@ -1031,7 +1031,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
             </div>
             {selectedRelease.isLatest && (
               <span className="text-xs font-mono text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/60 px-2.5 py-1 rounded-full font-bold shrink-0">
-                âœ“ Installed
+                ✓ Installed
               </span>
             )}
           </div>

@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { celebrate } from '../../utils/feedback';
 import { markFirstRunDone, saveReminderTime } from '../../utils/firstRun';
+import { useLanguage } from '../../context/LanguageContext';
 import { useModalLock } from '../../utils/useModalLock';
 import { Play, Layers, Bell, Sparkles } from 'lucide-react';
 
@@ -8,30 +9,18 @@ interface FirstRunProps {
   onDone: () => void;
 }
 
-const SCREENS = [
-  {
-    icon: <Play className="w-8 h-8" />,
-    title: 'Play a Bible story in 3 minutes a day',
-    body: 'Swipe through the story, make a choice, and see what really happened — no walls of text.'
-  },
-  {
-    icon: <Layers className="w-8 h-8" />,
-    title: 'Collect the verses you learn',
-    body: 'Every finished story adds a card to My Deck. Watch your collection grow.'
-  },
-  {
-    icon: <Bell className="w-8 h-8" />,
-    title: 'Pick a daily reminder time',
-    body: 'A gentle nudge each day keeps your streak kind and easy.'
-  }
-];
-
 export function FirstRun({ onDone }: FirstRunProps) {
+  const { t } = useLanguage();
   const [index, setIndex] = useState(0);
   const [reminder, setReminder] = useState('08:00');
   const rootRef = useModalLock(true);
-  const isLast = index === SCREENS.length - 1;
-  const screen = SCREENS[index];
+  const screens = useMemo(() => [
+    { icon: <Play className="w-8 h-8" />, title: t('firstRun.s1.title'), body: t('firstRun.s1.body') },
+    { icon: <Layers className="w-8 h-8" />, title: t('firstRun.s2.title'), body: t('firstRun.s2.body') },
+    { icon: <Bell className="w-8 h-8" />, title: t('firstRun.s3.title'), body: t('firstRun.s3.body') },
+  ], [t]);
+  const isLast = index === screens.length - 1;
+  const screen = screens[index];
 
   const finish = () => {
     if (isLast) {
@@ -57,7 +46,7 @@ export function FirstRun({ onDone }: FirstRunProps) {
 
         {isLast && (
           <label className="space-y-2 text-left">
-            <span className="text-small text-fg-muted">Daily reminder time</span>
+            <span className="text-small text-fg-muted">{t('firstRun.reminderLabel')}</span>
             <input
               type="time"
               value={reminder}
@@ -70,15 +59,15 @@ export function FirstRun({ onDone }: FirstRunProps) {
 
       <div className="px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] max-w-md mx-auto w-full space-y-4">
         <div className="flex items-center justify-center gap-2" aria-hidden="true">
-          {SCREENS.map((_, i) => (
+          {screens.map((_, i) => (
             <span key={i} className={`h-1.5 w-6 rounded-full ${i === index ? 'bg-accent' : 'bg-line'}`} />
           ))}
         </div>
         <button type="button" onClick={finish} className="btn-primary w-full inline-flex items-center justify-center gap-2">
-          {isLast ? <><Sparkles className="w-4 h-4" /> Start with David and Goliath</> : 'Next'}
+          {isLast ? <><Sparkles className="w-4 h-4" /> {t('firstRun.start')}</> : t('firstRun.next')}
         </button>
         <button type="button" onClick={() => { markFirstRunDone(); onDone(); }} className="btn-quiet w-full">
-          Skip
+          {t('firstRun.skip')}
         </button>
       </div>
     </div>

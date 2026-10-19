@@ -4,6 +4,7 @@ import { getStoryStop } from '../content/stories';
 import { isStoryCompleted } from '../utils/storyProgress';
 import { celebrate } from '../utils/feedback';
 import { shareVerseCard } from '../utils/shareCard';
+import { useLanguage } from '../context/LanguageContext';
 import { PageHeader } from '../components/PageHeader';
 import { BookOpen, Dumbbell, Share2, RotateCw } from 'lucide-react';
 
@@ -21,6 +22,7 @@ const STRENGTH_STYLES: Record<CardStrength, string> = {
 };
 
 export function DeckScreen({ onPractice, onReadChapter }: DeckScreenProps) {
+  const { t } = useLanguage();
   const [nonce, setNonce] = useState(0);
   const cards = useMemo(() => readDeck(), [nonce]);
   const [strengthFilter, setStrengthFilter] = useState<StrengthFilter>('all');
@@ -58,8 +60,8 @@ export function DeckScreen({ onPractice, onReadChapter }: DeckScreenProps) {
   return (
     <div className="max-w-2xl mx-auto px-4 pt-4 pb-8 space-y-5">
       <PageHeader
-        title="My Deck"
-        subtitle={cards.length > 0 ? `${cards.length} card${cards.length === 1 ? '' : 's'} collected.` : 'Finish a story and its verse lands here.'}
+        title={t('deck.title')}
+        subtitle={cards.length > 0 ? t('deck.subtitleCount', { count: cards.length }) : t('deck.subtitleEmpty')}
       />
 
       <div className="flex flex-wrap gap-2">
@@ -69,9 +71,9 @@ export function DeckScreen({ onPractice, onReadChapter }: DeckScreenProps) {
             type="button"
             onClick={() => { celebrate('tap'); setStrengthFilter(s); }}
             aria-pressed={strengthFilter === s}
-            className={`px-3 min-h-[44px] rounded-full border text-small font-semibold capitalize ${strengthFilter === s ? 'border-accent bg-accent/15 text-accent' : 'border-line text-fg-muted'}`}
+            className={`btn-segment capitalize ${strengthFilter === s ? 'btn-segment-selected' : ''}`}
           >
-            {s}
+            {s === 'all' ? t('deck.filterAll') : s}
           </button>
         ))}
         {arcs.map((arc) => (
@@ -80,7 +82,7 @@ export function DeckScreen({ onPractice, onReadChapter }: DeckScreenProps) {
             type="button"
             onClick={() => { celebrate('tap'); setArcFilter(arcFilter === arc ? 'all' : arc); }}
             aria-pressed={arcFilter === arc}
-            className={`px-3 min-h-[44px] rounded-full border text-small font-semibold ${arcFilter === arc ? 'border-accent bg-accent/15 text-accent' : 'border-line text-fg-muted'}`}
+            className={`btn-segment ${arcFilter === arc ? 'btn-segment-selected' : ''}`}
           >
             {arc}
           </button>
@@ -89,7 +91,7 @@ export function DeckScreen({ onPractice, onReadChapter }: DeckScreenProps) {
 
       {visible.length === 0 ? (
         <p className="text-body text-fg-muted text-center py-10">
-          No cards yet. Finish a story and its verse lands here.
+          {t('deck.empty')}
         </p>
       ) : (
         <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -106,14 +108,14 @@ export function DeckScreen({ onPractice, onReadChapter }: DeckScreenProps) {
               )}
               <div className="flex items-center gap-2 flex-wrap">
                 <button type="button" className="btn-secondary" onClick={() => { celebrate('tap'); setFlipped(flipped === card.id ? null : card.id); }}>
-                  <RotateCw className="w-4 h-4" /> Flip
+                  <RotateCw className="w-4 h-4" /> {t('deck.flip')}
                 </button>
                 <button
                   type="button"
                   className="btn-quiet"
                   onClick={() => { celebrate('tap'); onPractice(card.ref); }}
                 >
-                  <Dumbbell className="w-4 h-4" /> Practice
+                  <Dumbbell className="w-4 h-4" /> {t('common.practice')}
                 </button>
                 <button
                   type="button"
@@ -121,7 +123,7 @@ export function DeckScreen({ onPractice, onReadChapter }: DeckScreenProps) {
                   disabled={busy === card.id}
                   onClick={() => handleShare(card)}
                 >
-                  <Share2 className="w-4 h-4" /> Share
+                  <Share2 className="w-4 h-4" /> {t('deck.share')}
                 </button>
                 {card.strength !== 'gold' && (
                   <button
@@ -153,19 +155,20 @@ export function DeckScreen({ onPractice, onReadChapter }: DeckScreenProps) {
 }
 
 function VerseCardBack({ card, onPractice, onReadChapter }: { card: DeckVerseCard; onPractice: (ref: string) => void; onReadChapter: (passage: string) => void }) {
+  const { t } = useLanguage();
   const stop = getStoryStop(card.storyId);
   return (
     <div className="space-y-2">
-      <p className="text-small text-fg-muted">From {card.storyTitle}{stop ? ` • ${stop.passage}` : ''}</p>
+      <p className="text-small text-fg-muted">{card.storyTitle}{stop ? ` • ${stop.passage}` : ''}</p>
       <p className="text-body text-fg font-reading">“{card.text}”</p>
       <p className="text-ref text-fg-muted">{card.ref} • {card.translation}</p>
       <div className="flex gap-2">
         <button type="button" className="btn-quiet" onClick={() => { celebrate('tap'); onPractice(card.ref); }}>
-          <Dumbbell className="w-4 h-4" /> Practice
+          <Dumbbell className="w-4 h-4" /> {t('common.practice')}
         </button>
         {stop && (
           <button type="button" className="btn-quiet" onClick={() => { celebrate('tap'); onReadChapter(stop.passage); }}>
-            <BookOpen className="w-4 h-4" /> Read chapter
+            <BookOpen className="w-4 h-4" /> {t('deck.read')}
           </button>
         )}
       </div>

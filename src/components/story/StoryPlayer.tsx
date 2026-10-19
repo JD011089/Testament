@@ -4,6 +4,7 @@ import { getStoryCardIndex, markStoryComplete, saveStoryCursor } from '../../uti
 import { addVerseCard } from '../../utils/deck';
 import { celebrate, nudge } from '../../utils/feedback';
 import { soundEngine } from '../../utils/audio';
+import { useLanguage } from '../../context/LanguageContext';
 import { useModalLock } from '../../utils/useModalLock';
 import { VerseLine } from './VerseLine';
 import { ChoiceMoment } from './ChoiceMoment';
@@ -44,6 +45,7 @@ function InteractionCardView({ card, onComplete }: { card: InteractionCard; onCo
 }
 
 export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: StoryPlayerProps) {
+  const { t } = useLanguage();
   const lastIndex = story.cards.length - 1;
   const [index, setIndex] = useState(() => Math.min(getStoryCardIndex(story.id), lastIndex));
   const [completed, setCompleted] = useState(false);
@@ -131,7 +133,7 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
   }, [advance, canSwipe]);
 
   const requestExit = () => {
-    if (!completed && index > 0 && !window.confirm('Leave this story? Your spot is saved.')) return;
+    if (!completed && index > 0 && !window.confirm(t('story.leaveConfirm'))) return;
     soundEngine.stopSpeaking();
     onExit();
   };
@@ -175,7 +177,7 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
           <button
             type="button"
             onClick={requestExit}
-            aria-label="Back"
+            aria-label={t('story.back')}
             className="min-h-[44px] min-w-[44px] rounded-full flex items-center justify-center hover:bg-surface/60"
           >
             <ChevronLeft className="w-6 h-6" />
@@ -202,7 +204,7 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
         <div className="max-w-xl mx-auto min-h-full flex flex-col justify-center gap-5 py-4">
           {card.type === 'narration' && (
             <div className="space-y-4">
-              <span className="text-label uppercase text-fg-muted">Narration • not Scripture</span>
+              <span className="text-label uppercase text-fg-muted">{t('story.narrationLabel')}</span>
               <p className="text-title-3 font-reading leading-relaxed text-fg">{card.text}</p>
               {card.scriptureLine && <VerseLine line={card.scriptureLine} />}
             </div>
@@ -215,11 +217,11 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
               {cardDone && (
                 <div className="space-y-3">
                   <p className="text-body text-accent font-semibold">{card.successText}</p>
-                  <button type="button" onClick={advance} className="btn-primary w-full">Continue</button>
+                  <button type="button" onClick={advance} className="btn-primary w-full">{t('common.continue')}</button>
                 </div>
               )}
               {!cardDone && (
-                <p className="text-small text-fg-muted text-center">Finish this step to keep swiping forward.</p>
+                <p className="text-small text-fg-muted text-center">{t('story.finishToSwipe')}</p>
               )}
             </div>
           )}
@@ -228,14 +230,14 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
 
           {card.type === 'payoff' && (
             <div className="space-y-5 text-center">
-              <span className="text-label uppercase text-accent">Verse collected</span>
+              <span className="text-label uppercase text-accent">{t('today.verseCollected')}</span>
               <div className="animate-fadeIn">
                 <VerseLine line={card.verse ?? story.verse} />
               </div>
-              <p className="text-small text-fg-muted">This verse is now in My Deck.</p>
+              <p className="text-small text-fg-muted">{t('story.verseInDeck')}</p>
               {!completed && (
                 <button type="button" onClick={finish} className="btn-primary w-full inline-flex items-center justify-center gap-2">
-                  <Check className="w-4 h-4" /> Done for now
+                  <Check className="w-4 h-4" /> {t('story.doneForNow')}
                 </button>
               )}
             </div>
@@ -251,15 +253,15 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
             onClick={() => { celebrate('snap'); onReadChapter(story.passage); }}
             className="btn-secondary flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap"
           >
-            <BookOpen className="w-4 h-4" /> Read the full chapter
+            <BookOpen className="w-4 h-4" /> {t('story.readChapter')}
           </button>
           {canTapAdvance && !completed && card.type !== 'payoff' && (
-            <button type="button" onClick={advance} className="btn-primary flex-1">Next</button>
+            <button type="button" onClick={advance} className="btn-primary flex-1">{t('story.next')}</button>
           )}
         </div>
         {completed && (
           <div className="max-w-xl mx-auto mt-2 text-center">
-            <p className="text-small text-fg-muted">Done for today. Tomorrow&apos;s story is waiting on the map.</p>
+            <p className="text-small text-fg-muted">{t('story.doneFooter')}</p>
           </div>
         )}
       </div>

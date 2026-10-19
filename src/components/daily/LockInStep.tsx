@@ -13,6 +13,7 @@ import {
 import { getMemoryState, getDueVerses, recordReview } from '../../utils/spacedRepetition';
 import { getVerseById } from '../../utils/verseRegistry';
 import { celebrate, nudge } from '../../utils/feedback';
+import { useLanguage } from '../../context/LanguageContext';
 import { VerseLine } from '../story/VerseLine';
 
 function seededShuffle<T>(items: T[], seed = 11): T[] {
@@ -33,15 +34,16 @@ interface LockInStepProps {
 
 /** Step 3: today's verse at the current level, plus up to two due reviews. */
 export function LockInStep({ verse, onDone }: LockInStepProps) {
+  const { language } = useLanguage();
   const dueReviews = useMemo(() => {
     return getDueVerses()
       .filter((state) => state.ref !== verse.ref)
       .slice(0, 2)
       .map((state) => {
-        const memory = getVerseById(state.ref);
+        const memory = getVerseById(state.ref, language);
         return { ref: state.ref, text: memory?.text ?? '', translation: (memory?.translation === 'KJV' ? 'KJV' : 'WEB') as 'WEB' | 'KJV', level: state.level };
       });
-  }, [verse.ref]);
+  }, [verse.ref, language]);
 
   const queue = useMemo(
     () => [{ ref: verse.ref, text: verse.text, translation: verse.translation, level: getMemoryState(verse.ref).level }, ...dueReviews],

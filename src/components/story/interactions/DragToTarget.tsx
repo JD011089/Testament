@@ -2,6 +2,7 @@ import { useCallback, useRef, useState, type PointerEvent as ReactPointerEvent }
 import type { DragConfig } from '../../../types/story';
 import type { InteractionProps } from './types';
 import { celebrate, nudge } from '../../../utils/feedback';
+import { useLanguage } from '../../../context/LanguageContext';
 
 const DRAG_THRESHOLD_PX = 8;
 
@@ -21,6 +22,7 @@ type DragState = {
  * simply bounce back with a gentle nudge.
  */
 export function DragToTarget({ config, disabled, onComplete }: InteractionProps<DragConfig>) {
+  const { t } = useLanguage();
   const [placed, setPlaced] = useState<string[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [wrongId, setWrongId] = useState<string | null>(null);
@@ -214,12 +216,12 @@ export function DragToTarget({ config, disabled, onComplete }: InteractionProps<
         <span className="text-label uppercase text-fg-muted">{config.targetLabel}</span>
         <span className="text-title-3 text-accent">{placed.length} / {config.requiredCount}</span>
         <span className="text-small text-fg-muted">
-          {selected ? 'Tap the bag to drop it' : 'Drag a stone here'}
+          {selected ? t('story.tapBag') : t('story.dragHint')}
         </span>
       </div>
 
       {remaining.length === 0 && (
-        <p className="text-center text-small text-success font-semibold">All five stones are in the bag.</p>
+        <p className="text-center text-small text-success font-semibold">{t('story.allStones')}</p>
       )}
 
       {drag?.active && (

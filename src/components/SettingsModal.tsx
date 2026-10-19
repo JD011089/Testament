@@ -7,7 +7,7 @@ import { useModalLock } from '../utils/useModalLock';
 import { getStoredTheme, applyTheme, type AppTheme } from '../utils/theme';
 import { getShowXpPreference, setShowXpPreference } from '../utils/userPreferences';
 import { loadReadingPlace, saveReadingPlace } from '../utils/readingPlace';
-import { BIBLE_TRANSLATIONS, type TranslationId } from '../utils/bibleService';
+import { BIBLE_TRANSLATIONS, getDefaultTranslationForLanguage, type TranslationId } from '../utils/bibleService';
 import {
   isSoundEnabled, setSoundEnabled, isHapticsEnabled, setHapticsEnabled
 } from '../utils/feedback';
@@ -38,7 +38,11 @@ interface SettingsModalProps {
   relicsCount?: { unlocked: number; total: number };
 }
 
-const VOICE_PREVIEW_TEXT = "The Lord is my strength and my shield; in Him my heart trusts.";
+const VOICE_PREVIEW_BY_LANG: Record<Language, string> = {
+  en: 'The Lord is my strength and my shield; in Him my heart trusts.',
+  es: 'El Señor es mi fuerza y mi escudo; en Él confía mi corazón.',
+  fr: 'L\'Éternel est ma force et mon bouclier; en lui mon cœur se confie.',
+};
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
   isOpen,
@@ -80,6 +84,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   }, []);
 
   useEffect(() => {
+    const next = getDefaultTranslationForLanguage(language);
+    setCurrentTranslation(next);
+  }, [language]);
+
+  useEffect(() => {
     return () => {
       soundEngine.stopSpeaking();
     };
@@ -113,7 +122,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
     soundEngine.stopSpeaking();
     setIsPreviewingVoice(true);
-    soundEngine.speakVerse(VOICE_PREVIEW_TEXT, () => {
+    soundEngine.speakVerse(VOICE_PREVIEW_BY_LANG[language] ?? VOICE_PREVIEW_BY_LANG.en, () => {
       setIsPreviewingVoice(false);
     });
   };
@@ -150,7 +159,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             type="button"
             onClick={handleClose}
             className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-stone-500 hover:text-stone-900 dark:hover:text-stone-200 bg-stone-100 dark:bg-stone-800 transition-colors cursor-pointer"
-            aria-label="Close settings"
+            aria-label={t('settings.close')}
           >
             ✕
           </button>
@@ -161,10 +170,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <div className="flex items-center justify-between text-xs sm:text-sm font-medium text-stone-800 dark:text-stone-200">
             <div className="flex items-center gap-2">
               {currentTheme === 'dark' ? <Moon className="w-4 h-4 text-amber-400" /> : <Sun className="w-4 h-4 text-amber-600" />}
-              <span>Theme</span>
+              <span>{t('settings.theme')}</span>
             </div>
             <span className="text-xs font-mono font-bold text-amber-700 dark:text-amber-400 uppercase">
-              {currentTheme === 'dark' ? 'Vespers (Dark)' : 'Daybreak (Light)'}
+              {currentTheme === 'dark' ? t('settings.themeDark') : t('settings.themeLight')}
             </span>
           </div>
           <div className="grid grid-cols-2 gap-2">
@@ -175,14 +184,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 applyTheme('light');
                 setCurrentTheme('light');
               }}
-              className={`p-3 rounded-2xl border text-xs font-semibold flex items-center justify-center gap-2 min-h-[44px] cursor-pointer transition-all ${
-                currentTheme === 'light'
-                  ? 'bg-amber-500/20 border-amber-500 text-stone-900 font-bold shadow-xs'
-                  : 'bg-stone-50 dark:bg-stone-850 border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-300'
+              className={`btn-segment justify-center gap-2 p-3 rounded-2xl min-h-[44px] ${
+                currentTheme === 'light' ? 'btn-segment-selected' : ''
               }`}
             >
               <Sun className="w-3.5 h-3.5 text-amber-600" />
-              <span>Daybreak (Light)</span>
+              <span>{t('settings.themeLight')}</span>
             </button>
             <button
               type="button"
@@ -191,14 +198,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 applyTheme('dark');
                 setCurrentTheme('dark');
               }}
-              className={`p-3 rounded-2xl border text-xs font-semibold flex items-center justify-center gap-2 min-h-[44px] cursor-pointer transition-all ${
-                currentTheme === 'dark'
-                  ? 'bg-amber-500/20 border-amber-500 text-parchment-50 font-bold shadow-xs'
-                  : 'bg-stone-50 dark:bg-stone-850 border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-300'
+              className={`btn-segment justify-center gap-2 p-3 rounded-2xl min-h-[44px] ${
+                currentTheme === 'dark' ? 'btn-segment-selected' : ''
               }`}
             >
               <Moon className="w-3.5 h-3.5 text-amber-400" />
-              <span>Vespers (Dark)</span>
+              <span>{t('settings.themeDark')}</span>
             </button>
           </div>
         </div>
@@ -208,7 +213,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <div className="flex items-center justify-between text-xs sm:text-sm font-medium text-stone-800 dark:text-stone-200">
             <div className="flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-              <span>Bible Translation</span>
+              <span>{t('settings.translation')}</span>
             </div>
             <span className="text-xs font-mono font-bold text-amber-700 dark:text-amber-400 uppercase">
               {currentTranslation.toUpperCase()}
@@ -244,13 +249,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <div className="flex items-center justify-between text-xs sm:text-sm font-medium text-stone-800 dark:text-stone-200">
             <div className="flex items-center gap-2">
               <Globe className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-              <span>Language</span>
+              <span>{t('settings.language')}</span>
             </div>
           </div>
           <div className="grid grid-cols-3 gap-1.5">
             {(['en', 'es', 'fr'] as Language[]).map((langCode) => {
               const isSelected = language === langCode;
-              const label = langCode === 'en' ? 'English 🇺🇸' : langCode === 'es' ? 'Español 🇪🇸' : 'Français 🇫🇷';
+              const label = langCode === 'en' ? t('settings.langEn') : langCode === 'es' ? t('settings.langEs') : t('settings.langFr');
               return (
                 <button
                   key={langCode}
@@ -259,11 +264,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     soundEngine.playClick();
                     setLanguage(langCode);
                   }}
-                  className={`py-2 rounded-xl text-xs font-semibold min-h-[44px] flex items-center justify-center transition-all cursor-pointer ${
-                    isSelected
-                      ? 'bg-amber-500 text-stone-950 font-bold shadow-xs'
-                      : 'bg-stone-100 dark:bg-stone-850 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-800'
-                  }`}
+                  className={`btn-segment justify-center py-2 min-h-[44px] ${isSelected ? 'btn-segment-selected' : ''}`}
                 >
                   {label}
                 </button>
@@ -278,8 +279,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <div className="flex items-center gap-2">
               <Volume2 className="w-4 h-4 text-amber-600 dark:text-amber-400" />
               <div>
-                <div className="text-xs sm:text-sm font-medium text-stone-800 dark:text-stone-200">Sound</div>
-                <div className="text-[11px] text-stone-500 dark:text-stone-400">Short sound on every success</div>
+                <div className="text-xs sm:text-sm font-medium text-stone-800 dark:text-stone-200">{t('settings.sound')}</div>
+                <div className="text-[11px] text-stone-500 dark:text-stone-400">{t('settings.soundHint')}</div>
               </div>
             </div>
             <button
@@ -296,8 +297,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <div className="flex items-center gap-2">
               <Bell className="w-4 h-4 text-amber-600 dark:text-amber-400" />
               <div>
-                <div className="text-xs sm:text-sm font-medium text-stone-800 dark:text-stone-200">Haptics</div>
-                <div className="text-[11px] text-stone-500 dark:text-stone-400">Gentle vibration on success</div>
+                <div className="text-xs sm:text-sm font-medium text-stone-800 dark:text-stone-200">{t('settings.haptics')}</div>
+                <div className="text-[11px] text-stone-500 dark:text-stone-400">{t('settings.hapticsHint')}</div>
               </div>
             </div>
             <button
@@ -316,7 +317,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className="space-y-2 pt-3 border-t border-stone-200 dark:border-stone-800">
           <div className="flex items-center gap-2 text-stone-800 dark:text-stone-200 font-medium text-xs sm:text-sm">
             <BookOpen className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-            <span>Daily session length</span>
+            <span>{t('settings.sessionLength')}</span>
           </div>
           <div className="grid grid-cols-3 gap-1.5">
             {([
@@ -351,7 +352,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <div className="flex items-center gap-2">
             <Award className="w-4 h-4 text-amber-600 dark:text-amber-400" />
             <div>
-              <div className="text-xs sm:text-sm font-medium text-stone-800 dark:text-stone-200">Show XP and ranks</div>
+              <div className="text-xs sm:text-sm font-medium text-stone-800 dark:text-stone-200">{t('settings.showXp')}</div>
               <div className="text-[11px] text-stone-500 dark:text-stone-400">Keep learning calm and distraction-free</div>
             </div>
           </div>
@@ -428,7 +429,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-stone-800 dark:text-stone-200 font-medium text-xs sm:text-sm">
               <Mic className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-              <span>Narration voice</span>
+              <span>{t('settings.narrationVoice')}</span>
             </div>
             <button
               type="button"

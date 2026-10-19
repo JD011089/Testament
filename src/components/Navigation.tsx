@@ -42,7 +42,7 @@ export const Navigation: React.FC<NavigationProps> = ({
   onOpenSettings,
   onOpenWhatsNew
 }) => {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
 
   const isTabActive = (itemTab: NavTab) => {
     if (itemTab === 'practice') {
@@ -58,29 +58,29 @@ export const Navigation: React.FC<NavigationProps> = ({
     {
       tab: 'today',
       label: t('nav.home'),
-      mobileLabel: language === 'fr' ? 'Aujourd\'hui' : language === 'es' ? 'Hoy' : 'Today',
+      mobileLabel: t('nav.home'),
       tooltip: t('nav.homeTooltip'),
       icon: <Compass className="w-6 h-6 xl:w-4 xl:h-4" strokeWidth={2} />
     },
     {
       tab: 'map',
-      label: 'Map',
-      mobileLabel: language === 'fr' ? 'Carte' : language === 'es' ? 'Mapa' : 'Map',
-      tooltip: 'Story map',
+      label: t('nav.map'),
+      mobileLabel: t('nav.map'),
+      tooltip: t('nav.mapTooltip'),
       icon: <MapIcon className="w-6 h-6 xl:w-4 xl:h-4" strokeWidth={2} />
     },
     {
       tab: 'library',
       label: t('nav.library'),
-      mobileLabel: language === 'fr' ? 'Bible' : language === 'es' ? 'Biblia' : t('nav.library'),
+      mobileLabel: t('nav.library'),
       tooltip: t('nav.libraryTooltip'),
       icon: <BookOpen className="w-6 h-6 xl:w-4 xl:h-4" strokeWidth={2} />
     },
     {
       tab: 'deck',
-      label: 'Deck',
-      mobileLabel: language === 'fr' ? 'Jeu' : language === 'es' ? 'Colección' : 'Deck',
-      tooltip: 'My Deck',
+      label: t('nav.deck'),
+      mobileLabel: t('nav.deck'),
+      tooltip: t('nav.deckTooltip'),
       icon: <Layers className="w-6 h-6 xl:w-4 xl:h-4" strokeWidth={2} />
     },
   ];
@@ -120,8 +120,8 @@ export const Navigation: React.FC<NavigationProps> = ({
                       soundEngine.playClick();
                       onOpenWhatsNew();
                     }}
-                    title={`What's new in ${APP_VERSION}`}
-                    aria-label={`What's new in ${APP_VERSION}`}
+                    title={t('nav.whatsNew', { version: APP_VERSION })}
+                    aria-label={t('nav.whatsNew', { version: APP_VERSION })}
                     className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] -my-2 px-1.5 rounded-full text-[10px] font-mono text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-amber-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer"
                   >
                     {APP_VERSION}
@@ -145,7 +145,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                   title={item.tooltip}
                   className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
                     isActive
-                      ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                      ? 'btn-segment-selected shadow-sm'
                       : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/60 dark:hover:bg-stone-900/60'
                   }`}
                 >
@@ -199,7 +199,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                 className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs font-mono font-medium text-stone-500 dark:text-stone-400"
               >
                 <Flame className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500" />
-                <span>Fresh start</span>
+                <span>{t('nav.freshStart')}</span>
               </div>
             )}
 
@@ -222,8 +222,8 @@ export const Navigation: React.FC<NavigationProps> = ({
                   window.dispatchEvent(new CustomEvent('testament-open-settings'));
                 }
               }}
-              title="Settings & Preferences"
-              aria-label="Settings"
+              title={t('nav.settingsTooltip')}
+              aria-label={t('nav.settings')}
               className="p-2 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 transition-all cursor-pointer"
             >
               <Settings className="w-4 h-4" />
@@ -237,7 +237,7 @@ export const Navigation: React.FC<NavigationProps> = ({
       {/* ============================================================ */}
       <nav 
         role="navigation" 
-        aria-label="Mobile Navigation" 
+        aria-label={t('nav.mobileAria')} 
         className="xl:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-ink/95 backdrop-blur-lg border-t border-stone-200 dark:border-stone-800/90 px-2 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_24px_rgba(0,0,0,0.08)]"
       >
         <div className="grid grid-cols-4 items-stretch w-full max-w-md mx-auto gap-1">

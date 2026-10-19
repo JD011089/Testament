@@ -2,6 +2,7 @@ import { STORY_ARCS, isFullStory, type StoryArc } from '../types/story';
 import { STORY_STOPS } from '../content/stories';
 import { isStoryCompleted } from '../utils/storyProgress';
 import { celebrate } from '../utils/feedback';
+import { useLanguage } from '../context/LanguageContext';
 import { PageHeader } from '../components/PageHeader';
 import { Lock, Play, Sparkles } from 'lucide-react';
 
@@ -11,17 +12,18 @@ interface MapScreenProps {
 }
 
 export function MapScreen({ onPlayStory, onQuickPlay }: MapScreenProps) {
+  const { t } = useLanguage();
   const completedIds = STORY_STOPS.filter((stop) => isStoryCompleted(stop.id)).map((stop) => stop.id);
   const nextStop = STORY_STOPS.find((stop) => !completedIds.includes(stop.id)) ?? null;
 
   return (
     <div className="max-w-2xl mx-auto px-4 pt-4 pb-8 space-y-6">
       <PageHeader
-        title="Story Map"
-        subtitle="Follow the path from Creation to the early church."
+        title={t('map.title')}
+        subtitle={t('map.subtitle')}
         actions={onQuickPlay && (
           <button type="button" className="btn-quiet" onClick={() => { celebrate('tap'); onQuickPlay(); }}>
-            Quick play
+            {t('map.quickPlay')}
           </button>
         )}
       />
@@ -36,7 +38,7 @@ export function MapScreen({ onPlayStory, onQuickPlay }: MapScreenProps) {
               <h2 className="text-title-3 font-serif text-fg">{arc}</h2>
               {arcDone && (
                 <span className="inline-flex items-center gap-1 text-label uppercase rounded-full border border-accent/50 bg-accent/10 text-accent px-2 py-0.5">
-                  <Sparkles className="w-3 h-3" /> Arc complete
+                  <Sparkles className="w-3 h-3" /> {t('map.arcComplete')}
                 </span>
               )}
             </div>
@@ -65,17 +67,17 @@ export function MapScreen({ onPlayStory, onQuickPlay }: MapScreenProps) {
                         <h3 className="text-title-4 text-fg truncate">{stop.title}</h3>
                         {(completed || isNext) && <p className="text-small text-fg-muted">{stop.passage}</p>}
                         {locked && (
-                          <p className="text-small text-fg-muted inline-flex items-center gap-1"><Lock className="w-3 h-3" /> Coming soon</p>
+                          <p className="text-small text-fg-muted inline-flex items-center gap-1"><Lock className="w-3 h-3" /> {t('map.comingSoon')}</p>
                         )}
                       </div>
                       {completed && (
                         <button type="button" className="btn-secondary shrink-0" onClick={() => { celebrate('tap'); onPlayStory(stop.id); }}>
-                          <Play className="w-4 h-4" /> Replay
+                          <Play className="w-4 h-4" /> {t('common.replay')}
                         </button>
                       )}
                       {isNext && playable && (
                         <button type="button" className="btn-primary shrink-0" onClick={() => { celebrate('tap'); onPlayStory(stop.id); }}>
-                          <Sparkles className="w-4 h-4" /> Play
+                          <Sparkles className="w-4 h-4" /> {t('common.play')}
                         </button>
                       )}
                     </div>
