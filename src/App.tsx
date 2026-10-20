@@ -833,7 +833,10 @@ export function App() {
               <Suspense fallback={<ViewFallback />}>
                 <MapScreen
                   onPlayStory={handlePlayStory}
-                  onQuickPlay={() => setCurrentTab('game')}
+                  onQuickPlay={() => {
+                    // Fallback only if Map has no next playable story
+                    setCurrentTab('game');
+                  }}
                 />
               </Suspense>
             )}
