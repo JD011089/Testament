@@ -141,6 +141,8 @@ export function normalizeScriptureForSpeech(text: string): string {
     .trim();
 }
 
+const SOUND_PREF_KEY = 'testament_sound_enabled';
+
 class SoundEngine {
   private ctx: AudioContext | null = null;
   private ambientSource: AudioNode | null = null;
@@ -199,6 +201,27 @@ class SoundEngine {
     }
   }
 
+  /** Honors Settings → Sound (`testament_sound_enabled`) and the engine mute flag. */
+  private soundsAllowed(): boolean {
+    if (this.isMuted) return false;
+    try {
+      const raw = localStorage.getItem(SOUND_PREF_KEY);
+      if (raw === null) return true;
+      return raw === 'true';
+    } catch {
+      return true;
+    }
+  }
+
+  public setMuted(muted: boolean) {
+    this.isMuted = muted;
+    if (muted) this.stopAmbience();
+  }
+
+  public getMuted(): boolean {
+    return this.isMuted;
+  }
+
   // --- NARRATOR PROFILES & CONFIGURATION ---
 
   public getNarratorProfile(): NarratorProfile {
@@ -221,6 +244,7 @@ class SoundEngine {
   // --- AMBIENT SOUND GENERATION ---
 
   public startAmbience(type: 'campfire' | 'wind' | 'sanctuary') {
+    if (!this.soundsAllowed()) return;
     this.initCtx();
     if (!this.ctx) return;
 
@@ -380,8 +404,9 @@ class SoundEngine {
   // --- CINEMATIC SWELL ---
 
   public playCinematicSwell() {
+    if (!this.soundsAllowed()) return;
     this.initCtx();
-    if (!this.ctx || this.isMuted) return;
+    if (!this.ctx) return;
 
     try {
       const now = this.ctx.currentTime;
@@ -420,7 +445,7 @@ class SoundEngine {
   // --- SOUND EFFECTS ---
 
   public playClick() {
-    if (this.isMuted) return;
+    if (!this.soundsAllowed()) return;
     this.initCtx();
     if (!this.ctx) return;
 
@@ -440,7 +465,7 @@ class SoundEngine {
   }
 
   public playSnap() {
-    if (this.isMuted) return;
+    if (!this.soundsAllowed()) return;
     this.initCtx();
     if (!this.ctx) return;
 
@@ -460,7 +485,7 @@ class SoundEngine {
   }
 
   public playVictory() {
-    if (this.isMuted) return;
+    if (!this.soundsAllowed()) return;
     this.initCtx();
     if (!this.ctx) return;
 
@@ -484,8 +509,140 @@ class SoundEngine {
     });
   }
 
+  /** Soft bandpass sweep for story card advance / swipe. */
+  public playWhoosh() {
+    if (!this.soundsAllowed()) return;
+    this.initCtx();
+    if (!this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.Q.value = 0.7;
+      filter.frequency.setValueAtTime(900, now);
+      filter.frequency.exponentialRampToValueAtTime(280, now + 0.18);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(340, now);
+      osc.frequency.exponentialRampToValueAtTime(90, now + 0.18);
+      gain.gain.setValueAtTime(0.045, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.22);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  /** Soft two-note chime for reveals and sequence steps. */
+  public playReveal() {
+    if (!this.soundsAllowed()) return;
+    this.initCtx();
+    if (!this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      [523.25, 659.25].forEach((freq, idx) => {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        const t = now + idx * 0.06;
+        gain.gain.setValueAtTime(0.001, t);
+        gain.gain.linearRampToValueAtTime(0.07, t + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.3);
+      });
+    } catch {
+      /* ignore */
+    }
+  }
+
+  /** Low thud when a drag item settles into the target. */
+  public playSettle() {
+    if (!this.soundsAllowed()) return;
+    this.initCtx();
+    if (!this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(110, now);
+      osc.frequency.exponentialRampToValueAtTime(55, now + 0.12);
+      gain.gain.setValueAtTime(0.14, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.15);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  /** Quiet rising tick while the learner holds to continue. */
+  public playHoldPulse() {
+    if (!this.soundsAllowed()) return;
+    this.initCtx();
+    if (!this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(240, now);
+      osc.frequency.linearRampToValueAtTime(320, now + 0.08);
+      gain.gain.setValueAtTime(0.035, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.1);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  /** Mid click when picking a choice option. */
+  public playChoiceSelect() {
+    if (!this.soundsAllowed()) return;
+    this.initCtx();
+    if (!this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(440, now);
+      osc.frequency.exponentialRampToValueAtTime(330, now + 0.1);
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.13);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  /** Payoff cue: brief swell into the victory arpeggio. */
+  public playPayoff() {
+    if (!this.soundsAllowed()) return;
+    this.playCinematicSwell();
+    window.setTimeout(() => this.playVictory(), 280);
+  }
+
   public playBookSlide() {
-    if (this.isMuted) return;
+    if (!this.soundsAllowed()) return;
     this.initCtx();
     if (!this.ctx) return;
 
@@ -516,7 +673,7 @@ class SoundEngine {
   }
 
   public playPageTurn() {
-    if (this.isMuted) return;
+    if (!this.soundsAllowed()) return;
     this.initCtx();
     if (!this.ctx) return;
 

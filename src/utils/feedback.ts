@@ -41,6 +41,13 @@ function writeFlag(key: string, value: boolean, event: string) {
 
 export function setSoundEnabled(value: boolean) {
   writeFlag(SOUND_ENABLED_KEY, value, 'testament-sound-changed');
+  if (!value) {
+    try {
+      soundEngine.stopAmbience();
+    } catch {
+      /* ignore */
+    }
+  }
 }
 
 export function setHapticsEnabled(value: boolean) {
@@ -59,16 +66,55 @@ export function haptic(pattern: number | number[] = 12): void {
   }
 }
 
-export type SuccessTone = 'tap' | 'snap' | 'victory';
+export type SuccessTone =
+  | 'tap'
+  | 'snap'
+  | 'victory'
+  | 'reveal'
+  | 'settle'
+  | 'whoosh'
+  | 'choice'
+  | 'payoff'
+  | 'hold';
 
 /** Success sound + haptic. Use on every successful action. */
 export function celebrate(tone: SuccessTone = 'snap'): void {
   if (isSoundEnabled()) {
-    if (tone === 'victory') soundEngine.playVictory();
-    else if (tone === 'tap') soundEngine.playClick();
-    else soundEngine.playSnap();
+    switch (tone) {
+      case 'victory':
+        soundEngine.playVictory();
+        break;
+      case 'tap':
+        soundEngine.playClick();
+        break;
+      case 'reveal':
+        soundEngine.playReveal();
+        break;
+      case 'settle':
+        soundEngine.playSettle();
+        break;
+      case 'whoosh':
+        soundEngine.playWhoosh();
+        break;
+      case 'choice':
+        soundEngine.playChoiceSelect();
+        break;
+      case 'payoff':
+        soundEngine.playPayoff();
+        break;
+      case 'hold':
+        soundEngine.playHoldPulse();
+        break;
+      default:
+        soundEngine.playSnap();
+        break;
+    }
   }
-  haptic();
+
+  if (tone === 'victory' || tone === 'payoff') haptic([14, 40, 18]);
+  else if (tone === 'whoosh' || tone === 'hold') haptic(8);
+  else if (tone === 'settle') haptic(16);
+  else haptic();
 }
 
 /** A gentler nudge for a wrong try — no failure state, no negative sound. */

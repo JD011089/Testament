@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState, type TouchEvent } from 'react';
-import type { InteractionCard, Story, StoryCard } from '../../types/story';
+import type { InteractionCard, Story, StoryArc, StoryCard } from '../../types/story';
 import { getStoryCardIndex, markStoryComplete, saveStoryCursor } from '../../utils/storyProgress';
 import { addVerseCard } from '../../utils/deck';
-import { celebrate, nudge } from '../../utils/feedback';
+import { celebrate, isSoundEnabled, nudge } from '../../utils/feedback';
 import { soundEngine } from '../../utils/audio';
 import { useLanguage } from '../../context/LanguageContext';
 import { useModalLock } from '../../utils/useModalLock';
@@ -13,6 +13,12 @@ import { HoldToContinue } from './interactions/HoldToContinue';
 import { TapReveal } from './interactions/TapReveal';
 import { TapSequence } from './interactions/TapSequence';
 import { ChevronLeft, BookOpen, Check } from 'lucide-react';
+
+function ambienceForArc(arc: StoryArc): 'wind' | 'campfire' | 'sanctuary' {
+  if (arc === 'Jesus' || arc === 'Church') return 'sanctuary';
+  if (arc === 'Kings' || arc === 'Prophets') return 'campfire';
+  return 'wind';
+}
 
 interface StoryPlayerProps {
   story: Story;
@@ -70,9 +76,20 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
   const finish = useCallback(() => {
     markStoryComplete(story.id);
     setCompleted(true);
-    celebrate('victory');
+    celebrate('payoff');
     onCompleted?.(story);
   }, [story, onCompleted]);
+
+  // Ambient bed for the story arc; stop on exit.
+  useEffect(() => {
+    if (isSoundEnabled()) {
+      soundEngine.startAmbience(ambienceForArc(story.arc));
+    }
+    return () => {
+      soundEngine.stopAmbience();
+      soundEngine.stopSpeaking();
+    };
+  }, [story.id, story.arc]);
 
   // Narration audio: auto-play (if enabled) and stop when leaving the card.
   useEffect(() => {
@@ -103,23 +120,22 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
       storyId: story.id,
       storyTitle: story.title
     });
-    celebrate('victory');
   }, [card, story]);
 
   const advance = useCallback(() => {
-    celebrate('tap');
-    setIndex((i) => {
-      if (i >= lastIndex) {
-        finish();
-        return i;
-      }
-      return i + 1;
-    });
-  }, [lastIndex, finish]);
+    if (index >= lastIndex) {
+      finish();
+      return;
+    }
+    celebrate('whoosh');
+    setIndex((i) => Math.min(i + 1, lastIndex));
+  }, [index, lastIndex, finish]);
 
   const goBack = useCallback(() => {
+    if (index <= 0) return;
+    celebrate('whoosh');
     setIndex((i) => Math.max(0, i - 1));
-  }, []);
+  }, [index]);
 
   const requireCardDone = card.type === 'interaction' || card.type === 'choice';
   const canSwipe = !requireCardDone || cardDone;
@@ -135,6 +151,7 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
   const requestExit = () => {
     if (!completed && index > 0 && !window.confirm(t('story.leaveConfirm'))) return;
     soundEngine.stopSpeaking();
+    soundEngine.stopAmbience();
     onExit();
   };
 

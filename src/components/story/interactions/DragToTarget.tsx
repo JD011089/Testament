@@ -48,7 +48,7 @@ export function DragToTarget({ config, disabled, onComplete }: InteractionProps<
     const next = [...placed, itemId];
     setPlaced(next);
     setSelected(null);
-    celebrate('tap');
+    celebrate('settle');
     if (next.length >= config.requiredCount) {
       window.setTimeout(() => { celebrate('victory'); onComplete(); }, 250);
     }

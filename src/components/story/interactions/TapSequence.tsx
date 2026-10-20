@@ -29,7 +29,7 @@ export function TapSequence({ config, disabled, onComplete }: InteractionProps<T
     if (step === config.steps[progress]) {
       const next = progress + 1;
       setProgress(next);
-      celebrate('tap');
+      celebrate('reveal');
       if (next >= config.steps.length) {
         window.setTimeout(() => { celebrate('victory'); onComplete(); }, 250);
       }

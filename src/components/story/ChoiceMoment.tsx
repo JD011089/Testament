@@ -19,7 +19,7 @@ export function ChoiceMoment({ card, onComplete }: { card: ChoiceCard; onComplet
             <button
               key={option.label}
               type="button"
-              onClick={() => { celebrate('tap'); setPicked(i); }}
+              onClick={() => { celebrate('choice'); setPicked(i); }}
               className="btn-secondary text-left justify-start"
             >
               {option.label}

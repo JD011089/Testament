@@ -11,7 +11,7 @@ export function TapReveal({ config, disabled, onComplete }: InteractionProps<Tap
     if (disabled || revealed.includes(id)) return;
     const next = [...revealed, id];
     setRevealed(next);
-    celebrate('tap');
+    celebrate('reveal');
     if (next.length >= config.reveals.length) {
       window.setTimeout(() => { celebrate('victory'); onComplete(); }, 250);
     }

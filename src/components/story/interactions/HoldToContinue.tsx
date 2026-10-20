@@ -10,6 +10,7 @@ export function HoldToContinue({ config, disabled, onComplete }: InteractionProp
   const [done, setDone] = useState(false);
   const raf = useRef<number | null>(null);
   const start = useRef<number | null>(null);
+  const lastPulse = useRef(0);
 
   useEffect(() => {
     if (!holding || disabled || done) return;
@@ -18,6 +19,11 @@ export function HoldToContinue({ config, disabled, onComplete }: InteractionProp
       const elapsed = performance.now() - start.current;
       const pct = Math.min(1, elapsed / config.durationMs);
       setProgress(pct);
+      // Soft rising ticks while holding (~every 220ms)
+      if (elapsed - lastPulse.current >= 220) {
+        lastPulse.current = elapsed;
+        celebrate('hold');
+      }
       if (pct >= 1) {
         setDone(true);
         setHolding(false);
@@ -27,6 +33,7 @@ export function HoldToContinue({ config, disabled, onComplete }: InteractionProp
       }
       raf.current = requestAnimationFrame(tick);
     };
+    lastPulse.current = 0;
     raf.current = requestAnimationFrame(tick);
     return () => { if (raf.current) cancelAnimationFrame(raf.current); };
   }, [holding, disabled, done, config.durationMs, onComplete]);
