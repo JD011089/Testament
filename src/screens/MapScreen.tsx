@@ -22,7 +22,11 @@ export function MapScreen({ onPlayStory, onQuickPlay }: MapScreenProps) {
         title={t('map.title')}
         subtitle={t('map.subtitle')}
         actions={onQuickPlay && (
-          <button type="button" className="btn-quiet" onClick={() => { celebrate('tap'); onQuickPlay(); }}>
+          <button
+            type="button"
+            className="btn-quiet text-accent-text font-semibold px-0"
+            onClick={() => { celebrate('tap'); onQuickPlay(); }}
+          >
             {t('map.quickPlay')}
           </button>
         )}
@@ -53,9 +57,9 @@ export function MapScreen({ onPlayStory, onQuickPlay }: MapScreenProps) {
                     key={stop.id}
                     className={[
                       'relative rounded-2xl border p-3 transition-all',
-                      completed ? 'border-accent bg-accent/10 shadow-glow-gold'
-                        : isNext ? 'border-accent animate-pulse'
-                          : 'border-line bg-surface-raised opacity-70'
+                      completed ? 'border-accent/60 bg-accent/10'
+                        : isNext ? 'border-accent bg-surface-raised shadow-[0_0_0_1px_rgba(212,157,95,0.2),0_6px_20px_rgba(212,157,95,0.12)]'
+                          : 'border-line bg-surface-raised/80 opacity-75'
                     ].join(' ')}
                   >
                     <span className={[
@@ -71,13 +75,13 @@ export function MapScreen({ onPlayStory, onQuickPlay }: MapScreenProps) {
                         )}
                       </div>
                       {completed && (
-                        <button type="button" className="btn-secondary shrink-0" onClick={() => { celebrate('tap'); onPlayStory(stop.id); }}>
-                          <Play className="w-4 h-4" /> {t('common.replay')}
+                        <button type="button" className="btn-secondary shrink-0 !min-h-10 px-3 text-xs" onClick={() => { celebrate('tap'); onPlayStory(stop.id); }}>
+                          <Play className="w-3.5 h-3.5" /> {t('common.replay')}
                         </button>
                       )}
                       {isNext && playable && (
-                        <button type="button" className="btn-primary shrink-0" onClick={() => { celebrate('tap'); onPlayStory(stop.id); }}>
-                          <Sparkles className="w-4 h-4" /> {t('common.play')}
+                        <button type="button" className="btn-primary shrink-0 !min-h-10 px-3 text-xs" onClick={() => { celebrate('tap'); onPlayStory(stop.id); }}>
+                          <Sparkles className="w-3.5 h-3.5" /> {t('common.play')}
                         </button>
                       )}
                     </div>

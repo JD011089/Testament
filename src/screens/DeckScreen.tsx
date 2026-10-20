@@ -64,29 +64,35 @@ export function DeckScreen({ onPractice, onReadChapter }: DeckScreenProps) {
         subtitle={cards.length > 0 ? t('deck.subtitleCount', { count: cards.length }) : t('deck.subtitleEmpty')}
       />
 
-      <div className="flex flex-wrap gap-2">
-        {(['all', 'bronze', 'silver', 'gold'] as StrengthFilter[]).map((s) => (
-          <button
-            key={s}
-            type="button"
-            onClick={() => { celebrate('tap'); setStrengthFilter(s); }}
-            aria-pressed={strengthFilter === s}
-            className={`btn-segment capitalize ${strengthFilter === s ? 'btn-segment-selected' : ''}`}
-          >
-            {s === 'all' ? t('deck.filterAll') : s}
-          </button>
-        ))}
-        {arcs.map((arc) => (
-          <button
-            key={arc}
-            type="button"
-            onClick={() => { celebrate('tap'); setArcFilter(arcFilter === arc ? 'all' : arc); }}
-            aria-pressed={arcFilter === arc}
-            className={`btn-segment ${arcFilter === arc ? 'btn-segment-selected' : ''}`}
-          >
-            {arc}
-          </button>
-        ))}
+      <div className="space-y-2">
+        <div className="grid grid-cols-4 gap-1.5">
+          {(['all', 'bronze', 'silver', 'gold'] as StrengthFilter[]).map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => { celebrate('tap'); setStrengthFilter(s); }}
+              aria-pressed={strengthFilter === s}
+              className={`btn-segment w-full min-w-0 capitalize px-1.5 ${strengthFilter === s ? 'btn-segment-selected' : ''}`}
+            >
+              {s === 'all' ? t('deck.filterAll') : s.charAt(0).toUpperCase() + s.slice(1)}
+            </button>
+          ))}
+        </div>
+        {arcs.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {arcs.map((arc) => (
+              <button
+                key={arc}
+                type="button"
+                onClick={() => { celebrate('tap'); setArcFilter(arcFilter === arc ? 'all' : arc); }}
+                aria-pressed={arcFilter === arc}
+                className={`btn-segment ${arcFilter === arc ? 'btn-segment-selected' : ''}`}
+              >
+                {arc}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {visible.length === 0 ? (

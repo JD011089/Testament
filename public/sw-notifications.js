@@ -121,11 +121,16 @@ self.addEventListener('notificationclick', (event) => {
     if (action === 'dismiss') return;
 
     const verseId = data.verseId;
-    const targetUrl = verseId ? `/memorize?verseId=${encodeURIComponent(verseId)}` : '/';
+    const targetUrl = verseId
+      ? `/memorize?verseId=${encodeURIComponent(verseId)}`
+      : (typeof data.url === 'string' && data.url.startsWith('/') ? data.url : '/');
     const clientList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
     for (const client of clientList) {
       if ('focus' in client) {
         if (verseId) client.postMessage({ type: 'TESTAMENT_NAVIGATE_VERSE', verseId });
+        else if (data.type === 'DAILY_MISSION' || data.type === 'MEMORY_PULSE') {
+          client.postMessage({ type: 'TESTAMENT_NAVIGATE', url: targetUrl });
+        }
         return client.focus();
       }
     }

@@ -62,20 +62,22 @@ export function TodayScreen({ streakCount = 0, onOpenMap, onOpenDeck, onReadChap
           : t('today.freshStart')}
       />
 
-      <div className="rounded-3xl border border-accent/40 bg-surface-raised p-4 sm:p-5">
-        <div className="flex items-center justify-between mb-4">
+      <div className="rounded-3xl border border-line bg-surface-raised p-4 sm:p-5 shadow-[0_1px_0_rgba(178,123,63,0.08),0_8px_28px_rgba(31,35,48,0.05)]">
+        <div className="flex items-start justify-between gap-1 mb-4">
           {steps.map((label, i) => (
-            <div key={label} className="flex-1 flex flex-col items-center gap-1">
+            <div key={label} className="flex-1 min-w-0 flex flex-col items-center gap-1 px-0.5">
               <span
                 className={[
-                  'w-8 h-8 rounded-full flex items-center justify-center text-small font-bold border',
+                  'w-8 h-8 rounded-full flex items-center justify-center text-small font-bold border shrink-0',
                   i < step ? 'bg-accent text-accent-on border-accent' : i === step ? 'border-accent text-accent' : 'border-line text-fg-muted'
                 ].join(' ')}
                 aria-hidden="true"
               >
                 {i < step ? <Check className="w-4 h-4" /> : i + 1}
               </span>
-              <span className={`text-label uppercase ${i === step ? 'text-accent' : 'text-fg-muted'}`}>{label}</span>
+              <span className={`text-[10px] leading-tight text-center uppercase tracking-wide ${i === step ? 'text-accent font-semibold' : 'text-fg-muted'}`}>
+                {label}
+              </span>
             </div>
           ))}
         </div>

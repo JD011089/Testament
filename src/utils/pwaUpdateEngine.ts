@@ -21,7 +21,7 @@ export async function sendUpdatePushNotification(reg?: ServiceWorkerRegistration
     return false;
   }
 
-  const title = '🚀 Testament Update Available';
+  const title = 'Testament Update Available';
   const options: NotificationOptions & {
     renotify?: boolean;
     requireInteraction?: boolean;
@@ -72,6 +72,12 @@ function handleUpdateFound(registration: ServiceWorkerRegistration) {
     })
   );
 
+  // 2. OS notification when the user opted in via Notification Settings
+  void import('./notificationPrefs').then(({ shouldNotifyAppUpdates }) => {
+    if (shouldNotifyAppUpdates()) {
+      void sendUpdatePushNotification(registration);
+    }
+  });
 }
 
 /**

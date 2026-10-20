@@ -233,14 +233,14 @@ export const Navigation: React.FC<NavigationProps> = ({
       </header>
 
       {/* ============================================================ */}
-      {/* 3. BOTTOM NAVIGATION BAR (Visible below xl: screens) */}
+      {/* 3. FLOATING BOTTOM NAV (Visible below xl: screens) */}
       {/* ============================================================ */}
-      <nav 
-        role="navigation" 
-        aria-label={t('nav.mobileAria')} 
-        className="xl:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-ink/95 backdrop-blur-lg border-t border-stone-200 dark:border-stone-800/90 px-2 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_24px_rgba(0,0,0,0.08)]"
+      <nav
+        role="navigation"
+        aria-label={t('nav.mobileAria')}
+        className="xl:hidden fixed z-40 left-1/2 -translate-x-1/2 bottom-[max(0.75rem,env(safe-area-inset-bottom))] w-[calc(100%-1.5rem)] max-w-sm rounded-full bg-surface-raised/95 dark:bg-ink/95 backdrop-blur-xl border border-line/90 dark:border-stone-700/80 px-2 py-1.5 shadow-[0_10px_36px_rgba(31,35,48,0.12),0_2px_8px_rgba(31,35,48,0.05)]"
       >
-        <div className="grid grid-cols-4 items-stretch w-full max-w-md mx-auto gap-1">
+        <div className="grid grid-cols-4 items-stretch w-full gap-0.5">
           {navItems.map((item) => {
             const isActive = isTabActive(item.tab);
             return (
@@ -251,19 +251,16 @@ export const Navigation: React.FC<NavigationProps> = ({
                   onSelectTab(item.tab);
                 }}
                 aria-current={isActive ? 'page' : undefined}
-                className={`relative flex flex-col items-center justify-center min-h-[56px] py-1.5 px-1 rounded-xl transition-all focus-visible:ring-2 focus-visible:ring-amber-500 w-full min-w-0 active:scale-95 ${
+                className={`relative flex flex-col items-center justify-center min-h-[48px] py-1.5 px-0.5 rounded-full transition-all focus-visible:ring-2 focus-visible:ring-accent w-full min-w-0 active:scale-95 ${
                   isActive
-                    ? 'text-amber-800 dark:text-amber-300 font-bold'
-                    : 'text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                    ? 'text-accent-text dark:text-amber-300 font-bold bg-accent/20'
+                    : 'text-fg-muted hover:text-fg hover:bg-stone-100/80 dark:hover:bg-stone-800/50'
                 }`}
               >
-                {isActive && (
-                  <span aria-hidden="true" className="absolute top-0 h-0.5 w-8 rounded-full bg-amber-500" />
-                )}
                 <div className="shrink-0">
                   {item.icon}
                 </div>
-                <span className="text-[11px] leading-tight font-semibold w-full text-center block mt-1 truncate">
+                <span className="text-[10px] leading-tight font-semibold w-full text-center block mt-0.5 truncate">
                   {item.mobileLabel || item.label}
                 </span>
               </button>

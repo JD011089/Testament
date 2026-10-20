@@ -184,7 +184,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 applyTheme('light');
                 setCurrentTheme('light');
               }}
-              className={`btn-segment justify-center gap-2 p-3 rounded-2xl min-h-[44px] ${
+              className={`btn-segment justify-center gap-2 py-2.5 px-3 rounded-2xl min-w-0 w-full ${
                 currentTheme === 'light' ? 'btn-segment-selected' : ''
               }`}
             >
@@ -198,7 +198,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 applyTheme('dark');
                 setCurrentTheme('dark');
               }}
-              className={`btn-segment justify-center gap-2 p-3 rounded-2xl min-h-[44px] ${
+              className={`btn-segment justify-center gap-2 py-2.5 px-3 rounded-2xl min-w-0 w-full ${
                 currentTheme === 'dark' ? 'btn-segment-selected' : ''
               }`}
             >
@@ -264,7 +264,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     soundEngine.playClick();
                     setLanguage(langCode);
                   }}
-                  className={`btn-segment justify-center py-2 min-h-[44px] ${isSelected ? 'btn-segment-selected' : ''}`}
+                  className={`btn-segment justify-center py-2 min-w-0 w-full ${isSelected ? 'btn-segment-selected' : ''}`}
                 >
                   {label}
                 </button>
@@ -335,9 +335,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   window.dispatchEvent(new CustomEvent('testament-session-length-changed', { detail: option.id }));
                 }}
                 aria-pressed={sessionLength === option.id}
-                className={`py-2 rounded-xl text-xs font-semibold min-h-[44px] flex items-center justify-center transition-all cursor-pointer ${
+                className={`py-2 rounded-full text-xs font-semibold min-h-[44px] flex items-center justify-center transition-all cursor-pointer ${
                   sessionLength === option.id
-                    ? 'bg-amber-500 text-stone-950 font-bold shadow-xs'
+                    ? 'bg-accent text-accent-on font-bold shadow-xs'
                     : 'bg-stone-100 dark:bg-stone-850 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-800'
                 }`}
               >
@@ -391,7 +391,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
 
           {/* 5-step Segmented Scale */}
-          <div className="grid grid-cols-5 gap-1.5 p-1 rounded-2xl bg-stone-100 dark:bg-stone-850 border border-stone-200 dark:border-stone-800">
+          <div className="grid grid-cols-5 gap-1 p-1 rounded-full bg-stone-100 dark:bg-stone-850 border border-stone-200 dark:border-stone-800">
             {FONT_SCALE_STEPS.map((step) => {
               const isSelected = currentStep === step.step;
               return (
@@ -402,9 +402,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     soundEngine.playClick();
                     setFontScaleStep(step.step as FontScaleStep);
                   }}
-                  className={`py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer min-h-[44px] flex items-center justify-center ${
+                  className={`py-2 rounded-full text-xs font-mono font-bold transition-all cursor-pointer min-h-[44px] flex items-center justify-center ${
                     isSelected
-                      ? 'bg-amber-500 text-stone-950 shadow-sm scale-[1.02]'
+                      ? 'bg-accent text-accent-on shadow-sm'
                       : 'text-stone-600 dark:text-stone-400 hover:text-stone-950 dark:hover:text-stone-200 hover:bg-stone-200/50 dark:hover:bg-stone-800'
                   }`}
                   aria-pressed={isSelected}
@@ -497,7 +497,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               type="button"
               onClick={() => {
                 soundEngine.playClick();
-                onClose();
+                // Don't call onClose() — App swaps history so Back won't kill the next modal
                 onOpenOnboarding();
               }}
               className="w-full text-left text-xs p-2 rounded-xl text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 font-medium transition-colors cursor-pointer min-h-[44px] flex items-center"
@@ -510,12 +510,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               type="button"
               onClick={() => {
                 soundEngine.playClick();
-                onClose();
                 onOpenReminders();
               }}
               className="w-full text-left text-xs p-2 rounded-xl text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 font-medium transition-colors cursor-pointer min-h-[44px] flex items-center"
             >
-              Reminders
+              {t('notifications.settingsLink')}
             </button>
           )}
           {onOpenJournal && (
@@ -562,7 +561,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               type="button"
               onClick={() => {
                 soundEngine.playClick();
-                onClose();
                 onOpenHowItWorks();
               }}
               className="w-full text-left text-xs p-2 rounded-xl text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 font-medium transition-colors cursor-pointer min-h-[44px] flex items-center"

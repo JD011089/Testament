@@ -46,6 +46,9 @@ const TodayScreen = lazy(() => import('./screens/TodayScreen').then((m) => ({ de
 const MapScreen = lazy(() => import('./screens/MapScreen').then((m) => ({ default: m.MapScreen })));
 const DeckScreen = lazy(() => import('./screens/DeckScreen').then((m) => ({ default: m.DeckScreen })));
 const FirstRun = lazy(() => import('./components/onboarding/FirstRun').then((m) => ({ default: m.FirstRun })));
+const NotificationSettingsModal = lazy(() =>
+  import('./components/NotificationSettingsModal').then((m) => ({ default: m.NotificationSettingsModal }))
+);
 
 function ViewFallback() {
   return <div className="max-w-7xl mx-auto px-6 py-16 text-sm text-stone-500">Loading…</div>;
@@ -101,6 +104,7 @@ export function App() {
 
   // Modals state (owned at App so Library deep-links work when Dashboard is unmounted)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isNotificationSettingsOpen, setIsNotificationSettingsOpen] = useState(false);
   const [isDossierOpen, setIsDossierOpen] = useState(false);
   const [isProverbsOpen, setIsProverbsOpen] = useState(false);
   const [isPsalmsOpen, setIsPsalmsOpen] = useState(false);
@@ -114,7 +118,9 @@ export function App() {
   const [showFirstRun, setShowFirstRun] = useState<boolean>(() => !hasCompletedFirstRun());
 
   // Keep modal states in refs so the single window popstate listener closes modals before exiting the app
-  const modalsRef = useRef({    isSettingsOpen,
+  const modalsRef = useRef({
+    isSettingsOpen,
+    isNotificationSettingsOpen,
     isDossierOpen,
     isProverbsOpen,
     isPsalmsOpen,
@@ -127,6 +133,7 @@ export function App() {
   useEffect(() => {
     modalsRef.current = {
       isSettingsOpen,
+      isNotificationSettingsOpen,
       isDossierOpen,
       isProverbsOpen,
       isPsalmsOpen,
@@ -137,6 +144,7 @@ export function App() {
     };
   }, [
     isSettingsOpen,
+    isNotificationSettingsOpen,
     isDossierOpen,
     isProverbsOpen,
     isPsalmsOpen,
@@ -206,6 +214,22 @@ export function App() {
     }
   };
 
+  /** Close Settings and open another modal without history.back() (avoids popstate killing the new modal). */
+  const openFromSettings = (name: string, open: () => void) => {
+    setIsSettingsOpen(false);
+    open();
+    try {
+      const url = window.location.pathname + window.location.search;
+      if (window.history.state?.modal === 'settings') {
+        window.history.replaceState({ modal: name, tab: currentTabRef.current }, '', url);
+      } else if (window.history.state?.modal !== name) {
+        window.history.pushState({ modal: name, tab: currentTabRef.current }, '', url);
+      }
+    } catch {
+      // ignore
+    }
+  };
+
   // Keep activeQuestRef & activeDailyMissionRef in sync with state for popstate listener closure
   const activeQuestRef = useRef(activeQuest);
   useEffect(() => {
@@ -251,6 +275,7 @@ export function App() {
   useEffect(() => {
     const closeTopModalFromHistory = (): boolean => {
       const m = modalsRef.current;
+      if (m.isNotificationSettingsOpen) { setIsNotificationSettingsOpen(false); return true; }
       if (m.isSettingsOpen) { setIsSettingsOpen(false); return true; }
       if (m.isProverbsOpen) { setIsProverbsOpen(false); return true; }
       if (m.isPsalmsOpen) { setIsPsalmsOpen(false); return true; }
@@ -298,6 +323,15 @@ export function App() {
         setCurrentTab('wordforge');
         setActiveDailyMission(null);
         setActiveQuest(null);
+        return;
+      }
+      if (event.data?.type === 'TESTAMENT_NAVIGATE' && typeof event.data.url === 'string') {
+        const tab = tabFromPath(event.data.url);
+        if (tab !== 'not-found') {
+          setCurrentTab(tab as NavTab);
+          setActiveDailyMission(null);
+          setActiveQuest(null);
+        }
       }
     };
 
@@ -725,7 +759,7 @@ export function App() {
       <main className={`w-full pt-3 sm:pt-4 xl:pt-16 ${
         activeQuest || activeDailyMission || activeStory
           ? 'pb-4 xl:pb-8'
-          : 'pb-[calc(6rem+env(safe-area-inset-bottom,0px))] xl:pb-10'
+          : 'pb-[calc(6.75rem+env(safe-area-inset-bottom,0px))] xl:pb-10'
       }`}>
         {activeDailyMission ? (
           <StoryViewer 
@@ -860,7 +894,8 @@ export function App() {
               <CanonLibraryPage 
                 onBackToDashboard={() => {
                   soundEngine.playClick();
-                  setCurrentTab('dashboard');
+                  // Mobile nav has Today, not Dashboard — avoid dumping users on the old home chrome.
+                  setCurrentTab('today');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 onOpenWordForge={(verseId) => {
@@ -1099,12 +1134,10 @@ export function App() {
               }
             }}
             onOpenOnboarding={() => {
-              setIsSettingsOpen(false);
-              openModalWithHistory('onboarding', () => setIsOnboardingOpen(true));
+              openFromSettings('onboarding', () => setIsOnboardingOpen(true));
             }}
             onOpenReminders={() => {
-              setIsSettingsOpen(false);
-              window.dispatchEvent(new CustomEvent('testament-open-reminders'));
+              openFromSettings('notifications', () => setIsNotificationSettingsOpen(true));
             }}
             onOpenJournal={() => {
               setIsSettingsOpen(false);
@@ -1119,8 +1152,7 @@ export function App() {
               window.dispatchEvent(new CustomEvent('testament-open-relics'));
             }}
             onOpenHowItWorks={() => {
-              setIsSettingsOpen(false);
-              openModalWithHistory('howitworks', () => setIsHowItWorksOpen(true));
+              openFromSettings('howitworks', () => setIsHowItWorksOpen(true));
             }}
             onOpenLearnerMode={() => {
               setIsSettingsOpen(false);
@@ -1134,6 +1166,20 @@ export function App() {
       {/* PWA Home-Screen Install Prompt (Mutually exclusive with CampaignNextTaskPrompt and readers/modals) */}
       {!campaignPrompt && !activeQuest && !activeDailyMission && !isDossierOpen && !isProverbsOpen && !isPsalmsOpen && !isDriveModeOpen && !isOnboardingOpen && (
         <PWAInstallPrompt />
+      )}
+
+      {isNotificationSettingsOpen && (
+        <Suspense fallback={null}>
+          <NotificationSettingsModal
+            isOpen={isNotificationSettingsOpen}
+            onClose={() => {
+              setIsNotificationSettingsOpen(false);
+              if (window.history.state?.modal === 'notifications') {
+                try { window.history.back(); } catch { /* ignore */ }
+              }
+            }}
+          />
+        </Suspense>
       )}
 
       {/* PWA Update & Restart Floating Notification Banner */}

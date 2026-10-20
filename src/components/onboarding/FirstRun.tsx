@@ -57,7 +57,7 @@ export function FirstRun({ onDone }: FirstRunProps) {
         )}
       </div>
 
-      <div className="px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] max-w-md mx-auto w-full space-y-4">
+      <div className="px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] max-w-sm mx-auto w-full space-y-3">
         <div className="flex items-center justify-center gap-2" aria-hidden="true">
           {screens.map((_, i) => (
             <span key={i} className={`h-1.5 w-6 rounded-full ${i === index ? 'bg-accent' : 'bg-line'}`} />
@@ -66,7 +66,7 @@ export function FirstRun({ onDone }: FirstRunProps) {
         <button type="button" onClick={finish} className="btn-primary w-full inline-flex items-center justify-center gap-2">
           {isLast ? <><Sparkles className="w-4 h-4" /> {t('firstRun.start')}</> : t('firstRun.next')}
         </button>
-        <button type="button" onClick={() => { markFirstRunDone(); onDone(); }} className="btn-quiet w-full">
+        <button type="button" onClick={() => { markFirstRunDone(); onDone(); }} className="btn-quiet mx-auto">
           {t('firstRun.skip')}
         </button>
       </div>

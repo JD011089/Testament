@@ -33,5 +33,20 @@ if (typeof window !== 'undefined') {
 
   window.addEventListener('load', () => {
     initPwaUpdateEngine();
+
+    void import('./utils/notificationPrefs').then(({ rescheduleNotificationAlarms }) => {
+      void rescheduleNotificationAlarms();
+
+      const onPrefs = () => void rescheduleNotificationAlarms();
+      window.addEventListener('testament-notification-prefs', onPrefs);
+
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', (event: MessageEvent) => {
+          if (event.data?.type === 'TESTAMENT_ALARM_FIRED' || event.data?.type === 'TESTAMENT_TRIGGER_CHECK') {
+            void rescheduleNotificationAlarms();
+          }
+        });
+      }
+    });
   });
 }
