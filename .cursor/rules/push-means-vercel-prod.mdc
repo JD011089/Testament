@@ -1,0 +1,15 @@
+---
+description: When the user asks to push, always commit/push and deploy via Vercel prod CLI
+alwaysApply: true
+---
+
+# Push = git push + Vercel production deploy
+
+When the user asks to **push** changes (or ship / release / put live), do **all** of the following from the repo root:
+
+1. Commit if there are uncommitted changes (follow the normal commit protocol).
+2. `git push` to the remote.
+3. Deploy production with the Vercel CLI: `npx vercel --prod`
+4. Confirm the production URL (project `testament-bible-learning` → https://testament-bible-learning.vercel.app).
+
+Never treat `git push` alone as done. Do not skip the Vercel prod step unless the user explicitly says not to deploy.
