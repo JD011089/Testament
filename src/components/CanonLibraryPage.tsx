@@ -307,24 +307,24 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
             soundEngine.playSnap();
             setIsSeriesModalOpen(true);
           }}
-          className="w-full mb-6 flex items-center justify-between gap-3 rounded-2xl border border-accent/30 bg-accent/5 px-4 py-3 text-left hover:bg-accent/10 transition-colors"
+          className="w-full mb-4 flex items-center gap-3 rounded-2xl border border-line bg-surface-raised dark:bg-stone-900 px-4 py-3.5 text-left hover:border-accent/40 transition-colors min-h-[60px]"
         >
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-full bg-accent/15 text-accent flex items-center justify-center shrink-0">
-              <Compass className="w-4 h-4" />
+          <div className="w-10 h-10 rounded-xl bg-accent/15 text-accent flex items-center justify-center shrink-0">
+            <Compass className="w-4 h-4" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-[10px] font-mono uppercase tracking-widest text-accent-text font-bold">
+              {t('library.seriesBadge')}
             </div>
-            <div className="min-w-0">
-              <div className="text-[10px] font-mono uppercase tracking-wider text-accent-text font-bold">
-                {t('library.seriesBadge')}
-              </div>
-              <div className="text-sm font-semibold text-fg truncate">
-                {activeSeriesState
-                  ? t('library.seriesActiveDay', {
-                      title: getWeeklySeriesById(activeSeriesState.seriesId)?.title || t('library.seriesFallback'),
-                      day: getSeriesDayNumber(activeSeriesState),
-                    })
-                  : t('library.seriesExplore')}
-              </div>
+            <div className="text-sm font-semibold text-fg truncate">
+              {activeSeriesState
+                ? t('library.seriesActiveDay', {
+                    title:
+                      getWeeklySeriesById(activeSeriesState.seriesId)?.heroName ||
+                      t('library.seriesFallback'),
+                    day: getSeriesDayNumber(activeSeriesState),
+                  })
+                : t('library.seriesExplore')}
             </div>
           </div>
           <ArrowRight className="w-4 h-4 text-accent shrink-0" />

@@ -1,6 +1,7 @@
 # AGENTS.md
 
 ## Production deployment (always)
+- When the user asks to **push** changes, that means: commit (if needed) → `git push` → `npx vercel --prod`. Do not stop after git push.
 - Always deploy production with the Vercel CLI from the repo root: `npx vercel --prod`.
 - Never treat `git push` alone as a production deploy. Push the commit, then run `npx vercel --prod` so the live deployment is confirmed and the production URL is generated and verified.
 - Vercel project: `testament-bible-learning` — production URL: https://testament-bible-learning.vercel.app

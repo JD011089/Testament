@@ -1,23 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Compass, 
-  X, 
-  CheckCircle2, 
-  Circle, 
-  ArrowRight, 
-  RotateCcw
-} from 'lucide-react';
-import { 
-  WEEKLY_SERIES 
-} from '../data/weeklySeries';
-import { 
-  getActiveSeriesState, 
-  startWeeklySeries, 
-  clearActiveSeries, 
+import { useEffect, useState } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { ArrowLeft, ArrowRight, Check, RotateCcw, X } from 'lucide-react';
+import { WEEKLY_SERIES, type WeeklySeries } from '../data/weeklySeries';
+import {
+  clearActiveSeries,
+  getActiveSeriesState,
   getSeriesDayNumber,
-  type ActiveSeriesState 
+  startWeeklySeries,
+  type ActiveSeriesState,
 } from '../utils/weeklySeriesEngine';
 import { soundEngine } from '../utils/audio';
+import { useModalLock } from '../utils/useModalLock';
+import { useLanguage } from '../context/LanguageContext';
+
+function guardClickThrough(ms = 450) {
+  const blocker = document.createElement('div');
+  blocker.setAttribute('aria-hidden', 'true');
+  blocker.style.cssText = 'position:fixed;inset:0;z-index:2147483647;touch-action:none;';
+  const stop = (e: Event) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  blocker.addEventListener('click', stop, true);
+  blocker.addEventListener('pointerup', stop, true);
+  blocker.addEventListener('pointerdown', stop, true);
+  blocker.addEventListener('touchend', stop, true);
+  document.body.appendChild(blocker);
+  window.setTimeout(() => blocker.remove(), ms);
+}
 
 interface SeriesPickerModalProps {
   isOpen: boolean;
@@ -25,240 +35,288 @@ interface SeriesPickerModalProps {
   onSeriesSelected?: (seriesId: string) => void;
 }
 
-export const SeriesPickerModal: React.FC<SeriesPickerModalProps> = ({
-  isOpen,
-  onClose,
-  onSeriesSelected
-}) => {
+export function SeriesPickerModal({ isOpen, onClose, onSeriesSelected }: SeriesPickerModalProps) {
+  const { t } = useLanguage();
+  const reduceMotion = useReducedMotion();
+  const rootRef = useModalLock(isOpen);
   const [activeState, setActiveState] = useState<ActiveSeriesState | null>(() => getActiveSeriesState());
-  const [expandedSeriesId, setExpandedSeriesId] = useState<string | null>(null);
+  const [detail, setDetail] = useState<WeeklySeries | null>(null);
 
   useEffect(() => {
-    if (isOpen) {
-      const state = getActiveSeriesState();
-      setActiveState(state);
-      setExpandedSeriesId(state?.seriesId || WEEKLY_SERIES[0].id);
-    }
+    if (!isOpen) return;
+    setActiveState(getActiveSeriesState());
+    setDetail(null);
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      e.preventDefault();
+      soundEngine.playSnap();
+      if (detail) {
+        setDetail(null);
+        return;
+      }
+      guardClickThrough();
+      onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, detail, onClose]);
 
   if (!isOpen) return null;
 
-  const handleSelectSeries = (seriesId: string) => {
-    soundEngine.playClick();
-    const newState = startWeeklySeries(seriesId);
-    setActiveState(newState);
-    if (onSeriesSelected) {
-      onSeriesSelected(seriesId);
-    }
+  const dismiss = () => {
+    guardClickThrough();
     onClose();
   };
 
-  const handleClearSeries = () => {
+  const handleClear = () => {
     soundEngine.playSnap();
     clearActiveSeries();
     setActiveState(null);
-    onClose();
+    dismiss();
   };
 
+  const launchSeriesDay = (seriesId: string, dayNumber?: number) => {
+    soundEngine.playClick();
+    const existing = getActiveSeriesState();
+    const switching = !existing || existing.seriesId !== seriesId;
+    const next = switching ? startWeeklySeries(seriesId) : existing;
+    if (!next) return;
+
+    setActiveState(next);
+    const todayDay = getSeriesDayNumber(next);
+    const targetDay = dayNumber ?? todayDay;
+    if (targetDay > todayDay) return;
+
+    const dayOffset = targetDay - todayDay;
+    onSeriesSelected?.(seriesId);
+    window.dispatchEvent(
+      new CustomEvent('testament-launch-series-day', {
+        detail: { seriesId, dayOffset, dayNumber: targetDay },
+      })
+    );
+    dismiss();
+  };
+
+  const transition = reduceMotion
+    ? { duration: 0 }
+    : { type: 'spring' as const, stiffness: 380, damping: 34 };
+
+  const isDetailActive = Boolean(detail && activeState?.seriesId === detail.id);
+  const detailDay = isDetailActive && activeState ? getSeriesDayNumber(activeState) : 1;
+  const ctaDay = isDetailActive && activeState ? getSeriesDayNumber(activeState) : 1;
+
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+    <motion.div
+      ref={rootRef}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/55 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="series-picker-title"
+      initial={reduceMotion ? false : { opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={reduceMotion ? undefined : { opacity: 0 }}
+      transition={{ duration: reduceMotion ? 0 : 0.18 }}
+      onClick={() => {
+        soundEngine.playSnap();
+        dismiss();
+      }}
     >
-      <div 
-        className="w-full max-w-2xl max-h-[90vh] bg-surface dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden text-left"
+      <motion.div
+        initial={reduceMotion ? false : { y: 40, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={reduceMotion ? undefined : { y: 24, opacity: 0 }}
+        transition={transition}
+        className="w-full max-w-lg sm:max-w-xl max-h-[88dvh] rounded-t-3xl sm:rounded-3xl bg-surface-raised dark:bg-stone-900 border border-line dark:border-stone-700 shadow-2xl flex flex-col overflow-hidden text-left"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="p-5 sm:p-6 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between shrink-0 bg-stone-50/50 dark:bg-stone-900/50">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
-              <Compass className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded-full">
-                  Weekly Study Series
-                </span>
-              </div>
-              <h2 id="series-picker-title" className="text-lg sm:text-xl font-serif font-bold text-stone-900 dark:text-parchment-100 mt-0.5">
-                Go Deep on One Story
-              </h2>
-            </div>
-          </div>
+        <div className="shrink-0 px-4 pt-3 pb-3 border-b border-line dark:border-stone-800 flex items-start gap-2.5">
           <button
             type="button"
             onClick={() => {
               soundEngine.playSnap();
-              onClose();
+              if (detail) {
+                setDetail(null);
+                return;
+              }
+              dismiss();
             }}
-            className="p-2 rounded-xl text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-            aria-label="Close dialog"
+            className="inline-flex items-center justify-center h-10 w-10 rounded-full border border-line bg-surface dark:bg-stone-850 text-fg-muted hover:text-fg transition-colors"
+            aria-label={detail ? t('series.back') : t('series.close')}
           >
-            <X className="w-5 h-5" />
+            {detail ? <ArrowLeft className="w-4 h-4" /> : <X className="w-4 h-4" />}
           </button>
+          <div className="min-w-0 flex-1 pt-0.5">
+            <p className="text-[10px] font-mono uppercase tracking-widest text-accent-text font-bold">
+              {detail
+                ? isDetailActive
+                  ? t('series.dayOfSeven', { day: detailDay })
+                  : t('series.weekLabel')
+                : t('series.pickerEyebrow')}
+            </p>
+            <h2 id="series-picker-title" className="text-title-3 text-fg truncate leading-tight">
+              {detail ? detail.heroName : t('series.pickerTitle')}
+            </h2>
+          </div>
         </div>
 
-        {/* Subtitle / Anti-Overwhelm Explanation */}
-        <div className="px-6 py-3 bg-amber-50/50 dark:bg-amber-950/20 border-b border-amber-200/40 dark:border-amber-900/40 text-xs text-stone-700 dark:text-stone-300">
-          Trace one biblical figure across 7 daily decision-moments (Monday to Sunday). Low daily load (one decision a day), high depth through repetition.
-        </div>
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-4">
+          {!detail ? (
+            <div className="space-y-2">
+              <p className="text-xs text-fg-muted leading-relaxed pb-1">
+                {t('series.pickerHint')}
+              </p>
 
-        {/* Series List */}
-        <div className="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1">
-          {WEEKLY_SERIES.map((s) => {
-            const isCurrentActive = activeState?.seriesId === s.id;
-            const isExpanded = expandedSeriesId === s.id;
-            const currentDay = isCurrentActive && activeState ? getSeriesDayNumber(activeState) : 1;
-            const completedCount = isCurrentActive && activeState ? activeState.completedMomentIds.length : 0;
-
-            return (
-              <div
-                key={s.id}
-                className={`rounded-2xl border transition-all text-left ${
-                  isCurrentActive
-                    ? 'border-amber-500/80 bg-amber-50/30 dark:bg-amber-950/20 shadow-sm'
-                    : 'border-stone-200 dark:border-stone-800 bg-white/70 dark:bg-stone-900/60 hover:border-stone-300 dark:hover:border-stone-700'
-                }`}
-              >
-                {/* Series Banner Card */}
-                <div 
-                  className="p-4 sm:p-5 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                  onClick={() => {
-                    soundEngine.playSnap();
-                    setExpandedSeriesId(isExpanded ? null : s.id);
-                  }}
-                >
-                  <div className="flex items-start gap-3.5">
-                    <span className="text-2xl sm:text-3xl p-2 rounded-xl bg-stone-100 dark:bg-stone-800 shrink-0">
-                      {s.avatarIcon}
-                    </span>
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-serif font-bold text-base sm:text-lg text-stone-900 dark:text-parchment-100">
-                          {s.title}
-                        </h3>
-                        {isCurrentActive && (
-                          <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-700 dark:text-emerald-400 bg-emerald-500/15 font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3" />
-                            Active • Day {currentDay} of 7
+              {WEEKLY_SERIES.map((series) => {
+                const isActive = activeState?.seriesId === series.id;
+                const day = isActive && activeState ? getSeriesDayNumber(activeState) : null;
+                return (
+                  <button
+                    key={series.id}
+                    type="button"
+                    onClick={() => {
+                      soundEngine.playSnap();
+                      setDetail(series);
+                    }}
+                    className={`w-full flex items-center gap-3 rounded-2xl border px-3.5 py-3 text-left transition-colors min-h-[60px] ${
+                      isActive
+                        ? 'border-accent/45 bg-accent/10'
+                        : 'border-line bg-surface dark:bg-stone-900/70 hover:border-accent/35'
+                    }`}
+                  >
+                    <div
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-sm font-serif font-bold ${
+                        isActive
+                          ? 'bg-accent text-white'
+                          : 'bg-stone-100 dark:bg-stone-800 text-fg'
+                      }`}
+                      aria-hidden
+                    >
+                      {series.heroName.slice(0, 1)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-fg">{series.heroName}</span>
+                        {isActive && day != null && (
+                          <span className="text-[10px] font-mono font-bold text-accent-text bg-accent/15 px-1.5 py-0.5 rounded-md">
+                            {t('series.dayChip', { day })}
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-stone-600 dark:text-stone-300 mt-1 leading-relaxed">
-                        {s.hook}
+                      <p className="text-[12px] text-fg-muted mt-0.5 line-clamp-1 leading-snug">
+                        {series.tagline}
                       </p>
-                      <div className="flex items-center gap-3 mt-2 text-[11px] font-mono text-stone-500 dark:text-stone-400">
-                        <span>7 Moments</span>
-                        <span>•</span>
-                        <span>{s.weekTheme}</span>
-                        {isCurrentActive && (
-                          <>
-                            <span>•</span>
-                            <span className="text-amber-700 dark:text-amber-400 font-bold">
-                              {completedCount} completed
-                            </span>
-                          </>
-                        )}
-                      </div>
                     </div>
-                  </div>
+                    <ArrowRight className="w-4 h-4 text-fg-muted shrink-0" />
+                  </button>
+                );
+              })}
 
-                  <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                    {isCurrentActive ? (
-                      <span className="text-xs font-mono font-bold text-amber-700 dark:text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded-xl">
-                        In Progress
-                      </span>
-                    ) : (
+              {activeState && (
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  className="btn-quiet w-full mt-2 text-xs text-fg-muted"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  {t('series.leaveSeries')}
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm text-fg-muted leading-relaxed">{detail.tagline}</p>
+
+              <ol className="space-y-1.5">
+                {detail.moments.map((m) => {
+                  const isDone = isDetailActive && activeState?.completedMomentIds.includes(m.id);
+                  const isToday = m.dayNumber === detailDay;
+                  const locked = isDetailActive ? m.dayNumber > detailDay : m.dayNumber > 1;
+                  const canOpen = !locked;
+
+                  return (
+                    <li key={m.id}>
                       <button
                         type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSelectSeries(s.id);
+                        disabled={!canOpen}
+                        onClick={() => {
+                          if (!canOpen) return;
+                          launchSeriesDay(detail.id, m.dayNumber);
                         }}
-                        className="px-3.5 py-1.5 rounded-xl bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-semibold hover:bg-stone-800 dark:hover:bg-white transition-all cursor-pointer shadow-sm"
+                        className={`w-full flex items-center gap-3 rounded-2xl border px-3 py-2.5 text-left transition-colors min-h-[52px] ${
+                          locked
+                            ? 'border-line/60 bg-surface/70 dark:bg-stone-900/40 cursor-not-allowed'
+                            : isToday
+                              ? 'border-accent/40 bg-accent/10'
+                              : 'border-line bg-surface dark:bg-stone-850/70 hover:border-accent/30'
+                        }`}
                       >
-                        {activeState ? "Switch to this Series" : "Start Series"}
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Expanded Details / 7-Day Timeline */}
-                {isExpanded && (
-                  <div className="px-5 pb-5 pt-2 border-t border-stone-200/60 dark:border-stone-800/60 space-y-3 animate-in fade-in duration-150">
-                    <span className="text-[11px] font-mono uppercase tracking-wider text-stone-500 dark:text-stone-400 font-bold block">
-                      The 7 Decision Moments
-                    </span>
-                    <div className="space-y-1.5">
-                      {s.moments.map((m) => {
-                        const isDone = isCurrentActive && activeState?.completedMomentIds.includes(m.id);
-                        const isToday = isCurrentActive && m.dayNumber === currentDay;
-
-                        return (
-                          <div 
-                            key={m.id}
-                            className={`flex items-center gap-2.5 p-2 rounded-xl text-xs ${
-                              isToday 
-                                ? 'bg-amber-500/15 border border-amber-500/30 font-semibold' 
-                                : 'bg-stone-50/70 dark:bg-stone-800/40'
+                        <span
+                          className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-[11px] font-mono font-bold ${
+                            isDone
+                              ? 'bg-emerald-500 text-white'
+                              : isToday
+                                ? 'bg-accent text-white'
+                                : locked
+                                  ? 'bg-stone-100 dark:bg-stone-800 text-stone-400 dark:text-stone-500'
+                                  : 'bg-stone-200 dark:bg-stone-700 text-fg-muted'
+                          }`}
+                        >
+                          {isDone ? <Check className="w-3.5 h-3.5" /> : m.dayNumber}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div
+                            className={`text-sm font-medium leading-snug truncate ${
+                              locked ? 'text-stone-400 dark:text-stone-500' : 'text-fg'
                             }`}
                           >
-                            {isDone ? (
-                              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                            ) : (
-                              <Circle className="w-4 h-4 text-stone-300 dark:text-stone-600 shrink-0" />
-                            )}
-                            <span className="font-mono text-[11px] text-stone-500 dark:text-stone-400 shrink-0">
-                              Day {m.dayNumber}:
-                            </span>
-                            <span className="font-reading text-stone-900 dark:text-stone-100 flex-1 truncate">
-                              {m.momentTitle}
-                            </span>
-                            <span className="text-[10px] font-mono text-stone-400 dark:text-stone-500 shrink-0">
-                              {m.reference}
-                            </span>
+                            {m.momentTitle}
                           </div>
-                        );
-                      })}
-                    </div>
-
-                    {!isCurrentActive && (
-                      <div className="pt-2 flex justify-end">
-                        <button
-                          type="button"
-                          onClick={() => handleSelectSeries(s.id)}
-                          className="btn-primary text-xs flex items-center gap-1.5 cursor-pointer"
-                        >
-                          <span>{activeState ? `Restart with ${s.heroName} (Day 1)` : `Begin Week with ${s.heroName}`}</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                          <div
+                            className={`text-[11px] font-mono mt-0.5 truncate ${
+                              locked ? 'text-stone-300 dark:text-stone-600' : 'text-fg-muted'
+                            }`}
+                          >
+                            {m.reference}
+                          </div>
+                        </div>
+                        {isToday && canOpen && (
+                          <span className="text-[10px] font-mono font-bold uppercase tracking-wide text-accent-text shrink-0 pr-0.5">
+                            {t('series.today')}
+                          </span>
+                        )}
+                        {canOpen && !isToday && (
+                          <ArrowRight className="w-3.5 h-3.5 text-fg-muted shrink-0" />
+                        )}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
+          )}
         </div>
 
-        {/* Footer: Return to Standard Rotation */}
-        {activeState && (
-          <div className="p-4 border-t border-stone-200 dark:border-stone-800 bg-stone-50/80 dark:bg-stone-900/80 flex items-center justify-between text-xs text-stone-600 dark:text-stone-400">
-            <span>Currently studying a weekly series.</span>
+        {detail && (
+          <div className="shrink-0 px-4 pt-3 pb-[calc(0.85rem+env(safe-area-inset-bottom,0px))] border-t border-line dark:border-stone-800">
             <button
               type="button"
-              onClick={handleClearSeries}
-              className="btn-quiet font-mono text-xs"
+              onClick={() => launchSeriesDay(detail.id, ctaDay)}
+              className="btn-primary w-full !max-w-none text-sm"
             >
-              <RotateCcw className="w-3 h-3" />
-              Return to standard daily rotation
+              {isDetailActive
+                ? t('series.continueDay', { day: ctaDay })
+                : activeState
+                  ? t('series.switchStart', { name: detail.heroName })
+                  : t('series.startDayOne')}
+              <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
-};
+}

@@ -25,7 +25,7 @@ import { pathForTab, tabFromPath, storyIdFromPath, pathForStory, type AppTab } f
 import { loadReadingPlace } from './utils/readingPlace';
 import { addBookmark } from './utils/bookmarks';
 import { hasCompletedFirstRun } from './utils/firstRun';
-import { getDailyMission, type GeneratedDailyMission } from './utils/dailyMissionPipeline';
+import { getDailyMission, getDailyMissionSync, type GeneratedDailyMission } from './utils/dailyMissionPipeline';
 import { isVerseMastered } from './utils/fsrsEngine';
 import { getStoryById } from './content/stories';
 import { parseScriptureReference } from './utils/scriptureRef';
@@ -502,9 +502,26 @@ export function App() {
       // ignore
     }
     setActiveQuest(null);
+    setActiveStoryId(null);
     setActiveDailyMission(mission);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // Weekly series picker → start/continue today's (or selected) series day as a live mission
+  useEffect(() => {
+    const onLaunchSeriesDay = (event: Event) => {
+      const detail = (event as CustomEvent<{ dayOffset?: number }>).detail;
+      const dayOffset = typeof detail?.dayOffset === 'number' ? detail.dayOffset : 0;
+      const dateKey = getTodayDateKey();
+      const mission = getDailyMissionSync(dateKey, dayOffset);
+      handleStartDailyMission(mission);
+      void getDailyMission(dateKey, dayOffset).then((fresh) => {
+        setActiveDailyMission((current) => (current?.id === mission.id || current?.id === fresh.id ? fresh : current));
+      });
+    };
+    window.addEventListener('testament-launch-series-day', onLaunchSeriesDay);
+    return () => window.removeEventListener('testament-launch-series-day', onLaunchSeriesDay);
+  }, []);
 
   const handleBackFromDailyMission = () => {
     soundEngine.playClick();

@@ -572,22 +572,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
             )}
           </div>
 
-          {/* =========================================================================
-              FLAGSHIP WEEKLY SERIES SHOWCASE (Fix 5)
-              ========================================================================= */}
           {activeSeries ? (
-            <div className="p-5 lg:p-6 rounded-3xl bg-gradient-to-br from-amber-500/15 via-amber-500/10 to-stone-100/60 dark:to-stone-900/60 border border-amber-500/30 transition-all">
-              <div className="flex items-center justify-between gap-3 mb-3">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-2xl p-2 rounded-2xl bg-amber-500/20">{activeSeries.avatarIcon}</span>
-                  <div>
-                    <span className="text-[10px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold block">
-                      {t('dashboard.activeSeries')}
-                    </span>
-                    <h3 className="text-base lg:text-lg font-serif font-bold text-stone-900 dark:text-parchment-50 leading-tight">
-                      {activeSeries.title}
-                    </h3>
-                  </div>
+            <div className="rounded-2xl border border-accent/35 bg-accent/5 p-4 space-y-3.5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-mono uppercase tracking-widest text-accent-text font-bold">
+                    {t('dashboard.activeSeries')}
+                  </p>
+                  <h3 className="text-base font-serif font-bold text-fg leading-tight mt-0.5 truncate">
+                    {activeSeries.heroName}
+                  </h3>
+                  <p className="text-xs text-fg-muted mt-1 line-clamp-2">{activeSeries.tagline}</p>
                 </div>
                 <button
                   type="button"
@@ -595,118 +590,60 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     soundEngine.playSnap();
                     setShowSeriesPicker(true);
                   }}
-                  className="text-xs font-mono font-bold text-amber-800 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 py-1 px-2.5 rounded-lg hover:bg-amber-500/10 transition-colors cursor-pointer"
+                  className="shrink-0 text-xs font-semibold text-accent-text min-h-[40px] px-2.5 rounded-lg hover:bg-accent/10"
                 >
                   {t('dashboard.changeSeries')}
                 </button>
               </div>
 
-              {/* 7-Day Arc Progress Pill Bar */}
-              <div className="space-y-1.5 mb-3.5">
-                <div className="flex items-center justify-between text-xs text-stone-600 dark:text-stone-300 font-medium">
-                  <span>Day {activeSeriesDay} of 7</span>
-                  <span className="font-mono text-amber-800 dark:text-amber-400 font-bold">{Math.round((activeSeriesDay / 7) * 100)}%</span>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-[11px] text-fg-muted">
+                  <span className="font-medium">{t('series.dayOfSeven', { day: activeSeriesDay })}</span>
                 </div>
-                <div className="grid grid-cols-7 gap-1.5" aria-label={`Day ${activeSeriesDay} of 7`}>
+                <div className="flex items-center gap-1" aria-hidden>
                   {[1, 2, 3, 4, 5, 6, 7].map((dayNum) => (
                     <div
                       key={dayNum}
-                      className={`h-2 rounded-full transition-all ${
-                        dayNum === activeSeriesDay
-                          ? 'bg-amber-500 ring-2 ring-amber-500/40 animate-pulse'
-                          : dayNum < activeSeriesDay
-                          ? 'bg-amber-600 dark:bg-amber-500'
-                          : 'bg-stone-200 dark:bg-stone-800'
+                      className={`h-1.5 flex-1 rounded-full ${
+                        dayNum <= activeSeriesDay ? 'bg-accent' : 'bg-stone-200 dark:bg-stone-700'
                       }`}
                     />
                   ))}
                 </div>
               </div>
 
-              <p className="text-xs lg:text-sm text-stone-600 dark:text-stone-300 leading-relaxed mb-3">
-                {activeSeries.tagline}
-              </p>
-
-              <div className="flex items-center justify-between gap-2 pt-2.5 border-t border-amber-500/20">
-                <span className="text-[11px] font-serif italic text-stone-500 dark:text-stone-400 truncate">
-                  Theme: {activeSeries.weekTheme}
-                </span>
-                <button
-                  type="button"
-                  onClick={handleStartMission}
-                  className="text-xs font-bold text-amber-900 dark:text-amber-200 hover:underline flex items-center gap-1 cursor-pointer shrink-0"
-                >
-                  <span>{isTodayMissionDone ? `Review Day ${activeSeriesDay}` : `Jump into Day ${activeSeriesDay}`}</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="p-5 lg:p-6 rounded-3xl bg-gradient-to-br from-amber-500/10 via-stone-100/70 to-stone-100/40 dark:from-amber-500/10 dark:via-stone-900/60 dark:to-stone-900/40 border border-stone-200/80 dark:border-stone-800/80 hover:border-amber-500/40 transition-all">
-              <div className="flex items-start justify-between gap-3 mb-2.5">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
-                    <Compass className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                  </div>
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
-                    Weekly Study Series • 7-Day Guided Arcs
-                  </span>
-                </div>
-              </div>
-
-              <h3 className="text-base lg:text-lg font-serif font-bold text-stone-900 dark:text-parchment-50 mb-1.5 leading-snug">
-                Walk 7 Days with Biblical Leaders
-              </h3>
-              <p className="text-xs lg:text-sm text-stone-600 dark:text-stone-300 leading-relaxed mb-4">
-                Theme your daily walk with high-tension decisions and enduring wisdom from Scripture's greatest character arcs.
-              </p>
-
-              {/* Character Arc Pills Preview */}
-              <div className="flex flex-wrap gap-2 mb-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    soundEngine.playSnap();
-                    setShowSeriesPicker(true);
-                  }}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-stone-200/60 hover:bg-stone-300/70 dark:bg-stone-800/70 dark:hover:bg-stone-750 text-xs text-stone-800 dark:text-stone-200 font-medium cursor-pointer transition-colors"
-                >
-                  <span>👑</span> David (7 Decisions)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    soundEngine.playSnap();
-                    setShowSeriesPicker(true);
-                  }}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-stone-200/60 hover:bg-stone-300/70 dark:bg-stone-800/70 dark:hover:bg-stone-750 text-xs text-stone-800 dark:text-stone-200 font-medium cursor-pointer transition-colors"
-                >
-                  <span>✨</span> Esther (For Such a Time)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    soundEngine.playSnap();
-                    setShowSeriesPicker(true);
-                  }}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-stone-200/60 hover:bg-stone-300/70 dark:bg-stone-800/70 dark:hover:bg-stone-750 text-xs text-stone-800 dark:text-stone-200 font-medium cursor-pointer transition-colors"
-                >
-                  <span>🌊</span> Moses (Deliverer)
-                </button>
-              </div>
-
               <button
                 type="button"
-                onClick={() => {
-                  soundEngine.playSnap();
-                  setShowSeriesPicker(true);
-                }}
-                className="btn-primary w-full sm:w-auto text-xs sm:text-sm shadow-xs cursor-pointer"
+                onClick={handleStartMission}
+                className="btn-primary w-full !max-w-none text-sm"
               >
-                <span>Explore all 6 weekly series</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                {isTodayMissionDone
+                  ? t('series.reviewDay', { day: activeSeriesDay })
+                  : t('series.jumpDay', { day: activeSeriesDay })}
+                <ArrowRight className="w-4 h-4" />
               </button>
             </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                soundEngine.playSnap();
+                setShowSeriesPicker(true);
+              }}
+              className="w-full flex items-center gap-3 rounded-2xl border border-line bg-surface-raised dark:bg-stone-900 px-4 py-3.5 text-left hover:border-accent/40 transition-colors min-h-[60px]"
+            >
+              <div className="w-10 h-10 rounded-xl bg-accent/15 text-accent flex items-center justify-center shrink-0">
+                <Compass className="w-4 h-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[10px] font-mono uppercase tracking-widest text-accent-text font-bold">
+                  {t('library.seriesBadge')}
+                </div>
+                <div className="text-sm font-semibold text-fg">{t('series.pickWeek')}</div>
+                <p className="text-[11px] text-fg-muted mt-0.5 line-clamp-1">{t('series.pickWeekHint')}</p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-accent shrink-0" />
+            </button>
           )}
 
       {/* =========================================================================
@@ -1135,12 +1072,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
           const state = getActiveSeriesState();
           setActiveSeriesState(state);
           const dateKey = getTodayDateKey();
-          try {
-            localStorage.removeItem(`testament_daily_generated_mission_${dateKey}`);
-          } catch {
-            // ignore
-          }
-          setDailyMission(getDailyMissionSync(dateKey, 0, activeBattlefieldId));
+          const nextMission = getDailyMissionSync(dateKey, 0, activeBattlefieldId);
+          setDailyMission(nextMission);
+          // Mission launch is handled by App via testament-launch-series-day
         }}
       />
     </div>
