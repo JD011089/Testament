@@ -1,7 +1,10 @@
 import { test, expect } from '@playwright/test';
 import { validateStory } from '../src/utils/storySchema';
 import { STORIES, STORY_STOPS, STORY_VALIDATION_ERRORS, getStoryById } from '../src/content/stories';
+import { isFullStory } from '../src/types/story';
+import { SCENE_REVEAL_IDS } from '../src/utils/storyScenes';
 import { parseScriptureReference } from '../src/utils/scriptureRef';
+import { getQuizIssues } from '../src/utils/quizEngine';
 
 const validStory = {
   id: 'test-story',
@@ -61,6 +64,25 @@ test.describe('bundled story content', () => {
     expect(STORY_STOPS.length).toBe(24);
     const orders = STORY_STOPS.map((s) => s.order);
     expect(orders).toEqual([...orders].sort((a, b) => a - b));
+  });
+
+  test('every map stop is a playable story with a fair quiz', () => {
+    expect(STORIES.length).toBe(24);
+    expect(STORY_STOPS.every((stop) => isFullStory(stop))).toBe(true);
+    for (const story of STORIES) {
+      expect(getQuizIssues(story), story.id).toEqual([]);
+    }
+  });
+
+  test('every tap-reveal scene matches the pieces in that story', () => {
+    for (const story of STORIES) {
+      for (const card of story.cards) {
+        if (card.type !== 'interaction' || card.kind !== 'tap-reveal' || card.config.kind !== 'tap-reveal') continue;
+        expect(card.config.scene, story.id).toBe(story.id);
+        const ids = [...card.config.reveals.map((item) => item.id)].sort();
+        expect(ids, story.id).toEqual([...(SCENE_REVEAL_IDS[story.id] ?? [])].sort());
+      }
+    }
   });
 
   test('David and Goliath is the authored story with 8 cards', () => {

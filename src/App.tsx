@@ -21,10 +21,11 @@ import { setActiveMemoryVerse } from './utils/calendarReminders';
 import { markCampaignStepCompleted } from './data/dailyCampaigns';
 import type { DailyCampaignStep } from './data/dailyCampaigns';
 import { getComposedDailyMission } from './utils/missionComposer';
-import { pathForTab, tabFromPath, storyIdFromPath, pathForStory, type AppTab } from './utils/routes';
+import { pathForTab, tabFromPath, storyIdFromPath, pathForStory, pageFromPath, PAGE_PATHS, isAppPagePath, TAB_PATHS, type AppPage, type AppTab } from './utils/routes';
 import { loadReadingPlace } from './utils/readingPlace';
 import { addBookmark } from './utils/bookmarks';
 import { hasCompletedFirstRun } from './utils/firstRun';
+import { loadLearnerModesState, setLearnerMode } from './utils/learnerModes';
 import { getDailyMission, getDailyMissionSync, type GeneratedDailyMission } from './utils/dailyMissionPipeline';
 import { isVerseMastered } from './utils/fsrsEngine';
 import { getStoryById } from './content/stories';
@@ -36,7 +37,7 @@ const PsalmsFieldMedicModal = lazy(() => import('./components/PsalmsFieldMedicMo
 const OnboardingModal = lazy(() => import('./components/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
 const WhatsNewModal = lazy(() => import('./components/WhatsNewModal').then(m => ({ default: m.WhatsNewModal })));
 const HowTestamentWorksModal = lazy(() => import('./components/HowTestamentWorksModal').then(m => ({ default: m.HowTestamentWorksModal })));
-const SettingsModal = lazy(() => import('./components/SettingsModal').then(m => ({ default: m.SettingsModal })));
+const SettingsPage = lazy(() => import('./components/SettingsModal').then(m => ({ default: m.SettingsPage })));
 const PracticeView = lazy(() => import('./components/PracticeView').then((m) => ({ default: m.PracticeView })));
 const CanonLibraryPage = lazy(() => import('./components/CanonLibraryPage').then((m) => ({ default: m.CanonLibraryPage })));
 const TriviaGauntlet = lazy(() => import('./components/TriviaGauntlet').then((m) => ({ default: m.TriviaGauntlet })));
@@ -48,6 +49,15 @@ const DeckScreen = lazy(() => import('./screens/DeckScreen').then((m) => ({ defa
 const FirstRun = lazy(() => import('./components/onboarding/FirstRun').then((m) => ({ default: m.FirstRun })));
 const NotificationSettingsModal = lazy(() =>
   import('./components/NotificationSettingsModal').then((m) => ({ default: m.NotificationSettingsModal }))
+);
+const DecisionJournalModal = lazy(() =>
+  import('./components/DecisionJournalModal').then((m) => ({ default: m.DecisionJournalModal }))
+);
+const CharacterArcModal = lazy(() =>
+  import('./components/CharacterArcModal').then((m) => ({ default: m.CharacterArcModal }))
+);
+const ModeSelectorModal = lazy(() =>
+  import('./components/ModeSelectorModal').then((m) => ({ default: m.ModeSelectorModal }))
 );
 
 function ViewFallback() {
@@ -76,6 +86,11 @@ function persistNumber(key: string, value: number) {
 export function App() {
   const [currentTab, setCurrentTabState] = useState<AppTab>(() => {
     if (typeof window === 'undefined') return 'dashboard';
+    if (isAppPagePath(window.location.pathname)) {
+      const saved = (window.history.state as { tab?: string } | null)?.tab;
+      if (saved && saved in TAB_PATHS) return saved as AppTab;
+      return 'today';
+    }
     const params = new URLSearchParams(window.location.search);
     if (params.get('action') === 'wordforge' || params.get('verseId')) return 'wordforge';
     if (params.get('action') === 'library' || params.get('tab') === 'library') return 'library';
@@ -84,6 +99,7 @@ export function App() {
 
   const setCurrentTab = (tab: AppTab) => {
     setCurrentTabState(tab);
+    if (isAppPagePath(window.location.pathname)) return;
     const next = pathForTab(tab);
     if (window.location.pathname !== next) {
       window.history.replaceState({ tab }, '', next);
@@ -103,55 +119,43 @@ export function App() {
   const [currentAmbience, setCurrentAmbience] = useState<'none' | 'campfire' | 'wind' | 'sanctuary'>('none');
 
   // Modals state (owned at App so Library deep-links work when Dashboard is unmounted)
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isNotificationSettingsOpen, setIsNotificationSettingsOpen] = useState(false);
+  const [pageRoute, setPageRoute] = useState<AppPage | null>(() =>
+    typeof window === 'undefined' ? null : pageFromPath(window.location.pathname)
+  );
+  const [peopleFocus, setPeopleFocus] = useState<{ characterId?: string; momentIndex?: number }>({});
+  const [learnerMode, setLearnerModeState] = useState(() => loadLearnerModesState().activeMode);
   const [isDossierOpen, setIsDossierOpen] = useState(false);
   const [isProverbsOpen, setIsProverbsOpen] = useState(false);
   const [isPsalmsOpen, setIsPsalmsOpen] = useState(false);
   const [isDriveModeOpen, setIsDriveModeOpen] = useState(false);
   const [isWhatsNewOpen, setIsWhatsNewOpen] = useState<boolean>(false);
-  const [isHowItWorksOpen, setIsHowItWorksOpen] = useState<boolean>(false);
-  // Part 9: First-run experience drops the user straight into the mission with zero popup modals
-  const [isOnboardingOpen, setIsOnboardingOpen] = useState<boolean>(false);
 
   // First run: 3 short screens, then drop straight into David and Goliath.
   const [showFirstRun, setShowFirstRun] = useState<boolean>(() => !hasCompletedFirstRun());
 
   // Keep modal states in refs so the single window popstate listener closes modals before exiting the app
   const modalsRef = useRef({
-    isSettingsOpen,
-    isNotificationSettingsOpen,
     isDossierOpen,
     isProverbsOpen,
     isPsalmsOpen,
     isDriveModeOpen,
-    isWhatsNewOpen,
-    isHowItWorksOpen,
-    isOnboardingOpen
+    isWhatsNewOpen
   });
 
   useEffect(() => {
     modalsRef.current = {
-      isSettingsOpen,
-      isNotificationSettingsOpen,
       isDossierOpen,
       isProverbsOpen,
       isPsalmsOpen,
       isDriveModeOpen,
-      isWhatsNewOpen,
-      isHowItWorksOpen,
-      isOnboardingOpen
+      isWhatsNewOpen
     };
   }, [
-    isSettingsOpen,
-    isNotificationSettingsOpen,
     isDossierOpen,
     isProverbsOpen,
     isPsalmsOpen,
     isDriveModeOpen,
-    isWhatsNewOpen,
-    isHowItWorksOpen,
-    isOnboardingOpen
+    isWhatsNewOpen
   ]);
 
   const [userProfile, setUserProfile] = useState<UserCalibrationProfile | null>(() => {
@@ -214,16 +218,53 @@ export function App() {
     }
   };
 
-  /** Close Settings and open another modal without history.back() (avoids popstate killing the new modal). */
-  const openFromSettings = (name: string, open: () => void) => {
-    setIsSettingsOpen(false);
-    open();
+  const tabForPageReturn = (value?: string | null): AppTab => {
+    if (value && value in TAB_PATHS) return value as AppTab;
+    if (currentTabRef.current !== 'not-found') return currentTabRef.current;
+    return 'today';
+  };
+
+  const openPage = (page: AppPage) => {
+    setPageRoute(page);
     try {
-      const url = window.location.pathname + window.location.search;
-      if (window.history.state?.modal === 'settings') {
-        window.history.replaceState({ modal: name, tab: currentTabRef.current }, '', url);
-      } else if (window.history.state?.modal !== name) {
-        window.history.pushState({ modal: name, tab: currentTabRef.current }, '', url);
+      if (pageFromPath(window.location.pathname) !== page) {
+        const tab = tabForPageReturn(window.history.state?.tab ?? currentTabRef.current);
+        window.history.pushState({ route: page, tab, pushed: true }, '', PAGE_PATHS[page]);
+      }
+    } catch {
+      // ignore
+    }
+    window.scrollTo({ top: 0 });
+  };
+
+  const openSettingsPage = () => openPage('settings');
+
+  const closePage = () => {
+    soundEngine.stopSpeaking();
+    const state = window.history.state as { route?: string; pushed?: boolean; tab?: string } | null;
+    const current = pageFromPath(window.location.pathname);
+    if (current && state?.route === current && state.pushed) {
+      try { window.history.back(); } catch { /* ignore */ }
+      return;
+    }
+    setPageRoute(null);
+    const safe = tabForPageReturn(state?.tab);
+    setCurrentTabState(safe);
+    try {
+      window.history.replaceState({ tab: safe }, '', pathForTab(safe) + window.location.search);
+    } catch {
+      // ignore
+    }
+  };
+
+  /** Close a full page and restore the screen underneath, without stepping back past it. */
+  const dismissPageRoute = () => {
+    soundEngine.stopSpeaking();
+    const tab = tabForPageReturn(window.history.state?.tab);
+    setPageRoute(null);
+    try {
+      if (window.history.state?.route || isAppPagePath(window.location.pathname)) {
+        window.history.replaceState({ tab }, '', pathForTab(tab) + window.location.search);
       }
     } catch {
       // ignore
@@ -240,6 +281,11 @@ export function App() {
   useEffect(() => {
     currentTabRef.current = currentTab;
   }, [currentTab]);
+
+  const pageRouteRef = useRef(pageRoute);
+  pageRouteRef.current = pageRoute;
+  const openPageRef = useRef(openPage);
+  openPageRef.current = openPage;
 
   const activeDailyMissionRef = useRef(activeDailyMission);
   useEffect(() => {
@@ -275,19 +321,35 @@ export function App() {
   useEffect(() => {
     const closeTopModalFromHistory = (): boolean => {
       const m = modalsRef.current;
-      if (m.isNotificationSettingsOpen) { setIsNotificationSettingsOpen(false); return true; }
-      if (m.isSettingsOpen) { setIsSettingsOpen(false); return true; }
       if (m.isProverbsOpen) { setIsProverbsOpen(false); return true; }
       if (m.isPsalmsOpen) { setIsPsalmsOpen(false); return true; }
       if (m.isDossierOpen) { setIsDossierOpen(false); return true; }
       if (m.isDriveModeOpen) { setIsDriveModeOpen(false); return true; }
       if (m.isWhatsNewOpen) { setIsWhatsNewOpen(false); return true; }
-      if (m.isHowItWorksOpen) { setIsHowItWorksOpen(false); return true; }
-      if (m.isOnboardingOpen) { setIsOnboardingOpen(false); return true; }
       return false;
     };
 
     const onPop = (e: PopStateEvent) => {
+      const path = window.location.pathname;
+
+      const page = pageFromPath(path);
+      if (page) {
+        setPageRoute(page);
+        return;
+      }
+
+      if (pageRouteRef.current) {
+        setPageRoute(null);
+        const restored = (e.state as { tab?: string } | null)?.tab;
+        const nextTab = restored && restored in TAB_PATHS
+          ? restored as AppTab
+          : tabFromPath(path);
+        if (nextTab !== 'not-found' && nextTab !== currentTabRef.current) {
+          setCurrentTabState(nextTab);
+        }
+        return;
+      }
+
       // 1. Close open modals first on Back button
       if (closeTopModalFromHistory()) return;
 
@@ -313,7 +375,17 @@ export function App() {
 
     const next = pathForTab(currentTab);
     const search = window.location.search;
-    if (window.location.pathname !== next) {
+    const landedPage = pageFromPath(window.location.pathname);
+    if (landedPage) {
+      if (window.history.state?.route !== landedPage) {
+        const tab = currentTab !== 'not-found' ? currentTab : 'today';
+        window.history.replaceState(
+          { route: landedPage, tab, pushed: false },
+          '',
+          window.location.pathname + search
+        );
+      }
+    } else if (window.location.pathname !== next) {
       window.history.replaceState({ tab: currentTab }, '', next + search);
     }
 
@@ -376,8 +448,18 @@ export function App() {
     window.addEventListener('open-proverbs-codex', handleOpenProverbs);
     window.addEventListener('open-psalms-medic', handleOpenPsalms);
 
-    const handleOpenSettings = () => openModalWithHistory('settings', () => setIsSettingsOpen(true));
+    const handleOpenSettings = () => openPageRef.current('settings');
+    const handleOpenJournal = () => openPageRef.current('journal');
+    const handleOpenPeople = (event: Event) => {
+      const detail = (event as CustomEvent<{ characterId?: string; momentIndex?: number }>).detail;
+      setPeopleFocus(detail ?? {});
+      openPageRef.current('people');
+    };
+    const handleOpenModes = () => openPageRef.current('learner-mode');
     window.addEventListener('testament-open-settings', handleOpenSettings);
+    window.addEventListener('testament-open-journal', handleOpenJournal);
+    window.addEventListener('testament-open-people', handleOpenPeople);
+    window.addEventListener('testament-open-modes', handleOpenModes);
 
     return () => {
       window.removeEventListener('open-canon-library', handleOpenLibrary);
@@ -385,6 +467,9 @@ export function App() {
       window.removeEventListener('open-proverbs-codex', handleOpenProverbs);
       window.removeEventListener('open-psalms-medic', handleOpenPsalms);
       window.removeEventListener('testament-open-settings', handleOpenSettings);
+      window.removeEventListener('testament-open-journal', handleOpenJournal);
+      window.removeEventListener('testament-open-people', handleOpenPeople);
+      window.removeEventListener('testament-open-modes', handleOpenModes);
     };
   }, []);
 
@@ -682,7 +767,7 @@ export function App() {
     startRecommendedQuest?: boolean
   ) => {
     setUserProfile(profile);
-    setIsOnboardingOpen(false);
+    closePage();
     window.dispatchEvent(new Event('testament-onboarding-settled'));
 
     // Wire calibration into real session behavior
@@ -761,7 +846,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen min-h-dvh bg-surface dark:bg-iron-950 text-stone-900 dark:text-parchment-100 transition-colors duration-200 w-full relative">
+    <div className="flex min-h-screen min-h-dvh flex-col bg-surface dark:bg-iron-950 text-stone-900 dark:text-parchment-100 transition-colors duration-200 w-full relative">
       {showFirstRun && (
         <Suspense fallback={null}>
           <FirstRun
@@ -773,7 +858,10 @@ export function App() {
           />
         </Suspense>
       )}
-      <main className={`w-full pt-3 sm:pt-4 xl:pt-16 ${
+      <main
+        inert={pageRoute ? true : undefined}
+        aria-hidden={pageRoute ? true : undefined}
+        className={`flex w-full flex-1 flex-col pt-3 sm:pt-4 xl:pt-16 ${
         activeQuest || activeDailyMission || activeStory
           ? 'pb-4 xl:pb-8'
           : 'pb-[calc(6.75rem+env(safe-area-inset-bottom,0px))] xl:pb-10'
@@ -900,10 +988,10 @@ export function App() {
                 currentAmbience={currentAmbience}
                 onToggleAmbience={handleToggleAmbience}
                 userProfile={userProfile}
-                onOpenOnboarding={() => openModalWithHistory('onboarding', () => setIsOnboardingOpen(true))}
+                onOpenOnboarding={() => openPage('plan')}
                 onOpenWhatsNew={() => openModalWithHistory('whatsnew', () => setIsWhatsNewOpen(true))}
-                onOpenHowItWorks={() => openModalWithHistory('howitworks', () => setIsHowItWorksOpen(true))}
-                onOpenSettings={() => openModalWithHistory('settings', () => setIsSettingsOpen(true))}
+                onOpenHowItWorks={() => openPage('how-it-works')}
+                onOpenSettings={openSettingsPage}
                 onRewardXP={handleRewardXP}
                 onLaunchCampaignStep={handleLaunchCampaignStep}
               />
@@ -1006,7 +1094,7 @@ export function App() {
       )}
 
       {/* Persistent Responsive Nav (Desktop Top Nav & Mobile Bottom Nav) */}
-      {!activeQuest && !activeDailyMission && !activeStory && (
+      {!activeQuest && !activeDailyMission && !activeStory && !pageRoute && (
         <Navigation 
           currentTab={currentTab}
           onSelectTab={(tab) => {
@@ -1019,7 +1107,7 @@ export function App() {
           onOpenDriveMode={() => openModalWithHistory('drivemode', () => setIsDriveModeOpen(true))}
           streakCount={streakCount}
           xp={xp}
-          onOpenSettings={() => openModalWithHistory('settings', () => setIsSettingsOpen(true))}
+          onOpenSettings={openSettingsPage}
           onOpenWhatsNew={() => openModalWithHistory('whatsnew', () => setIsWhatsNewOpen(true))}
         />
       )}
@@ -1113,93 +1201,86 @@ export function App() {
         }}
       />
 
-      {/* M-8: How Testament Works Transparency Modal */}
-      <HowTestamentWorksModal
-        isOpen={isHowItWorksOpen}
-        onClose={() => {
-          setIsHowItWorksOpen(false);
-          if (window.history.state?.modal === 'howitworks') {
-            try { window.history.back(); } catch { /* ignore */ }
-          }
-        }}
-      />
-
-      <OnboardingModal
-        isOpen={isOnboardingOpen}
-        onComplete={handleCompleteOnboarding}
-        onClose={() => {
-          try {
-            sessionStorage.setItem('testament_onboarding_snoozed', '1');
-          } catch {
-            // ignore
-          }
-          setIsOnboardingOpen(false);
-          if (window.history.state?.modal === 'onboarding') {
-            try { window.history.back(); } catch { /* ignore */ }
-          }
-          window.dispatchEvent(new Event('testament-onboarding-settled'));
-        }}
-        initialProfile={userProfile}
-      />
-
-      {/* Global Lifted Settings Modal */}
-      {isSettingsOpen && (
+      {pageRoute === 'settings' && (
         <Suspense fallback={null}>
-          <SettingsModal
-            isOpen={isSettingsOpen}
-            onClose={() => {
-              setIsSettingsOpen(false);
-              if (window.history.state?.modal === 'settings') {
-                try { window.history.back(); } catch { /* ignore */ }
-              }
-            }}
-            onOpenOnboarding={() => {
-              openFromSettings('onboarding', () => setIsOnboardingOpen(true));
-            }}
-            onOpenReminders={() => {
-              openFromSettings('notifications', () => setIsNotificationSettingsOpen(true));
-            }}
-            onOpenJournal={() => {
-              setIsSettingsOpen(false);
-              window.dispatchEvent(new CustomEvent('testament-open-journal'));
-            }}
+          <SettingsPage
+            onBack={closePage}
+            onOpenOnboarding={() => openPage('plan')}
+            onOpenReminders={() => openPage('notifications')}
+            onOpenJournal={() => openPage('journal')}
             onOpenPeople={() => {
-              setIsSettingsOpen(false);
-              window.dispatchEvent(new CustomEvent('testament-open-people'));
+              setPeopleFocus({});
+              openPage('people');
             }}
             onOpenRelics={() => {
-              setIsSettingsOpen(false);
+              dismissPageRoute();
               window.dispatchEvent(new CustomEvent('testament-open-relics'));
             }}
-            onOpenHowItWorks={() => {
-              openFromSettings('howitworks', () => setIsHowItWorksOpen(true));
-            }}
-            onOpenLearnerMode={() => {
-              setIsSettingsOpen(false);
-              window.dispatchEvent(new CustomEvent('testament-open-modes'));
-            }}
-            activeLearnerMode="builder"
+            onOpenHowItWorks={() => openPage('how-it-works')}
+            onOpenLearnerMode={() => openPage('learner-mode')}
+            activeLearnerMode={learnerMode}
           />
+        </Suspense>
+      )}
+
+      {pageRoute === 'plan' && (
+        <Suspense fallback={null}>
+          <OnboardingModal
+            onComplete={handleCompleteOnboarding}
+            onClose={() => {
+              try { sessionStorage.setItem('testament_onboarding_snoozed', '1'); } catch { /* ignore */ }
+              closePage();
+              window.dispatchEvent(new Event('testament-onboarding-settled'));
+            }}
+            initialProfile={userProfile}
+          />
+        </Suspense>
+      )}
+
+      {pageRoute === 'how-it-works' && (
+        <Suspense fallback={null}>
+          <HowTestamentWorksModal onClose={closePage} />
+        </Suspense>
+      )}
+
+      {pageRoute === 'journal' && (
+        <Suspense fallback={null}>
+          <DecisionJournalModal onClose={closePage} />
+        </Suspense>
+      )}
+
+      {pageRoute === 'people' && (
+        <Suspense fallback={null}>
+          <CharacterArcModal
+            onClose={closePage}
+            initialCharacterId={peopleFocus.characterId}
+            initialMomentIndex={peopleFocus.momentIndex}
+          />
+        </Suspense>
+      )}
+
+      {pageRoute === 'learner-mode' && (
+        <Suspense fallback={null}>
+          <ModeSelectorModal
+            onClose={closePage}
+            currentMode={learnerMode}
+            onSelectMode={(mode) => {
+              const updated = setLearnerMode(mode);
+              setLearnerModeState(updated.activeMode);
+            }}
+          />
+        </Suspense>
+      )}
+
+      {pageRoute === 'notifications' && (
+        <Suspense fallback={null}>
+          <NotificationSettingsModal onClose={closePage} />
         </Suspense>
       )}
 
       {/* PWA Home-Screen Install Prompt (Mutually exclusive with CampaignNextTaskPrompt and readers/modals) */}
-      {!campaignPrompt && !activeQuest && !activeDailyMission && !isDossierOpen && !isProverbsOpen && !isPsalmsOpen && !isDriveModeOpen && !isOnboardingOpen && (
+      {!pageRoute && !campaignPrompt && !activeQuest && !activeDailyMission && !isDossierOpen && !isProverbsOpen && !isPsalmsOpen && !isDriveModeOpen && (
         <PWAInstallPrompt />
-      )}
-
-      {isNotificationSettingsOpen && (
-        <Suspense fallback={null}>
-          <NotificationSettingsModal
-            isOpen={isNotificationSettingsOpen}
-            onClose={() => {
-              setIsNotificationSettingsOpen(false);
-              if (window.history.state?.modal === 'notifications') {
-                try { window.history.back(); } catch { /* ignore */ }
-              }
-            }}
-          />
-        </Suspense>
       )}
 
       {/* PWA Update & Restart Floating Notification Banner */}
@@ -1208,7 +1289,7 @@ export function App() {
       {/* Campaign Next Task Prompt Modal / Banner (Requirement 5) */}
       <CampaignNextTaskPrompt
         completedStepNumber={campaignPrompt?.completedStep || 1}
-        nextStep={campaignPrompt?.nextStep || null}
+        nextStep={pageRoute ? null : (campaignPrompt?.nextStep || null)}
         onProceed={handleProceedCampaignPrompt}
         onDismiss={() => setCampaignPrompt(null)}
       />

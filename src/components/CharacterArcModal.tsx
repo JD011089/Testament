@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  X, 
   ChevronRight, 
   ChevronLeft, 
   ChevronDown, 
@@ -11,7 +9,7 @@ import {
   UserPlus, 
 } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
-import { useModalLock } from '../utils/useModalLock';
+import { FullPage } from './FullPage';
 import { 
   CHARACTER_ARCS, 
   getFollowedCharacterIds, 
@@ -20,32 +18,27 @@ import {
 } from '../data/characterArcs';
 
 interface CharacterArcModalProps {
-  isOpen: boolean;
   onClose: () => void;
   initialCharacterId?: string;
   initialMomentIndex?: number;
 }
 
 export const CharacterArcModal: React.FC<CharacterArcModalProps> = ({
-  isOpen,
   onClose,
   initialCharacterId = 'peter',
   initialMomentIndex = 0
 }) => {
-  const modalRef = useModalLock(isOpen);
   const [selectedCharId, setSelectedCharId] = useState<string>(initialCharacterId);
   const [momentIndex, setMomentIndex] = useState<number>(initialMomentIndex);
   const [followedIds, setFollowedIds] = useState<string[]>(() => getFollowedCharacterIds());
   const [expandedDeeper, setExpandedDeeper] = useState<boolean>(false);
 
   React.useEffect(() => {
-    if (isOpen) {
-      if (initialCharacterId) setSelectedCharId(initialCharacterId);
-      if (typeof initialMomentIndex === 'number') setMomentIndex(initialMomentIndex);
-      setExpandedDeeper(false);
-      setFollowedIds(getFollowedCharacterIds());
-    }
-  }, [isOpen, initialCharacterId, initialMomentIndex]);
+    if (initialCharacterId) setSelectedCharId(initialCharacterId);
+    if (typeof initialMomentIndex === 'number') setMomentIndex(initialMomentIndex);
+    setExpandedDeeper(false);
+    setFollowedIds(getFollowedCharacterIds());
+  }, [initialCharacterId, initialMomentIndex]);
 
   const activeArc = CHARACTER_ARCS.find((c) => c.id === selectedCharId) || CHARACTER_ARCS[0];
   const moments = activeArc.moments;
@@ -83,52 +76,11 @@ export const CharacterArcModal: React.FC<CharacterArcModalProps> = ({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-5 bg-black/60 dark:bg-black/85 backdrop-blur-md overflow-y-auto overscroll-contain"
-          onClick={onClose}
-          role="region"
-          aria-label="Character Arcs and People"
-        >
-          <motion.div
-            ref={modalRef}
-            tabIndex={-1}
-            onClick={(e) => e.stopPropagation()}
-            initial={{ opacity: 0, scale: 0.95, y: 15 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 15 }}
-            transition={{ duration: 0.2 }}
-            className="w-full max-w-3xl h-[100dvh] sm:h-auto sm:max-h-[90vh] rounded-none sm:rounded-3xl bg-white dark:bg-stone-900 border-0 sm:border border-stone-200 dark:border-stone-800 shadow-none sm:shadow-2xl flex flex-col text-left overflow-hidden relative outline-none"
-          >
-            {/* MODAL HEADER */}
-            <div className="p-4 sm:p-5 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between gap-4 bg-stone-50 dark:bg-stone-900/90 shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-xl shrink-0">
-                  {activeArc.avatarIcon}
-                </div>
-                <div>
-                  <h2 
-                    id="people-modal-title"
-                    className="text-lg font-serif font-bold text-stone-900 dark:text-parchment-50"
-                  >
-                    People • Character Arcs
-                  </h2>
-                  <p className="text-xs text-stone-500 dark:text-stone-400">
-                    Follow their real human journey moment by moment
-                  </p>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={onClose}
-                className="p-2 rounded-xl bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-750 text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200 border border-stone-200 dark:border-stone-700 transition-colors"
-                aria-label="Close people viewer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+    <FullPage title="People and character arcs" titleId="people-page-title" onBack={onClose} wide>
+      <div className="space-y-6">
+            <p className="text-base text-stone-600 dark:text-stone-300">
+              Follow their real human journey moment by moment
+            </p>
 
             {/* CHARACTER SELECTOR PILLS */}
             <div className="px-4 sm:px-6 py-2.5 border-b border-stone-200 dark:border-stone-800/80 bg-stone-100/70 dark:bg-stone-950/40 flex items-center gap-2 overflow-x-auto scrollbar-none shrink-0">
@@ -159,7 +111,7 @@ export const CharacterArcModal: React.FC<CharacterArcModalProps> = ({
             {/* MAIN ARC CONTENT */}
             <div className="p-5 sm:p-6 overflow-y-auto space-y-5 flex-1">
               {/* Character Bio & Follow action */}
-              <div className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="text-base sm:text-lg font-serif font-black text-stone-900 dark:text-parchment-50">
@@ -316,9 +268,7 @@ export const CharacterArcModal: React.FC<CharacterArcModalProps> = ({
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
+      </div>
+    </FullPage>
   );
 };

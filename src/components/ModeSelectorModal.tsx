@@ -1,41 +1,26 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { 
-  X, 
   Check, 
   Hammer, 
   Repeat, 
   Mic2, 
   ShieldCheck 
 } from 'lucide-react';
-import { useModalLock } from '../utils/useModalLock';
 import { soundEngine } from '../utils/audio';
+import { FullPage } from './FullPage';
 import type { LearnerMode } from '../types/learnerModes';
 
 interface ModeSelectorModalProps {
-  isOpen: boolean;
   onClose: () => void;
   currentMode: LearnerMode;
   onSelectMode: (mode: LearnerMode) => void;
 }
 
 export const ModeSelectorModal: React.FC<ModeSelectorModalProps> = ({
-  isOpen,
   onClose,
   currentMode,
   onSelectMode,
 }) => {
-  const modalRef = useModalLock(isOpen);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
 
   const MODES: {
     id: LearnerMode;
@@ -74,44 +59,14 @@ export const ModeSelectorModal: React.FC<ModeSelectorModalProps> = ({
   const handleSelect = (mode: LearnerMode) => {
     soundEngine.playSnap();
     onSelectMode(mode);
-    onClose();
   };
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-950/70 backdrop-blur-xs overflow-y-auto animate-fade-in"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="mode-selector-title"
-    >
-      <div 
-        ref={modalRef}
-        className="w-full max-w-lg rounded-3xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-2xl p-5 sm:p-6 my-auto text-left relative"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-stone-200/70 dark:border-stone-800/70">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
-                Learner Modes
-              </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300">
-                Changeable anytime
-              </span>
-            </div>
-            <h2 id="mode-selector-title" className="text-xl font-serif font-black text-stone-900 dark:text-parchment-50 mt-0.5">
-              Choose your practice lens
-            </h2>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-2 rounded-xl text-stone-500 hover:text-stone-900 dark:hover:text-parchment-50 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer"
-            aria-label="Close learner modes"
-          >
-            <X aria-hidden="true" className="w-5 h-5" />
-          </button>
-        </div>
+    <FullPage title="Learner mode" titleId="mode-selector-title" onBack={onClose}>
+      <div className="space-y-6">
+        <p className="text-base text-stone-600 dark:text-stone-300">
+          Choose your practice lens. You can change this anytime.
+        </p>
 
         {/* Mode cards list */}
         <div className="mt-4 space-y-3">
@@ -178,6 +133,6 @@ export const ModeSelectorModal: React.FC<ModeSelectorModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </FullPage>
   );
 };

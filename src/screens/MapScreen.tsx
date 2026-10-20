@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { STORY_ARCS, isFullStory, type StoryArc } from '../types/story';
 import { STORY_STOPS } from '../content/stories';
+import { getDailyStoryId } from '../utils/dailyStory';
 import { isStoryCompleted } from '../utils/storyProgress';
 import { celebrate } from '../utils/feedback';
 import { useLanguage } from '../context/LanguageContext';
@@ -13,10 +15,13 @@ interface MapScreenProps {
 
 export function MapScreen({ onPlayStory, onQuickPlay }: MapScreenProps) {
   const { t } = useLanguage();
+  const [todayId] = useState(() => getDailyStoryId());
   const completedIds = STORY_STOPS.filter((stop) => isStoryCompleted(stop.id)).map((stop) => stop.id);
-  // Next playable authored story (skip stubs so David & Goliath can be started)
+  const todayStop = STORY_STOPS.find((stop) => stop.id === todayId) ?? null;
   const nextPlayable =
-    STORY_STOPS.find((stop) => isFullStory(stop) && !completedIds.includes(stop.id)) ?? null;
+    (todayStop && isFullStory(todayStop) ? todayStop : null) ??
+    STORY_STOPS.find((stop) => isFullStory(stop) && !completedIds.includes(stop.id)) ??
+    null;
 
   return (
     <div className="max-w-2xl mx-auto px-4 pt-4 pb-8 space-y-6">
@@ -62,18 +67,20 @@ export function MapScreen({ onPlayStory, onQuickPlay }: MapScreenProps) {
               {stops.map((stop) => {
                 const completed = isStoryCompleted(stop.id);
                 const playable = isFullStory(stop);
-                const isNext = nextPlayable?.id === stop.id;
+                const isToday = stop.id === todayId;
+                const isNext = isToday;
                 const locked = !playable;
                 return (
                   <div
                     key={stop.id}
                     className={[
-                      'relative rounded-full border px-4 py-3 transition-all',
+                      'relative border px-4 py-3 transition-all',
+                      'rounded-3xl',
                       completed
                         ? 'border-accent/60 bg-accent/10'
                         : isNext
                           ? 'border-accent bg-surface-raised shadow-[0_0_0_1px_rgba(212,157,95,0.2),0_6px_20px_rgba(212,157,95,0.12)]'
-                          : 'border-line bg-surface-raised/80 opacity-75',
+                          : 'border-line bg-surface-raised',
                     ].join(' ')}
                   >
                     <span
@@ -85,8 +92,15 @@ export function MapScreen({ onPlayStory, onQuickPlay }: MapScreenProps) {
                     />
                     <div className="flex items-center justify-between gap-3 min-h-[44px]">
                       <div className="min-w-0 pl-0.5">
-                        <h3 className="text-title-4 text-fg truncate">{stop.title}</h3>
-                        {playable && (completed || isNext) && (
+                        <div className="flex items-center gap-2 min-w-0">
+                          <h3 className="text-title-4 text-fg truncate">{stop.title}</h3>
+                          {isToday && (
+                            <span className="shrink-0 text-label uppercase rounded-full border border-accent/50 bg-accent/10 text-accent px-2 py-0.5">
+                              {t('map.today')}
+                            </span>
+                          )}
+                        </div>
+                        {playable && (
                           <p className="text-small text-fg-muted">{stop.passage}</p>
                         )}
                         {locked && (
@@ -107,16 +121,20 @@ export function MapScreen({ onPlayStory, onQuickPlay }: MapScreenProps) {
                           <Play className="w-3.5 h-3.5" /> {t('common.replay')}
                         </button>
                       )}
-                      {playable && !completed && isNext && (
+                      {playable && !completed && (
                         <button
                           type="button"
-                          className="btn-primary shrink-0 !min-h-10 !max-w-none px-4 text-xs"
+                          className={
+                            isNext
+                              ? 'btn-primary shrink-0 !min-h-10 !max-w-none px-4 text-xs'
+                              : 'btn-secondary shrink-0 !min-h-10 !rounded-full px-3 text-xs'
+                          }
                           onClick={() => {
                             celebrate('tap');
                             onPlayStory(stop.id);
                           }}
                         >
-                          <Sparkles className="w-3.5 h-3.5" /> {t('common.play')}
+                          {isNext ? <Sparkles className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />} {t('common.play')}
                         </button>
                       )}
                     </div>

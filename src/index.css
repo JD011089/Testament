@@ -451,6 +451,176 @@
     animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
+  .scene-piece {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    transition-property: opacity, transform;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .scene-piece.enter-rise { transform: translateY(18px); }
+  .scene-piece.enter-grow { transform: scale(0.72); }
+  .scene-piece.enter-slide-left { transform: translateX(-28px); }
+  .scene-piece.enter-ripple { transform: scale(0.9); }
+  .scene-piece.is-on {
+    opacity: 1;
+    transform: none;
+  }
+  .scene-ambient {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 900ms ease;
+  }
+  .scene-ambient.is-on { opacity: 1; }
+  .creation-layer,
+  .scene-layer {
+    position: absolute;
+    opacity: 0;
+    transition: opacity 0.7s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .creation-layer.is-on,
+  .scene-layer.is-on {
+    opacity: 1;
+  }
+  .scene-layer.fit-full {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .scene-layer.fit-sun {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: translateY(8%);
+  }
+  .scene-layer.fit-sun.is-on {
+    transform: translateY(-14%);
+  }
+  .scene-layer.fit-deck {
+    left: 50%;
+    bottom: 4%;
+    width: 46%;
+    height: 62%;
+    object-fit: contain;
+    transform: translateX(-50%) translateY(16px);
+  }
+  .scene-layer.fit-deck.is-on {
+    transform: translateX(-50%) translateY(0);
+  }
+  .scene-layer.fit-herd {
+    left: 4%;
+    bottom: 0;
+    width: 58%;
+    height: 52%;
+    object-fit: contain;
+    transform: translateY(16px);
+  }
+  .scene-layer.fit-herd.is-on {
+    transform: translateY(0);
+  }
+  .scene-layer.fit-left {
+    left: 1%;
+    bottom: 6%;
+    width: 42%;
+    height: 68%;
+    object-fit: contain;
+    transform: translateY(16px);
+  }
+  .scene-layer.fit-left.is-on {
+    transform: translateY(0);
+  }
+  .scene-layer.fit-right {
+    right: 2%;
+    bottom: 8%;
+    width: 34%;
+    height: 72%;
+    object-fit: contain;
+    transform: translateY(16px);
+  }
+  .scene-layer.fit-right.is-on {
+    transform: translateY(0);
+  }
+  .creation-sun {
+    transform: scale(0.65);
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .creation-sun.is-on {
+    transform: scale(1);
+  }
+  .creation-rise,
+  .scene-rise {
+    transform: translateY(36px);
+  }
+  .creation-rise.is-on,
+  .scene-rise.is-on {
+    transform: translateY(0);
+  }
+  .creation-plants {
+    transform: scaleY(0.15);
+    transform-box: fill-box;
+    transform-origin: bottom;
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
+  }
+  .creation-rise.is-on .creation-plants {
+    transform: scaleY(1);
+  }
+  @keyframes creation-wave {
+    from { transform: translateX(0); }
+    to { transform: translateX(-60px); }
+  }
+  .creation-waves {
+    animation: creation-wave 7s linear infinite;
+  }
+  .creation-waves-slow {
+    animation-duration: 11s;
+    animation-direction: reverse;
+  }
+  @keyframes creation-drift {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(18px, -6px); }
+  }
+  .creation-bird {
+    animation: creation-drift 4.8s ease-in-out infinite;
+  }
+  .creation-bird-late {
+    animation-delay: -2s;
+  }
+  @keyframes creation-swim {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(22px); }
+  }
+  .creation-fish {
+    animation: creation-swim 5.5s ease-in-out infinite;
+  }
+  @keyframes scene-flicker {
+    0%, 100% { opacity: 0.95; }
+    50% { opacity: 0.55; }
+  }
+  .scene-flame {
+    animation: scene-flicker 1.3s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: bottom center;
+  }
+  @keyframes scene-gust {
+    from { transform: translateX(0); }
+    to { transform: translateX(-36px); }
+  }
+  .scene-gust {
+    animation: scene-gust 1.2s linear infinite;
+  }
+  @keyframes scene-plate {
+    from { opacity: 0.25; }
+    to { opacity: 1; }
+  }
+  .scene-plate {
+    animation: scene-plate 0.55s ease;
+  }
+
   /* Micro text font-scaler support (respects --app-font-scale) */
   .text-\[9px\] {
     font-size: calc(0.5625rem * var(--app-font-scale, 1)) !important;

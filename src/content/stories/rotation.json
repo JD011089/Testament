@@ -1,0 +1,2956 @@
+[
+  {
+    "id": "creation",
+    "title": "Creation",
+    "arc": "Beginnings",
+    "order": 1,
+    "passage": "Genesis 1-2",
+    "estMinutes": 3,
+    "verse": {
+      "ref": "Genesis 1:31",
+      "translation": "WEB",
+      "text": "God saw everything that he had made, and, behold, it was very good. There was evening and there was morning, a sixth day."
+    },
+    "cards": [
+      {
+        "type": "narration",
+        "text": "Before anything else, God made the heavens and the earth.",
+        "scriptureLine": {
+          "ref": "Genesis 1:1",
+          "translation": "WEB",
+          "text": "In the beginning, God created the heavens and the earth."
+        }
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-reveal",
+        "prompt": "Tap what filled the new world.",
+        "config": {
+          "kind": "tap-reveal",
+          "scene": "creation",
+          "reveals": [
+            {
+              "id": "light",
+              "label": "Light"
+            },
+            {
+              "id": "sky",
+              "label": "Sky and sea"
+            },
+            {
+              "id": "land",
+              "label": "Land and plants"
+            },
+            {
+              "id": "life",
+              "label": "Living creatures"
+            }
+          ]
+        },
+        "successText": "He looked at all of it and called it very good."
+      },
+      {
+        "type": "interaction",
+        "kind": "hold",
+        "prompt": "Hold still. Let the finished world be good.",
+        "config": {
+          "kind": "hold",
+          "durationMs": 1400,
+          "holdLabel": "Hold"
+        },
+        "successText": "The day is good."
+      },
+      {
+        "type": "choice",
+        "prompt": "A beginning is in front of you. What do you do?",
+        "options": [
+          {
+            "label": "Give thanks",
+            "response": "You start by noticing the gift."
+          },
+          {
+            "label": "Hold back",
+            "response": "You wait and watch."
+          }
+        ],
+        "whatHappened": {
+          "text": "God formed a person and breathed in life.",
+          "ref": "Genesis 2:7",
+          "translation": "WEB",
+          "scriptureText": "Yahweh God formed man from the dust of the ground, and breathed into his nostrils the breath of life; and man became a living soul."
+        }
+      },
+      {
+        "type": "payoff"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "creation-who",
+        "category": "who",
+        "question": "Who made the heavens and the earth?",
+        "options": [
+          "God",
+          "A storm",
+          "Ocean waves",
+          "A king"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Genesis 1:31"
+      },
+      {
+        "id": "creation-what",
+        "category": "what",
+        "question": "What was breathed into the first person?",
+        "options": [
+          "Life",
+          "Fire",
+          "Rain",
+          "Stone"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Genesis 1:31"
+      },
+      {
+        "id": "creation-where",
+        "category": "where",
+        "question": "Where did that life come from?",
+        "options": [
+          "Dust of the ground",
+          "A city",
+          "The ocean",
+          "A cave"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Genesis 1:31"
+      }
+    ]
+  },
+  {
+    "id": "noah",
+    "title": "Noah",
+    "arc": "Beginnings",
+    "order": 2,
+    "passage": "Genesis 6-9",
+    "estMinutes": 3,
+    "verse": {
+      "ref": "Genesis 9:13",
+      "translation": "WEB",
+      "text": "I set my rainbow in the cloud, and it will be a sign of a covenant between me and the earth."
+    },
+    "cards": [
+      {
+        "type": "narration",
+        "text": "The world turned violent, but Noah still had favor with God.",
+        "scriptureLine": {
+          "ref": "Genesis 6:8",
+          "translation": "WEB",
+          "text": "But Noah found favor in Yahweh’s eyes."
+        }
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-reveal",
+        "prompt": "Tap what rode out the flood.",
+        "config": {
+          "kind": "tap-reveal",
+          "scene": "noah",
+          "reveals": [
+            {
+              "id": "ship",
+              "label": "The ship"
+            },
+            {
+              "id": "animals",
+              "label": "The animals"
+            },
+            {
+              "id": "people",
+              "label": "Noah and his household"
+            }
+          ]
+        },
+        "successText": "They were kept while the waters rose."
+      },
+      {
+        "type": "interaction",
+        "kind": "drag",
+        "prompt": "Bring the animals onto the deck.",
+        "config": {
+          "kind": "drag",
+          "targetLabel": "The ark",
+          "requiredCount": 3,
+          "items": [
+            {
+              "id": "pair-1",
+              "label": "A pair of doves",
+              "accept": true
+            },
+            {
+              "id": "pair-2",
+              "label": "A pair of sheep",
+              "accept": true
+            },
+            {
+              "id": "pair-3",
+              "label": "A pair of cattle",
+              "accept": true
+            },
+            {
+              "id": "wave",
+              "label": "A wave",
+              "accept": false
+            }
+          ]
+        },
+        "successText": "The animals are aboard."
+      },
+      {
+        "type": "choice",
+        "prompt": "A hard warning comes before the rain. What do you do?",
+        "options": [
+          {
+            "label": "Start building",
+            "response": "You begin the work early."
+          },
+          {
+            "label": "Ignore it",
+            "response": "You hope the warning is wrong."
+          }
+        ],
+        "whatHappened": {
+          "text": "God remembered Noah, and the waters went down.",
+          "ref": "Genesis 8:1",
+          "translation": "WEB",
+          "scriptureText": "God remembered Noah, all the animals, and all the livestock that were with him in the ship; and God made a wind to pass over the earth. The waters subsided."
+        }
+      },
+      {
+        "type": "payoff"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "noah-who",
+        "category": "who",
+        "question": "Who found favor before the flood?",
+        "options": [
+          "Noah",
+          "Lot",
+          "Esau",
+          "Cain"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Genesis 9:13"
+      },
+      {
+        "id": "noah-what",
+        "category": "what",
+        "question": "What sign did God set in the cloud?",
+        "options": [
+          "A rainbow",
+          "A sword",
+          "A star",
+          "A throne"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Genesis 9:13"
+      },
+      {
+        "id": "noah-where",
+        "category": "where",
+        "question": "Where did the household ride out the water?",
+        "options": [
+          "Inside a ship",
+          "On a mountain peak",
+          "In a cave",
+          "In a city"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Genesis 9:13"
+      }
+    ]
+  },
+  {
+    "id": "abrahams-call",
+    "title": "Abraham's Call",
+    "arc": "Patriarchs",
+    "order": 3,
+    "passage": "Genesis 12",
+    "estMinutes": 3,
+    "verse": {
+      "ref": "Genesis 12:1",
+      "translation": "WEB",
+      "text": "Now Yahweh said to Abram, “Leave your country, and your relatives, and your father’s house, and go to the land that I will show you."
+    },
+    "cards": [
+      {
+        "type": "narration",
+        "text": "God told Abram to leave home for a land not yet seen.",
+        "scriptureLine": {
+          "ref": "Genesis 12:1",
+          "translation": "WEB",
+          "text": "Now Yahweh said to Abram, “Leave your country, and your relatives, and your father’s house, and go to the land that I will show you."
+        }
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-reveal",
+        "prompt": "Tap what Abram left behind.",
+        "config": {
+          "kind": "tap-reveal",
+          "scene": "abrahams-call",
+          "reveals": [
+            {
+              "id": "country",
+              "label": "His country"
+            },
+            {
+              "id": "relatives",
+              "label": "His relatives"
+            },
+            {
+              "id": "house",
+              "label": "His father's house"
+            }
+          ]
+        },
+        "successText": "He walked away from the familiar."
+      },
+      {
+        "type": "interaction",
+        "kind": "hold",
+        "prompt": "Hold until you take the step.",
+        "config": {
+          "kind": "hold",
+          "durationMs": 1400,
+          "holdLabel": "Hold to step"
+        },
+        "successText": "You leave with him."
+      },
+      {
+        "type": "choice",
+        "prompt": "You are asked to leave what you know. Do you go?",
+        "options": [
+          {
+            "label": "Go",
+            "response": "You step onto the road."
+          },
+          {
+            "label": "Stay",
+            "response": "You keep the life you already have."
+          }
+        ],
+        "whatHappened": {
+          "text": "Abram went, just as God had told him.",
+          "ref": "Genesis 12:4",
+          "translation": "WEB",
+          "scriptureText": "So Abram went, as Yahweh had told him. Lot went with him. Abram was seventy-five years old when he departed from Haran."
+        }
+      },
+      {
+        "type": "payoff"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "abrahams-call-who",
+        "category": "who",
+        "question": "Who left Haran at seventy-five?",
+        "options": [
+          "Abram",
+          "Isaac",
+          "Jacob",
+          "Joseph"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Genesis 12:1"
+      },
+      {
+        "id": "abrahams-call-what",
+        "category": "what",
+        "question": "What did Abram leave behind?",
+        "options": [
+          "Country and relatives",
+          "An army",
+          "A crown",
+          "A boat"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Genesis 12:1"
+      },
+      {
+        "id": "abrahams-call-where",
+        "category": "where",
+        "question": "Where was Abram sent?",
+        "options": [
+          "A land still ahead",
+          "Egypt",
+          "The sea",
+          "A palace"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Genesis 12:1"
+      }
+    ]
+  },
+  {
+    "id": "joseph",
+    "title": "Joseph",
+    "arc": "Patriarchs",
+    "order": 4,
+    "passage": "Genesis 37, 39-45",
+    "estMinutes": 3,
+    "verse": {
+      "ref": "Genesis 50:20",
+      "translation": "WEB",
+      "text": "As for you, you meant evil against me, but God meant it for good, to bring to pass, as it is today, to save many people alive."
+    },
+    "cards": [
+      {
+        "type": "narration",
+        "text": "Joseph's brothers sold him, and merchants took him away.",
+        "scriptureLine": {
+          "ref": "Genesis 37:28",
+          "translation": "WEB",
+          "text": "Midianites who were merchants passed by, and they drew and lifted up Joseph out of the pit, and sold Joseph to the Ishmaelites for twenty pieces of silver. They brought Joseph into Egypt."
+        }
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-reveal",
+        "prompt": "Tap the hard stops on his road.",
+        "config": {
+          "kind": "tap-reveal",
+          "scene": "joseph",
+          "reveals": [
+            {
+              "id": "pit",
+              "label": "A pit"
+            },
+            {
+              "id": "sale",
+              "label": "A sale"
+            },
+            {
+              "id": "egypt",
+              "label": "A new land"
+            }
+          ]
+        },
+        "successText": "None of those stops were the end."
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-sequence",
+        "prompt": "Tap the road in the order it happened.",
+        "config": {
+          "kind": "tap-sequence",
+          "steps": [
+            "The pit",
+            "The sale",
+            "Egypt"
+          ]
+        },
+        "successText": "That road led somewhere."
+      },
+      {
+        "type": "choice",
+        "prompt": "You finally have power over people who hurt you. What do you do?",
+        "options": [
+          {
+            "label": "Show mercy",
+            "response": "You choose mercy over payback."
+          },
+          {
+            "label": "Get even",
+            "response": "You make them feel what you felt."
+          }
+        ],
+        "whatHappened": {
+          "text": "What they meant for evil, God meant for good.",
+          "ref": "Genesis 50:20",
+          "translation": "WEB",
+          "scriptureText": "As for you, you meant evil against me, but God meant it for good, to bring to pass, as it is today, to save many people alive."
+        }
+      },
+      {
+        "type": "payoff"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "joseph-who",
+        "category": "who",
+        "question": "Who was sold to merchants?",
+        "options": [
+          "Joseph",
+          "Benjamin",
+          "Reuben",
+          "Judah"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Genesis 50:20"
+      },
+      {
+        "id": "joseph-what",
+        "category": "what",
+        "question": "What did God do with the evil planned against him?",
+        "options": [
+          "Turned it toward good",
+          "Ignored it",
+          "Copied it",
+          "Hid it"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Genesis 50:20"
+      },
+      {
+        "id": "joseph-where",
+        "category": "where",
+        "question": "Where did the merchants take him?",
+        "options": [
+          "Egypt",
+          "Haran",
+          "Nineveh",
+          "Rome"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Genesis 50:20"
+      }
+    ]
+  },
+  {
+    "id": "moses-burning-bush",
+    "title": "Moses and the Burning Bush",
+    "arc": "Exodus",
+    "order": 5,
+    "passage": "Exodus 3",
+    "estMinutes": 3,
+    "verse": {
+      "ref": "Exodus 3:14",
+      "translation": "WEB",
+      "text": "God said to Moses, “I AM WHO I AM,” and he said, “You shall tell the children of Israel this: ‘I AM has sent me to you.’”"
+    },
+    "cards": [
+      {
+        "type": "narration",
+        "text": "A bush burned on the mountain, and the fire did not consume it.",
+        "scriptureLine": {
+          "ref": "Exodus 3:2",
+          "translation": "WEB",
+          "text": "Yahweh’s angel appeared to him in a flame of fire out of the middle of a bush. He looked, and behold, the bush burned with fire, and the bush was not consumed."
+        }
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-reveal",
+        "prompt": "Tap what Moses was sent to do.",
+        "config": {
+          "kind": "tap-reveal",
+          "scene": "moses-burning-bush",
+          "reveals": [
+            {
+              "id": "pharaoh",
+              "label": "Go to Pharaoh"
+            },
+            {
+              "id": "people",
+              "label": "Bring the people out"
+            },
+            {
+              "id": "name",
+              "label": "Carry God's name"
+            }
+          ]
+        },
+        "successText": "The one who spoke from the bush sent him."
+      },
+      {
+        "type": "interaction",
+        "kind": "hold",
+        "prompt": "Stay at the bush.",
+        "config": {
+          "kind": "hold",
+          "durationMs": 1400,
+          "holdLabel": "Hold still"
+        },
+        "successText": "You stayed long enough to hear."
+      },
+      {
+        "type": "choice",
+        "prompt": "The task in front of you feels too big. What do you do?",
+        "options": [
+          {
+            "label": "Take the next step",
+            "response": "You go, even unsure."
+          },
+          {
+            "label": "Refuse",
+            "response": "You stay where it feels safe."
+          }
+        ],
+        "whatHappened": {
+          "text": "God sent Moses to bring the people out.",
+          "ref": "Exodus 3:10",
+          "translation": "WEB",
+          "scriptureText": "Come now therefore, and I will send you to Pharaoh, that you may bring my people, the children of Israel, out of Egypt.”"
+        }
+      },
+      {
+        "type": "payoff"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "moses-burning-bush-who",
+        "category": "who",
+        "question": "Who heard a voice from a burning bush?",
+        "options": [
+          "Moses",
+          "Aaron",
+          "Joshua",
+          "Caleb"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Exodus 3:14"
+      },
+      {
+        "id": "moses-burning-bush-what",
+        "category": "what",
+        "question": "What name was Moses told to speak?",
+        "options": [
+          "I AM",
+          "A city",
+          "A number",
+          "A river"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Exodus 3:14"
+      },
+      {
+        "id": "moses-burning-bush-where",
+        "category": "where",
+        "question": "Where did the flame appear?",
+        "options": [
+          "In a bush",
+          "In a palace",
+          "On open water",
+          "In a tent"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Exodus 3:14"
+      }
+    ]
+  },
+  {
+    "id": "red-sea",
+    "title": "Red Sea",
+    "arc": "Exodus",
+    "order": 6,
+    "passage": "Exodus 14",
+    "estMinutes": 3,
+    "verse": {
+      "ref": "Exodus 14:21",
+      "translation": "WEB",
+      "text": "Moses stretched out his hand over the sea, and Yahweh caused the sea to go back by a strong east wind all night, and made the sea dry land, and the waters were divided."
+    },
+    "cards": [
+      {
+        "type": "narration",
+        "text": "The sea was in front of them, and an army was behind.",
+        "scriptureLine": {
+          "ref": "Exodus 14:13",
+          "translation": "WEB",
+          "text": "Moses said to the people, “Don’t be afraid. Stand still, and see the salvation of Yahweh, which he will work for you today: for the Egyptians whom you have seen today, you shall never see them again."
+        }
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-reveal",
+        "prompt": "Tap what happened at the water.",
+        "config": {
+          "kind": "tap-reveal",
+          "scene": "red-sea",
+          "reveals": [
+            {
+              "id": "hand",
+              "label": "A hand stretched out"
+            },
+            {
+              "id": "wind",
+              "label": "A strong east wind"
+            },
+            {
+              "id": "path",
+              "label": "A path of dry land"
+            }
+          ]
+        },
+        "successText": "The waters divided."
+      },
+      {
+        "type": "interaction",
+        "kind": "hold",
+        "prompt": "Hold your hand out over the sea.",
+        "config": {
+          "kind": "hold",
+          "durationMs": 1400,
+          "holdLabel": "Hold your hand out"
+        },
+        "successText": "The wind has room to work."
+      },
+      {
+        "type": "choice",
+        "prompt": "Fear is loud and the way through is not open yet. What do you do?",
+        "options": [
+          {
+            "label": "Stand still",
+            "response": "You wait and watch."
+          },
+          {
+            "label": "Panic",
+            "response": "You look for a way to run."
+          }
+        ],
+        "whatHappened": {
+          "text": "Moses stretched out his hand, and the sea was driven back.",
+          "ref": "Exodus 14:21",
+          "translation": "WEB",
+          "scriptureText": "Moses stretched out his hand over the sea, and Yahweh caused the sea to go back by a strong east wind all night, and made the sea dry land, and the waters were divided."
+        }
+      },
+      {
+        "type": "payoff"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "red-sea-who",
+        "category": "who",
+        "question": "Who stretched a hand over the water?",
+        "options": [
+          "Moses",
+          "Aaron",
+          "Pharaoh",
+          "Joshua"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Exodus 14:21"
+      },
+      {
+        "id": "red-sea-what",
+        "category": "what",
+        "question": "What split after the east wind?",
+        "options": [
+          "Salt water",
+          "A mountain",
+          "A city",
+          "A rock"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Exodus 14:21"
+      },
+      {
+        "id": "red-sea-where",
+        "category": "where",
+        "question": "Where were the people told to stand?",
+        "options": [
+          "Facing open water",
+          "Inside a palace",
+          "On a rooftop",
+          "In a market"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Exodus 14:21"
+      }
+    ]
+  },
+  {
+    "id": "ruth",
+    "title": "Ruth",
+    "arc": "Kings",
+    "order": 7,
+    "passage": "Ruth 1-4",
+    "estMinutes": 3,
+    "verse": {
+      "ref": "Ruth 1:16",
+      "translation": "WEB",
+      "text": "Ruth said, “Don’t urge me to leave you, and to return from following you, for where you go, I will go; and where you stay, I will stay. Your people will be my people, and your God my God."
+    },
+    "cards": [
+      {
+        "type": "narration",
+        "text": "Ruth would not turn back. She stayed with Naomi.",
+        "scriptureLine": {
+          "ref": "Ruth 1:16",
+          "translation": "WEB",
+          "text": "Ruth said, “Don’t urge me to leave you, and to return from following you, for where you go, I will go; and where you stay, I will stay. Your people will be my people, and your God my God."
+        }
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-reveal",
+        "prompt": "Tap the promises Ruth made.",
+        "config": {
+          "kind": "tap-reveal",
+          "scene": "ruth",
+          "reveals": [
+            {
+              "id": "go",
+              "label": "I will go where you go"
+            },
+            {
+              "id": "people",
+              "label": "Your people will be my people"
+            },
+            {
+              "id": "god",
+              "label": "Your God will be my God"
+            }
+          ]
+        },
+        "successText": "She chose a new home and a new faith."
+      },
+      {
+        "type": "interaction",
+        "kind": "hold",
+        "prompt": "Stay on the road with her.",
+        "config": {
+          "kind": "hold",
+          "durationMs": 1400,
+          "holdLabel": "Hold to stay"
+        },
+        "successText": "You did not turn back."
+      },
+      {
+        "type": "choice",
+        "prompt": "Someone you love is leaving. Do you stay with them?",
+        "options": [
+          {
+            "label": "Stay",
+            "response": "You bind your road to theirs."
+          },
+          {
+            "label": "Turn back",
+            "response": "You return to the old life."
+          }
+        ],
+        "whatHappened": {
+          "text": "Ruth had come under the care of the God of Israel.",
+          "ref": "Ruth 2:12",
+          "translation": "WEB",
+          "scriptureText": "May Yahweh repay your work, and a full reward be given to you from Yahweh, the God of Israel, under whose wings you have come to take refuge.”"
+        }
+      },
+      {
+        "type": "payoff"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "ruth-who",
+        "category": "who",
+        "question": "Who refused to leave Naomi?",
+        "options": [
+          "Ruth",
+          "Orpah",
+          "Esther",
+          "Hannah"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Ruth 1:16"
+      },
+      {
+        "id": "ruth-what",
+        "category": "what",
+        "question": "What did Ruth claim as her own?",
+        "options": [
+          "Naomi's people and God",
+          "A crown",
+          "A ship",
+          "A throne"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Ruth 1:16"
+      },
+      {
+        "id": "ruth-where",
+        "category": "where",
+        "question": "Where did Ruth say she would go?",
+        "options": [
+          "Wherever Naomi went",
+          "Back alone",
+          "To Egypt",
+          "To Rome"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Ruth 1:16"
+      }
+    ]
+  },
+  {
+    "id": "elijah-carmel",
+    "title": "Elijah on Carmel",
+    "arc": "Prophets",
+    "order": 9,
+    "passage": "1 Kings 18",
+    "estMinutes": 3,
+    "verse": {
+      "ref": "1 Kings 18:39",
+      "translation": "WEB",
+      "text": "When all the people saw it, they fell on their faces. They said, “Yahweh, he is God! Yahweh, he is God!”"
+    },
+    "cards": [
+      {
+        "type": "narration",
+        "text": "Elijah stood before the crowd and told them to choose.",
+        "scriptureLine": {
+          "ref": "1 Kings 18:21",
+          "translation": "WEB",
+          "text": "Elijah came near to all the people, and said, “How long will you waver between the two sides? If Yahweh is God, follow him; but if Baal, then follow him.” The people didn’t say a word."
+        }
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-reveal",
+        "prompt": "Tap what the fire burned.",
+        "config": {
+          "kind": "tap-reveal",
+          "scene": "elijah-carmel",
+          "reveals": [
+            {
+              "id": "offering",
+              "label": "The offering"
+            },
+            {
+              "id": "wood",
+              "label": "The wood"
+            },
+            {
+              "id": "stones",
+              "label": "The stones"
+            },
+            {
+              "id": "water",
+              "label": "The water in the trench"
+            }
+          ]
+        },
+        "successText": "Nothing on the altar was left."
+      },
+      {
+        "type": "interaction",
+        "kind": "drag",
+        "prompt": "Lay the wood on the altar.",
+        "config": {
+          "kind": "drag",
+          "targetLabel": "The altar",
+          "requiredCount": 3,
+          "items": [
+            {
+              "id": "log-1",
+              "label": "A log",
+              "accept": true
+            },
+            {
+              "id": "log-2",
+              "label": "A log",
+              "accept": true
+            },
+            {
+              "id": "log-3",
+              "label": "A log",
+              "accept": true
+            },
+            {
+              "id": "cup",
+              "label": "An empty cup",
+              "accept": false
+            }
+          ]
+        },
+        "successText": "The wood is on the altar."
+      },
+      {
+        "type": "choice",
+        "prompt": "Two voices pull at you. Which way do you turn?",
+        "options": [
+          {
+            "label": "Choose God",
+            "response": "You stop wavering."
+          },
+          {
+            "label": "Keep wavering",
+            "response": "You stay stuck between both sides."
+          }
+        ],
+        "whatHappened": {
+          "text": "Yahweh's fire fell and consumed the offering.",
+          "ref": "1 Kings 18:38",
+          "translation": "WEB",
+          "scriptureText": "Then Yahweh’s fire fell, and consumed the burnt offering, the wood, the stones, and the dust, and licked up the water that was in the trench."
+        }
+      },
+      {
+        "type": "payoff"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "elijah-carmel-who",
+        "category": "who",
+        "question": "Who called the crowd to stop wavering?",
+        "options": [
+          "Elijah",
+          "Elisha",
+          "Ahab",
+          "Obadiah"
+        ],
+        "answerIndex": 0,
+        "verseRef": "1 Kings 18:39"
+      },
+      {
+        "id": "elijah-carmel-what",
+        "category": "what",
+        "question": "What fell and consumed the offering?",
+        "options": [
+          "Fire",
+          "Rain",
+          "A sword",
+          "Dust"
+        ],
+        "answerIndex": 0,
+        "verseRef": "1 Kings 18:39"
+      },
+      {
+        "id": "elijah-carmel-where",
+        "category": "where",
+        "question": "Where did Elijah confront the crowd?",
+        "options": [
+          "On Carmel",
+          "In Jerusalem",
+          "Beside open water",
+          "In a cave"
+        ],
+        "answerIndex": 0,
+        "verseRef": "1 Kings 18:39"
+      }
+    ]
+  },
+  {
+    "id": "elijah-still-small-voice",
+    "title": "Elijah's Still Small Voice",
+    "arc": "Prophets",
+    "order": 10,
+    "passage": "1 Kings 19",
+    "estMinutes": 3,
+    "verse": {
+      "ref": "1 Kings 19:12",
+      "translation": "WEB",
+      "text": "After the earthquake a fire passed; but Yahweh was not in the fire. After the fire, there was a still small voice."
+    },
+    "cards": [
+      {
+        "type": "narration",
+        "text": "Wind, earthquake, and fire passed by. God was not in them.",
+        "scriptureLine": {
+          "ref": "1 Kings 19:11",
+          "translation": "WEB",
+          "text": "He said, “Go out, and stand on the mountain before Yahweh.” Behold, Yahweh passed by, and a great and strong wind tore the mountains, and broke in pieces the rocks before Yahweh; but Yahweh was not in the wind. After the wind there was an earthquake; but Yahweh was not in the earthquake."
+        }
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-reveal",
+        "prompt": "Tap what passed, then what remained.",
+        "config": {
+          "kind": "tap-reveal",
+          "scene": "elijah-still-small-voice",
+          "reveals": [
+            {
+              "id": "wind",
+              "label": "A great wind"
+            },
+            {
+              "id": "quake",
+              "label": "An earthquake"
+            },
+            {
+              "id": "fire",
+              "label": "A fire"
+            },
+            {
+              "id": "voice",
+              "label": "A still small voice"
+            }
+          ]
+        },
+        "successText": "After the noise, a quiet voice."
+      },
+      {
+        "type": "interaction",
+        "kind": "hold",
+        "prompt": "Wait past the noise.",
+        "config": {
+          "kind": "hold",
+          "durationMs": 1400,
+          "holdLabel": "Hold and listen"
+        },
+        "successText": "The quiet is enough."
+      },
+      {
+        "type": "choice",
+        "prompt": "Life is loud. Where do you listen?",
+        "options": [
+          {
+            "label": "In the quiet",
+            "response": "You step out and wait."
+          },
+          {
+            "label": "In the noise",
+            "response": "You stay inside the storm."
+          }
+        ],
+        "whatHappened": {
+          "text": "After the fire, there was a still small voice.",
+          "ref": "1 Kings 19:12",
+          "translation": "WEB",
+          "scriptureText": "After the earthquake a fire passed; but Yahweh was not in the fire. After the fire, there was a still small voice."
+        }
+      },
+      {
+        "type": "payoff"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "elijah-still-small-voice-who",
+        "category": "who",
+        "question": "Who stood on the mountain after running?",
+        "options": [
+          "Elijah",
+          "Moses",
+          "Samuel",
+          "Nathan"
+        ],
+        "answerIndex": 0,
+        "verseRef": "1 Kings 19:12"
+      },
+      {
+        "id": "elijah-still-small-voice-what",
+        "category": "what",
+        "question": "What came after the fire?",
+        "options": [
+          "A still small voice",
+          "Another storm",
+          "An army",
+          "A flood"
+        ],
+        "answerIndex": 0,
+        "verseRef": "1 Kings 19:12"
+      },
+      {
+        "id": "elijah-still-small-voice-where",
+        "category": "where",
+        "question": "Where was he told to stand?",
+        "options": [
+          "On the mountain",
+          "In a palace",
+          "On a ship",
+          "In Egypt"
+        ],
+        "answerIndex": 0,
+        "verseRef": "1 Kings 19:12"
+      }
+    ]
+  },
+  {
+    "id": "daniel-lions-den",
+    "title": "Daniel in the Lions' Den",
+    "arc": "Prophets",
+    "order": 11,
+    "passage": "Daniel 6",
+    "estMinutes": 3,
+    "verse": {
+      "ref": "Daniel 6:23",
+      "translation": "WEB",
+      "text": "Then was the king exceeding glad, and commanded that they should take Daniel up out of the den. So Daniel was taken up out of the den, and no kind of harm was found on him, because he had trusted in his God."
+    },
+    "cards": [
+      {
+        "type": "narration",
+        "text": "A law said not to pray. Daniel prayed anyway.",
+        "scriptureLine": {
+          "ref": "Daniel 6:10",
+          "translation": "WEB",
+          "text": "When Daniel knew that the writing was signed, he went into his house (now his windows were open in his room toward Jerusalem) and he kneeled on his knees three times a day, and prayed, and gave thanks before his God, as he did before."
+        }
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-reveal",
+        "prompt": "Tap Daniel's prayer habit.",
+        "config": {
+          "kind": "tap-reveal",
+          "scene": "daniel-lions-den",
+          "reveals": [
+            {
+              "id": "windows",
+              "label": "Open windows"
+            },
+            {
+              "id": "jerusalem",
+              "label": "Toward Jerusalem"
+            },
+            {
+              "id": "times",
+              "label": "Three times a day"
+            }
+          ]
+        },
+        "successText": "He did not hide his faith."
+      },
+      {
+        "type": "interaction",
+        "kind": "hold",
+        "prompt": "Keep the prayer.",
+        "config": {
+          "kind": "hold",
+          "durationMs": 1400,
+          "holdLabel": "Hold to pray"
+        },
+        "successText": "The windows stay open."
+      },
+      {
+        "type": "choice",
+        "prompt": "A rule tells you to hide your faith. What do you do?",
+        "options": [
+          {
+            "label": "Pray anyway",
+            "response": "You keep the habit, even at a cost."
+          },
+          {
+            "label": "Stay silent",
+            "response": "You close the windows and wait."
+          }
+        ],
+        "whatHappened": {
+          "text": "God sent an angel and shut the lions' mouths.",
+          "ref": "Daniel 6:22",
+          "translation": "WEB",
+          "scriptureText": "My God has sent his angel, and has shut the lions’ mouths, and they have not hurt me; because as before him innocence was found in me; and also before you, O king, I have done no hurt."
+        }
+      },
+      {
+        "type": "payoff"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "daniel-lions-den-who",
+        "category": "who",
+        "question": "Who kept praying toward Jerusalem?",
+        "options": [
+          "Daniel",
+          "Darius",
+          "Nebuchadnezzar",
+          "Belshazzar"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Daniel 6:23"
+      },
+      {
+        "id": "daniel-lions-den-what",
+        "category": "what",
+        "question": "What did the angel shut?",
+        "options": [
+          "Lions' mouths",
+          "A city gate",
+          "A royal book",
+          "A window"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Daniel 6:23"
+      },
+      {
+        "id": "daniel-lions-den-where",
+        "category": "where",
+        "question": "Where did Daniel pray three times a day?",
+        "options": [
+          "In his house",
+          "Inside the palace yard",
+          "Inside the den",
+          "Aboard ship"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Daniel 6:23"
+      }
+    ]
+  },
+  {
+    "id": "jonah",
+    "title": "Jonah",
+    "arc": "Prophets",
+    "order": 12,
+    "passage": "Jonah 1-4",
+    "estMinutes": 3,
+    "verse": {
+      "ref": "Jonah 1:17",
+      "translation": "WEB",
+      "text": "Yahweh prepared a great fish to swallow up Jonah, and Jonah was in the belly of the fish three days and three nights."
+    },
+    "cards": [
+      {
+        "type": "narration",
+        "text": "Jonah paid the fare the other way and ran from God.",
+        "scriptureLine": {
+          "ref": "Jonah 1:3",
+          "translation": "WEB",
+          "text": "But Jonah rose up to flee to Tarshish from the presence of Yahweh. He went down to Joppa, and found a ship going to Tarshish; so he paid its fare, and went down into it, to go with them to Tarshish from the presence of Yahweh."
+        }
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-reveal",
+        "prompt": "Tap the pieces of his detour.",
+        "config": {
+          "kind": "tap-reveal",
+          "scene": "jonah",
+          "reveals": [
+            {
+              "id": "joppa",
+              "label": "Joppa"
+            },
+            {
+              "id": "ship",
+              "label": "A ship"
+            },
+            {
+              "id": "tarshish",
+              "label": "Tarshish"
+            }
+          ]
+        },
+        "successText": "He went down into the ship to get away."
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-sequence",
+        "prompt": "Tap the flight in order.",
+        "config": {
+          "kind": "tap-sequence",
+          "steps": [
+            "Joppa",
+            "The ship",
+            "Tarshish"
+          ]
+        },
+        "successText": "He ran, and the sea was still ahead."
+      },
+      {
+        "type": "choice",
+        "prompt": "You know the right direction and you do not want it. What do you do?",
+        "options": [
+          {
+            "label": "Turn around",
+            "response": "You head back toward the call."
+          },
+          {
+            "label": "Keep running",
+            "response": "You pay the fare and leave."
+          }
+        ],
+        "whatHappened": {
+          "text": "A great fish swallowed Jonah for three days and three nights.",
+          "ref": "Jonah 1:17",
+          "translation": "WEB",
+          "scriptureText": "Yahweh prepared a great fish to swallow up Jonah, and Jonah was in the belly of the fish three days and three nights."
+        }
+      },
+      {
+        "type": "payoff"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "jonah-who",
+        "category": "who",
+        "question": "Who fled toward Tarshish?",
+        "options": [
+          "Jonah",
+          "Noah",
+          "Peter",
+          "Paul"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Jonah 1:17"
+      },
+      {
+        "id": "jonah-what",
+        "category": "what",
+        "question": "What swallowed him?",
+        "options": [
+          "A great fish",
+          "A wave",
+          "A net",
+          "A storm cloud"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Jonah 1:17"
+      },
+      {
+        "id": "jonah-where",
+        "category": "where",
+        "question": "Where was he trying to flee?",
+        "options": [
+          "Tarshish",
+          "Nineveh",
+          "Jerusalem",
+          "Egypt"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Jonah 1:17"
+      }
+    ]
+  },
+  {
+    "id": "esther",
+    "title": "Esther",
+    "arc": "Kings",
+    "order": 13,
+    "passage": "Esther 4-9",
+    "estMinutes": 3,
+    "verse": {
+      "ref": "Esther 4:14",
+      "translation": "WEB",
+      "text": "For if you remain silent now, then relief and deliverance will come to the Jews from another place, but you and your father’s house will perish. Who knows if you haven’t come to the kingdom for such a time as this?”"
+    },
+    "cards": [
+      {
+        "type": "narration",
+        "text": "Esther's people were in danger, and silence would not save them.",
+        "scriptureLine": {
+          "ref": "Esther 4:14",
+          "translation": "WEB",
+          "text": "For if you remain silent now, then relief and deliverance will come to the Jews from another place, but you and your father’s house will perish. Who knows if you haven’t come to the kingdom for such a time as this?”"
+        }
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-reveal",
+        "prompt": "Tap Esther's plan.",
+        "config": {
+          "kind": "tap-reveal",
+          "scene": "esther",
+          "reveals": [
+            {
+              "id": "gather",
+              "label": "Gather the people"
+            },
+            {
+              "id": "fast",
+              "label": "Fast"
+            },
+            {
+              "id": "king",
+              "label": "Go in to the king"
+            }
+          ]
+        },
+        "successText": "She would speak, even if it cost her life."
+      },
+      {
+        "type": "interaction",
+        "kind": "hold",
+        "prompt": "Stand before you go in.",
+        "config": {
+          "kind": "hold",
+          "durationMs": 1400,
+          "holdLabel": "Hold your courage"
+        },
+        "successText": "You are ready to enter."
+      },
+      {
+        "type": "choice",
+        "prompt": "Speaking up could cost you. Do you stay quiet?",
+        "options": [
+          {
+            "label": "Speak",
+            "response": "You step in at the right time."
+          },
+          {
+            "label": "Stay silent",
+            "response": "You hope someone else will act."
+          }
+        ],
+        "whatHappened": {
+          "text": "Esther decided to go to the king, even if she perished.",
+          "ref": "Esther 4:16",
+          "translation": "WEB",
+          "scriptureText": "“Go, gather together all the Jews who are present in Shushan, and fast for me, and neither eat nor drink three days, night or day. I and my maidens will also fast the same way. Then I will go in to the king, which is against the law; and if I perish, I perish.”"
+        }
+      },
+      {
+        "type": "payoff"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "esther-who",
+        "category": "who",
+        "question": "Who was asked to speak for her people?",
+        "options": [
+          "Esther",
+          "Ruth",
+          "Deborah",
+          "Miriam"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Esther 4:14"
+      },
+      {
+        "id": "esther-what",
+        "category": "what",
+        "question": "What did she ask for before she went in?",
+        "options": [
+          "A fast",
+          "A fight",
+          "A ship",
+          "A feast"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Esther 4:14"
+      },
+      {
+        "id": "esther-where",
+        "category": "where",
+        "question": "Where did she decide to go?",
+        "options": [
+          "Before the king",
+          "Back home",
+          "The harbor",
+          "Into hiding"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Esther 4:14"
+      }
+    ]
+  },
+  {
+    "id": "birth-of-jesus",
+    "title": "Birth of Jesus",
+    "arc": "Jesus",
+    "order": 14,
+    "passage": "Luke 2",
+    "estMinutes": 3,
+    "verse": {
+      "ref": "Luke 2:11",
+      "translation": "WEB",
+      "text": "For there is born to you today, in David’s city, a Savior, who is Christ the Lord."
+    },
+    "cards": [
+      {
+        "type": "narration",
+        "text": "Mary laid her baby in a feeding trough. The inn was full.",
+        "scriptureLine": {
+          "ref": "Luke 2:7",
+          "translation": "WEB",
+          "text": "She gave birth to her firstborn son. She wrapped him in bands of cloth, and laid him in a feeding trough, because there was no room for them in the inn."
+        }
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-reveal",
+        "prompt": "Tap the news the angel brought.",
+        "config": {
+          "kind": "tap-reveal",
+          "scene": "birth-of-jesus",
+          "reveals": [
+            {
+              "id": "fear",
+              "label": "Do not be afraid"
+            },
+            {
+              "id": "news",
+              "label": "Good news"
+            },
+            {
+              "id": "joy",
+              "label": "Great joy"
+            },
+            {
+              "id": "savior",
+              "label": "A Savior"
+            }
+          ]
+        },
+        "successText": "The message was for all the people."
+      },
+      {
+        "type": "interaction",
+        "kind": "hold",
+        "prompt": "Wait for the news.",
+        "config": {
+          "kind": "hold",
+          "durationMs": 1400,
+          "holdLabel": "Hold"
+        },
+        "successText": "The news arrives."
+      },
+      {
+        "type": "choice",
+        "prompt": "Good news shows up in a humble place. Do you go see?",
+        "options": [
+          {
+            "label": "Go and see",
+            "response": "You move toward the news."
+          },
+          {
+            "label": "Stay away",
+            "response": "You keep your distance."
+          }
+        ],
+        "whatHappened": {
+          "text": "A Savior, Christ the Lord, was born.",
+          "ref": "Luke 2:11",
+          "translation": "WEB",
+          "scriptureText": "For there is born to you today, in David’s city, a Savior, who is Christ the Lord."
+        }
+      },
+      {
+        "type": "payoff"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "birth-of-jesus-who",
+        "category": "who",
+        "question": "Who was born in David's city?",
+        "options": [
+          "Christ the Lord",
+          "John",
+          "Herod",
+          "Caesar"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Luke 2:11"
+      },
+      {
+        "id": "birth-of-jesus-what",
+        "category": "what",
+        "question": "What held the newborn that night?",
+        "options": [
+          "A feeding trough",
+          "A throne",
+          "A chariot",
+          "A crown"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Luke 2:11"
+      },
+      {
+        "id": "birth-of-jesus-where",
+        "category": "where",
+        "question": "Where was there no room?",
+        "options": [
+          "The inn",
+          "The palace",
+          "The temple",
+          "The ship"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Luke 2:11"
+      }
+    ]
+  },
+  {
+    "id": "jesus-calms-the-storm",
+    "title": "Jesus Calms the Storm",
+    "arc": "Jesus",
+    "order": 15,
+    "passage": "Mark 4",
+    "estMinutes": 3,
+    "verse": {
+      "ref": "Mark 4:39",
+      "translation": "WEB",
+      "text": "He awoke, and rebuked the wind, and said to the sea, “Peace! Be still!” The wind ceased, and there was a great calm."
+    },
+    "cards": [
+      {
+        "type": "narration",
+        "text": "Waves beat the boat while Jesus slept.",
+        "scriptureLine": {
+          "ref": "Mark 4:39",
+          "translation": "WEB",
+          "text": "He awoke, and rebuked the wind, and said to the sea, “Peace! Be still!” The wind ceased, and there was a great calm."
+        }
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-reveal",
+        "prompt": "Tap what grew quiet.",
+        "config": {
+          "kind": "tap-reveal",
+          "scene": "jesus-calms-the-storm",
+          "reveals": [
+            {
+              "id": "wind",
+              "label": "The wind"
+            },
+            {
+              "id": "sea",
+              "label": "The sea"
+            }
+          ]
+        },
+        "successText": "The storm became a great calm."
+      },
+      {
+        "type": "interaction",
+        "kind": "hold",
+        "prompt": "Hold through the wind.",
+        "config": {
+          "kind": "hold",
+          "durationMs": 1400,
+          "holdLabel": "Hold through the wind"
+        },
+        "successText": "The wind is not the last word."
+      },
+      {
+        "type": "choice",
+        "prompt": "The boat is taking on water. What do you do?",
+        "options": [
+          {
+            "label": "Ask for help",
+            "response": "You wake him."
+          },
+          {
+            "label": "Bail alone",
+            "response": "You fight the waves by yourself."
+          }
+        ],
+        "whatHappened": {
+          "text": "He told the sea, \"Peace! Be still!\" and it grew calm.",
+          "ref": "Mark 4:39",
+          "translation": "WEB",
+          "scriptureText": "He awoke, and rebuked the wind, and said to the sea, “Peace! Be still!” The wind ceased, and there was a great calm."
+        }
+      },
+      {
+        "type": "payoff"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "jesus-calms-the-storm-who",
+        "category": "who",
+        "question": "Who rebuked the wind?",
+        "options": [
+          "Jesus",
+          "Peter",
+          "Jonah",
+          "Moses"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Mark 4:39"
+      },
+      {
+        "id": "jesus-calms-the-storm-what",
+        "category": "what",
+        "question": "What became calm?",
+        "options": [
+          "The sea",
+          "The crowd",
+          "The city",
+          "The night"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Mark 4:39"
+      },
+      {
+        "id": "jesus-calms-the-storm-where",
+        "category": "where",
+        "question": "Where were they when fear spiked?",
+        "options": [
+          "Aboard ship",
+          "On a mountain",
+          "Inside a house",
+          "At the temple"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Mark 4:39"
+      }
+    ]
+  },
+  {
+    "id": "feeding-the-5000",
+    "title": "Feeding the 5,000",
+    "arc": "Jesus",
+    "order": 16,
+    "passage": "John 6",
+    "estMinutes": 3,
+    "verse": {
+      "ref": "John 6:35",
+      "translation": "WEB",
+      "text": "Jesus said to them, “I am the bread of life. He who comes to me will not be hungry, and he who believes in me will never be thirsty."
+    },
+    "cards": [
+      {
+        "type": "narration",
+        "text": "A huge crowd was hungry, and the food on hand was small.",
+        "scriptureLine": {
+          "ref": "John 6:11",
+          "translation": "WEB",
+          "text": "Jesus took the loaves; and having given thanks, he distributed to the disciples, and the disciples to those who were sitting down; likewise also of the fish as much as they desired."
+        }
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-reveal",
+        "prompt": "Tap how the meal was shared.",
+        "config": {
+          "kind": "tap-reveal",
+          "scene": "feeding-the-5000",
+          "reveals": [
+            {
+              "id": "thanks",
+              "label": "Thanks"
+            },
+            {
+              "id": "loaves",
+              "label": "Loaves"
+            },
+            {
+              "id": "fish",
+              "label": "Fish"
+            },
+            {
+              "id": "enough",
+              "label": "Enough for the crowd"
+            }
+          ]
+        },
+        "successText": "People ate as much as they wanted."
+      },
+      {
+        "type": "interaction",
+        "kind": "drag",
+        "prompt": "Put the loaves into the baskets.",
+        "config": {
+          "kind": "drag",
+          "targetLabel": "The baskets",
+          "requiredCount": 3,
+          "items": [
+            {
+              "id": "loaf-1",
+              "label": "A loaf",
+              "accept": true
+            },
+            {
+              "id": "loaf-2",
+              "label": "A loaf",
+              "accept": true
+            },
+            {
+              "id": "loaf-3",
+              "label": "A loaf",
+              "accept": true
+            },
+            {
+              "id": "stone",
+              "label": "A stone",
+              "accept": false
+            }
+          ]
+        },
+        "successText": "The baskets are full."
+      },
+      {
+        "type": "choice",
+        "prompt": "You do not have enough for the need in front of you. What do you do?",
+        "options": [
+          {
+            "label": "Offer what you have",
+            "response": "You hand over the little."
+          },
+          {
+            "label": "Send them away",
+            "response": "You decide it cannot be done."
+          }
+        ],
+        "whatHappened": {
+          "text": "Jesus gave thanks, and the food was shared until people were full.",
+          "ref": "John 6:11",
+          "translation": "WEB",
+          "scriptureText": "Jesus took the loaves; and having given thanks, he distributed to the disciples, and the disciples to those who were sitting down; likewise also of the fish as much as they desired."
+        }
+      },
+      {
+        "type": "payoff"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "feeding-the-5000-who",
+        "category": "who",
+        "question": "Who gave thanks and shared the loaves?",
+        "options": [
+          "Jesus",
+          "Philip",
+          "Andrew",
+          "Judas"
+        ],
+        "answerIndex": 0,
+        "verseRef": "John 6:35"
+      },
+      {
+        "id": "feeding-the-5000-what",
+        "category": "what",
+        "question": "What did Jesus call himself afterward?",
+        "options": [
+          "Bread of life",
+          "A locked gate",
+          "A vine only",
+          "A shepherd only"
+        ],
+        "answerIndex": 0,
+        "verseRef": "John 6:35"
+      },
+      {
+        "id": "feeding-the-5000-where",
+        "category": "where",
+        "question": "Where did the crowd sit to eat?",
+        "options": [
+          "Down on grass",
+          "In a palace",
+          "Aboard ship",
+          "In an inn"
+        ],
+        "answerIndex": 0,
+        "verseRef": "John 6:35"
+      }
+    ]
+  },
+  {
+    "id": "peter-walks-on-water",
+    "title": "Peter Walks on Water",
+    "arc": "Jesus",
+    "order": 17,
+    "passage": "Matthew 14",
+    "estMinutes": 3,
+    "verse": {
+      "ref": "Matthew 14:31",
+      "translation": "WEB",
+      "text": "Immediately Jesus stretched out his hand, took hold of him, and said to him, “You of little faith, why did you doubt?”"
+    },
+    "cards": [
+      {
+        "type": "narration",
+        "text": "Peter stepped out of the boat and walked on the water.",
+        "scriptureLine": {
+          "ref": "Matthew 14:29",
+          "translation": "WEB",
+          "text": "He said, “Come!” Peter stepped down from the boat, and walked on the waters to come to Jesus."
+        }
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-reveal",
+        "prompt": "Tap the moment the walk broke.",
+        "config": {
+          "kind": "tap-reveal",
+          "scene": "peter-walks-on-water",
+          "reveals": [
+            {
+              "id": "wind",
+              "label": "He saw the wind"
+            },
+            {
+              "id": "fear",
+              "label": "Fear rose"
+            },
+            {
+              "id": "sink",
+              "label": "He began to sink"
+            }
+          ]
+        },
+        "successText": "Fear pulled his eyes off Jesus."
+      },
+      {
+        "type": "interaction",
+        "kind": "hold",
+        "prompt": "Keep your eyes up.",
+        "config": {
+          "kind": "hold",
+          "durationMs": 1400,
+          "holdLabel": "Hold your eyes up"
+        },
+        "successText": "You look up again."
+      },
+      {
+        "type": "choice",
+        "prompt": "You start well, then fear hits. What do you do?",
+        "options": [
+          {
+            "label": "Call for help",
+            "response": "You reach out instead of pretending."
+          },
+          {
+            "label": "Give up",
+            "response": "You let the fear finish it."
+          }
+        ],
+        "whatHappened": {
+          "text": "Jesus caught him and asked why he doubted.",
+          "ref": "Matthew 14:31",
+          "translation": "WEB",
+          "scriptureText": "Immediately Jesus stretched out his hand, took hold of him, and said to him, “You of little faith, why did you doubt?”"
+        }
+      },
+      {
+        "type": "payoff"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "peter-walks-on-water-who",
+        "category": "who",
+        "question": "Who stepped off the boat?",
+        "options": [
+          "Peter",
+          "John",
+          "James",
+          "Andrew"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Matthew 14:31"
+      },
+      {
+        "id": "peter-walks-on-water-what",
+        "category": "what",
+        "question": "What question came after the rescue?",
+        "options": [
+          "Why did you doubt",
+          "Where is your net",
+          "Who sent you",
+          "When will you leave"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Matthew 14:31"
+      },
+      {
+        "id": "peter-walks-on-water-where",
+        "category": "where",
+        "question": "Where was Peter walking?",
+        "options": [
+          "On the water",
+          "On the sand",
+          "On the road",
+          "On the roof"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Matthew 14:31"
+      }
+    ]
+  },
+  {
+    "id": "prodigal-son",
+    "title": "Prodigal Son",
+    "arc": "Jesus",
+    "order": 18,
+    "passage": "Luke 15",
+    "estMinutes": 3,
+    "verse": {
+      "ref": "Luke 15:20",
+      "translation": "WEB",
+      "text": "“He arose, and came to his father. But while he was still far off, his father saw him, and was moved with compassion, and ran, and fell on his neck, and kissed him."
+    },
+    "cards": [
+      {
+        "type": "narration",
+        "text": "A son left home, wasted everything, and turned back.",
+        "scriptureLine": {
+          "ref": "Luke 15:20",
+          "translation": "WEB",
+          "text": "“He arose, and came to his father. But while he was still far off, his father saw him, and was moved with compassion, and ran, and fell on his neck, and kissed him."
+        }
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-reveal",
+        "prompt": "Tap how the father welcomed him.",
+        "config": {
+          "kind": "tap-reveal",
+          "scene": "prodigal-son",
+          "reveals": [
+            {
+              "id": "saw",
+              "label": "Saw him far off"
+            },
+            {
+              "id": "ran",
+              "label": "Ran to him"
+            },
+            {
+              "id": "kiss",
+              "label": "Kissed him"
+            }
+          ]
+        },
+        "successText": "The welcome started before any speech."
+      },
+      {
+        "type": "interaction",
+        "kind": "hold",
+        "prompt": "Hold the embrace.",
+        "config": {
+          "kind": "hold",
+          "durationMs": 1400,
+          "holdLabel": "Hold the embrace"
+        },
+        "successText": "He is home."
+      },
+      {
+        "type": "choice",
+        "prompt": "You have failed, and the road home is open. Do you take it?",
+        "options": [
+          {
+            "label": "Go home",
+            "response": "You turn around."
+          },
+          {
+            "label": "Stay away",
+            "response": "You hide in the far country."
+          }
+        ],
+        "whatHappened": {
+          "text": "The lost son was alive again, and they celebrated.",
+          "ref": "Luke 15:24",
+          "translation": "WEB",
+          "scriptureText": "for this, my son, was dead, and is alive again. He was lost, and is found.’ They began to celebrate."
+        }
+      },
+      {
+        "type": "payoff"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "prodigal-son-who",
+        "category": "who",
+        "question": "Who ran to meet the returning son?",
+        "options": [
+          "His father",
+          "A servant",
+          "An older brother",
+          "A neighbor"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Luke 15:20"
+      },
+      {
+        "id": "prodigal-son-what",
+        "category": "what",
+        "question": "What did the household begin?",
+        "options": [
+          "A celebration",
+          "An argument",
+          "A search",
+          "A silence"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Luke 15:20"
+      },
+      {
+        "id": "prodigal-son-where",
+        "category": "where",
+        "question": "Where was the son when his father saw him?",
+        "options": [
+          "Still far off",
+          "At the table",
+          "In the field",
+          "At the gate"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Luke 15:20"
+      }
+    ]
+  },
+  {
+    "id": "good-samaritan",
+    "title": "Good Samaritan",
+    "arc": "Jesus",
+    "order": 19,
+    "passage": "Luke 10",
+    "estMinutes": 3,
+    "verse": {
+      "ref": "Luke 10:37",
+      "translation": "WEB",
+      "text": "He said, “He who showed mercy on him.” Then Jesus said to him, “Go and do likewise.”"
+    },
+    "cards": [
+      {
+        "type": "narration",
+        "text": "A man lay hurt on the road. Most people passed by.",
+        "scriptureLine": {
+          "ref": "Luke 10:33",
+          "translation": "WEB",
+          "text": "But a certain Samaritan, as he traveled, came where he was. When he saw him, he was moved with compassion,"
+        }
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-reveal",
+        "prompt": "Tap what the Samaritan did.",
+        "config": {
+          "kind": "tap-reveal",
+          "scene": "good-samaritan",
+          "reveals": [
+            {
+              "id": "near",
+              "label": "Came near"
+            },
+            {
+              "id": "saw",
+              "label": "Saw him"
+            },
+            {
+              "id": "mercy",
+              "label": "Showed mercy"
+            }
+          ]
+        },
+        "successText": "Mercy stopped where others walked on."
+      },
+      {
+        "type": "interaction",
+        "kind": "drag",
+        "prompt": "Bring him to the donkey.",
+        "config": {
+          "kind": "drag",
+          "targetLabel": "The donkey",
+          "requiredCount": 1,
+          "items": [
+            {
+              "id": "traveler",
+              "label": "The traveler",
+              "accept": true
+            },
+            {
+              "id": "coin",
+              "label": "A coin left behind",
+              "accept": false
+            }
+          ]
+        },
+        "successText": "He is on the way to care."
+      },
+      {
+        "type": "choice",
+        "prompt": "Someone is hurt, and helping will cost you time. What do you do?",
+        "options": [
+          {
+            "label": "Stop and help",
+            "response": "You cross toward them."
+          },
+          {
+            "label": "Pass by",
+            "response": "You keep your plans."
+          }
+        ],
+        "whatHappened": {
+          "text": "Jesus said to go and do likewise.",
+          "ref": "Luke 10:37",
+          "translation": "WEB",
+          "scriptureText": "He said, “He who showed mercy on him.” Then Jesus said to him, “Go and do likewise.”"
+        }
+      },
+      {
+        "type": "payoff"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "good-samaritan-who",
+        "category": "who",
+        "question": "Who stopped for the wounded man?",
+        "options": [
+          "A Samaritan",
+          "A priest",
+          "A Levite",
+          "A soldier"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Luke 10:37"
+      },
+      {
+        "id": "good-samaritan-what",
+        "category": "what",
+        "question": "What was the listener told to copy?",
+        "options": [
+          "Mercy",
+          "Speed",
+          "Status",
+          "Silence"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Luke 10:37"
+      },
+      {
+        "id": "good-samaritan-where",
+        "category": "where",
+        "question": "Where was the wounded man lying?",
+        "options": [
+          "Beside a road",
+          "Inside a temple",
+          "Aboard a boat",
+          "Inside a palace"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Luke 10:37"
+      }
+    ]
+  },
+  {
+    "id": "zacchaeus",
+    "title": "Zacchaeus",
+    "arc": "Jesus",
+    "order": 20,
+    "passage": "Luke 19",
+    "estMinutes": 3,
+    "verse": {
+      "ref": "Luke 19:9",
+      "translation": "WEB",
+      "text": "Jesus said to him, “Today, salvation has come to this house, because he also is a son of Abraham."
+    },
+    "cards": [
+      {
+        "type": "narration",
+        "text": "Zacchaeus was short, so he climbed to see over the crowd.",
+        "scriptureLine": {
+          "ref": "Luke 19:5",
+          "translation": "WEB",
+          "text": "When Jesus came to the place, he looked up and saw him, and said to him, “Zacchaeus, hurry and come down, for today I must stay at your house.”"
+        }
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-reveal",
+        "prompt": "Tap what Zacchaeus promised.",
+        "config": {
+          "kind": "tap-reveal",
+          "scene": "zacchaeus",
+          "reveals": [
+            {
+              "id": "half",
+              "label": "Half his goods to the poor"
+            },
+            {
+              "id": "restore",
+              "label": "Pay back four times what he took"
+            }
+          ]
+        },
+        "successText": "Meeting Jesus changed what he did with money."
+      },
+      {
+        "type": "interaction",
+        "kind": "drag",
+        "prompt": "Return what was taken.",
+        "config": {
+          "kind": "drag",
+          "targetLabel": "The people",
+          "requiredCount": 3,
+          "items": [
+            {
+              "id": "coin-1",
+              "label": "A coin",
+              "accept": true
+            },
+            {
+              "id": "coin-2",
+              "label": "A coin",
+              "accept": true
+            },
+            {
+              "id": "coin-3",
+              "label": "A coin",
+              "accept": true
+            },
+            {
+              "id": "receipt",
+              "label": "A receipt to keep",
+              "accept": false
+            }
+          ]
+        },
+        "successText": "The coins go back."
+      },
+      {
+        "type": "choice",
+        "prompt": "You are seen, and your record is not proud. What do you do?",
+        "options": [
+          {
+            "label": "Make it right",
+            "response": "You pay back what you took."
+          },
+          {
+            "label": "Slip away",
+            "response": "You climb down and hide."
+          }
+        ],
+        "whatHappened": {
+          "text": "Zacchaeus promised to give and to repay.",
+          "ref": "Luke 19:8",
+          "translation": "WEB",
+          "scriptureText": "Zacchaeus stood and said to the Lord, “Behold, Lord, half of my goods I give to the poor. If I have wrongfully exacted anything of anyone, I restore four times as much.”"
+        }
+      },
+      {
+        "type": "payoff"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "zacchaeus-who",
+        "category": "who",
+        "question": "Who climbed up to see Jesus?",
+        "options": [
+          "Zacchaeus",
+          "Bartimaeus",
+          "Nicodemus",
+          "Matthew"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Luke 19:9"
+      },
+      {
+        "id": "zacchaeus-what",
+        "category": "what",
+        "question": "What did he promise to give the poor?",
+        "options": [
+          "Half his goods",
+          "Nothing",
+          "A single coin",
+          "Only an apology"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Luke 19:9"
+      },
+      {
+        "id": "zacchaeus-where",
+        "category": "where",
+        "question": "Where did Jesus say he must stay?",
+        "options": [
+          "At that house",
+          "At the temple",
+          "At the palace",
+          "At the shore"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Luke 19:9"
+      }
+    ]
+  },
+  {
+    "id": "the-cross",
+    "title": "The Cross",
+    "arc": "Jesus",
+    "order": 21,
+    "passage": "John 19",
+    "estMinutes": 3,
+    "verse": {
+      "ref": "John 19:30",
+      "translation": "WEB",
+      "text": "When Jesus therefore had received the vinegar, he said, “It is finished.” He bowed his head, and gave up his spirit."
+    },
+    "cards": [
+      {
+        "type": "narration",
+        "text": "They crucified Jesus between two others.",
+        "scriptureLine": {
+          "ref": "John 19:18",
+          "translation": "WEB",
+          "text": "where they crucified him, and with him two others, on either side one, and Jesus in the middle."
+        }
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-reveal",
+        "prompt": "Tap the last moment on the cross.",
+        "config": {
+          "kind": "tap-reveal",
+          "scene": "the-cross",
+          "reveals": [
+            {
+              "id": "words",
+              "label": "It is finished"
+            },
+            {
+              "id": "head",
+              "label": "He bowed his head"
+            },
+            {
+              "id": "spirit",
+              "label": "He gave up his spirit"
+            }
+          ]
+        },
+        "successText": "The work he came to do was complete."
+      },
+      {
+        "type": "interaction",
+        "kind": "hold",
+        "prompt": "Stay with the quiet hill.",
+        "config": {
+          "kind": "hold",
+          "durationMs": 1400,
+          "holdLabel": "Hold and watch"
+        },
+        "successText": "You stayed."
+      },
+      {
+        "type": "choice",
+        "prompt": "Love goes all the way to a cost. Do you stay near?",
+        "options": [
+          {
+            "label": "Stay near",
+            "response": "You do not look away."
+          },
+          {
+            "label": "Walk off",
+            "response": "You leave before the end."
+          }
+        ],
+        "whatHappened": {
+          "text": "Jesus said, \"It is finished,\" and gave up his spirit.",
+          "ref": "John 19:30",
+          "translation": "WEB",
+          "scriptureText": "When Jesus therefore had received the vinegar, he said, “It is finished.” He bowed his head, and gave up his spirit."
+        }
+      },
+      {
+        "type": "payoff"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "the-cross-who",
+        "category": "who",
+        "question": "Who was crucified in the middle?",
+        "options": [
+          "Jesus",
+          "Pilate",
+          "Barabbas",
+          "Peter"
+        ],
+        "answerIndex": 0,
+        "verseRef": "John 19:30"
+      },
+      {
+        "id": "the-cross-what",
+        "category": "what",
+        "question": "What did he say when the work was done?",
+        "options": [
+          "It is finished",
+          "Wait here",
+          "Run away",
+          "Try again"
+        ],
+        "answerIndex": 0,
+        "verseRef": "John 19:30"
+      },
+      {
+        "id": "the-cross-where",
+        "category": "where",
+        "question": "Where was he placed between two others?",
+        "options": [
+          "On a cross",
+          "In the temple",
+          "On a boat",
+          "In a garden"
+        ],
+        "answerIndex": 0,
+        "verseRef": "John 19:30"
+      }
+    ]
+  },
+  {
+    "id": "the-resurrection",
+    "title": "The Resurrection",
+    "arc": "Jesus",
+    "order": 22,
+    "passage": "John 20",
+    "estMinutes": 3,
+    "verse": {
+      "ref": "John 20:16",
+      "translation": "WEB",
+      "text": "Jesus said to her, “Mary.” She turned and said to him, “Rabboni!” which is to say, “Teacher!”"
+    },
+    "cards": [
+      {
+        "type": "narration",
+        "text": "Mary came to the tomb while it was still dark.",
+        "scriptureLine": {
+          "ref": "John 20:1",
+          "translation": "WEB",
+          "text": "Now on the first day of the week, Mary Magdalene went early, while it was still dark, to the tomb, and saw the stone taken away from the tomb."
+        }
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-reveal",
+        "prompt": "Tap what Mary found.",
+        "config": {
+          "kind": "tap-reveal",
+          "scene": "the-resurrection",
+          "reveals": [
+            {
+              "id": "early",
+              "label": "Early morning"
+            },
+            {
+              "id": "stone",
+              "label": "The stone moved"
+            },
+            {
+              "id": "empty",
+              "label": "An empty tomb"
+            }
+          ]
+        },
+        "successText": "The grave did not hold him."
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-sequence",
+        "prompt": "Tap the morning in order.",
+        "config": {
+          "kind": "tap-sequence",
+          "steps": [
+            "Dawn",
+            "The stone",
+            "The empty doorway"
+          ]
+        },
+        "successText": "The tomb is open."
+      },
+      {
+        "type": "choice",
+        "prompt": "Grief is fresh and the story looks over. Do you go look?",
+        "options": [
+          {
+            "label": "Go and look",
+            "response": "You show up even in the dark."
+          },
+          {
+            "label": "Stay home",
+            "response": "You let the night decide."
+          }
+        ],
+        "whatHappened": {
+          "text": "Jesus said her name, and she knew him.",
+          "ref": "John 20:16",
+          "translation": "WEB",
+          "scriptureText": "Jesus said to her, “Mary.” She turned and said to him, “Rabboni!” which is to say, “Teacher!”"
+        }
+      },
+      {
+        "type": "payoff"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "the-resurrection-who",
+        "category": "who",
+        "question": "Who went to the tomb while it was dark?",
+        "options": [
+          "Mary Magdalene",
+          "Peter",
+          "Thomas",
+          "John"
+        ],
+        "answerIndex": 0,
+        "verseRef": "John 20:16"
+      },
+      {
+        "id": "the-resurrection-what",
+        "category": "what",
+        "question": "What had been taken away from the entrance?",
+        "options": [
+          "Stone slab",
+          "A guard",
+          "A lamp",
+          "A seal"
+        ],
+        "answerIndex": 0,
+        "verseRef": "John 20:16"
+      },
+      {
+        "id": "the-resurrection-where",
+        "category": "where",
+        "question": "Where did Mary go early?",
+        "options": [
+          "The tomb",
+          "The palace",
+          "The market",
+          "The sea"
+        ],
+        "answerIndex": 0,
+        "verseRef": "John 20:16"
+      }
+    ]
+  },
+  {
+    "id": "pentecost",
+    "title": "Pentecost",
+    "arc": "Church",
+    "order": 23,
+    "passage": "Acts 2",
+    "estMinutes": 3,
+    "verse": {
+      "ref": "Acts 2:4",
+      "translation": "WEB",
+      "text": "They were all filled with the Holy Spirit, and began to speak with other languages, as the Spirit gave them the ability to speak."
+    },
+    "cards": [
+      {
+        "type": "narration",
+        "text": "A sound like a mighty wind filled the house.",
+        "scriptureLine": {
+          "ref": "Acts 2:2",
+          "translation": "WEB",
+          "text": "Suddenly there came from the sky a sound like the rushing of a mighty wind, and it filled all the house where they were sitting."
+        }
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-reveal",
+        "prompt": "Tap what happened in that room.",
+        "config": {
+          "kind": "tap-reveal",
+          "scene": "pentecost",
+          "reveals": [
+            {
+              "id": "sound",
+              "label": "A rushing sound"
+            },
+            {
+              "id": "filled",
+              "label": "The house filled"
+            },
+            {
+              "id": "speak",
+              "label": "They began to speak"
+            }
+          ]
+        },
+        "successText": "They spoke in languages they had not learned."
+      },
+      {
+        "type": "interaction",
+        "kind": "hold",
+        "prompt": "Wait for the wind.",
+        "config": {
+          "kind": "hold",
+          "durationMs": 1400,
+          "holdLabel": "Hold for the wind"
+        },
+        "successText": "The room is no longer still."
+      },
+      {
+        "type": "choice",
+        "prompt": "You are asked to speak and you feel empty. What do you do?",
+        "options": [
+          {
+            "label": "Open your mouth",
+            "response": "You trust the help you are given."
+          },
+          {
+            "label": "Stay quiet",
+            "response": "You keep the words inside."
+          }
+        ],
+        "whatHappened": {
+          "text": "They were filled with the Holy Spirit and began to speak.",
+          "ref": "Acts 2:4",
+          "translation": "WEB",
+          "scriptureText": "They were all filled with the Holy Spirit, and began to speak with other languages, as the Spirit gave them the ability to speak."
+        }
+      },
+      {
+        "type": "payoff"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "pentecost-who",
+        "category": "who",
+        "question": "Who filled the people that day?",
+        "options": [
+          "Holy Spirit",
+          "A king",
+          "A crowd outside",
+          "A priest"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Acts 2:4"
+      },
+      {
+        "id": "pentecost-what",
+        "category": "what",
+        "question": "What kind of sound filled the room?",
+        "options": [
+          "A mighty wind",
+          "A trumpet",
+          "A whisper",
+          "A drum"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Acts 2:4"
+      },
+      {
+        "id": "pentecost-where",
+        "category": "where",
+        "question": "Where were they sitting?",
+        "options": [
+          "In a house",
+          "On a boat",
+          "In a prison",
+          "On a mountain"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Acts 2:4"
+      }
+    ]
+  },
+  {
+    "id": "road-to-damascus",
+    "title": "Paul on the Road to Damascus",
+    "arc": "Church",
+    "order": 24,
+    "passage": "Acts 9",
+    "estMinutes": 3,
+    "verse": {
+      "ref": "Acts 9:18",
+      "translation": "WEB",
+      "text": "Immediately something like scales fell from his eyes, and he received his sight. He arose and was baptized."
+    },
+    "cards": [
+      {
+        "type": "narration",
+        "text": "A light stopped Saul on the road, and he fell.",
+        "scriptureLine": {
+          "ref": "Acts 9:4",
+          "translation": "WEB",
+          "text": "He fell on the earth, and heard a voice saying to him, “Saul, Saul, why do you persecute me?”"
+        }
+      },
+      {
+        "type": "interaction",
+        "kind": "tap-reveal",
+        "prompt": "Tap what changed for Saul.",
+        "config": {
+          "kind": "tap-reveal",
+          "scene": "road-to-damascus",
+          "reveals": [
+            {
+              "id": "voice",
+              "label": "He heard a voice"
+            },
+            {
+              "id": "scales",
+              "label": "Scales fell"
+            },
+            {
+              "id": "sight",
+              "label": "He could see"
+            },
+            {
+              "id": "baptism",
+              "label": "He was baptized"
+            }
+          ]
+        },
+        "successText": "The man who opposed Jesus was turned around."
+      },
+      {
+        "type": "interaction",
+        "kind": "hold",
+        "prompt": "Wait until you can see.",
+        "config": {
+          "kind": "hold",
+          "durationMs": 1400,
+          "holdLabel": "Hold until you can see"
+        },
+        "successText": "The light finds you."
+      },
+      {
+        "type": "choice",
+        "prompt": "You are confronted with the truth about yourself. What do you do?",
+        "options": [
+          {
+            "label": "Listen",
+            "response": "You let the question land."
+          },
+          {
+            "label": "Fight it",
+            "response": "You keep going the old way."
+          }
+        ],
+        "whatHappened": {
+          "text": "Scales fell from his eyes, and he was baptized.",
+          "ref": "Acts 9:18",
+          "translation": "WEB",
+          "scriptureText": "Immediately something like scales fell from his eyes, and he received his sight. He arose and was baptized."
+        }
+      },
+      {
+        "type": "payoff"
+      }
+    ],
+    "quiz": [
+      {
+        "id": "road-to-damascus-who",
+        "category": "who",
+        "question": "Who heard \"why do you persecute me?\"",
+        "options": [
+          "Saul",
+          "Barnabas",
+          "Stephen",
+          "Philip"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Acts 9:18"
+      },
+      {
+        "id": "road-to-damascus-what",
+        "category": "what",
+        "question": "What fell from his eyes?",
+        "options": [
+          "Scales",
+          "Tears",
+          "Dust",
+          "Sand"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Acts 9:18"
+      },
+      {
+        "id": "road-to-damascus-where",
+        "category": "where",
+        "question": "Where was Saul traveling?",
+        "options": [
+          "Toward Damascus",
+          "Toward Rome",
+          "Toward Egypt",
+          "Toward Jerusalem"
+        ],
+        "answerIndex": 0,
+        "verseRef": "Acts 9:18"
+      }
+    ]
+  }
+]

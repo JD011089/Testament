@@ -145,8 +145,10 @@ const SOUND_PREF_KEY = 'testament_sound_enabled';
 
 class SoundEngine {
   private ctx: AudioContext | null = null;
-  private ambientSource: AudioNode | null = null;
   private ambientGain: GainNode | null = null;
+  /** Every oscillator and noise source in the current bed, so stop can silence all of them. */
+  private ambientNodes: AudioNode[] = [];
+  private ambientStopTimer: ReturnType<typeof setTimeout> | null = null;
   private currentAmbience: 'none' | 'campfire' | 'wind' | 'sanctuary' = 'none';
   private isMuted: boolean = false;
   private isAmbiencePlaying: boolean = false;
@@ -262,22 +264,35 @@ class SoundEngine {
   }
 
   public stopAmbience() {
-    if (this.ambientGain && this.ctx) {
+    this.isAmbiencePlaying = false;
+    this.currentAmbience = 'none';
+    if (this.ambientStopTimer) {
+      clearTimeout(this.ambientStopTimer);
+      this.ambientStopTimer = null;
+    }
+    const nodes = this.ambientNodes;
+    const gain = this.ambientGain;
+    this.ambientNodes = [];
+    this.ambientGain = null;
+    if (gain && this.ctx) {
       try {
-        this.ambientGain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.5);
-        setTimeout(() => {
-          if (this.ambientSource) {
-            try { (this.ambientSource as AudioScheduledSourceNode).stop(); } catch { /* ignore */ }
-            this.ambientSource.disconnect();
-            this.ambientSource = null;
-          }
-        }, 550);
+        const now = this.ctx.currentTime;
+        gain.gain.cancelScheduledValues(now);
+        const current = Math.max(gain.gain.value, 0.0001);
+        gain.gain.setValueAtTime(current, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
       } catch {
         /* ignore */
       }
     }
-    this.isAmbiencePlaying = false;
-    this.currentAmbience = 'none';
+    const kill = () => {
+      for (const node of nodes) {
+        try { (node as AudioScheduledSourceNode).stop(); } catch { /* already stopped */ }
+        try { node.disconnect(); } catch { /* ignore */ }
+      }
+      try { gain?.disconnect(); } catch { /* ignore */ }
+    };
+    this.ambientStopTimer = setTimeout(kill, 220);
   }
 
   public getCurrentAmbience() {
@@ -335,7 +350,7 @@ class SoundEngine {
     gainNode.connect(this.ctx.destination);
 
     whiteNoise.start();
-    this.ambientSource = whiteNoise;
+    this.ambientNodes = [whiteNoise, lfo];
     this.ambientGain = gainNode;
   }
 
@@ -368,7 +383,7 @@ class SoundEngine {
     gainNode.connect(this.ctx.destination);
 
     source.start();
-    this.ambientSource = source;
+    this.ambientNodes = [source];
     this.ambientGain = gainNode;
   }
 
@@ -397,8 +412,8 @@ class SoundEngine {
       oscs.push(osc);
     });
 
+    this.ambientNodes = oscs;
     this.ambientGain = masterGain;
-    this.ambientSource = oscs[0];
   }
 
   // --- CINEMATIC SWELL ---

@@ -52,6 +52,10 @@ function writeMap(map: StoryProgressMap, storage: StorageLike | null = defaultSt
   return map;
 }
 
+export function listStoryProgress(storage: StorageLike | null = defaultStorage()): StoryProgressMap {
+  return readMap(storage);
+}
+
 export function getStoryProgress(storyId: string, storage: StorageLike | null = defaultStorage()): StoryProgressEntry | null {
   return readMap(storage)[storyId] ?? null;
 }

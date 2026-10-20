@@ -1,49 +1,65 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { TapRevealConfig } from '../../../types/story';
 import type { InteractionProps } from './types';
 import { celebrate } from '../../../utils/feedback';
+import { getStoryScene } from '../sceneModel';
+import { StoryWorld } from './StoryScene';
 
-/** Tap each tile to reveal it. Revealing them all advances the card. */
+/**
+ * Tap a step to show every layer up through that step.
+ * Tapping an earlier step peels the later layers back off.
+ */
 export function TapReveal({ config, disabled, onComplete }: InteractionProps<TapRevealConfig>) {
-  const [revealed, setRevealed] = useState<string[]>([]);
+  const [stepIndex, setStepIndex] = useState(-1);
+  const finished = useRef(false);
+  const scene = config.scene;
+  const sceneConfig = scene ? getStoryScene(scene) : undefined;
+  const illustrated = sceneConfig != null;
+  const latest = stepIndex >= 0 ? config.reveals[stepIndex] : undefined;
 
-  const reveal = (id: string) => {
-    if (disabled || revealed.includes(id)) return;
-    const next = [...revealed, id];
-    setRevealed(next);
+  const choose = (index: number) => {
+    if (disabled || index === stepIndex) return;
+    setStepIndex(index);
     celebrate('reveal');
-    if (next.length >= config.reveals.length) {
+    if (!finished.current && index >= config.reveals.length - 1) {
+      finished.current = true;
       window.setTimeout(() => { celebrate('victory'); onComplete(); }, 250);
     }
   };
 
   return (
-    <div className="w-full grid grid-cols-2 gap-3">
-      {config.reveals.map((item) => {
-        const isRevealed = revealed.includes(item.id);
-        return (
-          <button
-            key={item.id}
-            type="button"
-            disabled={disabled || isRevealed}
-            onClick={() => reveal(item.id)}
-            aria-pressed={isRevealed}
-            className={[
-              'min-h-[88px] rounded-2xl border p-3 text-left transition-all',
-              isRevealed ? 'border-accent bg-accent/15' : 'border-line bg-surface-raised'
-            ].join(' ')}
-          >
-            {isRevealed ? (
-              <>
-                <span className="block text-small font-bold text-fg">{item.label}</span>
-                {item.detail && <span className="block text-small text-fg-muted mt-1">{item.detail}</span>}
-              </>
-            ) : (
-              <span className="block text-small font-semibold text-fg-muted">Tap to reveal</span>
-            )}
-          </button>
-        );
-      })}
+    <div className={illustrated ? 'flex min-h-0 w-full flex-1 flex-col gap-3' : 'w-full'}>
+      {illustrated && scene && <StoryWorld scene={scene} stepIndex={stepIndex} />}
+      <p className="sr-only" aria-live="polite">
+        {illustrated && latest ? `${latest.label} filled in.` : ''}
+      </p>
+      <div className="grid w-full grid-cols-2 gap-3">
+        {config.reveals.map((item, index) => {
+          const isRevealed = index <= stepIndex;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              disabled={disabled}
+              onClick={() => choose(index)}
+              aria-pressed={isRevealed}
+              className={[
+                'min-h-[88px] rounded-2xl border p-3 text-left transition-all active:scale-[0.98]',
+                isRevealed ? 'border-accent bg-accent/15' : 'border-line bg-surface-raised'
+              ].join(' ')}
+            >
+              {isRevealed ? (
+                <span className="block text-small font-bold text-fg animate-fadeIn">{item.label}</span>
+              ) : (
+                <span className="block text-small font-semibold text-fg-muted">Tap to reveal</span>
+              )}
+              {isRevealed && item.detail && (
+                <span className="mt-1 block text-small text-fg-muted">{item.detail}</span>
+              )}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

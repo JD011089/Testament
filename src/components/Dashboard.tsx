@@ -45,16 +45,12 @@ import {
   markYesterdayRecallComplete, 
   type MemoryVerseData 
 } from '../utils/memoryVerseEngine';
-import { DecisionJournalModal } from './DecisionJournalModal';
-import { CharacterArcModal } from './CharacterArcModal';
 import { CalendarRemindersModal } from './CalendarRemindersModal';
 import { CHARACTER_ARCS } from '../data/characterArcs';
-import { ModeSelectorModal } from './ModeSelectorModal';
 import { ReciterModal } from './ReciterModal';
 import { StorytellerModal } from './StorytellerModal';
 import { 
   loadLearnerModesState, 
-  setLearnerMode, 
   getOrInitReciterVerse 
 } from '../utils/learnerModes';
 import { formatSpaced } from '../utils/textUtils';
@@ -145,14 +141,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [isYesterdayFlipped, setIsYesterdayFlipped] = useState<boolean>(false);
   const [yesterdayRecalled, setYesterdayRecalled] = useState<boolean>(false);
   const [showCalendarModal, setShowCalendarModal] = useState<boolean>(false);
-  const [showJournalModal, setShowJournalModal] = useState<boolean>(false);
-  const [showPeopleModal, setShowPeopleModal] = useState<boolean>(false);
-  const [selectedCharacterArcId, setSelectedCharacterArcId] = useState<string | undefined>(undefined);
-  const [selectedMomentIndex, setSelectedMomentIndex] = useState<number | undefined>(undefined);
 
   // Learner Modes State (Builder, Reciter, Storyteller)
   const [learnerModesState, setLearnerModesState] = useState<LearnerModesState>(() => loadLearnerModesState());
-  const [showModeModal, setShowModeModal] = useState<boolean>(false);
   const [showReciterModal, setShowReciterModal] = useState<boolean>(false);
   const [showStorytellerModal, setShowStorytellerModal] = useState<boolean>(false);
 
@@ -181,29 +172,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
       setLearnerModesState(loadLearnerModesState());
     };
     const handleOpenReminders = () => setShowCalendarModal(true);
-    const handleOpenJournal = () => setShowJournalModal(true);
-    const handleOpenPeople = () => {
-      setSelectedCharacterArcId(undefined);
-      setSelectedMomentIndex(undefined);
-      setShowPeopleModal(true);
-    };
     const handleOpenRelics = () => setShowRelics(true);
-    const handleOpenModes = () => setShowModeModal(true);
 
     window.addEventListener('testament-mode-changed', handleModeUpdate);
     window.addEventListener('testament-open-reminders', handleOpenReminders);
-    window.addEventListener('testament-open-journal', handleOpenJournal);
-    window.addEventListener('testament-open-people', handleOpenPeople);
     window.addEventListener('testament-open-relics', handleOpenRelics);
-    window.addEventListener('testament-open-modes', handleOpenModes);
 
     return () => {
       window.removeEventListener('testament-mode-changed', handleModeUpdate);
       window.removeEventListener('testament-open-reminders', handleOpenReminders);
-      window.removeEventListener('testament-open-journal', handleOpenJournal);
-      window.removeEventListener('testament-open-people', handleOpenPeople);
       window.removeEventListener('testament-open-relics', handleOpenRelics);
-      window.removeEventListener('testament-open-modes', handleOpenModes);
     };
   }, []);
 
@@ -558,9 +536,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   type="button"
                   onClick={() => {
                     soundEngine.playClick();
-                    setSelectedCharacterArcId(matchedCharacterArc.id);
-                    if (matchedMomentIndex >= 0) setSelectedMomentIndex(matchedMomentIndex);
-                    setShowPeopleModal(true);
+                    window.dispatchEvent(new CustomEvent('testament-open-people', {
+                      detail: {
+                        characterId: matchedCharacterArc.id,
+                        momentIndex: matchedMomentIndex >= 0 ? matchedMomentIndex : 0
+                      }
+                    }));
                   }}
                   className="inline-flex items-center gap-1.5 text-xs text-amber-900 dark:text-amber-300 hover:underline font-medium cursor-pointer"
                 >
@@ -663,7 +644,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               type="button"
               onClick={() => {
                 soundEngine.playClick();
-                setShowJournalModal(true);
+                window.dispatchEvent(new CustomEvent('testament-open-journal'));
               }}
               className="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-stone-900/80 hover:bg-stone-100 dark:hover:bg-stone-850 border border-stone-200/70 dark:border-stone-800/70 transition-all text-left flex flex-col justify-between cursor-pointer group hover:border-amber-500/40"
             >
@@ -688,9 +669,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               type="button"
               onClick={() => {
                 soundEngine.playClick();
-                setSelectedCharacterArcId(undefined);
-                setSelectedMomentIndex(undefined);
-                setShowPeopleModal(true);
+                window.dispatchEvent(new CustomEvent('testament-open-people'));
               }}
               className="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-stone-900/80 hover:bg-stone-100 dark:hover:bg-stone-850 border border-stone-200/70 dark:border-stone-800/70 transition-all text-left flex flex-col justify-between cursor-pointer group hover:border-amber-500/40"
             >
@@ -1012,35 +991,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
-      {/* Feature 3: Decision Journal Modal */}
-      <DecisionJournalModal
-        isOpen={showJournalModal}
-        onClose={() => setShowJournalModal(false)}
-      />
-
-      {/* Feature 6: Character Arcs Modal */}
-      <CharacterArcModal
-        isOpen={showPeopleModal}
-        onClose={() => setShowPeopleModal(false)}
-        initialCharacterId={selectedCharacterArcId}
-        initialMomentIndex={selectedMomentIndex}
-      />
-
       {/* Feature 8: Calendar Reminders Modal */}
       <CalendarRemindersModal
         isOpen={showCalendarModal}
         onClose={() => setShowCalendarModal(false)}
-      />
-
-      {/* Learner Modes: Mode Selector Modal */}
-      <ModeSelectorModal
-        isOpen={showModeModal}
-        onClose={() => setShowModeModal(false)}
-        currentMode={learnerModesState.activeMode}
-        onSelectMode={(mode) => {
-          const updated = setLearnerMode(mode);
-          setLearnerModesState(updated);
-        }}
       />
 
       {/* Mode B: Reciter Modal */}

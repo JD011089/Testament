@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Bell, BellOff, BellRing, Check, RefreshCw, Sparkles, Sun, Brain, X } from 'lucide-react';
-import { useModalLock } from '../utils/useModalLock';
+import { Bell, BellOff, Check, RefreshCw, Sparkles, Sun, Brain } from 'lucide-react';
+import { FullPage } from './FullPage';
 import { useLanguage } from '../context/LanguageContext';
 import { soundEngine } from '../utils/audio';
 import {
@@ -17,35 +17,21 @@ import { formatTime12h } from '../utils/calendarReminders';
 import { sendTestUpdateNotification } from '../utils/pwaUpdateEngine';
 
 interface NotificationSettingsModalProps {
-  isOpen: boolean;
   onClose: () => void;
 }
 
-export function NotificationSettingsModal({ isOpen, onClose }: NotificationSettingsModalProps) {
+export function NotificationSettingsModal({ onClose }: NotificationSettingsModalProps) {
   const { t } = useLanguage();
-  const modalRef = useModalLock(isOpen);
   const [prefs, setPrefs] = useState<NotificationPrefs>(() => getNotificationPrefs());
   const [permission, setPermission] = useState<NotificationPermissionState>(() => getNotificationPermission());
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isOpen) return;
     setPrefs(getNotificationPrefs());
     setPermission(getNotificationPermission());
     setToast(null);
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
+  }, []);
 
   const showToast = (message: string) => {
     setToast(message);
@@ -135,44 +121,11 @@ export function NotificationSettingsModal({ isOpen, onClose }: NotificationSetti
           : t('notifications.permDefault');
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 dark:bg-black/80 backdrop-blur-xs overflow-y-auto overscroll-contain"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="notification-settings-title"
-      onClick={onClose}
-    >
-      <div
-        ref={modalRef}
-        className="w-full max-w-md rounded-t-3xl sm:rounded-3xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-2xl p-5 sm:p-6 text-left my-auto space-y-4 max-h-[92dvh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
-              <BellRing className="w-5 h-5" />
-            </div>
-            <div className="min-w-0">
-              <h2 id="notification-settings-title" className="text-lg font-serif font-bold text-stone-900 dark:text-parchment-50">
-                {t('notifications.title')}
-              </h2>
-              <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
-                {t('notifications.subtitle')}
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              soundEngine.playSnap();
-              onClose();
-            }}
-            className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 hover:text-stone-900 dark:hover:text-stone-200"
-            aria-label={t('settings.close')}
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
+    <FullPage title={t('notifications.title')} titleId="notification-settings-title" onBack={onClose}>
+      <div className="space-y-6">
+        <p className="text-base text-stone-600 dark:text-stone-300">
+          {t('notifications.subtitle')}
+        </p>
 
         <div
           className={`rounded-2xl border px-3.5 py-3 flex items-center justify-between gap-3 ${
@@ -287,12 +240,12 @@ export function NotificationSettingsModal({ isOpen, onClose }: NotificationSetti
         </div>
 
         {toast && (
-          <p className="text-center text-[11px] font-medium text-amber-800 dark:text-amber-300 animate-fadeIn">
+          <p className="text-center text-base font-medium text-amber-800 dark:text-amber-300 animate-fadeIn">
             {toast}
           </p>
         )}
       </div>
-    </div>
+    </FullPage>
   );
 }
 

@@ -1,3 +1,5 @@
+import type { StorySceneId } from '../utils/storyScenes';
+
 /**
  * Story Swipes data model.
  *
@@ -68,6 +70,8 @@ export interface RevealItem {
 export interface TapRevealConfig {
   kind: 'tap-reveal';
   reveals: RevealItem[];
+  /** Illustrated stage that fills in as the tiles are tapped. */
+  scene?: StorySceneId;
 }
 
 export interface TapSequenceConfig {

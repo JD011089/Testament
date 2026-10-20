@@ -1,22 +1,24 @@
 /**
  * Story Swipes content registry.
  *
- * Full stories live in their own JSON file. The remaining map stops are stubs
- * (title / passage / arc / order) until they are authored. Full stories always
- * win over a stub with the same id.
+ * Full stories live in JSON. A stub with the same id is replaced by the full story.
  */
 
 import type { Story, StoryEntry, StoryStub } from '../../types/story';
 import { validateStory } from '../../utils/storySchema';
 import davidAndGoliathRaw from './david-and-goliath.json' with { type: 'json' };
+import rotationRaw from './rotation.json' with { type: 'json' };
 import stubsRaw from './stubs.json' with { type: 'json' };
 
 export const STORY_STUBS: StoryStub[] = (stubsRaw as StoryStub[]).slice().sort((a, b) => a.order - b.order);
 
-const fullStoryResult = validateStory(davidAndGoliathRaw);
-export const STORY_VALIDATION_ERRORS: string[] = fullStoryResult.ok ? [] : fullStoryResult.errors;
+const authored = [davidAndGoliathRaw, ...(rotationRaw as unknown[])];
+const validated = authored.map((raw) => validateStory(raw));
+export const STORY_VALIDATION_ERRORS: string[] = validated.flatMap((result, index) =>
+  result.ok ? [] : result.errors.map((error) => `story #${index}: ${error}`)
+);
 
-export const STORIES: Story[] = fullStoryResult.ok ? [fullStoryResult.story] : [];
+export const STORIES: Story[] = validated.flatMap((result) => (result.ok ? [result.story] : []));
 
 const fullStoryById = new Map(STORIES.map((story) => [story.id, story]));
 

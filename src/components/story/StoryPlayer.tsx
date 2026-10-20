@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type TouchEvent } from 'react';
-import type { InteractionCard, Story, StoryArc, StoryCard } from '../../types/story';
+import type { InteractionCard, Story, StoryArc, StoryCard, TapRevealConfig } from '../../types/story';
 import { getStoryCardIndex, markStoryComplete, saveStoryCursor } from '../../utils/storyProgress';
 import { addVerseCard } from '../../utils/deck';
 import { celebrate, isSoundEnabled, nudge } from '../../utils/feedback';
@@ -12,6 +12,9 @@ import { DragToTarget } from './interactions/DragToTarget';
 import { HoldToContinue } from './interactions/HoldToContinue';
 import { TapReveal } from './interactions/TapReveal';
 import { TapSequence } from './interactions/TapSequence';
+import { StoryWorld } from './interactions/StoryScene';
+import { getStoryScene } from './sceneModel';
+import { isStorySceneId } from '../../utils/storyScenes';
 import { ChevronLeft, BookOpen, Check } from 'lucide-react';
 
 function ambienceForArc(arc: StoryArc): 'wind' | 'campfire' | 'sanctuary' {
@@ -185,6 +188,16 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
   };
 
   const canTapAdvance = card.type === 'narration' || card.type === 'payoff';
+  const sceneId = isStorySceneId(story.id) && getStoryScene(story.id) ? story.id : undefined;
+  const tapScene =
+    card.type === 'interaction' &&
+    card.kind === 'tap-reveal' &&
+    Boolean((card.config as TapRevealConfig).scene);
+  const sceneBehind =
+    card.type === 'interaction' &&
+    card.kind !== 'tap-reveal' &&
+    sceneId != null;
+  const illustrated = tapScene || sceneBehind;
 
   return (
     <div ref={rootRef} className="fixed inset-0 z-40 bg-bg text-fg flex flex-col overscroll-none">
@@ -218,7 +231,7 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
         onTouchEnd={onTouchEnd}
         className="flex-1 overflow-y-auto overscroll-contain touch-pan-y px-4 pb-6"
       >
-        <div className="max-w-xl mx-auto min-h-full flex flex-col justify-center gap-5 py-4">
+        <div className={`max-w-xl mx-auto min-h-full flex flex-col py-4 ${illustrated ? 'gap-4' : 'justify-center gap-5'}`}>
           {card.type === 'narration' && (
             <div className="space-y-4">
               <span className="text-label uppercase text-fg-muted">{t('story.narrationLabel')}</span>
@@ -228,8 +241,9 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
           )}
 
           {card.type === 'interaction' && (
-            <div className="space-y-4">
+            <div className={illustrated ? 'flex min-h-0 flex-1 flex-col gap-4' : 'space-y-4'}>
               <p className="text-title-3 text-fg">{card.prompt}</p>
+              {sceneBehind && sceneId && <StoryWorld scene={sceneId} stepIndex={99} />}
               <InteractionCardView card={card} onComplete={() => setCardDone(true)} />
               {cardDone && (
                 <div className="space-y-3">

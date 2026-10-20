@@ -45,3 +45,34 @@ export function storyIdFromPath(pathname: string): string | null {
 export function pathForStory(storyId: string): string {
   return `/story/${storyId}`;
 }
+
+/** Full-page routes. Same history router as tabs and stories — not modals. */
+export const PAGE_PATHS = {
+  settings: '/settings',
+  plan: '/plan',
+  'how-it-works': '/how-it-works',
+  journal: '/journal',
+  people: '/people',
+  'learner-mode': '/learner-mode',
+  notifications: '/notifications',
+} as const;
+
+export type AppPage = keyof typeof PAGE_PATHS;
+
+export const SETTINGS_PATH = PAGE_PATHS.settings;
+
+export function pageFromPath(pathname: string): AppPage | null {
+  const path = pathname.replace(/\/+$/, '') || '/';
+  for (const [id, pagePath] of Object.entries(PAGE_PATHS) as [AppPage, string][]) {
+    if (pagePath === path) return id;
+  }
+  return null;
+}
+
+export function isSettingsPath(pathname: string): boolean {
+  return pageFromPath(pathname) === 'settings';
+}
+
+export function isAppPagePath(pathname: string): boolean {
+  return pageFromPath(pathname) != null;
+}

@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
 import { 
   Shield, 
   Sparkles, 
@@ -7,11 +6,10 @@ import {
   ArrowLeft, 
   Clock, 
   Brain, 
-  BookOpen, 
-  X
+  BookOpen
 } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
-import { useModalLock } from '../utils/useModalLock';
+import { FullPage } from './FullPage';
 import confetti from 'canvas-confetti';
 import type { LearnerMode } from '../types/learnerModes';
 import { loadLearnerModesState, setLearnerMode } from '../utils/learnerModes';
@@ -28,19 +26,16 @@ export interface UserCalibrationProfile {
 }
 
 interface OnboardingModalProps {
-  isOpen: boolean;
   onComplete: (profile: UserCalibrationProfile, startRecommendedQuest?: boolean, openTour?: boolean) => void;
   onClose: () => void;
   initialProfile?: UserCalibrationProfile | null;
 }
 
 export const OnboardingModal: React.FC<OnboardingModalProps> = ({
-  isOpen,
   onComplete,
   onClose,
   initialProfile
 }) => {
-  const modalRef = useModalLock(isOpen);
   const [step, setStep] = useState<number>(1);
   const [battle, setBattle] = useState<string>(initialProfile?.battleId || 'responsibility');
   const [learningStyle, setLearningStyle] = useState<'visual' | 'audio' | 'tactical' | 'plain'>(initialProfile?.learningStyle || 'visual');
@@ -51,19 +46,6 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   });
   const lastStepChangeRef = React.useRef<number>(0);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
-
   // BATTLES DEFINITION
   const BATTLES = [
     {
@@ -72,8 +54,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
       desc: 'Work burnout, leadership pressure, provider stress. Carrying heavy expectations in isolation.',
       recommendedQuestId: 'david-journey',
       questTitle: "David's Crucible: The Reluctant Warrior",
-      icon: 'ðŸ›¡ï¸',
-      primaryVerse: 'Proverbs 27:17 â€¢ "Iron sharpens iron, and one man sharpens another."'
+      icon: '🛡️',
+      primaryVerse: 'Proverbs 27:17 • "Iron sharpens iron, and one man sharpens another."'
     },
     {
       id: 'betrayal',
@@ -81,8 +63,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
       desc: 'Blindsided by unfair treatment, broken trust, or waiting endlessly in a difficult season.',
       recommendedQuestId: 'joseph-journey',
       questTitle: "Joseph's Rise: From Pit to Palace",
-      icon: 'ðŸ”¥',
-      primaryVerse: 'Genesis 50:20 â€¢ "You intended to harm me, but God intended it for good."'
+      icon: '🔥',
+      primaryVerse: 'Genesis 50:20 • "You intended to harm me, but God intended it for good."'
     },
     {
       id: 'regret',
@@ -90,8 +72,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
       desc: 'Letting down people who mattered. Wondering if your worst mistakes disqualify you.',
       recommendedQuestId: 'peter-journey',
       questTitle: "Peter's Crucible: Grace After Failure",
-      icon: 'âš”ï¸',
-      primaryVerse: 'Luke 22:32 â€¢ "When you have turned back, strengthen your brothers."'
+      icon: '⚔️',
+      primaryVerse: 'Luke 22:32 • "When you have turned back, strengthen your brothers."'
     },
     {
       id: 'purpose',
@@ -99,8 +81,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
       desc: 'Feeling stuck, questioning your calling, or reluctant to step up to a daunting assignment.',
       recommendedQuestId: 'moses-journey',
       questTitle: "Moses: From Fugitive to Deliverer",
-      icon: 'ðŸ§­',
-      primaryVerse: 'Exodus 3:12 â€¢ "I will be with you. This will be the sign."'
+      icon: '🧭',
+      primaryVerse: 'Exodus 3:12 • "I will be with you. This will be the sign."'
     },
     {
       id: 'discipline',
@@ -108,8 +90,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
       desc: 'Exhausted by compromise all around you. Battling cynicism, anger, or feeling like the only one trying.',
       recommendedQuestId: 'elijah-journey',
       questTitle: "Elijah: Standing Alone on Mount Carmel",
-      icon: 'âš¡',
-      primaryVerse: '1 Kings 19:12 â€¢ "After the fire came a gentle whisper."'
+      icon: '⚡',
+      primaryVerse: '1 Kings 19:12 • "After the fire came a gentle whisper."'
     }
   ];
 
@@ -118,25 +100,25 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
       id: 'visual' as const,
       title: 'Visual & Action-First',
       desc: 'Graphic novel illustration panels, gritty historical environments, seeing the scene unfold.',
-      icon: 'ðŸŽ¬'
+      icon: '🎬'
     },
     {
       id: 'audio' as const,
       title: 'Audio & Commute Narration',
       desc: 'Deep cinematic documentary narration for the truck, gym, or commute. Sub-bass atmosphere.',
-      icon: 'ðŸŽ§'
+      icon: '🎧'
     },
     {
       id: 'tactical' as const,
       title: 'Tactical & Hands-On Drills',
       desc: 'Practice tile puzzles, memory retention drills, and real-life scenario simulators.',
-      icon: 'ðŸ§ '
+      icon: '🧠'
     },
     {
       id: 'plain' as const,
       title: 'Zero Religious Jargon & Fluff',
       desc: 'Raw historical facts, street translation of ancient customs, and 3-minute plain-English takeaways.',
-      icon: 'ðŸ”'
+      icon: '🔍'
     }
   ];
 
@@ -166,19 +148,19 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
       id: '3min' as const,
       title: '3 Minutes / Quick Briefing',
       desc: 'Quick audio summary with your morning coffee or drive.',
-      icon: 'â˜•'
+      icon: '☕'
     },
     {
       id: '10min' as const,
       title: '7 to 10 Minutes / One Story Act',
       desc: 'One full story scene, dilemma choice, and unlocked scripture.',
-      icon: 'â±ï¸'
+      icon: '⏱️'
     },
     {
       id: 'deep' as const,
       title: 'Deep Dive / Flexible Session',
       desc: 'Story act + Practice tile memory + scenario simulator.',
-      icon: 'ðŸ›¡ï¸'
+      icon: '🛡️'
     }
   ];
 
@@ -236,22 +218,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   };
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/60 dark:bg-black/85 backdrop-blur-md overflow-y-auto overscroll-contain"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="onboarding-modal-title"
-    >
-      <motion.div 
-        ref={modalRef}
-        tabIndex={-1}
-        onClick={e => e.stopPropagation()}
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.96 }}
-        className="w-full max-w-2xl bg-white dark:bg-ink-raised border-2 border-amber-400 dark:border-amber-600/70 rounded-3xl shadow-2xl overflow-hidden flex flex-col my-auto max-h-[92vh] outline-none"
-      >
+    <FullPage title="Set up my plan" titleId="plan-page-title" onBack={onClose}>
+      <div className="space-y-6">
         {/* Top Header Bar */}
         <div className="p-4 sm:p-5 border-b border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-ink-overlay flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -290,14 +258,6 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               className="text-xs text-stone-500 dark:text-stone-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors px-2.5 py-1 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 focus-visible:ring-2 focus-visible:ring-amber-500"
             >
               Skip
-            </button>
-            <button
-              onClick={onClose}
-              aria-label="Close calibration modal"
-              className="p-1 rounded-lg text-stone-400 hover:text-stone-700 dark:text-stone-500 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors focus-visible:ring-2 focus-visible:ring-amber-500"
-              title="Close"
-            >
-              <X className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -356,7 +316,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                           <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[11px] shrink-0 ${
                             isSelected ? 'bg-amber-500 text-stone-950 font-bold' : 'border border-stone-300 dark:border-stone-700'
                           }`}>
-                            {isSelected ? 'âœ“' : ''}
+                            {isSelected ? '✓' : ''}
                           </div>
                         </div>
                         <p className="text-xs text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">{b.desc}</p>
@@ -380,7 +340,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   }}
                   className="w-full py-2.5 px-4 rounded-xl border border-stone-200 dark:border-stone-800 text-xs font-semibold text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-850 hover:text-stone-900 dark:hover:text-stone-200 transition-colors text-center"
                 >
-                  Skip for now â€” take me to the app â†’
+                  Skip for now — take me to the app →
                 </button>
               </div>
             </div>
@@ -427,7 +387,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                         <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[11px] ${
                           isSelected ? 'bg-amber-500 text-stone-950 font-bold' : 'border border-stone-300 dark:border-stone-700'
                         }`}>
-                          {isSelected ? 'âœ“' : ''}
+                          {isSelected ? '✓' : ''}
                         </div>
                       </div>
                     </button>
@@ -481,7 +441,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       <div className={`w-4 h-4 rounded-full mt-1 flex items-center justify-center text-[11px] shrink-0 ${
                         isSelected ? 'bg-amber-500 text-stone-950 font-bold' : 'border border-stone-300 dark:border-stone-700'
                       }`}>
-                        {isSelected ? 'âœ“' : ''}
+                        {isSelected ? '✓' : ''}
                       </div>
                     </button>
                   );
@@ -530,7 +490,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[11px] shrink-0 ${
                         isSelected ? 'bg-amber-500 text-stone-950 font-bold' : 'border border-stone-300 dark:border-stone-700'
                       }`}>
-                        {isSelected ? 'âœ“' : ''}
+                        {isSelected ? '✓' : ''}
                       </div>
                     </button>
                   );
@@ -545,7 +505,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               <div className="text-center py-2">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-600/50 text-emerald-800 dark:text-emerald-300 text-xs font-mono font-bold mb-3 shadow-sm">
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>Calibration Complete â€¢ +50 Starter XP Awarded</span>
+                  <span>Calibration Complete • +50 Starter XP Awarded</span>
                 </div>
                 <h2 className="text-xl sm:text-2xl font-serif font-black text-stone-900 dark:text-parchment-50">
                   Your Personal Battle Plan
@@ -685,7 +645,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
             </button>
           </div>
         )}
-      </motion.div>
-    </div>
+      </div>
+    </FullPage>
   );
 };

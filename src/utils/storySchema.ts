@@ -15,6 +15,7 @@ import type {
   VerseTranslation
 } from '../types/story';
 import { STORY_ARCS } from '../types/story';
+import { isStorySceneId } from './storyScenes';
 
 export type ValidationResult =
   | { ok: true; story: Story }
@@ -67,6 +68,7 @@ function validateInteraction(card: Record<string, unknown>, where: string, error
       break;
     case 'tap-reveal':
       if (!Array.isArray(config.reveals) || config.reveals.length === 0) errors.push(`${where}: tap-reveal needs reveals`);
+      if (!isStorySceneId(config.scene)) errors.push(`${where}: tap-reveal needs a known scene`);
       break;
     case 'tap-sequence':
       if (!Array.isArray(config.steps) || config.steps.length < 2) errors.push(`${where}: tap-sequence needs at least 2 steps`);

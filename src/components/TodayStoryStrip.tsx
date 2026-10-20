@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { getStoryById, STORY_STOPS } from '../content/stories';
+import { getDailyStoryId } from '../utils/dailyStory';
 import { isFullStory } from '../types/story';
 import { getStoryCardIndex, isStoryCompleted } from '../utils/storyProgress';
 import { soundEngine } from '../utils/audio';
@@ -9,7 +11,8 @@ import { Play, Sparkles } from 'lucide-react';
  * loop screen (Phase 3) replaces it.
  */
 export function TodayStoryStrip({ onPlay }: { onPlay?: (storyId: string) => void }) {
-  const featured = getStoryById('david-and-goliath');
+  const [storyId] = useState(() => getDailyStoryId());
+  const featured = getStoryById(storyId);
   if (!featured) return null;
 
   const completed = isStoryCompleted(featured.id);
