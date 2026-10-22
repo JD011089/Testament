@@ -24,7 +24,7 @@ export function MapScreen({ onPlayStory, onQuickPlay }: MapScreenProps) {
     null;
 
   return (
-    <div className="max-w-2xl mx-auto px-4 pt-4 pb-8 space-y-6">
+    <div className="w-full min-w-0 max-w-2xl mx-auto px-4 pt-4 pb-8 space-y-6">
       <PageHeader
         title={t('map.title')}
         subtitle={t('map.subtitle')}

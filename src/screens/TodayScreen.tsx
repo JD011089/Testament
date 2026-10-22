@@ -11,35 +11,8 @@ import { StoryQuiz } from '../components/daily/StoryQuiz';
 import { LockInStep } from '../components/daily/LockInStep';
 import { VerseLine } from '../components/story/VerseLine';
 import { PageHeader } from '../components/PageHeader';
+import { getStoryIllustrationUrl } from '../utils/storyIllustrations';
 import { Check, Map as MapIcon, Layers, Play } from 'lucide-react';
-
-/** Painted plate for each map stop. David keeps the valley where he faces Goliath. */
-const STORY_SCENES: Record<string, string> = {
-  creation: '/images/stories/finished/creation.jpg',
-  noah: '/images/stories/finished/noah.jpg',
-  'abrahams-call': '/images/stories/finished/abrahams-call.jpg',
-  joseph: '/images/stories/finished/joseph.jpg',
-  'moses-burning-bush': '/images/stories/finished/moses-burning-bush.jpg',
-  'red-sea': '/images/stories/finished/red-sea.jpg',
-  ruth: '/images/stories/finished/ruth.jpg',
-  'david-and-goliath': '/images/stories/finished/david-and-goliath.jpg',
-  'elijah-carmel': '/images/stories/finished/elijah-carmel.jpg',
-  'elijah-still-small-voice': '/images/stories/finished/elijah-still-small-voice.jpg',
-  'daniel-lions-den': '/images/stories/finished/daniel-lions-den.jpg',
-  jonah: '/images/stories/finished/jonah.jpg',
-  esther: '/images/stories/finished/esther.jpg',
-  'birth-of-jesus': '/images/stories/finished/birth-of-jesus.jpg',
-  'jesus-calms-the-storm': '/images/stories/finished/jesus-calms-the-storm.jpg',
-  'feeding-the-5000': '/images/stories/finished/feeding-the-5000.jpg',
-  'peter-walks-on-water': '/images/stories/finished/peter-walks-on-water.jpg',
-  'prodigal-son': '/images/stories/finished/prodigal-son.jpg',
-  'good-samaritan': '/images/stories/finished/good-samaritan.jpg',
-  zacchaeus: '/images/stories/finished/zacchaeus.jpg',
-  'the-cross': '/images/stories/finished/the-cross.jpg',
-  'the-resurrection': '/images/stories/finished/the-resurrection.jpg',
-  pentecost: '/images/stories/finished/pentecost.jpg',
-  'road-to-damascus': '/images/stories/finished/road-to-damascus.jpg',
-};
 
 interface TodayScreenProps {
   streakCount?: number;
@@ -85,7 +58,7 @@ export function TodayScreen({ streakCount = 0, onOpenMap, onOpenDeck, onReadChap
   };
 
   const done = step >= steps.length;
-  const scene = STORY_SCENES[story.id] ?? '/images/valley_battlefield-1376.webp';
+  const scene = getStoryIllustrationUrl(story.id);
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 pt-1 pb-1">
@@ -139,10 +112,12 @@ export function TodayScreen({ streakCount = 0, onOpenMap, onOpenDeck, onReadChap
             </div>
           </div>
         ) : step === 0 ? (
-          <div className="flex flex-1 flex-col">
-            <p className="text-small text-fg-muted">{t('today.estMinutes', { passage: story.passage, minutes: story.estMinutes })}</p>
-            <h2 className="mt-1 font-serif text-title-1 text-fg">{story.title}</h2>
-            <div className="relative mt-3 min-h-40 flex-1 overflow-hidden rounded-2xl bg-stone-900">
+          <div className="flex flex-1 flex-col justify-between">
+            <div>
+              <p className="text-small text-fg-muted">{t('today.estMinutes', { passage: story.passage, minutes: story.estMinutes })}</p>
+              <h2 className="mt-1 font-serif text-title-1 text-fg">{story.title}</h2>
+            </div>
+            <div className="relative mt-3 aspect-video w-full flex-none overflow-hidden rounded-2xl bg-stone-900">
               <img
                 src={scene}
                 alt={story.title}

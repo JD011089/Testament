@@ -15,6 +15,7 @@ import { TapSequence } from './interactions/TapSequence';
 import { StoryWorld } from './interactions/StoryScene';
 import { getStoryScene } from './sceneModel';
 import { isStorySceneId } from '../../utils/storyScenes';
+import { getStoryIllustrationUrl } from '../../utils/storyIllustrations';
 import { ChevronLeft, BookOpen, Check } from 'lucide-react';
 
 function ambienceForArc(arc: StoryArc): 'wind' | 'campfire' | 'sanctuary' {
@@ -200,7 +201,7 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
   const illustrated = tapScene || sceneBehind;
 
   return (
-    <div ref={rootRef} className="fixed inset-0 z-40 bg-bg text-fg flex flex-col overscroll-none">
+    <div ref={rootRef} className="fixed inset-0 z-50 bg-bg text-fg flex flex-col overscroll-none">
       {/* Progress segments + back */}
       <div className="px-3 pt-3 pb-2">
         <div className="flex items-center gap-2 mb-3">
@@ -235,6 +236,14 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
           {card.type === 'narration' && (
             <div className="space-y-4">
               <span className="text-label uppercase text-fg-muted">{t('story.narrationLabel')}</span>
+              {index === 0 && (
+                <img
+                  src={getStoryIllustrationUrl(story.id)}
+                  alt={`${story.title} story illustration`}
+                  className="aspect-video w-full rounded-2xl object-cover"
+                  loading="eager"
+                />
+              )}
               <p className="text-title-3 font-reading leading-relaxed text-fg">{card.text}</p>
               {card.scriptureLine && <VerseLine line={card.scriptureLine} />}
             </div>
