@@ -13,6 +13,7 @@ import {
 import { getMemoryState, recordReview } from '../../utils/spacedRepetition';
 import { celebrate, nudge } from '../../utils/feedback';
 import { VerseLine } from '../story/VerseLine';
+import { useLanguage } from '../../context/LanguageContext';
 
 function seededShuffle<T>(items: T[], seed = 11): T[] {
   const out = [...items];
@@ -32,6 +33,7 @@ interface LockInStepProps {
 
 /** Step 3: lock in today's verse before continuing to the collection step. */
 export function LockInStep({ verse, onDone }: LockInStepProps) {
+  const { t } = useLanguage();
   const current = useMemo(() => ({
     ref: verse.ref,
     text: verse.text,
@@ -54,8 +56,8 @@ export function LockInStep({ verse, onDone }: LockInStepProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between text-small text-fg-muted">
-        <span>Today's verse</span>
-        <span className="uppercase text-label">Level {current.level}</span>
+        <span>{t('lockIn.todayVerse')}</span>
+        <span className="uppercase text-label">{t('lockIn.level', { level: current.level })}</span>
       </div>
       <VerseLine line={{ ref: current.ref, translation: current.translation, text: current.text }} />
       <LadderTask
@@ -63,12 +65,13 @@ export function LockInStep({ verse, onDone }: LockInStepProps) {
         text={current.text}
         level={current.level}
         onResult={finishOne}
+        t={t}
       />
     </div>
   );
 }
 
-function LadderTask({ text, level, onResult }: { text: string; level: LadderLevel; onResult: (correct: boolean) => void }) {
+function LadderTask({ text, level, onResult, t }: { text: string; level: LadderLevel; onResult: (correct: boolean) => void; t: (key: string, params?: Record<string, string | number>) => string }) {
   const task = getLevelTask(level);
   const words = useMemo(() => verseWords(text), [text]);
 
@@ -97,18 +100,18 @@ function LadderTask({ text, level, onResult }: { text: string; level: LadderLeve
           onChange={(e) => setTyped(e.target.value)}
           rows={4}
           className="w-full rounded-xl border border-line bg-surface-raised p-3 text-body text-fg"
-          aria-label="Type the verse from memory"
+          aria-label={t('lockIn.typeAria')}
         />
         <button
           type="button"
           className="btn-primary w-full"
           onClick={() => {
             const correct = validateTyped(typed, text);
-            setMsg(correct ? 'Perfect recall!' : 'Not quite — check the wording and try again.');
+            setMsg(correct ? t('lockIn.perfect') : t('lockIn.notQuite'));
             onResult(correct);
           }}
         >
-          Check
+          {t('lockIn.check')}
         </button>
         {msg && <p className="text-small text-fg-muted text-center">{msg}</p>}
       </div>
@@ -118,7 +121,7 @@ function LadderTask({ text, level, onResult }: { text: string; level: LadderLeve
   if (task.mode === 'blank' && blankTask) {
     return (
       <div className="space-y-3">
-        <p className="text-small text-fg-muted">{task.instruction} Tap the missing words in order, from left to right.</p>
+        <p className="text-small text-fg-muted">{task.instruction} {t('lockIn.instruction')}</p>
         <p className="text-body text-fg font-reading">{blankTask.display}</p>
         <div className="flex flex-wrap gap-2">
           {blankTask.choices.map((choice) => (
@@ -131,7 +134,7 @@ function LadderTask({ text, level, onResult }: { text: string; level: LadderLeve
                 setBlankPicks(nextPicks);
                 if (nextPicks.length === blankTask.blanks.length) {
                   const correct = nextPicks.every((pick, i) => normalizeVerseForMatch(pick) === normalizeVerseForMatch(blankTask.blanks[i].answer));
-                  setMsg(correct ? 'Filled in correctly.' : 'One slipped — try again.');
+                  setMsg(correct ? t('lockIn.filled') : t('lockIn.slipped'));
                   onResult(correct);
                 }
               }}
@@ -142,9 +145,9 @@ function LadderTask({ text, level, onResult }: { text: string; level: LadderLeve
           ))}
         </div>
         {msg && <p className="text-small text-fg-muted text-center">{msg}</p>}
-        {msg?.startsWith('One slipped') && (
+        {msg === t('lockIn.slipped') && (
           <button type="button" className="btn-secondary w-full" onClick={() => { setBlankPicks([]); setMsg(null); }}>
-            Try again
+            {t('lockIn.tryAgain')}
           </button>
         )}
       </div>
@@ -155,17 +158,17 @@ function LadderTask({ text, level, onResult }: { text: string; level: LadderLeve
   return (
     <div className="space-y-3">
       <p className="text-small text-fg-muted">{task.instruction}</p>
-      <p className="text-label text-fg-muted">Tap a placed word to return it to the choices.</p>
+      <p className="text-label text-fg-muted">{t('lockIn.removeHint')}</p>
       {task.mode === 'first-letter' && (
         <p className="text-body text-fg-muted font-mono break-words">{firstLetterHint(text)}</p>
       )}
       <div className="min-h-[48px] rounded-xl border border-dashed border-line bg-surface-raised p-2 flex flex-wrap gap-1">
-        {built.length === 0 && <span className="text-small text-fg-muted">Your verse appears here…</span>}
+        {built.length === 0 && <span className="text-small text-fg-muted">{t('lockIn.placeholder')}</span>}
         {built.map((entry) => (
           <button
             key={entry.id}
             type="button"
-            aria-label={`Remove ${entry.word} from your verse`}
+            aria-label={t('lockIn.placedAria', { word: entry.word })}
             onClick={() => {
               setBuilt((current) => current.filter((placed) => placed.id !== entry.id));
               setMsg(null);
@@ -186,7 +189,7 @@ function LadderTask({ text, level, onResult }: { text: string; level: LadderLeve
               setBuilt(next);
               if (next.length === words.length) {
                 const correct = validateOrder(next.map((entry) => entry.word), text);
-                setMsg(correct ? 'In order — nice.' : 'Close. Try the order again.');
+                setMsg(correct ? t('lockIn.inOrder') : t('lockIn.close'));
                 onResult(correct);
               }
             }}
@@ -197,9 +200,9 @@ function LadderTask({ text, level, onResult }: { text: string; level: LadderLeve
         ))}
       </div>
       {msg && <p className="text-small text-fg-muted text-center">{msg}</p>}
-      {msg?.startsWith('Close.') && (
+      {msg === t('lockIn.close') && (
         <button type="button" className="btn-secondary w-full" onClick={() => { setBuilt([]); setMsg(null); }}>
-          Try again
+          {t('lockIn.tryAgain')}
         </button>
       )}
     </div>

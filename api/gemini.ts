@@ -1,3 +1,5 @@
+import { consumeRateLimit, isSharedStoreConfigured, requestClientIp } from './sharedRedis.js';
+
 type HeaderValue = string | string[] | undefined;
 
 interface ApiRequest {
@@ -19,40 +21,11 @@ const CANDIDATE_MODELS = [
   'gemini-flash-latest',
 ];
 
-const hits: Map<string, { count: number; reset: number }> =
-  (globalThis as unknown as { __geminiHits?: Map<string, { count: number; reset: number }> }).__geminiHits
-  ?? new Map();
-
-(globalThis as unknown as { __geminiHits: Map<string, { count: number; reset: number }> }).__geminiHits = hits;
-
-const WINDOW_MS = 60_000;
 const MAX_REQUESTS = 30;
 
 function firstHeader(value: HeaderValue): string {
   if (Array.isArray(value)) return value[0] || '';
   return value || '';
-}
-
-function clientIp(req: ApiRequest): string {
-  const realIp = firstHeader(req.headers['x-real-ip']) || firstHeader(req.headers['x-vercel-ip']);
-  if (realIp) return realIp.trim();
-  const forwarded = firstHeader(req.headers['x-forwarded-for']);
-  if (forwarded) {
-    const parts = forwarded.split(',').map((s) => s.trim()).filter(Boolean);
-    return parts[parts.length - 1] || parts[0] || 'unknown';
-  }
-  return 'unknown';
-}
-
-function allow(ip: string): boolean {
-  const now = Date.now();
-  const entry = hits.get(ip);
-  if (!entry || now > entry.reset) {
-    hits.set(ip, { count: 1, reset: now + WINDOW_MS });
-    return true;
-  }
-  entry.count += 1;
-  return entry.count <= MAX_REQUESTS;
 }
 
 function isOriginAllowed(originOrReferer: string): boolean {
@@ -62,10 +35,8 @@ function isOriginAllowed(originOrReferer: string): boolean {
     const host = url.hostname.toLowerCase();
     const isLocal = host === 'localhost' || host === '127.0.0.1' || host === '[::1]';
     const isProd = host === 'testament-bible-learning.vercel.app';
-    const isVercelPreview =
-      (host.startsWith('testament-bible-learning') && host.endsWith('.vercel.app')) ||
-      (host.endsWith('.vercel.app') && host.includes('jd011089'));
-    const isAndroidTwa = originOrReferer.startsWith('android-app://app.testament.bible');
+    const isVercelPreview = /^testament-bible-learning(?:-[a-z0-9-]+)?-jd011089\.vercel\.app$/.test(host);
+    const isAndroidTwa = url.protocol === 'android-app:' && host === 'app.testament.bible';
     return isLocal || isProd || isVercelPreview || isAndroidTwa;
   } catch {
     return false;
@@ -105,8 +76,19 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return;
   }
 
-  const ip = clientIp(req);
-  if (!allow(ip)) {
+  if (!isSharedStoreConfigured()) {
+    res.status(503).json({ error: 'AI service is temporarily unavailable' });
+    return;
+  }
+
+  let allowed = false;
+  try {
+    allowed = await consumeRateLimit('gemini', requestClientIp(req.headers), MAX_REQUESTS, 60);
+  } catch {
+    res.status(503).json({ error: 'AI service is temporarily unavailable' });
+    return;
+  }
+  if (!allowed) {
     res.setHeader('Retry-After', '60');
     res.status(429).json({ error: 'Too many requests. Please wait a moment.' });
     return;

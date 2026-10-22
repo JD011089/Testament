@@ -114,7 +114,7 @@
     <div class="header">
       <div class="badge">Privacy Policy</div>
       <h1>Testament: The Living Word</h1>
-      <div class="effective-date">Effective Date: October 2026 • Version 1.23</div>
+      <div class="effective-date">Effective Date: October 22, 2026 | Version 2.0.0-beta</div>
     </div>
 
     <section>
@@ -126,9 +126,10 @@
 
     <section>
       <h2>2. What Data We Store Locally On Your Device</h2>
-      <p>The vast majority of app state is stored strictly in your device's private local storage (browser LocalStorage / app sandbox) and never transmitted to our servers:</p>
+      <p>Many app settings and study records are stored in browser or app storage on this device. Some features send the text you choose to submit to Testament's API and third-party providers; see Network Communications below.</p>
       <ul>
-        <li><strong>Decision Journal & Free Reflections:</strong> Your personal responses and prayers stay 100% on your device.</li>
+        <li><strong>Journal entries and saved reflections:</strong> These are stored in browser/app storage on this device. If you choose an AI-powered feature, the text you submit for that request is sent to Testament API and forwarded to Google Gemini for processing.</li>
+        <li><strong>Optional Gemini key:</strong> If you enter your own key, the app stores it in this device's local storage and sends it in the request header when you use an AI feature. Testament does not store it in a user account.</li>
         <li><strong>Study Progress & Scripture XP:</strong> Completed stories, memorized verses, streak count, and unlocked historical relics.</li>
         <li><strong>Settings & Preferences:</strong> Reading font scale, narration voice choice, audio ambience volume, and selected language (English, Spanish, French).</li>
       </ul>
@@ -137,12 +138,13 @@
 
     <section>
       <h2>3. Network Communications & Cloud Services</h2>
-      <p>To provide high-quality learning features, Testament makes limited, stateless network requests:</p>
+      <p>Some features communicate with Testament and third-party services. Hosting providers may process technical connection information such as your IP address. When shared storage is configured, Testament stores a one-way hash of the request IP temporarily to enforce request limits.</p>
       <ul>
         <li><strong>Public Scripture Text:</strong> Bible chapters and verses are fetched from public Scripture APIs (<a href="https://bible-api.com" target="_blank" rel="noopener">bible-api.com</a> and <a href="https://bolls.life" target="_blank" rel="noopener">bolls.life</a>) and cached on your device for offline reading.</li>
-        <li><strong>High-Fidelity Audio Narration:</strong> When you tap "Listen", text is sent to our serverless narration proxy to stream audio. No personal identifiers are logged or attached to audio requests.</li>
-        <li><strong>AI Engagement & Reflections:</strong> Contextual plain-language questions and scenario insights are processed through a stateless serverless function powered by Google Gemini. No user identity or account profile is transmitted or stored by Google.</li>
-        <li><strong>Web Push Reminders (Optional):</strong> If you explicitly grant notification permissions, an anonymous push token is created solely to dispatch scheduled daily verses. No contact lists, emails, or phone numbers are accessed.</li>
+        <li><strong>Audio narration:</strong> When available, the text you choose to hear is sent to Testament's narration API and its speech provider to generate audio. The API applies request limits and does not require an account.</li>
+        <li><strong>AI features:</strong> Your prompt, answer, or scenario text needed for the feature is sent through Testament's API to Google Gemini. Do not include information you do not want processed by these services. Google's handling is subject to its own terms and privacy policy; Testament does not control its retention practices.</li>
+        <li><strong>Daily scenario totals:</strong> When the statistics service is enabled, submitted choices are counted in aggregate. A one-way hash of the browser-generated voter ID is kept for up to 400 days to prevent duplicate votes for the same scenario.</li>
+        <li><strong>Reminders:</strong> Reminders are scheduled locally by your browser or device when supported. The current app does not register a server push subscription or send a push token to Testament.</li>
       </ul>
     </section>
 
@@ -153,13 +155,14 @@
 
     <section>
       <h2>5. Children's Privacy</h2>
-      <p>Testament is designed as an educational and discipleship tool for all audiences. We do not knowingly collect personal identifiable information from children under 13.</p>
+      <p>The app has no age gate or account creation. If you are a parent or guardian and believe a child has provided personal information through an AI feature, contact us so we can review the request.</p>
     </section>
 
     <section>
       <h2>6. Contact Us</h2>
       <p>If you have any questions about this Privacy Policy or app security practices, please contact the development team at:</p>
       <p>
+        <strong>Support:</strong> <a href="mailto:feedback@testament.app">feedback@testament.app</a><br />
         <strong>Website:</strong> <a href="https://testament-bible-learning.vercel.app">testament-bible-learning.vercel.app</a><br />
         <strong>Repository:</strong> <a href="https://github.com/JD011089/Testament" target="_blank" rel="noopener">github.com/JD011089/Testament</a>
       </p>

@@ -1,5 +1,6 @@
 const MAX_CHARS = 2500;
-const WINDOW_MS = 60_000;
+import { consumeRateLimit, isSharedStoreConfigured, requestClientIp } from './sharedRedis.js';
+
 const MAX_REQUESTS = 20;
 
 const VOICES: Record<string, { voiceId: string; settings: { stability: number; similarity_boost: number; style: number; use_speaker_boost: boolean } }> = {
@@ -35,26 +36,9 @@ interface TtsResponse {
   end: (body?: string | Buffer) => void;
 }
 
-const hits: Map<string, { count: number; reset: number }> =
-  (globalThis as unknown as { __ttsHits?: Map<string, { count: number; reset: number }> }).__ttsHits
-  ?? new Map();
-
-(globalThis as unknown as { __ttsHits: Map<string, { count: number; reset: number }> }).__ttsHits = hits;
-
 function firstHeader(value: HeaderValue): string {
   if (Array.isArray(value)) return value[0] || '';
   return value || '';
-}
-
-function clientIp(req: TtsRequest): string {
-  const realIp = firstHeader(req.headers['x-real-ip']) || firstHeader(req.headers['x-vercel-ip']);
-  if (realIp) return realIp.trim();
-  const forwarded = firstHeader(req.headers['x-forwarded-for']);
-  if (forwarded) {
-    const parts = forwarded.split(',').map((s) => s.trim()).filter(Boolean);
-    return parts[parts.length - 1] || parts[0] || 'unknown';
-  }
-  return 'unknown';
 }
 
 function queryValue(req: TtsRequest, key: string): string {
@@ -121,17 +105,6 @@ function normalizeSpeech(text: string): string {
     .trim();
 }
 
-function allow(ip: string): boolean {
-  const now = Date.now();
-  const entry = hits.get(ip);
-  if (!entry || now > entry.reset) {
-    hits.set(ip, { count: 1, reset: now + WINDOW_MS });
-    return true;
-  }
-  entry.count += 1;
-  return entry.count <= MAX_REQUESTS;
-}
-
 function isOriginAllowed(originOrReferer: string): boolean {
   if (!originOrReferer) return true;
   try {
@@ -141,8 +114,8 @@ function isOriginAllowed(originOrReferer: string): boolean {
       host === 'localhost' ||
       host === '127.0.0.1' ||
       host === 'testament-bible-learning.vercel.app' ||
-      host.endsWith('.vercel.app') ||
-      originOrReferer.startsWith('android-app://')
+      /^testament-bible-learning(?:-[a-z0-9-]+)?-jd011089\.vercel\.app$/.test(host) ||
+      (url.protocol === 'android-app:' && host === 'app.testament.bible')
     );
   } catch {
     return false;
@@ -162,7 +135,19 @@ export default async function handler(req: TtsRequest, res: TtsResponse) {
     return;
   }
 
-  if (!allow(clientIp(req))) {
+  if (!isSharedStoreConfigured()) {
+    res.status(503).end('Narration is temporarily unavailable');
+    return;
+  }
+
+  let allowed = false;
+  try {
+    allowed = await consumeRateLimit('tts', requestClientIp(req.headers), MAX_REQUESTS, 60);
+  } catch {
+    res.status(503).end('Narration is temporarily unavailable');
+    return;
+  }
+  if (!allowed) {
     res.setHeader('Retry-After', '60');
     res.status(429).end('Too many narration requests');
     return;

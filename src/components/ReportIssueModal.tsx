@@ -30,12 +30,14 @@ export const ReportIssueModal: React.FC<ReportIssueModalProps> = ({
   const [selectedReason, setSelectedReason] = useState<string>(REPORT_REASONS[0]);
   const [userComment, setUserComment] = useState<string>('');
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+  const [saveFailed, setSaveFailed] = useState<boolean>(false);
 
   if (!isOpen) return null;
 
   const handleClose = () => {
     soundEngine.playClick();
     setIsSubmitted(false);
+    setSaveFailed(false);
     setUserComment('');
     onClose();
   };
@@ -55,15 +57,19 @@ export const ReportIssueModal: React.FC<ReportIssueModalProps> = ({
       screen: contextInfo?.screenName || 'Story Viewer'
     };
 
+    let savedLocally = false;
     try {
       const existing = localStorage.getItem('testament_content_reports');
       const list = existing ? JSON.parse(existing) : [];
+      if (!Array.isArray(list)) throw new Error('Invalid saved reports');
       list.push(report);
       localStorage.setItem('testament_content_reports', JSON.stringify(list));
+      savedLocally = true;
     } catch {
-      // ignore
+      savedLocally = false;
     }
 
+    setSaveFailed(!savedLocally);
     setIsSubmitted(true);
   };
 
@@ -113,8 +119,13 @@ export const ReportIssueModal: React.FC<ReportIssueModalProps> = ({
               Thank you for keeping Testament faithful.
             </h4>
             <p className="text-xs text-stone-600 dark:text-stone-400 max-w-xs mx-auto leading-relaxed">
-              Your feedback was logged directly for pastoral and editorial review.
+              {saveFailed
+                ? 'This report could not be saved on this device and has not been sent.'
+                : 'This report is saved only on this device. It has not been sent to the Testament team.'}
             </p>
+            <a href={mailtoUrl} className="inline-flex items-center justify-center gap-2 text-xs font-semibold text-amber-700 dark:text-amber-300 underline underline-offset-4">
+              <Mail aria-hidden="true" className="w-4 h-4" /> Email this report to the team
+            </a>
             <div className="pt-2">
               <button
                 type="button"
@@ -170,7 +181,7 @@ export const ReportIssueModal: React.FC<ReportIssueModalProps> = ({
                 type="submit"
                 className="btn-primary flex-1 text-xs cursor-pointer"
               >
-                Submit Report
+                Save on this device
               </button>
               <a
                 href={mailtoUrl}

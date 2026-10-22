@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { MsEdgeTTS, OUTPUT_FORMAT } from 'msedge-tts'
 import fs from 'fs'
@@ -308,6 +309,7 @@ export default defineConfig(({ mode }) => {
       }
     },
     plugins: [
+      tailwindcss(),
       react(),
       mode === 'production' ? stripConsolePlugin() : null,
       neuralTtsPlugin(env),

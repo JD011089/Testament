@@ -1,12 +1,18 @@
-type HeaderValue = string | string[] | undefined;
+import {
+  consumeRateLimit,
+  getDecisionTally,
+  isSharedStoreConfigured,
+  recordDecisionVote,
+  requestClientIp
+} from './sharedRedis.js';
 
+type HeaderValue = string | string[] | undefined;
 interface ApiRequest {
   method?: string;
   headers: Record<string, HeaderValue>;
   query?: Record<string, string | string[] | undefined>;
   body?: unknown;
 }
-
 interface ApiResponse {
   status: (code: number) => ApiResponse;
   setHeader: (name: string, value: string) => void;
@@ -14,175 +20,126 @@ interface ApiResponse {
   end: (body?: string | Buffer) => void;
 }
 
-// Global in-memory storage for Vercel serverless function warm instances
-interface DecisionTally {
-  totalVotes: number;
-  counts: Record<string, number>;
-}
-
-const votesStore: Map<string, DecisionTally> =
-  (globalThis as unknown as { __decisionVotes?: Map<string, DecisionTally> }).__decisionVotes
-  ?? new Map();
-
-(globalThis as unknown as { __decisionVotes: Map<string, DecisionTally> }).__decisionVotes = votesStore;
-
-function getStoreKey(dateKey: string, passageId: string): string {
-  return `${dateKey.trim()}::${passageId.trim()}`;
-}
-
-function calculateStats(tally?: DecisionTally) {
-  if (!tally || tally.totalVotes === 0) {
-    return {
-      totalVotes: 0,
-      counts: {},
-      topChoiceId: null,
-      topChoicePercentage: 0
-    };
-  }
-
-  let topChoiceId: string | null = null;
-  let maxCount = 0;
-
-  for (const [choiceId, count] of Object.entries(tally.counts)) {
-    if (count > maxCount) {
-      maxCount = count;
-      topChoiceId = choiceId;
-    }
-  }
-
-  const topChoicePercentage = tally.totalVotes > 0
-    ? Math.round((maxCount / tally.totalVotes) * 100)
-    : 0;
-
-  return {
-    totalVotes: tally.totalVotes,
-    counts: tally.counts,
-    topChoiceId,
-    topChoicePercentage
-  };
-}
-
-const hits: Map<string, { count: number; reset: number }> =
-  (globalThis as unknown as { __decisionHits?: Map<string, { count: number; reset: number }> }).__decisionHits
-  ?? new Map();
-
-(globalThis as unknown as { __decisionHits: Map<string, { count: number; reset: number }> }).__decisionHits = hits;
-
-const WINDOW_MS = 60_000;
-const MAX_REQUESTS = 40;
-
 function firstHeader(value: HeaderValue): string {
-  if (Array.isArray(value)) return value[0] || '';
-  return value || '';
+  return Array.isArray(value) ? value[0] || '' : value || '';
 }
 
-function clientIp(req: ApiRequest): string {
-  const forwarded = firstHeader(req.headers['x-forwarded-for']);
-  return forwarded.split(',')[0].trim() || 'unknown';
-}
-
-function allow(ip: string): boolean {
-  const now = Date.now();
-  const entry = hits.get(ip);
-  if (!entry || now > entry.reset) {
-    hits.set(ip, { count: 1, reset: now + WINDOW_MS });
-    return true;
-  }
-  entry.count += 1;
-  return entry.count <= MAX_REQUESTS;
-}
-
-function isOriginAllowed(originOrReferer: string): boolean {
-  if (!originOrReferer) return true;
+function isAllowedOrigin(value: string): boolean {
+  if (!value) return true;
   try {
-    const url = new URL(originOrReferer);
+    const url = new URL(value);
     const host = url.hostname.toLowerCase();
-    return (
-      host === 'localhost' ||
-      host === '127.0.0.1' ||
+    if (url.protocol === 'android-app:') return host === 'app.testament.bible';
+    return host === 'localhost' || host === '127.0.0.1' ||
       host === 'testament-bible-learning.vercel.app' ||
-      host.endsWith('.vercel.app') ||
-      originOrReferer.startsWith('android-app://')
-    );
+      /^testament-bible-learning-[a-z0-9-]+\.vercel\.app$/.test(host);
   } catch {
     return false;
   }
 }
 
-export default async function handler(req: ApiRequest, res: ApiResponse) {
-  // CORS & Security Headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+function parseTally(values: string[]) {
+  const tally: Record<string, string> = {};
+  for (let index = 0; index + 1 < values.length; index += 2) tally[values[index]] = values[index + 1];
+  const counts: Record<string, number> = {};
+  for (const [key, value] of Object.entries(tally)) {
+    if (key.startsWith('choice:')) counts[key.slice(7)] = Number(value) || 0;
   }
+  const totalVotes = Number(tally.totalVotes) || 0;
+  const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+  return {
+    totalVotes,
+    counts,
+    topChoiceId: top?.[0] ?? null,
+    topChoicePercentage: totalVotes && top ? Math.round(top[1] / totalVotes * 100) : 0
+  };
+}
 
-  const origin = firstHeader(req.headers['origin']) || firstHeader(req.headers['referer']);
-  if (!isOriginAllowed(origin)) {
+function validDateKey(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
+export default async function handler(req: ApiRequest, res: ApiResponse) {
+  const origin = firstHeader(req.headers.origin) || firstHeader(req.headers.referer);
+  if (!isAllowedOrigin(origin)) {
     res.status(403).json({ error: 'Forbidden origin' });
     return;
   }
+  if (origin && firstHeader(req.headers.origin)) res.setHeader('Access-Control-Allow-Origin', firstHeader(req.headers.origin));
+  res.setHeader('Vary', 'Origin');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
 
-  if (!allow(clientIp(req))) {
-    res.setHeader('Retry-After', '60');
-    res.status(429).json({ error: 'Too many requests' });
+  if (req.method === 'OPTIONS') {
+    res.status(204).end();
     return;
   }
-
-  if (req.method === 'GET') {
-    const dateKey = typeof req.query?.dateKey === 'string' ? req.query.dateKey : '';
-    const passageId = typeof req.query?.passageId === 'string' ? req.query.passageId : '';
-
-    if (!dateKey || !passageId) {
-      res.status(400).json({ error: 'dateKey and passageId query parameters required' });
+  if (req.method !== 'GET' && req.method !== 'POST') {
+    res.setHeader('Allow', 'GET, POST, OPTIONS');
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
+  if (!isSharedStoreConfigured()) {
+    res.status(503).json({ error: 'Decision statistics are temporarily unavailable' });
+    return;
+  }
+  try {
+    if (!await consumeRateLimit('decision-stats', requestClientIp(req.headers), 40, 60)) {
+      res.setHeader('Retry-After', '60');
+      res.status(429).json({ error: 'Too many requests' });
       return;
     }
-
-    const key = getStoreKey(dateKey, passageId);
-    const tally = votesStore.get(key);
-    res.status(200).json(calculateStats(tally));
+  } catch {
+    res.status(503).json({ error: 'Decision statistics are temporarily unavailable' });
     return;
   }
 
-  if (req.method === 'POST') {
+  let dateKey = '';
+  let passageId = '';
+  let values: string[];
+  if (req.method === 'GET') {
+    dateKey = typeof req.query?.dateKey === 'string' ? req.query.dateKey.trim() : '';
+    passageId = typeof req.query?.passageId === 'string' ? req.query.passageId.trim() : '';
+  } else {
     let body = req.body;
     if (typeof body === 'string') {
-      try {
-        body = JSON.parse(body);
-      } catch {
+      try { body = JSON.parse(body); } catch {
         res.status(400).json({ error: 'Invalid JSON body' });
         return;
       }
     }
-
-    const data = body as { dateKey?: string; passageId?: string; choiceId?: string };
-    const dateKey = data?.dateKey?.trim();
-    const passageId = data?.passageId?.trim();
-    const choiceId = data?.choiceId?.trim();
-
-    if (!dateKey || !passageId || !choiceId) {
-      res.status(400).json({ error: 'dateKey, passageId, and choiceId required' });
+    const data = body as { dateKey?: unknown; passageId?: unknown; choiceId?: unknown; voterId?: unknown };
+    dateKey = typeof data?.dateKey === 'string' ? data.dateKey.trim() : '';
+    passageId = typeof data?.passageId === 'string' ? data.passageId.trim() : '';
+    const choiceId = typeof data?.choiceId === 'string' ? data.choiceId.trim() : '';
+    const voterId = typeof data?.voterId === 'string' ? data.voterId.trim() : '';
+    if (!/^[A-Za-z0-9_-]{1,80}$/.test(choiceId) ||
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(voterId)) {
+      res.status(400).json({ error: 'Invalid choice or voter identifier' });
       return;
     }
-
-    // Safety: only allow standard choice IDs (A/B/C/D or choice-*) - never free text
-    if (choiceId.length > 50 || choiceId.includes('\n')) {
-      res.status(400).json({ error: 'Invalid choice identifier' });
+    if (!validDateKey(dateKey) || !/^[A-Za-z0-9._:-]{1,120}$/.test(passageId)) {
+      res.status(400).json({ error: 'Invalid dateKey or passageId' });
       return;
     }
-
-    const key = getStoreKey(dateKey, passageId);
-    const current = votesStore.get(key) || { totalVotes: 0, counts: {} };
-    current.totalVotes += 1;
-    current.counts[choiceId] = (current.counts[choiceId] || 0) + 1;
-    votesStore.set(key, current);
-
-    res.status(200).json(calculateStats(current));
+    try { values = await recordDecisionVote(dateKey, passageId, voterId, choiceId); } catch {
+      res.status(503).json({ error: 'Decision statistics are temporarily unavailable' });
+      return;
+    }
+    res.status(200).json(parseTally(values));
     return;
   }
 
-  res.status(405).json({ error: 'Method not allowed' });
+  if (!validDateKey(dateKey) || !/^[A-Za-z0-9._:-]{1,120}$/.test(passageId)) {
+    res.status(400).json({ error: 'Invalid dateKey or passageId' });
+    return;
+  }
+  try { values = await getDecisionTally(dateKey, passageId); } catch {
+    res.status(503).json({ error: 'Decision statistics are temporarily unavailable' });
+    return;
+  }
+  res.status(200).json(parseTally(values));
 }

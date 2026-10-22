@@ -5,6 +5,26 @@ export interface DecisionStatsResponse {
   topChoicePercentage: number;
 }
 
+function getVoterId(): string {
+  const key = 'testament_decision_voter_id';
+  const createId = () => {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (char) => {
+      const random = Math.floor(Math.random() * 16);
+      return (char === 'x' ? random : (random & 3) | 8).toString(16);
+    });
+  };
+  try {
+    const saved = localStorage.getItem(key);
+    if (saved) return saved;
+    const id = createId();
+    localStorage.setItem(key, id);
+    return id;
+  } catch {
+    return createId();
+  }
+}
+
 /**
  * Client for fetching and recording real anonymous decision statistics.
  * Strictly adheres to the Honesty Rule: Zero fabricated numbers.
@@ -36,7 +56,8 @@ export async function submitAnonymousDecisionVote(
       body: JSON.stringify({
         dateKey,
         passageId,
-        choiceId
+        choiceId,
+        voterId: getVoterId()
       })
     });
     if (!res.ok) return null;
