@@ -1,4 +1,4 @@
-import { consumeRateLimit, isSharedStoreConfigured, requestClientIp } from './sharedRedis.js';
+import { consumeRateLimit, isSharedStoreConfigured, requestClientIp } from '../server/sharedRedis.js';
 
 type HeaderValue = string | string[] | undefined;
 

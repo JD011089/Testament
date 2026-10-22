@@ -1,5 +1,5 @@
 const MAX_CHARS = 2500;
-import { consumeRateLimit, isSharedStoreConfigured, requestClientIp } from './sharedRedis.js';
+import { consumeRateLimit, isSharedStoreConfigured, requestClientIp } from '../server/sharedRedis.js';
 
 const MAX_REQUESTS = 20;
 

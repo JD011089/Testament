@@ -4,7 +4,7 @@ import {
   isSharedStoreConfigured,
   recordDecisionVote,
   requestClientIp
-} from './sharedRedis.js';
+} from '../server/sharedRedis.js';
 
 type HeaderValue = string | string[] | undefined;
 interface ApiRequest {
