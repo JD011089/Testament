@@ -133,7 +133,15 @@ test('complete the daily loop, land the card in Deck, and resume', async ({ page
   // Play the whole story, quiz, lock in, collect.
   await playStory(page);
   await answerQuiz(page);
+  // A due review must not hold the daily flow on step three after today's verse is locked in.
+  await page.evaluate(() => {
+    localStorage.setItem('testament_memory_ladder', JSON.stringify({
+      '1 Samuel 17:11': { ref: '1 Samuel 17:11', level: 1, reps: 0, lapses: 0, dueDate: '2020-01-01', lastReviewed: '', masteredDays: [] }
+    }));
+  });
   await lockIn(page);
+  await expect(page.getByText("Today's verse")).toBeHidden();
+  await expect(page.getByText('Verse collected')).toBeVisible();
   await page.getByRole('button', { name: /Done for today/ }).click();
 
   // Clear Done state

@@ -10,10 +10,8 @@ import {
   verseWords,
   type LadderLevel
 } from '../../utils/memoryLadder';
-import { getMemoryState, getDueVerses, recordReview } from '../../utils/spacedRepetition';
-import { getVerseById } from '../../utils/verseRegistry';
+import { getMemoryState, recordReview } from '../../utils/spacedRepetition';
 import { celebrate, nudge } from '../../utils/feedback';
-import { useLanguage } from '../../context/LanguageContext';
 import { VerseLine } from '../story/VerseLine';
 
 function seededShuffle<T>(items: T[], seed = 11): T[] {
@@ -32,34 +30,21 @@ interface LockInStepProps {
   onDone: () => void;
 }
 
-/** Step 3: today's verse at the current level, plus up to two due reviews. */
+/** Step 3: lock in today's verse before continuing to the collection step. */
 export function LockInStep({ verse, onDone }: LockInStepProps) {
-  const { language } = useLanguage();
-  const dueReviews = useMemo(() => {
-    return getDueVerses()
-      .filter((state) => state.ref !== verse.ref)
-      .slice(0, 2)
-      .map((state) => {
-        const memory = getVerseById(state.ref, language);
-        return { ref: state.ref, text: memory?.text ?? '', translation: (memory?.translation === 'KJV' ? 'KJV' : 'WEB') as 'WEB' | 'KJV', level: state.level };
-      });
-  }, [verse.ref, language]);
-
-  const queue = useMemo(
-    () => [{ ref: verse.ref, text: verse.text, translation: verse.translation, level: getMemoryState(verse.ref).level }, ...dueReviews],
-    [verse, dueReviews]
-  );
-
-  const [qi, setQi] = useState(0);
-  const current = queue[qi] ?? queue[0];
+  const current = useMemo(() => ({
+    ref: verse.ref,
+    text: verse.text,
+    translation: verse.translation,
+    level: getMemoryState(verse.ref).level
+  }), [verse]);
 
   const finishOne = (correct: boolean) => {
     recordReview(current.ref, current.level, correct);
     if (correct) {
       celebrate('victory');
       window.setTimeout(() => {
-        if (qi + 1 >= queue.length) onDone();
-        else setQi((i) => i + 1);
+        onDone();
       }, 300);
     } else {
       nudge();
@@ -69,12 +54,12 @@ export function LockInStep({ verse, onDone }: LockInStepProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between text-small text-fg-muted">
-        <span>{qi === 0 ? "Today's verse" : `Review ${qi} of ${queue.length - 1}`}</span>
+        <span>Today's verse</span>
         <span className="uppercase text-label">Level {current.level}</span>
       </div>
       <VerseLine line={{ ref: current.ref, translation: current.translation, text: current.text }} />
       <LadderTask
-        key={`${current.ref}-${qi}`}
+        key={current.ref}
         text={current.text}
         level={current.level}
         onResult={finishOne}
@@ -133,7 +118,7 @@ function LadderTask({ text, level, onResult }: { text: string; level: LadderLeve
   if (task.mode === 'blank' && blankTask) {
     return (
       <div className="space-y-3">
-        <p className="text-small text-fg-muted">{task.instruction}</p>
+        <p className="text-small text-fg-muted">{task.instruction} Tap the missing words in order, from left to right.</p>
         <p className="text-body text-fg font-reading">{blankTask.display}</p>
         <div className="flex flex-wrap gap-2">
           {blankTask.choices.map((choice) => (
@@ -157,6 +142,11 @@ function LadderTask({ text, level, onResult }: { text: string; level: LadderLeve
           ))}
         </div>
         {msg && <p className="text-small text-fg-muted text-center">{msg}</p>}
+        {msg?.startsWith('One slipped') && (
+          <button type="button" className="btn-secondary w-full" onClick={() => { setBlankPicks([]); setMsg(null); }}>
+            Try again
+          </button>
+        )}
       </div>
     );
   }
@@ -207,6 +197,11 @@ function LadderTask({ text, level, onResult }: { text: string; level: LadderLeve
         ))}
       </div>
       {msg && <p className="text-small text-fg-muted text-center">{msg}</p>}
+      {msg?.startsWith('Close.') && (
+        <button type="button" className="btn-secondary w-full" onClick={() => { setBuilt([]); setMsg(null); }}>
+          Try again
+        </button>
+      )}
     </div>
   );
 }
