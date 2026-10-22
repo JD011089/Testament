@@ -112,12 +112,12 @@ export function TodayScreen({ streakCount = 0, onOpenMap, onOpenDeck, onReadChap
             </div>
           </div>
         ) : step === 0 ? (
-          <div className="flex flex-1 flex-col justify-between">
+          <div className="flex flex-1 flex-col">
             <div>
               <p className="text-small text-fg-muted">{t('today.estMinutes', { passage: story.passage, minutes: story.estMinutes })}</p>
-              <h2 className="mt-1 font-serif text-title-1 text-fg">{story.title}</h2>
+              <h2 className="mt-1 font-serif text-title-1 leading-tight text-fg">{story.title}</h2>
             </div>
-            <div className="relative mt-3 aspect-video w-full flex-none overflow-hidden rounded-2xl bg-stone-900">
+            <div className="relative mt-4 aspect-video w-full overflow-hidden rounded-2xl bg-stone-900">
               <img
                 src={scene}
                 alt={story.title}
@@ -126,7 +126,7 @@ export function TodayScreen({ streakCount = 0, onOpenMap, onOpenDeck, onReadChap
                 fetchPriority="high"
               />
             </div>
-            <div className="pt-3">
+            <div className="mt-auto pt-5">
               <p className="text-body text-fg-muted">{t('today.swipeIntro')}</p>
               {tomorrow && (
                 <p className="mt-2 text-small text-fg-muted">

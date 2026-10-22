@@ -6,6 +6,7 @@ import { isStoryCompleted } from '../utils/storyProgress';
 import { celebrate } from '../utils/feedback';
 import { useLanguage } from '../context/LanguageContext';
 import { PageHeader } from '../components/PageHeader';
+import { getStoryIllustrationUrl } from '../utils/storyIllustrations';
 import { Lock, Play, Sparkles } from 'lucide-react';
 
 interface MapScreenProps {
@@ -24,7 +25,7 @@ export function MapScreen({ onPlayStory, onQuickPlay }: MapScreenProps) {
     null;
 
   return (
-    <div className="w-full min-w-0 max-w-2xl mx-auto px-4 pt-4 pb-8 space-y-6">
+    <div className="w-full min-w-0 max-w-2xl mx-auto px-4 pt-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] xl:pb-8 space-y-6">
       <PageHeader
         title={t('map.title')}
         subtitle={t('map.subtitle')}
@@ -90,8 +91,16 @@ export function MapScreen({ onPlayStory, onQuickPlay }: MapScreenProps) {
                       ].join(' ')}
                       aria-hidden="true"
                     />
-                    <div className="flex items-center justify-between gap-3 min-h-[44px]">
-                      <div className="min-w-0 pl-0.5">
+                    <div className="flex items-center justify-between gap-3 min-h-[52px]">
+                      <img
+                        src={getStoryIllustrationUrl(stop.id)}
+                        alt=""
+                        aria-hidden="true"
+                        loading="lazy"
+                        decoding="async"
+                        className="h-14 w-14 shrink-0 rounded-xl border border-line/70 object-cover"
+                      />
+                      <div className="min-w-0 flex-1 pl-0.5">
                         <div className="flex items-center gap-2 min-w-0">
                           <h3 className="text-title-4 text-fg truncate">{stop.title}</h3>
                           {isToday && (

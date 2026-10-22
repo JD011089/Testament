@@ -8,7 +8,7 @@ import { getStoryIllustrationUrl } from '../../../utils/storyIllustrations';
 
 function focalPoint(step: SceneStep | undefined) {
   const layer = step?.layers[0];
-  if (!layer) return { x: 50, y: 50 };
+  if (!layer) return { x: 50, y: 50, zoom: 1.8 };
   const percent = (value: string | undefined, fallback: number) => {
     if (!value) return fallback;
     const parsed = Number.parseFloat(value);
@@ -24,7 +24,13 @@ function focalPoint(step: SceneStep | undefined) {
     : layer.position.bottom != null
       ? 100 - percent(layer.position.bottom, 0) - percent(layer.size.height, 0) / 2
       : 50;
-  return { x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) };
+  const targetSize = Math.max(percent(layer.size.width, 0), percent(layer.size.height, 0));
+  const zoom = Math.max(1.5, Math.min(3.2, 58 / Math.max(targetSize, 1)));
+  return {
+    x: Math.max(0, Math.min(100, x)),
+    y: Math.max(0, Math.min(100, y)),
+    zoom
+  };
 }
 
 /**
@@ -40,6 +46,7 @@ export function TapReveal({ config, disabled, onComplete }: InteractionProps<Tap
   const illustrated = sceneConfig != null;
   const latest = stepIndex >= 0 ? config.reveals[stepIndex] : undefined;
   const latestStep = stepIndex >= 0 ? sceneConfig?.steps[stepIndex] : undefined;
+  const focus = focalPoint(latestStep);
 
   useEffect(() => {
     if (stepIndex < 0) return;
@@ -105,7 +112,7 @@ export function TapReveal({ config, disabled, onComplete }: InteractionProps<Tap
               style={{
                 objectPosition: '50% 50%',
                 transformOrigin: '0 0',
-                transform: `scale(2.35) translate(${(50 / 2.35) - focalPoint(latestStep).x}%, ${(50 / 2.35) - focalPoint(latestStep).y}%)`
+                transform: `scale(${focus.zoom}) translate(${(50 / focus.zoom) - focus.x}%, ${(50 / focus.zoom) - focus.y}%)`
               }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
