@@ -117,6 +117,7 @@ async function lockIn(page: Page) {
 }
 
 test('complete the daily loop, land the card in Deck, and resume', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('testament_audio_enabled', 'false'));
   await page.goto('/');
   await page.evaluate(() => localStorage.clear());
   await page.reload();

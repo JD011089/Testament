@@ -5,6 +5,7 @@ import { celebrate } from '../../../utils/feedback';
 import { getStoryScene, type SceneStep } from '../sceneModel';
 import { StoryWorld } from './StoryScene';
 import { getStoryIllustrationUrl } from '../../../utils/storyIllustrations';
+import { useLanguage } from '../../../context/LanguageContext';
 
 function focalPoint(step: SceneStep | undefined) {
   const layer = step?.layers[0];
@@ -38,7 +39,9 @@ function focalPoint(step: SceneStep | undefined) {
  * Tapping an earlier step peels the later layers back off.
  */
 export function TapReveal({ config, disabled, onComplete }: InteractionProps<TapRevealConfig>) {
+  const { t } = useLanguage();
   const [stepIndex, setStepIndex] = useState(-1);
+  const [highestRevealedIndex, setHighestRevealedIndex] = useState(-1);
   const finished = useRef(false);
   const detailCardRef = useRef<HTMLElement>(null);
   const scene = config.scene;
@@ -47,6 +50,8 @@ export function TapReveal({ config, disabled, onComplete }: InteractionProps<Tap
   const latest = stepIndex >= 0 ? config.reveals[stepIndex] : undefined;
   const latestStep = stepIndex >= 0 ? sceneConfig?.steps[stepIndex] : undefined;
   const focus = focalPoint(latestStep);
+  const translateX = Math.max(100 - focus.zoom * 100, Math.min(0, 50 - focus.x * focus.zoom));
+  const translateY = Math.max(100 - focus.zoom * 100, Math.min(0, 50 - focus.y * focus.zoom));
 
   useEffect(() => {
     if (stepIndex < 0) return;
@@ -54,8 +59,9 @@ export function TapReveal({ config, disabled, onComplete }: InteractionProps<Tap
   }, [stepIndex]);
 
   const choose = (index: number) => {
-    if (disabled || index === stepIndex) return;
+    if (disabled || index > highestRevealedIndex + 1 || index === stepIndex) return;
     setStepIndex(index);
+    setHighestRevealedIndex((highest) => Math.max(highest, index));
     celebrate('reveal');
     if (!finished.current && index >= config.reveals.length - 1) {
       finished.current = true;
@@ -71,23 +77,26 @@ export function TapReveal({ config, disabled, onComplete }: InteractionProps<Tap
       </p>
       <div className="grid w-full grid-cols-2 gap-3">
         {config.reveals.map((item, index) => {
-          const isRevealed = index <= stepIndex;
+          const isRevealed = index <= highestRevealedIndex;
+          const isNext = index === highestRevealedIndex + 1;
+          const isCenteredLast = config.reveals.length % 2 === 1 && index === config.reveals.length - 1;
           return (
             <button
               key={item.id}
               type="button"
-              disabled={disabled}
+              disabled={disabled || index > highestRevealedIndex + 1}
               onClick={() => choose(index)}
               aria-pressed={isRevealed}
               className={[
-                'min-h-[88px] rounded-2xl border p-3 text-left transition-all active:scale-[0.98]',
+                'min-h-[88px] rounded-2xl border p-3 text-left transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-65',
+                isCenteredLast ? 'col-span-2 w-[calc(50%-0.375rem)] justify-self-center' : '',
                 isRevealed ? 'border-accent bg-accent/15' : 'border-line bg-surface-raised'
               ].join(' ')}
             >
               {isRevealed ? (
                 <span className="block text-small font-bold text-fg animate-fadeIn">{item.label}</span>
               ) : (
-                <span className="block text-small font-semibold text-fg-muted">Tap to reveal</span>
+                <span className="block text-small font-semibold text-fg-muted">{isNext ? t('story.revealNext') : t('story.revealLocked')}</span>
               )}
               {isRevealed && item.detail && (
                 <span className="mt-1 block text-small text-fg-muted">{item.detail}</span>
@@ -112,7 +121,7 @@ export function TapReveal({ config, disabled, onComplete }: InteractionProps<Tap
               style={{
                 objectPosition: '50% 50%',
                 transformOrigin: '0 0',
-                transform: `scale(${focus.zoom}) translate(${(50 / focus.zoom) - focus.x}%, ${(50 / focus.zoom) - focus.y}%)`
+                transform: `translate(${translateX}%, ${translateY}%) scale(${focus.zoom})`
               }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />

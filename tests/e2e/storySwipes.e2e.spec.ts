@@ -8,6 +8,7 @@ import { test, expect } from '@playwright/test';
  */
 test.describe('story swipe gestures', () => {
   test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem('testament_audio_enabled', 'false'));
     await page.goto('/');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
@@ -73,5 +74,31 @@ test.describe('story swipe gestures', () => {
     await reveals.first().waitFor({ state: 'visible' });
     await reveals.first().click();
     expect(await swipeCard(page, 300, 150)).toBe('2');
+  });
+
+  test('tap reveal steps unlock in order and keep the focused artwork inside its frame', async ({ page }) => {
+    await page.keyboard.press('ArrowRight');
+
+    const revealButtons = page.getByRole('button', { name: /Tap to reveal|Reveal in order/ });
+    await expect(revealButtons).toHaveCount(5);
+    const finalPiece = revealButtons.nth(4);
+    await expect(finalPiece).toBeDisabled();
+    await finalPiece.click({ force: true });
+    await expect(page.getByRole('button', { name: /Tap to reveal|Reveal in order/ })).toHaveCount(5);
+
+    for (let i = 0; i < 5; i++) {
+      await page.getByRole('button', { name: 'Tap to reveal' }).first().click();
+    }
+
+    const detailImage = page.locator('section[aria-label$="story detail"] img');
+    await expect(detailImage).toBeVisible();
+    const artworkFitsFrame = await detailImage.evaluate((img) => {
+      const frame = img.parentElement!.getBoundingClientRect();
+      const image = img.getBoundingClientRect();
+      return image.left <= frame.left + 1 && image.top <= frame.top + 1 &&
+        image.right >= frame.right - 1 && image.bottom >= frame.bottom - 1;
+    });
+    expect(artworkFitsFrame).toBe(true);
+    await expect(page.getByRole('button', { name: 'Tap to reveal' })).toHaveCount(0);
   });
 });
