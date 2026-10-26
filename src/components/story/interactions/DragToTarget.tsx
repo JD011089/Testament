@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import { Check } from 'lucide-react';
 import type { DragConfig } from '../../../types/story';
 import type { InteractionProps } from './types';
 import { celebrate, nudge } from '../../../utils/feedback';
@@ -185,19 +186,20 @@ export function DragToTarget({ config, disabled, onComplete }: InteractionProps<
                   return;
                 }
               }}
-              aria-pressed={selected === item.id}
+              aria-pressed={selected === item.id || isPlaced}
               className={[
-                'min-h-[44px] min-w-[44px] px-3 rounded-xl border text-small font-semibold transition-transform touch-none select-none',
+                'min-h-[44px] min-w-[44px] px-3 rounded-xl border text-small font-semibold transition-transform touch-none select-none inline-flex items-center justify-center gap-1.5',
                 isPlaced
-                  ? 'opacity-30 border-line'
+                  ? 'border-emerald-300/60 bg-emerald-400/15 text-emerald-200'
                   : selected === item.id || isDragging
-                    ? 'border-accent bg-accent/15 scale-105'
-                    : 'border-line bg-surface-raised',
-                wrongId === item.id ? 'animate-pulse border-danger' : '',
+                    ? 'border-amber-200/70 bg-amber-200/15 text-amber-50 scale-105'
+                    : 'border-line bg-surface-raised text-fg',
+                wrongId === item.id ? 'animate-pulse border-rose-300 bg-rose-400/15 text-rose-100' : '',
                 isDragging ? 'opacity-40' : '',
               ].join(' ')}
             >
               {item.label}
+              {isPlaced && <Check className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
             </button>
           );
         })}
@@ -213,9 +215,9 @@ export function DragToTarget({ config, disabled, onComplete }: InteractionProps<
             : 'border-accent/60 bg-accent/5',
         ].join(' ')}
       >
-        <span className="text-label uppercase text-fg-muted">{config.targetLabel}</span>
-        <span className="text-title-3 text-accent">{placed.length} / {config.requiredCount}</span>
-        <span className="text-small text-fg-muted">
+        <span className="text-label uppercase text-white/70">{config.targetLabel}</span>
+        <span className="text-title-3 text-amber-200">{placed.length} / {config.requiredCount}</span>
+        <span className="text-small text-white/70">
           {selected ? t('story.tapBag') : t('story.dragHint')}
         </span>
       </div>

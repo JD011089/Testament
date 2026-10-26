@@ -44,7 +44,7 @@ export function TapSequence({ config, disabled, onComplete }: InteractionProps<T
     <div className="space-y-3">
       <div className="flex items-center justify-center gap-1" aria-hidden="true">
         {config.steps.map((_, i) => (
-          <span key={i} className={`h-1.5 w-6 rounded-full ${i < progress ? 'bg-accent' : 'bg-line'}`} />
+          <span key={i} className={`h-1.5 w-6 rounded-full ${i < progress ? 'bg-accent' : 'bg-white/25'}`} />
         ))}
       </div>
       <div className="grid grid-cols-1 gap-2">
@@ -58,8 +58,8 @@ export function TapSequence({ config, disabled, onComplete }: InteractionProps<T
               onClick={() => tap(step)}
               className={[
                 'min-h-[44px] rounded-xl border px-4 text-small font-semibold text-left transition-transform',
-                done ? 'opacity-30 border-line' : 'border-line bg-surface-raised',
-                shake === step ? 'animate-pulse border-danger' : ''
+                done ? 'border-emerald-300/50 bg-emerald-400/10 text-emerald-200' : 'border-white/20 bg-white/10 text-white',
+                shake === step ? 'animate-pulse border-rose-300 bg-rose-400/15 text-white' : ''
               ].join(' ')}
             >
               {step}
@@ -67,7 +67,7 @@ export function TapSequence({ config, disabled, onComplete }: InteractionProps<T
           );
         })}
       </div>
-      <p className="text-center text-small text-fg-muted">
+      <p className="text-center text-small text-white/70">
         Step {Math.min(progress + 1, config.steps.length)} of {config.steps.length}
       </p>
     </div>

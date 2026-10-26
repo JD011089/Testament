@@ -22,17 +22,17 @@ function spotlightStyle(layer: SceneLayer, on: boolean): CSSProperties {
 }
 
 /** One full-frame illustration; each revealed detail adds a soft light cue. */
-export function StoryWorld({ scene, stepIndex }: { scene: StorySceneId; stepIndex: number }) {
+export function StoryWorld({ scene, stepIndex, compact = false, veryCompact = false }: { scene: StorySceneId; stepIndex: number; compact?: boolean; veryCompact?: boolean }) {
   const config = getStoryScene(scene);
   if (!config) return null;
-  return <SceneCanvas config={config} stepIndex={stepIndex} />;
+  return <SceneCanvas config={config} stepIndex={stepIndex} compact={compact} veryCompact={veryCompact} />;
 }
 
-export function SceneCanvas({ config, stepIndex }: { config: StorySceneConfig; stepIndex: number }) {
+export function SceneCanvas({ config, stepIndex, compact = false, veryCompact = false }: { config: StorySceneConfig; stepIndex: number; compact?: boolean; veryCompact?: boolean }) {
   const ambients = config.steps.slice(0, Math.max(0, stepIndex + 1)).flatMap((step) => step.ambient ? [step.ambient] : []);
 
   return (
-    <div className="relative w-full overflow-hidden rounded-3xl border border-line bg-stone-950" style={{ aspectRatio: '16 / 9' }}>
+    <div className={`relative w-full overflow-hidden rounded-3xl border border-line bg-stone-950 aspect-video ${compact ? '!h-[clamp(96px,18dvh,150px)] !aspect-auto' : ''} ${veryCompact ? '!h-[clamp(76px,12dvh,104px)] !aspect-auto' : ''}`}>
       <img
         src={getStoryIllustrationUrl(config.id)}
         alt={`${config.title} story illustration`}

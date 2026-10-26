@@ -76,7 +76,7 @@ export function HoldToContinue({ config, disabled, onComplete }: InteractionProp
         </svg>
         <span className="text-small font-semibold text-fg">{done ? 'Done' : config.holdLabel}</span>
       </button>
-      <p className="text-small text-fg-muted text-center">
+      <p className="text-small text-white/70 text-center">
         {holding ? 'Keep holding…' : 'Press and hold to swing.'}
       </p>
     </div>

@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import type { StoryQuest } from './types';
 import { STORY_QUESTS } from './data/stories';
 import { Dashboard } from './components/Dashboard';
@@ -1083,14 +1084,17 @@ export function App() {
       </main>
 
       {activeStory && (
-        <Suspense fallback={null}>
-          <StoryPlayer
-            key={activeStory.id}
-            story={activeStory}
-            onExit={handleExitStory}
-            onReadChapter={handleReadChapterFromStory}
-          />
-        </Suspense>
+        createPortal(
+          <Suspense fallback={null}>
+            <StoryPlayer
+              key={activeStory.id}
+              story={activeStory}
+              onExit={handleExitStory}
+              onReadChapter={handleReadChapterFromStory}
+            />
+          </Suspense>,
+          document.body
+        )
       )}
 
       {/* Persistent Responsive Nav (Desktop Top Nav & Mobile Bottom Nav) */}

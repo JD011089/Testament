@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useRef, useState, type TouchEvent } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { InteractionCard, Story, StoryArc, StoryCard, TapRevealConfig } from '../../types/story';
-import { getStoryCardIndex, markStoryComplete, saveStoryCursor } from '../../utils/storyProgress';
+import { getStoryCardIndex, isStoryCompleted, markStoryComplete, saveStoryCursor } from '../../utils/storyProgress';
 import { addVerseCard } from '../../utils/deck';
-import { celebrate, isSoundEnabled, nudge } from '../../utils/feedback';
+import { celebrate, isSoundEnabled } from '../../utils/feedback';
 import { soundEngine } from '../../utils/audio';
 import { useLanguage } from '../../context/LanguageContext';
 import { useModalLock } from '../../utils/useModalLock';
@@ -16,7 +16,7 @@ import { StoryWorld } from './interactions/StoryScene';
 import { getStoryScene } from './sceneModel';
 import { isStorySceneId } from '../../utils/storyScenes';
 import { getStoryIllustrationUrl } from '../../utils/storyIllustrations';
-import { ChevronLeft, BookOpen, Check } from 'lucide-react';
+import { ChevronLeft, BookOpen, Check, ArrowRight, Sparkles } from 'lucide-react';
 
 function ambienceForArc(arc: StoryArc): 'wind' | 'campfire' | 'sanctuary' {
   if (arc === 'Jesus' || arc === 'Church') return 'sanctuary';
@@ -39,14 +39,14 @@ function narrationAudioEnabled(): boolean {
   }
 }
 
-function InteractionCardView({ card, onComplete }: { card: InteractionCard; onComplete: () => void }) {
+function InteractionCardView({ card, onComplete, density }: { card: InteractionCard; onComplete: () => void; density: number }) {
   switch (card.kind) {
     case 'drag':
       return <DragToTarget config={card.config as never} onComplete={onComplete} />;
     case 'hold':
       return <HoldToContinue config={card.config as never} onComplete={onComplete} />;
     case 'tap-reveal':
-      return <TapReveal config={card.config as never} onComplete={onComplete} />;
+      return <TapReveal config={card.config as never} onComplete={onComplete} compact={density > 0} veryCompact={density > 1} />;
     case 'tap-sequence':
       return <TapSequence config={card.config as never} onComplete={onComplete} />;
     default:
@@ -57,15 +57,48 @@ function InteractionCardView({ card, onComplete }: { card: InteractionCard; onCo
 export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: StoryPlayerProps) {
   const { t } = useLanguage();
   const lastIndex = story.cards.length - 1;
-  const [index, setIndex] = useState(() => Math.min(getStoryCardIndex(story.id), lastIndex));
+  const [index, setIndex] = useState(() => isStoryCompleted(story.id) ? 0 : Math.min(getStoryCardIndex(story.id), lastIndex));
   const [completed, setCompleted] = useState(false);
   const [cardDone, setCardDone] = useState(false);
-  const touchStart = useRef<{ x: number; y: number } | null>(null);
-  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const [density, setDensity] = useState(0);
   const rootRef = useModalLock(true);
+  const mainRef = useRef<HTMLElement | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
   const payoffRecorded = useRef(false);
 
   const card: StoryCard = story.cards[index];
+
+  useLayoutEffect(() => {
+    const main = mainRef.current;
+    const stage = stageRef.current;
+    if (!main || !stage) return;
+    setDensity(0);
+    let frame = 0;
+    const fitToViewport = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        if (stage.scrollHeight > main.clientHeight + 2) {
+          setDensity((current) => Math.min(current + 1, 2));
+        }
+      });
+    };
+    const refreshForViewport = () => {
+      setDensity(0);
+      fitToViewport();
+    };
+    const observer = new ResizeObserver(fitToViewport);
+    observer.observe(main);
+    observer.observe(stage);
+    fitToViewport();
+    window.addEventListener('resize', refreshForViewport);
+    window.visualViewport?.addEventListener('resize', refreshForViewport);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener('resize', refreshForViewport);
+      window.visualViewport?.removeEventListener('resize', refreshForViewport);
+    };
+  }, [cardDone, index, story.id]);
 
   // Persist the cursor so a reload resumes on the exact card.
   useEffect(() => {
@@ -135,57 +168,11 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
     setIndex((i) => Math.min(i + 1, lastIndex));
   }, [index, lastIndex, finish]);
 
-  const goBack = useCallback(() => {
-    if (index <= 0) return;
-    celebrate('whoosh');
-    setIndex((i) => Math.max(0, i - 1));
-  }, [index]);
-
-  const requireCardDone = card.type === 'interaction' || card.type === 'choice';
-  const canSwipe = !requireCardDone || cardDone;
-
-  const tryAdvance = useCallback(() => {
-    if (!canSwipe) {
-      nudge();
-      return;
-    }
-    advance();
-  }, [advance, canSwipe]);
-
   const requestExit = () => {
     if (!completed && index > 0 && !window.confirm(t('story.leaveConfirm'))) return;
     soundEngine.stopSpeaking();
     soundEngine.stopAmbience();
     onExit();
-  };
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight') tryAdvance();
-      if (e.key === 'ArrowLeft') goBack();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [tryAdvance, goBack]);
-
-  const onTouchStart = (e: TouchEvent<HTMLDivElement>) => {
-    const touch = e.touches[0];
-    touchStart.current = touch ? { x: touch.clientX, y: touch.clientY } : null;
-  };
-  const onTouchEnd = (e: TouchEvent<HTMLDivElement>) => {
-    const start = touchStart.current;
-    touchStart.current = null;
-    if (!start) return;
-    const end = e.changedTouches[0];
-    if (!end) return;
-    const deltaX = end.clientX - start.x;
-    const deltaY = end.clientY - start.y;
-    // Require a deliberate horizontal swipe so vertical scrolling, diagonal
-    // drags, and in-card interactions are never mistaken for navigation.
-    if (Math.abs(deltaX) < 72) return;
-    if (Math.abs(deltaY) > Math.abs(deltaX) * 0.6) return;
-    if (deltaX < 0) tryAdvance();
-    else goBack();
   };
 
   const canTapAdvance = card.type === 'narration' || card.type === 'payoff';
@@ -201,110 +188,125 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
   const illustrated = tapScene || sceneBehind;
 
   return (
-    <div ref={rootRef} className="fixed inset-0 z-50 bg-bg text-fg flex flex-col overscroll-none">
-      {/* Progress segments + back */}
-      <div className="px-3 pt-3 pb-2">
-        <div className="flex items-center gap-2 mb-3">
+    <div
+      ref={rootRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={story.title}
+      className="story-reader fixed inset-0 z-[100] isolate flex flex-col overflow-hidden bg-stone-950 text-white overscroll-none"
+    >
+      <img
+        src={getStoryIllustrationUrl(story.id)}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full object-cover object-center opacity-70"
+        loading="eager"
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/25 to-black/90" aria-hidden="true" />
+
+      <header className="relative z-10 shrink-0 px-4 pt-[calc(0.75rem+env(safe-area-inset-top))] sm:px-6 sm:pt-5">
+        <div className="mx-auto flex w-full max-w-3xl items-center gap-3">
           <button
             type="button"
             onClick={requestExit}
             aria-label={t('story.back')}
-            className="min-h-[44px] min-w-[44px] rounded-full flex items-center justify-center hover:bg-surface/60"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/25 bg-black/30 text-white backdrop-blur-md transition hover:bg-white/15"
           >
-            <ChevronLeft className="w-6 h-6" />
+            <ChevronLeft className="h-5 w-5" />
           </button>
-          <span className="text-small font-semibold text-fg-muted truncate">{story.title}</span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold text-white">{story.title}</p>
+            <p className="mt-0.5 text-xs text-white/65">{story.passage} <span className="px-1 text-amber-200">·</span> {index + 1} of {story.cards.length}</p>
+          </div>
+          <span className="rounded-full border border-white/20 bg-black/25 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/75 backdrop-blur-md">
+            {card.type === 'interaction' ? t('story.stageYourTurn') : card.type === 'payoff' ? t('story.stageTakeaway') : t('story.stageStory')}
+          </span>
         </div>
-        <div className="flex items-center gap-1" role="progressbar" aria-valuemin={0} aria-valuemax={story.cards.length} aria-valuenow={index + 1}>
+        <div className="mx-auto mt-4 flex w-full max-w-3xl gap-1.5" role="progressbar" aria-valuemin={0} aria-valuemax={story.cards.length} aria-valuenow={index + 1}>
           {story.cards.map((_, i) => (
             <span
               key={i}
-              className={`h-1 flex-1 rounded-full transition-colors ${i < index || completed ? 'bg-accent' : i === index ? 'bg-accent/60' : 'bg-line'}`}
+              className={`h-1 flex-1 rounded-full transition-colors ${i < index || completed ? 'bg-amber-300' : i === index ? 'bg-white' : 'bg-white/25'}`}
             />
           ))}
         </div>
-      </div>
+      </header>
 
-      {/* Card body */}
-      <div
-        ref={scrollRef}
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
-        className="flex-1 overflow-y-auto overscroll-contain touch-pan-y px-4 pb-6"
-      >
-        <div className={`max-w-xl mx-auto min-h-full flex flex-col py-4 ${illustrated ? 'gap-4' : 'justify-center gap-5'}`}>
+      <main ref={mainRef} className={`relative z-10 min-h-0 flex-1 overflow-hidden overscroll-contain px-4 ${density > 1 ? 'py-1' : density ? 'py-2' : 'pb-4 pt-5'}`}>
+        <div ref={stageRef} className={`mx-auto flex min-h-full w-full max-w-xl flex-col justify-end ${illustrated ? density > 1 ? 'gap-1' : density ? 'gap-2' : 'gap-4' : ''}`}>
           {card.type === 'narration' && (
-            <div className="space-y-4">
-              <span className="text-label uppercase text-fg-muted">{t('story.narrationLabel')}</span>
-              {index === 0 && (
-                <img
-                  src={getStoryIllustrationUrl(story.id)}
-                  alt={`${story.title} story illustration`}
-                  className="aspect-video w-full rounded-2xl object-cover"
-                  loading="eager"
-                />
-              )}
-              <p className="text-title-3 font-reading leading-relaxed text-fg">{card.text}</p>
-              {card.scriptureLine && <VerseLine line={card.scriptureLine} />}
-            </div>
+            <article className={`rounded-[1.75rem] border border-white/20 bg-black/55 shadow-[0_16px_48px_rgba(0,0,0,0.25)] backdrop-blur-xl ${density > 1 ? 'p-2.5' : density ? 'p-3' : 'p-5 sm:p-7'}`}>
+              <span className="inline-flex rounded-full border border-amber-200/30 bg-amber-200/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-100">
+                {t('story.narrationLabel')}
+              </span>
+              <p className={`font-serif leading-snug text-white ${density > 1 ? 'mt-2 text-lg' : density ? 'mt-3 text-xl' : 'mt-4 text-2xl sm:text-3xl'}`}>{card.text}</p>
+              {card.scriptureLine && <VerseLine line={card.scriptureLine} compact={density > 0} veryCompact={density > 1} className={`${density > 1 ? 'mt-2' : 'mt-5'} !border-line !bg-surface-raised`} />}
+            </article>
           )}
 
           {card.type === 'interaction' && (
-            <div className={illustrated ? 'flex min-h-0 flex-1 flex-col gap-4' : 'space-y-4'}>
-              <p className="text-title-3 text-fg">{card.prompt}</p>
-              {sceneBehind && sceneId && <StoryWorld scene={sceneId} stepIndex={99} />}
-              <InteractionCardView card={card} onComplete={() => setCardDone(true)} />
-              {cardDone && (
-                <div className="space-y-3">
-                  <p className="text-body text-accent font-semibold">{card.successText}</p>
-                  <button type="button" onClick={advance} className="btn-primary w-full">{t('common.continue')}</button>
-                </div>
-              )}
-              {!cardDone && (
-                <p className="text-small text-fg-muted text-center">{t('story.finishToSwipe')}</p>
-              )}
-            </div>
+            <article className={`rounded-[1.75rem] border border-white/20 bg-black/55 shadow-[0_16px_48px_rgba(0,0,0,0.25)] backdrop-blur-xl ${density > 1 ? 'space-y-1.5 p-2' : density ? 'space-y-2 p-3' : `space-y-4 p-4 sm:p-6 ${illustrated ? '' : 'space-y-5'}`}`}>
+              <div>
+                <span className="inline-flex rounded-full border border-amber-200/30 bg-amber-200/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-100">{t('story.stageYourTurn')}</span>
+                <p className={`font-serif leading-snug text-white ${density > 1 ? 'mt-1 text-base' : density ? 'mt-2 text-lg' : 'mt-3 text-xl sm:text-2xl'}`}>{card.prompt}</p>
+              </div>
+              {sceneBehind && sceneId && <StoryWorld scene={sceneId} stepIndex={99} compact={density > 0} veryCompact={density > 1} />}
+              <InteractionCardView card={card} density={density} onComplete={() => setCardDone(true)} />
+              {cardDone ? (
+                <p className={`rounded-2xl bg-amber-200/10 text-sm font-medium text-amber-100 ${density > 1 ? 'px-2 py-1' : density ? 'px-3 py-1.5' : 'px-4 py-3'}`} aria-live="polite">
+                  <Sparkles className="mr-2 inline h-4 w-4" />{card.successText}
+                </p>
+              ) : null}
+            </article>
           )}
 
-          {card.type === 'choice' && <ChoiceMoment card={card} onComplete={() => { setCardDone(true); advance(); }} />}
+          {card.type === 'choice' && (
+            <article className={`rounded-[1.75rem] border border-white/20 bg-black/55 shadow-[0_16px_48px_rgba(0,0,0,0.25)] backdrop-blur-xl ${density > 1 ? 'p-2' : density ? 'p-3' : 'p-5 sm:p-7'}`}>
+              <ChoiceMoment card={card} compact={density > 0} veryCompact={density > 1} onComplete={() => { setCardDone(true); advance(); }} />
+            </article>
+          )}
 
           {card.type === 'payoff' && (
-            <div className="space-y-5 text-center">
-              <span className="text-label uppercase text-accent">{t('today.verseCollected')}</span>
-              <div className="animate-fadeIn">
-                <VerseLine line={card.verse ?? story.verse} />
+            <article className={`rounded-[1.75rem] border border-amber-200/30 bg-black/60 text-center shadow-[0_16px_48px_rgba(0,0,0,0.3)] backdrop-blur-xl ${density > 1 ? 'p-2' : density ? 'p-3' : 'p-5 sm:p-7'}`}>
+              <span className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-200">
+                <Sparkles className="h-3.5 w-3.5" /> {t('today.verseCollected')}
+              </span>
+              <div className="mt-4 animate-fadeIn">
+                <VerseLine line={card.verse ?? story.verse} compact={density > 0} veryCompact={density > 1} className="!border-line !bg-surface-raised text-left" />
               </div>
-              <p className="text-small text-fg-muted">{t('story.verseInDeck')}</p>
-              {!completed && (
-                <button type="button" onClick={finish} className="btn-primary w-full inline-flex items-center justify-center gap-2">
-                  <Check className="w-4 h-4" /> {t('story.doneForNow')}
-                </button>
-              )}
-            </div>
+              <p className="mt-4 text-sm text-white/70">{t('story.verseInDeck')}</p>
+            </article>
           )}
         </div>
-      </div>
+      </main>
 
-      {/* Footer actions */}
-      <div className="px-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] pt-2 border-t border-line">
-        <div className="max-w-xl mx-auto flex flex-col sm:flex-row items-stretch gap-2 sm:gap-3">
+      <footer className="relative z-10 shrink-0 border-t border-white/10 bg-gradient-to-t from-black/80 to-black/45 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-lg sm:px-6">
+        <div className="mx-auto flex w-full max-w-xl gap-2">
           <button
             type="button"
             onClick={() => { celebrate('snap'); onReadChapter(story.passage); }}
-            className="btn-secondary flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap"
+            className="btn-secondary min-h-12 flex-1 !border-white/25 !bg-white/10 !text-white hover:!bg-white/15"
           >
-            <BookOpen className="w-4 h-4" /> {t('story.readChapter')}
+            <BookOpen className="h-4 w-4" /> {t('story.readChapter')}
           </button>
+          {card.type === 'interaction' && cardDone && !completed && (
+            <button type="button" onClick={advance} className="btn-primary min-h-12 flex-1 inline-flex items-center justify-center gap-2">
+              {t('common.continue')} <ArrowRight className="h-4 w-4" />
+            </button>
+          )}
           {canTapAdvance && !completed && card.type !== 'payoff' && (
-            <button type="button" onClick={advance} className="btn-primary flex-1">{t('story.next')}</button>
+            <button type="button" onClick={advance} className="btn-primary min-h-12 flex-1 inline-flex items-center justify-center gap-2">
+              {t('common.continue')} <ArrowRight className="h-4 w-4" />
+            </button>
+          )}
+          {card.type === 'payoff' && !completed && (
+            <button type="button" onClick={finish} className="btn-primary min-h-12 flex-1 inline-flex items-center justify-center gap-2">
+              <Check className="h-4 w-4" /> {t('story.doneForNow')}
+            </button>
           )}
         </div>
-        {completed && (
-          <div className="max-w-xl mx-auto mt-2 text-center">
-            <p className="text-small text-fg-muted">{t('story.doneFooter')}</p>
-          </div>
-        )}
-      </div>
+        {completed && <p className="mx-auto mt-2 max-w-xl text-center text-xs text-white/60">{t('story.doneFooter')}</p>}
+      </footer>
     </div>
   );
 }

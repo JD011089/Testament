@@ -912,9 +912,13 @@
         }
       },
       {
+        "type": "narration",
+        "text": "Elijah rebuilt the altar, laid out the offering and wood, then had water poured over everything. The people watched as the trench filled."
+      },
+      {
         "type": "interaction",
         "kind": "tap-reveal",
-        "prompt": "Tap what the fire burned.",
+        "prompt": "See what the fire would have to consume. Tap each part of the altar.",
         "config": {
           "kind": "tap-reveal",
           "scene": "elijah-carmel",
@@ -937,60 +941,7 @@
             }
           ]
         },
-        "successText": "Nothing on the altar was left."
-      },
-      {
-        "type": "interaction",
-        "kind": "drag",
-        "prompt": "Lay the wood on the altar.",
-        "config": {
-          "kind": "drag",
-          "targetLabel": "The altar",
-          "requiredCount": 3,
-          "items": [
-            {
-              "id": "log-1",
-              "label": "A log",
-              "accept": true
-            },
-            {
-              "id": "log-2",
-              "label": "A log",
-              "accept": true
-            },
-            {
-              "id": "log-3",
-              "label": "A log",
-              "accept": true
-            },
-            {
-              "id": "cup",
-              "label": "An empty cup",
-              "accept": false
-            }
-          ]
-        },
-        "successText": "The wood is on the altar."
-      },
-      {
-        "type": "choice",
-        "prompt": "Two voices pull at you. Which way do you turn?",
-        "options": [
-          {
-            "label": "Choose God",
-            "response": "You stop wavering."
-          },
-          {
-            "label": "Keep wavering",
-            "response": "You stay stuck between both sides."
-          }
-        ],
-        "whatHappened": {
-          "text": "Yahweh's fire fell and consumed the offering.",
-          "ref": "1 Kings 18:38",
-          "translation": "WEB",
-          "scriptureText": "Then Yahweh’s fire fell, and consumed the burnt offering, the wood, the stones, and the dust, and licked up the water that was in the trench."
-        }
+        "successText": "The fire consumed the offering, wood, stones, and even the water."
       },
       {
         "type": "payoff"

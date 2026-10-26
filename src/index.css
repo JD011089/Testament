@@ -64,6 +64,38 @@
     --status-bar: 19 23 34;              /* #131722 */
   }
 
+  /* The immersive story reader is always dark, even when the rest of the app
+     uses the light theme. Keep every semantic surface inside it in sync. */
+  .story-reader {
+    color-scheme: dark;
+    --color-bg: 19 23 34;
+    --color-surface: 26 31 45;
+    --color-surface-raised: 35 42 59;
+    --color-border: 51 59 80;
+    --color-border-strong: 71 80 105;
+    --color-text-primary: 243 234 211;
+    --color-text-secondary: 201 190 166;
+    --color-text-muted: 156 148 131;
+    --stone-400: 168 156 134;
+    --stone-500: 156 148 131;
+    --amber-500: 228 184 121;
+    --color-accent: 228 184 121;
+    --color-accent-hover: 237 203 147;
+    --color-on-accent: 26 20 8;
+    --color-accent-text: 233 195 134;
+    --color-accent-border: 228 184 121;
+    --color-secondary: 154 190 210;
+    --color-secondary-text: 154 190 210;
+    --color-on-secondary: 19 23 34;
+    --color-success: 108 196 140;
+    --color-warning: 240 180 90;
+    --color-danger: 242 139 130;
+    --color-xp: 244 162 89;
+    --color-xp-fill: 244 162 89;
+    --focus-ring: 228 184 121;
+    --status-bar: 19 23 34;
+  }
+
   ::selection {
     background: rgba(212, 157, 95, 0.30);
     color: #5E3A1A;
