@@ -134,45 +134,6 @@ RULES:
 }
 
 /* =========================================================================
-   FEATURE 3: "Say it simpler" verse paraphrase
-   ========================================================================= */
-
-export interface SimplerVerseRequest {
-  verseText: string;
-  reference: string;
-}
-
-export async function paraphraseVerseSimpler({
-  verseText,
-  reference
-}: SimplerVerseRequest): Promise<string> {
-  const prompt = `You are a plain-language translator for Testament, helping 10-year-olds and ADHD readers understand Bible verses clearly.
-Verse (${reference}):
-"${verseText}"
-
-RULES:
-1. Write 1 to 2 plain, clear sentences explaining what this verse means in simple everyday English.
-2. Stay strictly faithful to the verse. Do not invent, preach, or add outside ideas not present in the verse text.
-3. If there are ancient names, customs, or unusual terms (like "Yahweh", "rabbi", "yoke", "formless and void"), fold the plain explanation naturally into the sentence.
-4. Plain language: a 10-year-old must understand every word.
-5. Output ONLY the 1-2 sentence paraphrase. Do NOT start with "This means:" or "This verse means:". No quotes.`;
-
-  const response = await callGeminiFlash(prompt, { maxTokens: 100 });
-  if (response) {
-    let clean = response.replace(/^["']|["']$/g, '').trim();
-    clean = clean.replace(/^(this means|this verse means|in simple words|in plain english):\s*/i, '');
-    return clean;
-  }
-
-  // Plain faithful fallback if model is unreachable
-  const clean = verseText.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim();
-  if (reference.toLowerCase().includes('genesis 1:2')) {
-    return `Before God spoke creation into being, the earth was completely dark and covered in deep waters, and God's Spirit hovered over the sea getting ready to make life.`;
-  }
-  return clean.length > 120 ? `${clean.slice(0, 117)}...` : clean;
-}
-
-/* =========================================================================
    FEATURE 4: Adaptive Socratic follow-up
    ========================================================================= */
 

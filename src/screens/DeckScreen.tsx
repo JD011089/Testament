@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { readDeck, setVerseStrength, type CardStrength, type DeckVerseCard } from '../utils/deck';
+import { registerDynamicBibleVerse } from '../utils/verseRegistry';
 import { getStoryStop } from '../content/stories';
 import { isStoryCompleted } from '../utils/storyProgress';
 import { celebrate } from '../utils/feedback';
@@ -44,6 +45,11 @@ export function DeckScreen({ onPractice, onReadChapter }: DeckScreenProps) {
     if (arcFilter !== 'all' && getStoryStop(card.storyId)?.arc !== arcFilter) return false;
     return true;
   });
+
+  const practiceCard = (card: DeckVerseCard) => {
+    registerDynamicBibleVerse(card.ref, card.text, card.translation);
+    onPractice(card.ref);
+  };
 
   const handleShare = async (card: DeckVerseCard) => {
     setBusy(card.id);
@@ -108,7 +114,7 @@ export function DeckScreen({ onPractice, onReadChapter }: DeckScreenProps) {
                 <span className={`text-label uppercase px-2 py-0.5 rounded-full border ${STRENGTH_STYLES[card.strength]}`}>{card.strength}</span>
               </div>
               {flipped === card.id ? (
-                <VerseCardBack card={card} onPractice={onPractice} onReadChapter={onReadChapter} />
+                <VerseCardBack card={card} onPractice={() => practiceCard(card)} onReadChapter={onReadChapter} />
               ) : (
                 <p className="text-body text-fg font-reading line-clamp-4">“{card.text}”</p>
               )}
@@ -119,7 +125,7 @@ export function DeckScreen({ onPractice, onReadChapter }: DeckScreenProps) {
                 <button
                   type="button"
                   className="btn-quiet"
-                  onClick={() => { celebrate('tap'); onPractice(card.ref); }}
+                  onClick={() => { celebrate('tap'); practiceCard(card); }}
                 >
                   <Dumbbell className="w-4 h-4" /> {t('common.practice')}
                 </button>
@@ -160,7 +166,7 @@ export function DeckScreen({ onPractice, onReadChapter }: DeckScreenProps) {
   );
 }
 
-function VerseCardBack({ card, onPractice, onReadChapter }: { card: DeckVerseCard; onPractice: (ref: string) => void; onReadChapter: (passage: string) => void }) {
+function VerseCardBack({ card, onPractice, onReadChapter }: { card: DeckVerseCard; onPractice: () => void; onReadChapter: (passage: string) => void }) {
   const { t } = useLanguage();
   const stop = getStoryStop(card.storyId);
   return (
@@ -169,7 +175,7 @@ function VerseCardBack({ card, onPractice, onReadChapter }: { card: DeckVerseCar
       <p className="text-body text-fg font-reading">“{card.text}”</p>
       <p className="text-ref text-fg-muted">{card.ref} • {card.translation}</p>
       <div className="flex gap-2">
-        <button type="button" className="btn-quiet" onClick={() => { celebrate('tap'); onPractice(card.ref); }}>
+        <button type="button" className="btn-quiet" onClick={() => { celebrate('tap'); onPractice(); }}>
           <Dumbbell className="w-4 h-4" /> {t('common.practice')}
         </button>
         {stop && (

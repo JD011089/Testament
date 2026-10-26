@@ -65,6 +65,13 @@ function ViewFallback() {
   return <div className="max-w-7xl mx-auto px-6 py-16 text-sm text-stone-500">Loading…</div>;
 }
 
+/** Legacy tabs that now live inside Practice/Deck. Never render them directly. */
+function normalizeTab(tab: AppTab): AppTab {
+  if (tab === 'wordforge' || tab === 'dilemmas') return 'practice';
+  if (tab === 'arsenal') return 'deck';
+  return tab;
+}
+
 function readStringArray(key: string): string[] {
   try {
     const raw = localStorage.getItem(key);
@@ -89,21 +96,22 @@ export function App() {
     if (typeof window === 'undefined') return 'dashboard';
     if (isAppPagePath(window.location.pathname)) {
       const saved = (window.history.state as { tab?: string } | null)?.tab;
-      if (saved && saved in TAB_PATHS) return saved as AppTab;
+      if (saved && saved in TAB_PATHS) return normalizeTab(saved as AppTab);
       return 'today';
     }
     const params = new URLSearchParams(window.location.search);
-    if (params.get('action') === 'wordforge' || params.get('verseId')) return 'wordforge';
+    if (params.get('action') === 'wordforge' || params.get('verseId')) return 'practice';
     if (params.get('action') === 'library' || params.get('tab') === 'library') return 'library';
-    return tabFromPath(window.location.pathname);
+    return normalizeTab(tabFromPath(window.location.pathname));
   });
 
   const setCurrentTab = (tab: AppTab) => {
-    setCurrentTabState(tab);
+    const normalized = normalizeTab(tab);
+    setCurrentTabState(normalized);
     if (isAppPagePath(window.location.pathname)) return;
-    const next = pathForTab(tab);
+    const next = pathForTab(normalized);
     if (window.location.pathname !== next) {
-      window.history.replaceState({ tab }, '', next);
+      window.history.replaceState({ tab: normalized }, '', next);
     }
   };
   const [activeQuest, setActiveQuest] = useState<StoryQuest | null>(null);
@@ -186,6 +194,7 @@ export function App() {
     const params = new URLSearchParams(window.location.search);
     return params.get('verseId') || null;
   });
+  const [practiceEntry, setPracticeEntry] = useState<'memorize' | 'dilemmas'>('memorize');
 
   const [targetDilemmaId, setTargetDilemmaId] = useState<string | null>(null);
   const [targetPsalmId, setTargetPsalmId] = useState<string | null>(null);
@@ -370,7 +379,7 @@ export function App() {
 
       // 3. Navigate tab
       const nextTab = (e.state as { tab?: string } | null)?.tab || tabFromPath(window.location.pathname);
-      setCurrentTabState(nextTab as NavTab);
+      setCurrentTabState(normalizeTab(nextTab as AppTab));
     };
     window.addEventListener('popstate', onPop);
 
@@ -393,6 +402,7 @@ export function App() {
     const handleSwMessage = (event: MessageEvent) => {
       if (event.data?.type === 'TESTAMENT_NAVIGATE_VERSE' && event.data.verseId) {
         setTargetWordForgeVerseId(event.data.verseId);
+        setPracticeEntry('memorize');
         setCurrentTab('wordforge');
         setActiveDailyMission(null);
         setActiveQuest(null);
@@ -526,6 +536,7 @@ export function App() {
       soundEngine.stopSpeaking();
       setActiveQuest(null);
       setTargetDilemmaId(step.targetId);
+      setPracticeEntry('dilemmas');
       setCurrentTab('dilemmas');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (step.type === 'wordforge') {
@@ -556,6 +567,7 @@ export function App() {
       soundEngine.stopSpeaking();
       setActiveQuest(null);
       setTargetDilemmaId(id);
+      setPracticeEntry('dilemmas');
       setCurrentTab('dilemmas');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
@@ -820,6 +832,7 @@ export function App() {
   const handlePracticeVerseFromArsenal = (verseId: string) => {
     soundEngine.stopSpeaking();
     setTargetWordForgeVerseId(verseId);
+    setPracticeEntry('memorize');
     setCurrentTab('wordforge');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -946,6 +959,7 @@ export function App() {
                 onPlayStory={handlePlayStory}
                 onOpenWordForge={(verseId?: string) => {
                   soundEngine.stopSpeaking();
+                  setPracticeEntry('memorize');
                   if (verseId) setTargetWordForgeVerseId(verseId);
                   setCurrentTab('wordforge');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -957,6 +971,7 @@ export function App() {
                 }}
                 onOpenDilemmas={() => {
                   soundEngine.stopSpeaking();
+                  setPracticeEntry('dilemmas');
                   setCurrentTab('dilemmas');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
@@ -1009,6 +1024,7 @@ export function App() {
                 }}
                 onOpenWordForge={(verseId) => {
                   soundEngine.stopSpeaking();
+                  setPracticeEntry('memorize');
                   setTargetWordForgeVerseId(verseId);
                   setCurrentTab('wordforge');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1041,7 +1057,7 @@ export function App() {
             {currentTab === 'practice' && (
               <Suspense fallback={<ViewFallback />}>
                 <PracticeView
-                  initialSubTab="memorize"
+                  initialSubTab={practiceEntry}
                   memorizedVerses={memorizedVerses}
                   onVerseMastered={handleVerseMastered}
                   targetVerseId={targetWordForgeVerseId}
@@ -1143,6 +1159,7 @@ export function App() {
           setIsProverbsOpen(false);
           setTargetProverbId(null);
           setTargetWordForgeVerseId(verseId);
+          setPracticeEntry('memorize');
           setCurrentTab('wordforge');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
@@ -1166,6 +1183,7 @@ export function App() {
           setIsPsalmsOpen(false);
           setTargetPsalmId(null);
           setTargetWordForgeVerseId(verseId);
+          setPracticeEntry('memorize');
           setCurrentTab('wordforge');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}

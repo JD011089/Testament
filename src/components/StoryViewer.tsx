@@ -42,7 +42,6 @@ import {
 } from '../utils/memoryVerseEngine';
 import { getTodayDateKey, recordDailyActivityStreak } from '../utils/dailyEngine';
 import { sanitizeGrammarArticles } from '../utils/textUtils';
-import { paraphraseVerseSimpler } from '../utils/geminiFeatures';
 import { ReportIssueModal } from './ReportIssueModal';
 import { fetchDecisionStats, submitAnonymousDecisionVote } from '../utils/decisionStatsClient';
 import { StorytellerModal } from './StorytellerModal';
@@ -208,10 +207,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
   // Translation toggle: default modern (WEB), KJV behind toggle
   const [useKjv, setUseKjv] = useState<boolean>(false);
 
-  // M-3: Say it simpler & tap-to-define state
-  const [showSimplerVerse, setShowSimplerVerse] = useState<boolean>(false);
-  const [simplerVerseText, setSimplerVerseText] = useState<string>('');
-  const [isLoadingSimplerVerse, setIsLoadingSimplerVerse] = useState<boolean>(false);
+  // M-3: tap-to-define state
   const [selectedHardWord, setSelectedHardWord] = useState<{ word: string; definition: string } | null>(null);
 
   // M-6: Slow network loading state
@@ -568,30 +564,6 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
       soundEngine.speakVerse(textToRead, () => {
         setIsPlayingAudio(false);
       });
-    }
-  };
-
-  // M-3: Say it simpler one-tap paraphrase handler
-  const handleToggleSimplerVerse = async () => {
-    soundEngine.playSnap();
-    if (showSimplerVerse) {
-      setShowSimplerVerse(false);
-      return;
-    }
-    setShowSimplerVerse(true);
-    if (!simplerVerseText) {
-      setIsLoadingSimplerVerse(true);
-      try {
-        const result = await paraphraseVerseSimpler({
-          verseText: keyVerseText,
-          reference: keyVerseRef
-        });
-        setSimplerVerseText(result);
-      } catch {
-        setSimplerVerseText(keyVerseText);
-      } finally {
-        setIsLoadingSimplerVerse(false);
-      }
     }
   };
 
@@ -992,7 +964,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
               ))}
             </div>
 
-            {/* Key Verse Verbatim (VERBATIM SCRIPTURE) with "Say it simpler" toggle (M-3) — EMOTIONAL CENTER */}
+            {/* Key Verse Verbatim (VERBATIM SCRIPTURE) — EMOTIONAL CENTER */}
             <div className="p-5 sm:p-6 lg:p-7 rounded-3xl bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-stone-100/80 dark:to-stone-900/70 border-2 border-amber-500/30 dark:border-amber-500/40 shadow-sm space-y-3.5">
               <div className="flex items-center justify-between text-xs sm:text-sm flex-wrap gap-2">
                 <div className="flex items-center gap-2">
@@ -1005,15 +977,6 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                 </div>
 
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  {/* M-3: Say it simpler toggle */}
-                  <button
-                    type="button"
-                    onClick={handleToggleSimplerVerse}
-                    className="text-[11px] sm:text-xs font-mono px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-900 dark:text-amber-200 transition-colors"
-                  >
-                    {showSimplerVerse ? 'Hide simpler' : 'Say it simpler'}
-                  </button>
-
                   {/* KJV Toggle Button */}
                   <button
                     type="button"
@@ -1054,20 +1017,6 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
               <blockquote className="text-sm sm:text-base lg:text-lg font-serif italic font-medium text-stone-900 dark:text-parchment-50 leading-relaxed border-l-4 border-amber-500 pl-4 lg:pl-5">
                 "{renderTextWithHardWords(useKjv ? personalization.kjvVerseText : keyVerseText)}"
               </blockquote>
-
-              {/* M-3: Inline Say It Simpler translation */}
-              {showSimplerVerse && (
-                <div className="mt-3 p-3.5 rounded-2xl bg-amber-500/10 border-l-3 border-amber-500 text-xs sm:text-sm text-stone-800 dark:text-parchment-100">
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <span className="font-mono text-[10px] text-amber-700 dark:text-amber-400 font-bold" role="note" aria-label="AI reflection, Not Scripture">
-                      <span aria-hidden="true">✨ </span>Plain English • AI reflection
-                    </span>
-                  </div>
-                  <p className="font-reading leading-relaxed">
-                    {isLoadingSimplerVerse ? 'Translating into plain everyday words…' : simplerVerseText}
-                  </p>
-                </div>
-              )}
             </div>
 
             {/* Feature 7: Verse card feedback toast */}
