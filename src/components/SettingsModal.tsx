@@ -463,6 +463,9 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
               );
             })}
           </div>
+          <p className="text-xs leading-5 text-stone-500 dark:text-stone-400">
+            Narration uses the most natural voice already installed on your device. For the best sound, open Testament in Microsoft Edge, Safari, or your phone's browser. No account or paid service required.
+          </p>
         </section>
 
         <section className="py-8 space-y-2 border-t border-stone-200 dark:border-stone-800">

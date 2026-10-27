@@ -22,21 +22,22 @@ test.describe('Testament — Font Size Picker & Voice API Overhaul Suite', () =>
     expect(getStoredFontScaleStep()).toBe('m');
   });
 
-  test('Voice Settings: All narrator profiles have calm human reader settings (stability >= 0.70, style: 0.0)', () => {
+  test('Voice Settings: All narrator profiles expose a name, subtitle, and description', () => {
     const profiles = ['cinematic', 'brotherhood', 'scholar', 'grace'] as const;
     for (const p of profiles) {
       const voice = NARRATOR_VOICES[p];
       expect(voice).toBeDefined();
-      expect(voice.settings.stability).toBeGreaterThanOrEqual(0.70);
-      expect(voice.settings.style).toBe(0.0);
+      expect(voice.name.length).toBeGreaterThan(0);
+      expect(voice.subtitle.length).toBeGreaterThan(0);
+      expect(voice.description.length).toBeGreaterThan(0);
     }
   });
 
-  test('Speech Normalization: AI reflection badges and verbatim labels are stripped and never spoken', () => {
-    const raw = "✨ AI reflection • Not Scripture. David stood before the giant. Scripture (Verbatim)";
+  test('Speech Normalization: Reflection badges and verbatim labels are stripped and never spoken', () => {
+    const raw = "Reflection • Not Scripture. David stood before the giant. Scripture (Verbatim)";
     const normalized = normalizeScriptureForSpeech(raw);
-    expect(normalized).not.toContain("AI reflection");
     expect(normalized).not.toContain("Not Scripture");
+    expect(normalized).not.toContain("Reflection");
     expect(normalized).not.toContain("Scripture (Verbatim)");
     expect(normalized).toContain("David stood before the giant.");
   });

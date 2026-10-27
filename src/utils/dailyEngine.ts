@@ -156,13 +156,13 @@ export const getAdaptiveNextObjective = (
   userProfile?: UserCalibrationProfile | null,
   _memorizedVerses: string[] = []
 ): AdaptiveObjective => {
-  // 1. FSRS-due retention (deterministic â€” no random coin flip)
+  // 1. FSRS-due retention (deterministic — no random coin flip)
   const dueVerse = getSpacedRepetitionDueVerse();
   if (dueVerse) {
     return {
       type: 'retention_drill',
       title: `Retention Drill: ${dueVerse.reference}`,
-      subtitle: `Due for review â€¢ Keep your edge sharp before memory fades.`,
+      subtitle: `Due for review • Keep your edge sharp before memory fades.`,
       badge: 'FSRS Review',
       targetVerseId: dueVerse.id
     };
@@ -186,7 +186,7 @@ export const getAdaptiveNextObjective = (
       if (!completedActs.includes(act.id)) {
         return {
           type: 'next_act',
-          title: `${quest.heroName} â€¢ Act ${act.actNumber}: ${act.actTitle}`,
+          title: `${quest.heroName} • Act ${act.actNumber}: ${act.actTitle}`,
           subtitle: act.sceneAtmosphere,
           badge: 'Next Mission',
           targetQuest: quest,
@@ -199,7 +199,7 @@ export const getAdaptiveNextObjective = (
 
   return {
     type: 'all_completed',
-    title: 'All Quests Mastered â€¢ Veteran of the Crucible',
+    title: 'All Quests Mastered • Veteran of the Crucible',
     subtitle: 'You have conquered every trial. Continue sharpening verses in the Practice.',
     badge: 'Iron Pillar'
   };

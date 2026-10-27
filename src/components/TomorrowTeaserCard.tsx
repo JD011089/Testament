@@ -29,7 +29,7 @@ export const TomorrowTeaserCard: React.FC = () => {
       aria-label="Tomorrow's mission preview"
       className="group relative p-5 rounded-2xl bg-stone-100/70 dark:bg-stone-900/60 border border-stone-200/80 dark:border-stone-800/80 transition-all hover:border-amber-500/40 cursor-pointer overflow-hidden text-left focus:outline-none focus:ring-2 focus:ring-amber-500/60"
     >
-      {/* Top row: Lock indicator, unlock time, AI reflection badge */}
+      {/* Top row: Lock indicator and unlock time */}
       <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
@@ -44,14 +44,7 @@ export const TomorrowTeaserCard: React.FC = () => {
           </span>
         </div>
 
-        <span
-          className="text-[10px] font-mono text-stone-500 dark:text-stone-400 bg-stone-200/60 dark:bg-stone-800/70 px-2 py-0.5 rounded-full shrink-0"
-          role="note"
-          aria-label="AI reflection, Not Scripture"
-        >
-          <span aria-hidden="true">✨ </span>AI reflection • Not Scripture
-        </span>
-      </div>
+        </div>
 
       {/* The Hook: Tension without spoiler */}
       <p className="text-xs sm:text-sm font-serif italic text-stone-800 dark:text-parchment-100 leading-relaxed pr-2">

@@ -5,7 +5,7 @@ import type { StorySceneId } from '../utils/storyScenes';
  *
  * A Story is a short, playable sequence of cards. Scripture lines are always
  * real, verified text (WEB or KJV) with their reference and translation label.
- * AI-written lines are narration and are never labeled as Scripture.
+ * Reflection lines are narration and are never labeled as Scripture.
  */
 
 export type StoryArc =

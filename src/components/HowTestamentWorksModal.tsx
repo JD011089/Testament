@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, BookOpen, Sparkles, Lock, Check } from 'lucide-react';
+import { ShieldCheck, BookOpen, BookMarked, Lock, Check } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
 import { FullPage } from './FullPage';
 
@@ -37,19 +37,19 @@ export const HowTestamentWorksModal: React.FC<HowTestamentWorksModalProps> = ({
           </p>
         </div>
 
-        {/* Pillar 2: AI Guardrails & Verbatim Scripture */}
+        {/* Pillar 2: Scripture Fidelity */}
         <div className="space-y-2">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
-              <Sparkles aria-hidden="true" className="w-4 h-4" />
+              <BookMarked aria-hidden="true" className="w-4 h-4" />
             </div>
             <h3 className="text-lg font-bold leading-7 text-stone-900 dark:text-parchment-100">
-              2. Strict AI Guardrails
+              2. Scripture Stays Scripture
             </h3>
           </div>
           <div className="text-base text-stone-600 dark:text-stone-300 leading-7 pl-10 space-y-3">
             <p>
-              AI is strictly governed by non-negotiable rules designed with pastoral oversight:
+              Every reflection, story retelling, and action step is written and reviewed by people, not generated live while you read:
             </p>
             <ul className="space-y-1 list-none pl-0">
               <li className="flex items-start gap-2">
@@ -58,7 +58,11 @@ export const HowTestamentWorksModal: React.FC<HowTestamentWorksModalProps> = ({
               </li>
               <li className="flex items-start gap-2">
                 <Check aria-hidden="true" className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                <span><strong>Every AI sentence is clearly badged</strong> with <span className="font-mono text-[11px] text-amber-700 dark:text-amber-400">"✨ AI reflection • Not Scripture"</span> so there is never ambiguity.</span>
+                <span><strong>Reflections are clearly marked</strong> as <span className="font-mono text-[11px] text-amber-700 dark:text-amber-400">"Not Scripture"</span> so there is never ambiguity.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check aria-hidden="true" className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                <span><strong>No external AI service is called</strong> while you read. The app works offline and does not require a paid account.</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check aria-hidden="true" className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />

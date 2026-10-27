@@ -250,9 +250,9 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
                   </blockquote>
 
                   <div className="my-3 p-3.5 rounded-xl bg-white/80 dark:bg-stone-950/70 text-xs md:text-sm text-stone-700 dark:text-stone-300">
-                    <div className="flex items-center gap-1.5 text-amber-800 dark:text-amber-400 font-semibold mb-1" role="note" aria-label="AI reflection, Not Scripture">
+                    <div className="flex items-center gap-1.5 text-amber-800 dark:text-amber-400 font-semibold mb-1" role="note" aria-label="Plain English, Not Scripture">
                       <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
-                      <span>{t('arsenal.plainEnglish')} • AI reflection • Not Scripture</span>
+                      <span>{t('arsenal.plainEnglish')} • Not Scripture</span>
                     </div>
                     <p className="leading-relaxed">{verse.plainEnglishSummary}</p>
                   </div>

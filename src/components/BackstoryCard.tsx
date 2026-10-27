@@ -58,13 +58,6 @@ export const BackstoryCard: React.FC<BackstoryCardProps> = ({
               <span className="text-[11px] font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold">
                 {getCategoryLabel(backstory.category)}
               </span>
-              <span
-                className="text-[10px] font-mono text-stone-500 dark:text-stone-400"
-                role="note"
-                aria-label="AI reflection, Not Scripture"
-              >
-                <span aria-hidden="true">✨ </span>AI reflection • Not Scripture
-              </span>
             </div>
             <h4 className="text-xs sm:text-sm font-serif font-bold text-stone-900 dark:text-parchment-50 truncate mt-0.5">
               {backstory.title}

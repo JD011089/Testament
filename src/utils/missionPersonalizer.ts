@@ -7,7 +7,7 @@ export interface MissionPersonalization {
   verseReference: string;
   verseText: string;
   kjvVerseText: string;
-  source: 'gemini' | 'local_rule' | 'default';
+  source: 'local_rule' | 'default';
 }
 
 // Preset decision keys for categorization
@@ -153,8 +153,6 @@ function classifyStance(text: string): DecisionStance {
   return 'general';
 }
 
-import { callServerGemini } from './geminiClient';
-
 /**
  * Immediate, zero-latency local personalization generator.
  * Guaranteed to return synchronously in 0ms.
@@ -231,53 +229,4 @@ export function getLocalPersonalization(
     kjvVerseText: defaultKjv,
     source: 'local_rule'
   };
-}
-
-/**
- * Asynchronous Gemini personalization.
- * Calls Gemini Flash with strict timeout; updates dynamically if fast enough.
- */
-export async function fetchGeminiPersonalization(
-  userDecision: string,
-  act: StoryAct,
-  quest: StoryQuest
-): Promise<Partial<MissionPersonalization> | null> {
-  const prompt = `You are a warm, tactical Bible guide for Testament, an app for ADHD learners.
-STORY: ${quest.title} — ${act.actTitle} (${quest.heroName})
-CONTEXT: ${act.historicalContext}
-SCENARIO QUESTION: "${act.perspectivePrompt}"
-KEY VERSE: "${act.unlockedScripture.text}" (${act.unlockedScripture.reference})
-USER'S DECISION: "${userDecision.replace(/"/g, '\\"')}"
-
-INSTRUCTIONS:
-1. "mirrorBack": A single punchy sentence connecting what the user chose to what ${quest.heroName} did. Under 20 words.
-2. "actionLine": One hyper-specific, doable daily action line for today starting with a strong verb. Under 20 words. No clichés.
-3. Use plain, concrete words. No idioms, slang, or figures of speech.
-4. Return ONLY valid JSON:
-{
-  "mirrorBack": "string",
-  "actionLine": "string"
-}`;
-
-  try {
-    const rawText = await callServerGemini(prompt, {
-      maxTokens: 200,
-      responseMimeType: 'application/json',
-      timeoutMs: 4000,
-    });
-    if (!rawText) return null;
-
-    const parsed = JSON.parse(rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim());
-    if (parsed.mirrorBack && parsed.actionLine) {
-      return {
-        mirrorBack: String(parsed.mirrorBack).trim(),
-        actionLine: String(parsed.actionLine).trim(),
-        source: 'gemini'
-      };
-    }
-  } catch {
-    // fallback cleanly
-  }
-
-  return null;
 }

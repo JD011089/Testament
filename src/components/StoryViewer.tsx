@@ -28,13 +28,11 @@ import { markSeriesMomentCompleted } from '../utils/weeklySeriesEngine';
 import { getDailyStreakCount } from '../utils/dailyEngine';
 import { 
   getLocalPersonalization, 
-  fetchGeminiPersonalization, 
   type MissionPersonalization 
-} from '../utils/geminiMissionPersonalizer';
+} from '../utils/missionPersonalizer';
 import { 
   type GeneratedDailyMission, 
-  getLocalDecisionPersonalization, 
-  fetchPersonalizedMirrorBack 
+  getLocalDecisionPersonalization
 } from '../utils/dailyMissionPipeline';
 import { 
   lockInMemoryVerse, 
@@ -87,7 +85,7 @@ function cleanWordKey(word: string): string {
   return normalizeWord(word);
 }
 
-function getAiConnectionText(mirrorBack: string, heroName: string): string {
+function getConnectionText(mirrorBack: string, heroName: string): string {
   if (!mirrorBack) return `${heroName} faced a similar pivotal moment.`;
   const dashParts = mirrorBack.split(/\s*—\s*|\s*--\s*/);
   if (dashParts.length > 1 && dashParts[1].trim()) {
@@ -209,10 +207,6 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
 
   // M-3: tap-to-define state
   const [selectedHardWord, setSelectedHardWord] = useState<{ word: string; definition: string } | null>(null);
-
-  // M-6: Slow network loading state
-  const [isRefiningAi, setIsRefiningAi] = useState<boolean>(false);
-  const [refinementExceeded, setRefinementExceeded] = useState<boolean>(false);
 
   // M-9: Content issue report modal state
   const [isReportOpen, setIsReportOpen] = useState<boolean>(false);
@@ -397,56 +391,6 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
         .catch(() => {
           // ignore
         });
-    }
-
-    // 2. M-6: Slow network handling for Gemini refinement
-    if (decisionString) {
-      setIsRefiningAi(true);
-      setRefinementExceeded(false);
-
-      // Exceeded timer after ~8s
-      const fallbackTimer = setTimeout(() => {
-        setIsRefiningAi(false);
-        setRefinementExceeded(true);
-      }, 8000);
-
-      if (dailyMission) {
-        fetchPersonalizedMirrorBack(decisionString, dailyMission)
-          .then((geminiRes) => {
-            clearTimeout(fallbackTimer);
-            setIsRefiningAi(false);
-            if (geminiRes?.mirrorBack) {
-              setPersonalization((prev) => ({
-                ...prev,
-                mirrorBack: geminiRes.mirrorBack,
-                actionLine: geminiRes.actionLine || prev.actionLine,
-                source: 'gemini'
-              }));
-            }
-          })
-          .catch(() => {
-            clearTimeout(fallbackTimer);
-            setIsRefiningAi(false);
-          });
-      } else if (act && quest) {
-        fetchGeminiPersonalization(decisionString, act, quest)
-          .then((geminiRes) => {
-            clearTimeout(fallbackTimer);
-            setIsRefiningAi(false);
-            if (geminiRes?.mirrorBack) {
-              setPersonalization((prev) => ({
-                ...prev,
-                mirrorBack: geminiRes.mirrorBack || prev.mirrorBack,
-                actionLine: geminiRes.actionLine || prev.actionLine,
-                source: 'gemini'
-              }));
-            }
-          })
-          .catch(() => {
-            clearTimeout(fallbackTimer);
-            setIsRefiningAi(false);
-          });
-      }
     }
   };
 
@@ -709,9 +653,6 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   <span className="text-[11px] lg:text-xs font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
                     {missionTitle}
                   </span>
-                  <span className="text-[10px] lg:text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300" role="note" aria-label="AI reflection, Not Scripture">
-                    <span aria-hidden="true">✨ </span>AI reflection • Not Scripture
-                  </span>
                 </div>
                 <legend className="text-xl sm:text-2xl lg:text-3xl font-serif font-black text-stone-900 dark:text-parchment-50 leading-snug lg:leading-tight mt-1.5 block">
                   "{scenarioQuestion}"
@@ -865,7 +806,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
         )}
 
         {/* =========================================================================
-            SCREEN 2 — STORY: Verbatim quote, badged AI connection, tap-to-define
+            SCREEN 2 — STORY: Verbatim quote, reflection connection, tap-to-define
             ========================================================================= */}
         {currentScreen === 2 && (
           <motion.div
@@ -876,7 +817,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             transition={{ duration: 0.2 }}
             className="space-y-6 max-w-2xl lg:max-w-3xl mx-auto"
           >
-            {/* M-5: Verbatim User Choice Quoted + Separately Badged AI Connection */}
+            {/* M-5: Verbatim User Choice Quoted + Separately Badged Connection */}
             <div className="p-5 lg:p-6 rounded-3xl bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent text-left space-y-3">
               <div className="flex items-start gap-3">
                 <Sparkles aria-hidden="true" className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
@@ -885,8 +826,8 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                     <span className="text-xs sm:text-sm font-semibold text-amber-800 dark:text-amber-400">
                       Here's how your answer connects
                     </span>
-                    <span className="text-[10px] sm:text-[11px] font-mono text-amber-700 dark:text-amber-400" role="note" aria-label="AI reflection, Not Scripture">
-                      <span aria-hidden="true">✨ </span>AI reflection • Not Scripture
+                    <span className="text-[10px] sm:text-[11px] font-mono text-amber-700 dark:text-amber-400" role="note" aria-label="Reflection, Not Scripture">
+                      Reflection • Not Scripture
                     </span>
                   </div>
 
@@ -898,15 +839,15 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                         <span className="font-bold text-amber-950 dark:text-amber-200">"{recordedDecisionText}"</span>
                       </p>
 
-                      {/* AI connection as a separate, badged sentence (M-5) */}
+                      {/* Connection as a separate, badged sentence (M-5) */}
                       <div className="pt-2.5 border-t border-amber-500/20">
                         <div className="flex items-center gap-1.5 mb-1">
                           <span className="text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded-sm bg-amber-500/15 text-amber-800 dark:text-amber-300 font-bold" role="note">
-                            <span aria-hidden="true">✨ </span>AI connection
+                            Connection
                           </span>
                         </div>
                         <p className="text-xs sm:text-sm lg:text-base font-serif text-stone-800 dark:text-parchment-100 leading-snug">
-                          {getAiConnectionText(personalization.mirrorBack, heroName)}
+                          {getConnectionText(personalization.mirrorBack, heroName)}
                         </p>
                       </div>
                     </div>
@@ -916,17 +857,6 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                     </p>
                   )}
 
-                  {/* M-6: Slow network progress indication */}
-                  {isRefiningAi && (
-                    <p className="text-[11px] sm:text-xs text-amber-700 dark:text-amber-400 mt-1 italic animate-pulse">
-                      Writing today's story connection…
-                    </p>
-                  )}
-                  {refinementExceeded && (
-                    <p className="text-[11px] sm:text-xs text-amber-700 dark:text-amber-400 mt-1 italic">
-                      Still working — showing you today's backup version instead.
-                    </p>
-                  )}
                 </div>
               </div>
             </div>
@@ -949,8 +879,8 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                 <h2 className="text-lg sm:text-xl lg:text-2xl font-serif font-bold text-stone-900 dark:text-parchment-50">
                   What actually happened
                 </h2>
-                <span className="text-[10px] sm:text-[11px] font-mono text-stone-600 dark:text-stone-400" role="note" aria-label="AI reflection, Not Scripture">
-                  <span aria-hidden="true">✨ </span>AI reflection • Not Scripture
+                <span className="text-[10px] sm:text-[11px] font-mono text-stone-600 dark:text-stone-400" role="note" aria-label="Story retelling, Not Scripture">
+                  Story retelling • Not Scripture
                 </span>
               </div>
             </div>
@@ -1242,8 +1172,8 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   <Sparkles aria-hidden="true" className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                   <span>Today's Move</span>
                 </span>
-                <span className="text-[10px] sm:text-[11px] font-mono text-amber-700 dark:text-amber-400" role="note" aria-label="AI reflection, Not Scripture">
-                  <span aria-hidden="true">✨ </span>AI reflection • Not Scripture
+                <span className="text-[10px] sm:text-[11px] font-mono text-amber-700 dark:text-amber-400" role="note" aria-label="Reflection, Not Scripture">
+                  Reflection • Not Scripture
                 </span>
               </div>
               <p className="text-base sm:text-lg lg:text-xl font-serif font-bold text-stone-900 dark:text-parchment-50 leading-snug">

@@ -8,15 +8,7 @@ export interface VoiceMetadata {
   id: NarratorProfile;
   name: string;
   subtitle: string;
-  actor: string;
-  elevenVoiceId: string;
   description: string;
-  settings: {
-    stability: number;
-    similarity_boost: number;
-    style: number;
-    use_speaker_boost: boolean;
-  };
 }
 
 export const NARRATOR_VOICES: Record<NarratorProfile, VoiceMetadata> = {
@@ -24,57 +16,25 @@ export const NARRATOR_VOICES: Record<NarratorProfile, VoiceMetadata> = {
     id: 'cinematic',
     name: 'Cinematic',
     subtitle: 'Epic & Resonant',
-    actor: 'Adam (ElevenLabs)',
-    elevenVoiceId: 'pNInz6obpgDQGcFmaJgB',
-    description: 'Deep, commanding baritone with cinematic gravitas. Ideal for battles and epics.',
-    settings: {
-      stability: 0.70,
-      similarity_boost: 0.85,
-      style: 0.0,
-      use_speaker_boost: true
-    }
+    description: 'Deep, commanding baritone with cinematic gravitas. Ideal for battles and epics.'
   },
   brotherhood: {
     id: 'brotherhood',
     name: 'Grounded',
     subtitle: 'Warm & Relatable',
-    actor: 'Antoni (ElevenLabs)',
-    elevenVoiceId: 'ErXwobaYiN019PkySvjV',
-    description: 'Warm, conversational tempo with natural pacing. Perfect for daily guidance.',
-    settings: {
-      stability: 0.72,
-      similarity_boost: 0.80,
-      style: 0.0,
-      use_speaker_boost: true
-    }
+    description: 'Warm, conversational tempo with natural pacing. Perfect for daily guidance.'
   },
   scholar: {
     id: 'scholar',
     name: 'Scholar',
     subtitle: 'Wise & Articulate',
-    actor: 'George (ElevenLabs UK)',
-    elevenVoiceId: 'JBFqnCBsd6RMkjVDRZzb',
-    description: 'Sophisticated British cadence with thoughtful, intellectual clarity.',
-    settings: {
-      stability: 0.75,
-      similarity_boost: 0.82,
-      style: 0.0,
-      use_speaker_boost: true
-    }
+    description: 'Sophisticated British cadence with thoughtful, intellectual clarity.'
   },
   grace: {
     id: 'grace',
     name: 'Grace & Peace',
     subtitle: 'Gentle & Reflective',
-    actor: 'Rachel (ElevenLabs)',
-    elevenVoiceId: '21m00Tcm4TlvDq8ikWAM',
-    description: 'Gentle, soothing, and clear cadence. Perfect for quiet reflection, meditation, and prayer.',
-    settings: {
-      stability: 0.72,
-      similarity_boost: 0.85,
-      style: 0.0,
-      use_speaker_boost: true
-    }
+    description: 'Gentle, soothing, and clear cadence. Perfect for quiet reflection, meditation, and prayer.'
   }
 };
 
@@ -99,11 +59,9 @@ function numberToWordsEn(numStr: string): string {
  */
 export function normalizeScriptureForSpeech(text: string): string {
   return text
-    // 1. Strip badges & annotations (AI reflection badges must NEVER be spoken)
-    .replace(/[\u2728\u2729\u2605\u2B50]?\s*AI\s+reflection\s*[•\-–—·*]?\s*Not\s+Scripture/gi, ' ')
-    .replace(/[\u2728\u2729\u2605\u2B50]?\s*Plain\s+English\s*[•\-–—·*]?\s*AI\s+reflection/gi, ' ')
-    .replace(/[\u2728\u2729\u2605\u2B50]?\s*Plain\s+English\s+takeaway\s*:?/gi, ' ')
-    .replace(/[\u2728\u2729\u2605\u2B50]?\s*AI\s+reflection/gi, ' ')
+    // 1. Strip badges & annotations (labels must never be spoken)
+    .replace(/[\u2728\u2729\u2605\u2B50]?\s*(?:Plain\s+English|Reflection|Story\s+retelling)\s*[•\-–—·*]\s*Not\s+Scripture/gi, ' ')
+    .replace(/[\u2728\u2729\u2605\u2B50]?\s*(?:Plain\s+English|Plain\s+English\s+takeaway)\s*:?/gi, ' ')
     .replace(/Scripture\s*\(Verbatim\)/gi, ' ')
     // 2. Strip URLs & web links
     .replace(/https?:\/\/\S+/gi, ' ')
@@ -129,7 +87,7 @@ export function normalizeScriptureForSpeech(text: string): string {
     .replace(/^#+\s+/gm, '')
     .replace(/^\s*[-*•]\s+/gm, '')
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    .replace(/[{}[\]()<>~^|\\\/]/g, ' ')
+    .replace(/[{}[\]()<>~^|\\/]/g, ' ')
     .replace(/\.{3,}\s*$/g, '.')
     .replace(/\.{3,}/g, ', ')
     .replace(/[—–]/g, ', ')
@@ -158,12 +116,8 @@ class SoundEngine {
       : 'cinematic'
   );
   private currentAudioElement: HTMLAudioElement | null = null;
-  private currentObjectUrl: string | null = null;
-  private currentAbortController: AbortController | null = null;
   private cachedVoices: SpeechSynthesisVoice[] = [];
   private currentPlaybackState: VoicePlaybackState = 'idle';
-  /** Once the TTS endpoint fails, stop retrying it this session (avoids console/network noise). */
-  private ttsEndpointUnavailable = false;
 
   public getPlaybackState(): VoicePlaybackState {
     return this.currentPlaybackState;
@@ -740,7 +694,7 @@ class SoundEngine {
     }
   }
 
-  // --- BROWSER SPEECH SYNTHESIS FALLBACK ---
+  // --- DEVICE SPEECH (FREE, NO NETWORK) ---
   private getFallbackVoice(profile: NarratorProfile): SpeechSynthesisVoice | null {
     this.refreshVoices();
     const voices = this.cachedVoices.length > 0 ? this.cachedVoices : (typeof window !== 'undefined' ? window.speechSynthesis.getVoices() : []);
@@ -751,72 +705,73 @@ class SoundEngine {
                         'en';
     const langPrefix = currentLang.toLowerCase().slice(0, 2);
 
-    if (langPrefix === 'fr') {
-      const frenchVoices = voices.filter(v => v.lang.toLowerCase().startsWith('fr'));
-      if (frenchVoices.length > 0) {
-        const neural = frenchVoices.find(v => {
-          const n = v.name.toLowerCase();
-          return n.includes('natural') || n.includes('online') || n.includes('neural') || n.includes('google');
-        });
-        if (neural) return neural;
-        return frenchVoices[0];
+    const naturalScore = (voice: SpeechSynthesisVoice): number => {
+      const n = voice.name.toLowerCase();
+      let score = 0;
+      if (n.includes('natural')) score += 6;
+      if (n.includes('neural')) score += 5;
+      if (n.includes('premium') || n.includes('enhanced')) score += 5;
+      if (n.includes('online')) score += 4;
+      if (n.includes('google')) score += 3;
+      if (n.includes('siri')) score += 2;
+      return score;
+    };
+
+    const chooseVoice = (
+      pool: SpeechSynthesisVoice[],
+      preferredNames: string[]
+    ): SpeechSynthesisVoice | null => {
+      const ranked = [...pool].sort((a, b) => naturalScore(b) - naturalScore(a));
+      for (const name of preferredNames) {
+        const match = ranked.find(v => v.name.toLowerCase().includes(name));
+        if (match) return match;
       }
+      return ranked[0] || null;
+    };
+
+    if (langPrefix === 'fr' || langPrefix === 'es') {
+      const localized = voices.filter(v => v.lang.toLowerCase().startsWith(langPrefix));
+      if (localized.length > 0) return chooseVoice(localized, []);
     }
 
-    if (langPrefix === 'es') {
-      const spanishVoices = voices.filter(v => v.lang.toLowerCase().startsWith('es'));
-      if (spanishVoices.length > 0) {
-        const neural = spanishVoices.find(v => {
-          const n = v.name.toLowerCase();
-          return n.includes('natural') || n.includes('online') || n.includes('neural') || n.includes('google');
-        });
-        if (neural) return neural;
-        return spanishVoices[0];
-      }
-    }
-
-    // English voices
     const enVoices = voices.filter(v => v.lang.toLowerCase().startsWith('en'));
     const pool = enVoices.length > 0 ? enVoices : voices;
 
-    // Filter out robotic legacy desktop voices if any modern ones exist
+    // Skip the old robotic desktop voices when anything better is available.
     const nonRobotic = pool.filter(v => {
       const n = v.name.toLowerCase();
-      return !n.includes('desktop') && !n.includes('microsoft david') && !n.includes('zira') && !n.includes('mark');
+      return !n.includes('microsoft david') && !n.includes('microsoft zira') && !n.includes('microsoft mark') && !n.includes('desktop');
     });
-
     const activePool = nonRobotic.length > 0 ? nonRobotic : pool;
 
+    const maleNames = ['andrew', 'brian', 'guy', 'christopher', 'eric', 'ryan', 'alex', 'daniel', 'george', 'oliver'];
+    const femaleNames = ['aria', 'jenny', 'samantha', 'serena', 'karen', 'moira', 'ava', 'zoe', 'emma', 'olivia'];
+
     if (profile === 'scholar') {
-      const ukNeural = activePool.find(v => {
+      const ukPool = activePool.filter(v => {
         const lang = v.lang.toLowerCase();
-        const name = v.name.toLowerCase();
-        return (lang.includes('gb') || lang.includes('uk')) &&
-               (name.includes('natural') || name.includes('online') || name.includes('neural') || name.includes('ryan') || name.includes('george') || name.includes('oliver'));
-      }) || activePool.find(v => v.lang.toLowerCase().includes('gb') || v.lang.toLowerCase().includes('uk'));
-      if (ukNeural) return ukNeural;
+        return lang.includes('gb') || lang.includes('uk');
+      });
+      const uk = chooseVoice(ukPool.length > 0 ? ukPool : activePool, maleNames);
+      if (uk) return uk;
     }
 
     if (profile === 'grace') {
-      const femaleNeural = activePool.find(v => {
-        const name = v.name.toLowerCase();
-        return (name.includes('natural') || name.includes('online') || name.includes('neural') || name.includes('jenny') || name.includes('aria') || name.includes('samantha')) &&
-               !name.includes('david');
-      });
-      if (femaleNeural) return femaleNeural;
+      return chooseVoice(activePool, femaleNames);
     }
 
-    // Default & cinematic / brotherhood: best available natural/online/Google neural voice
-    const neuralVoice = activePool.find(v => {
-      const name = v.name.toLowerCase();
-      return name.includes('natural') || name.includes('online') || name.includes('neural') || name.includes('google');
-    });
-    if (neuralVoice) return neuralVoice;
+    if (profile === 'cinematic') {
+      return chooseVoice(activePool, ['andrew', 'brian', 'christopher', 'guy', 'ryan', 'alex']);
+    }
 
-    return activePool[0] || null;
+    if (profile === 'brotherhood') {
+      return chooseVoice(activePool, ['guy', 'andrew', 'brian', 'christopher', 'alex']);
+    }
+
+    return chooseVoice(activePool, maleNames);
   }
 
-  // --- STUDIO & NEURAL VOICE NARRATION ---
+  // --- STUDIO AUDIO & ON-DEVICE VOICE NARRATION (NO NETWORK COST) ---
 
   public speakVerse(text: string, onEnd?: () => void, audioAssetUrl?: string) {
     this.stopSpeaking();
@@ -828,121 +783,40 @@ class SoundEngine {
       if (onEnd) onEnd();
     };
 
-    // Stream from real-time Azure Neural endpoint with safe buffering & persona fallback
-    this.streamOrSynthesize(text, handleFinished, audioAssetUrl);
+    this.playAssetOrSpeech(normalizeScriptureForSpeech(text), handleFinished, audioAssetUrl);
   }
 
-  private streamOrSynthesize(text: string, onFinished: () => void, audioAssetUrl?: string) {
-    if (this.currentAbortController) {
+  private playAssetOrSpeech(text: string, onFinished: () => void, audioAssetUrl?: string) {
+    // Bundled studio narration is free, instant, and works offline.
+    if (
+      audioAssetUrl &&
+      SoundEngine.AVAILABLE_STUDIO_AUDIO.has(audioAssetUrl) &&
+      this.currentNarratorProfile === 'cinematic'
+    ) {
       try {
-        this.currentAbortController.abort();
-      } catch {
-        /* ignore */
-      }
-      this.currentAbortController = null;
-    }
-
-    if (this.currentObjectUrl) {
-      try {
-        URL.revokeObjectURL(this.currentObjectUrl);
-      } catch {
-        /* ignore */
-      }
-      this.currentObjectUrl = null;
-    }
-
-    const controller = new AbortController();
-    this.currentAbortController = controller;
-
-    const cleanText = normalizeScriptureForSpeech(text);
-
-    // If the network TTS endpoint already failed this session, go straight to
-    // the on-device reader instead of hammering a dead endpoint on every card.
-    if (this.ttsEndpointUnavailable) {
-      this.fallbackWithAssetOrSpeech(cleanText, onFinished, audioAssetUrl);
-      return;
-    }
-
-    // Primary: High-fidelity ElevenLabs via Vite local proxy
-    const streamUrl = `/api/tts?text=${encodeURIComponent(cleanText)}&voice=${encodeURIComponent(this.currentNarratorProfile)}`;
-
-    this.setPlaybackState('loading');
-
-    const playBlob = (blob: Blob) => {
-      const objectUrl = URL.createObjectURL(blob);
-      this.currentObjectUrl = objectUrl;
-
-      const audio = new Audio(objectUrl);
-      this.currentAudioElement = audio;
-
-      const cleanup = () => {
-        if (this.currentObjectUrl === objectUrl) {
-          try {
-            URL.revokeObjectURL(objectUrl);
-          } catch {
-            /* ignore */
-          }
-          this.currentObjectUrl = null;
-        }
-        if (this.currentAudioElement === audio) {
+        const audio = new Audio(audioAssetUrl);
+        this.currentAudioElement = audio;
+        audio.onplay = () => this.setPlaybackState('playing');
+        audio.onended = () => {
           this.currentAudioElement = null;
-        }
-        if (this.currentAbortController === controller) {
-          this.currentAbortController = null;
-        }
-      };
+          this.setPlaybackState('idle');
+          onFinished();
+        };
+        audio.onerror = () => {
+          this.currentAudioElement = null;
+          this.fallbackSpeak(text, onFinished);
+        };
+        audio.play().catch(() => {
+          this.currentAudioElement = null;
+          this.fallbackSpeak(text, onFinished);
+        });
+        return;
+      } catch {
+        /* fall through to device speech */
+      }
+    }
 
-      audio.onplay = () => {
-        this.setPlaybackState('playing');
-      };
-
-      audio.onended = () => {
-        cleanup();
-        this.setPlaybackState('idle');
-        onFinished();
-      };
-
-      audio.onerror = () => {
-        cleanup();
-        this.setPlaybackState('error', 'Audio streaming failed');
-        this.fallbackWithAssetOrSpeech(cleanText, onFinished, audioAssetUrl);
-      };
-
-      audio.play().catch(() => {
-        cleanup();
-        this.setPlaybackState('error', 'Audio playback blocked');
-        this.fallbackWithAssetOrSpeech(cleanText, onFinished, audioAssetUrl);
-      });
-    };
-
-    fetch(streamUrl, { signal: controller.signal })
-      .then(async (res) => {
-        if (!res.ok) {
-          throw new Error(`TTS server HTTP ${res.status}`);
-        }
-        const blob = await res.blob();
-        if (controller.signal.aborted) return;
-
-        if (blob.size < 100) {
-          throw new Error('TTS payload too small');
-        }
-
-        playBlob(blob);
-      })
-      .catch((err) => {
-        if (controller.signal.aborted) return;
-        this.ttsEndpointUnavailable = true;
-        console.warn('[SoundEngine] Narration API unavailable, using on-device reader:', (err as Error)?.message);
-        this.setPlaybackState('error', (err as Error)?.message || 'Narration unavailable');
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(
-            new CustomEvent('testament:narration-fallback', {
-              detail: { reason: (err as Error)?.message || 'Narration server error' }
-            })
-          );
-        }
-        this.fallbackWithAssetOrSpeech(cleanText, onFinished, audioAssetUrl);
-      });
+    this.fallbackSpeak(text, onFinished);
   }
 
   private static readonly AVAILABLE_STUDIO_AUDIO = new Set([
@@ -966,32 +840,6 @@ class SoundEngine {
     '/audio/stories/elijah-journey_elijah-act-3.mp3',
   ]);
 
-  private fallbackWithAssetOrSpeech(text: string, onFinished: () => void, audioAssetUrl?: string) {
-    // If an offline studio asset is available and profile is cinematic, try it
-    if (audioAssetUrl && SoundEngine.AVAILABLE_STUDIO_AUDIO.has(audioAssetUrl) && this.currentNarratorProfile === 'cinematic') {
-      try {
-        const audio = new Audio(audioAssetUrl);
-        this.currentAudioElement = audio;
-        audio.onended = () => {
-          this.currentAudioElement = null;
-          onFinished();
-        };
-        audio.onerror = () => {
-          this.currentAudioElement = null;
-          this.fallbackSpeak(text, onFinished);
-        };
-        audio.play().catch(() => {
-          this.currentAudioElement = null;
-          this.fallbackSpeak(text, onFinished);
-        });
-        return;
-      } catch {
-        /* proceed to fallbackSpeak */
-      }
-    }
-
-    this.fallbackSpeak(text, onFinished);
-  }
 
   private fallbackSpeak(text: string, onFinished: () => void) {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
@@ -1026,37 +874,25 @@ class SoundEngine {
         }
       };
 
-      utterance.onend = () => callFinishedOnce();
-      utterance.onerror = () => callFinishedOnce();
+      utterance.onend = () => {
+        this.setPlaybackState('idle');
+        callFinishedOnce();
+      };
+      utterance.onerror = () => {
+        this.setPlaybackState('error', 'Device voice unavailable');
+        callFinishedOnce();
+      };
 
+      this.setPlaybackState('playing');
       window.speechSynthesis.speak(utterance);
     } catch {
+      this.setPlaybackState('error', 'Device voice unavailable');
       onFinished();
     }
   }
 
   public stopSpeaking() {
-    // 1. Abort any active fetch in progress
-    if (this.currentAbortController) {
-      try {
-        this.currentAbortController.abort();
-      } catch {
-        /* ignore */
-      }
-      this.currentAbortController = null;
-    }
-
-    // 2. Revoke and release blob object URL
-    if (this.currentObjectUrl) {
-      try {
-        URL.revokeObjectURL(this.currentObjectUrl);
-      } catch {
-        /* ignore */
-      }
-      this.currentObjectUrl = null;
-    }
-
-    // 3. Stop HTML5 audio element
+    // 1. Stop bundled audio element
     if (this.currentAudioElement) {
       try {
         this.currentAudioElement.pause();
@@ -1067,7 +903,7 @@ class SoundEngine {
       }
     }
 
-    // 4. Cancel browser speech synthesis
+    // 2. Cancel browser speech synthesis
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       try {
         window.speechSynthesis.cancel();

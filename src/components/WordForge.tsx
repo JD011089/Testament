@@ -354,7 +354,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
       setIsSpeaking(false);
     } else {
       setIsSpeaking(true);
-      // Scripture-only utterance: never speak the AI reflection as Scripture.
+      // Scripture-only utterance: never speak the plain-English reflection as Scripture.
       soundEngine.speakVerse(`${verse.reference}. ${verse.text}`, () => setIsSpeaking(false));
     }
   };
@@ -425,8 +425,8 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
           </div>
 
           <div className="p-3 bg-stone-200/50 dark:bg-stone-950/70 rounded-xl text-xs md:text-sm text-stone-700 dark:text-stone-300 italic">
-            <span className="not-italic inline-flex items-center gap-1 text-[10px] font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-300 bg-amber-500/15 px-2 py-0.5 rounded-full mb-1.5" role="note" aria-label="AI reflection, Not Scripture">
-              <span aria-hidden="true">✨ </span>AI reflection • Not Scripture
+            <span className="not-italic inline-flex items-center gap-1 text-[10px] font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-300 bg-amber-500/15 px-2 py-0.5 rounded-full mb-1.5" role="note" aria-label="Plain English, Not Scripture">
+              Plain English • Not Scripture
             </span>
             <span className="block">"{verse.plainEnglishSummary}"</span>
           </div>

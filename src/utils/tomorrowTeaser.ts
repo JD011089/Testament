@@ -6,7 +6,6 @@ export interface TomorrowTeaserData {
   heroName: string;
   hook: string;
   unlockLabel: string;
-  reflectionBadge: string;
 }
 
 const FALLBACK_TEASER: TomorrowTeaserData = {
@@ -15,7 +14,6 @@ const FALLBACK_TEASER: TomorrowTeaserData = {
   heroName: 'Next Hero',
   hook: "Tomorrow's mission is ready. Come back to unlock it.",
   unlockLabel: 'Unlocks tomorrow',
-  reflectionBadge: '✨ AI reflection • Not Scripture'
 };
 
 /**
@@ -35,7 +33,6 @@ export function getTomorrowTeaser(): TomorrowTeaserData {
       heroName: tomorrowPassage.heroName,
       hook,
       unlockLabel: 'Unlocks tomorrow',
-      reflectionBadge: '✨ AI reflection • Not Scripture'
     };
   } catch {
     return FALLBACK_TEASER;

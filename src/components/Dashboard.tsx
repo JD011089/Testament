@@ -438,13 +438,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
               PART 1 — HOMEPAGE: HERO MISSION CARD
               ========================================================================= */}
           <div className="p-6 sm:p-7 lg:p-8 rounded-3xl bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-stone-100/50 dark:to-stone-900/40 shadow-xs transition-colors">
-            {/* Micro-tag with AI Reflection Badge */}
+            {/* Micro-tag */}
             <div className="flex items-center justify-between gap-2 mb-3.5 flex-wrap">
               <span className="text-[11px] lg:text-xs font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
                 {formatSpaced(["Today's Mission", "•", `${dailyMission.heroName} (${dailyMission.passageReference})`])}
-              </span>
-              <span className="text-[10px] lg:text-[11px] font-mono text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full shrink-0" role="note" aria-label="AI reflection, Not Scripture">
-                <span aria-hidden="true">✨ </span>AI reflection • Not Scripture
               </span>
             </div>
 

@@ -419,7 +419,7 @@ export function evaluateUserPlay(
 }
 
 /**
- * Multi-Turn Socratic AI Response Evaluator (Turn 2)
+ * Multi-Turn Socratic Response Evaluator (Turn 2)
  * Evaluates how the user answers the incisive counter-question and computes their
  * Biblical Tactical Temperament Profile across Grace, Truth, Prudence, and Courage.
  */

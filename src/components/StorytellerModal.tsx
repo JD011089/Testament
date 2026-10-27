@@ -172,15 +172,11 @@ export const StorytellerModal: React.FC<StorytellerModalProps> = ({
                   </p>
                 </div>
 
-                {/* Column 2: App's Faithful Retelling with Reflection Badge */}
+                {/* Column 2: App's Faithful Retelling */}
                 <div className="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/5 dark:bg-amber-950/20 flex flex-col space-y-2.5">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-mono uppercase tracking-wider text-amber-900 dark:text-amber-300 font-bold">
                       Faithful Retelling
-                    </span>
-                    {/* Non-negotiable AI reflection badge */}
-                    <span className="text-[10px] font-mono text-amber-700 dark:text-amber-400" role="note" aria-label="AI reflection, Not Scripture">
-                      <span aria-hidden="true">✨ </span>AI reflection • Not Scripture
                     </span>
                   </div>
 

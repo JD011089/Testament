@@ -167,7 +167,7 @@ test.describe('Testament — Learner Modes Engine & Specification Suite', () => 
     expect(stateAfterClear.reciter.currentVerse?.loopBackPhraseIndices).not.toContain(0);
   });
 
-  test('Constraint 6: Storyteller retellings render side-by-side with required reflection badge', () => {
+  test('Constraint 6: Storyteller retellings render side-by-side with reflection labeling', () => {
     const passage = CURATED_DAILY_PASSAGES[0];
     const faithfulText = passage.staticFallback.storyRetelling.join(' ');
 

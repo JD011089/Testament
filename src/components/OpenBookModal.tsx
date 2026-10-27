@@ -476,7 +476,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
   const handleCopyVerse = (verseNum: number, text: string) => {
     soundEngine.playSnap();
     const reference = `${book.name} ${selectedChapter}:${verseNum}`;
-    const fullCitation = `"${text}" â€” ${reference} (${chapterData?.translation || 'WEB'})`;
+    const fullCitation = `"${text}" — ${reference} (${chapterData?.translation || 'WEB'})`;
     navigator.clipboard.writeText(fullCitation);
     showToast(t('reader.copied', { ref: reference }));
   };
@@ -518,7 +518,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
   const handleShareVerse = async (verseNum: number, text: string) => {
     soundEngine.playSnap();
     const reference = `${book.name} ${selectedChapter}:${verseNum}`;
-    const shareText = `"${text}" â€” ${reference} (${chapterData?.translation || 'WEB'})`;
+    const shareText = `"${text}" — ${reference} (${chapterData?.translation || 'WEB'})`;
     if (navigator.share) {
       try {
         await navigator.share({
@@ -1163,7 +1163,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                         >
                           <span className="flex items-center gap-1.5 truncate">
                             <Mic className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                            <span className="truncate">{NARRATOR_VOICES[currentVoice]?.name.split(' ')[0] || 'Adam'}</span>
+                            <span className="truncate">{NARRATOR_VOICES[currentVoice]?.name.split(' ')[0] || 'Voice'}</span>
                           </span>
                           <ChevronRight className="w-4 h-4 text-stone-400 shrink-0" />
                         </button>
@@ -1399,7 +1399,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                         disabled={selectedChapter >= totalChapters && allBooks.findIndex(b => b.id === book.id) >= allBooks.length - 1}
                         className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-xs font-bold text-stone-950 disabled:opacity-30 disabled:pointer-events-none shadow-xs transition-colors cursor-pointer"
                       >
-                        <span>{selectedChapter >= totalChapters && allBooks.findIndex(b => b.id === book.id) < allBooks.length - 1 ? 'Next Book â†’' : 'Next Ch'}</span>
+                        <span>{selectedChapter >= totalChapters && allBooks.findIndex(b => b.id === book.id) < allBooks.length - 1 ? 'Next Book →' : 'Next Ch'}</span>
                         <ChevronRight className="w-4 h-4 shrink-0" />
                       </button>
                     </div>
