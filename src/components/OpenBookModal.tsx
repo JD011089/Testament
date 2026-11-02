@@ -406,9 +406,13 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
 
   const handleToggleBriefingAudio = () => {
     if (isPlayingAudio) {
-      soundEngine.stopSpeaking();
+      if (!soundEngine.pauseSpeaking('briefing')) soundEngine.stopSpeaking();
       setIsPlayingAudio(false);
     } else {
+      if (soundEngine.resumeSpeaking('briefing')) {
+        setIsPlayingAudio(true);
+        return;
+      }
       soundEngine.stopSpeaking();
       soundEngine.playClick();
       setIsPlayingAudio(true);
@@ -419,15 +423,19 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
 
       const narrationText = `${book.name}. Tactical Codename: ${book.codename}. ${book.subtitle}. Why this matters on Monday: ${book.whyItMattersMonday}. Scripture anchor, ${book.anchorScripture.reference}: ${scriptureText}`;
 
-      soundEngine.speakVerse(narrationText, () => setIsPlayingAudio(false));
+      soundEngine.speakVerse(narrationText, () => setIsPlayingAudio(false), undefined, 'briefing');
     }
   };
 
   const handleToggleChapterAudio = () => {
     if (isPlayingChapterAudio) {
-      soundEngine.stopSpeaking();
+      if (!soundEngine.pauseSpeaking('chapter')) soundEngine.stopSpeaking();
       setIsPlayingChapterAudio(false);
     } else {
+      if (soundEngine.resumeSpeaking('chapter')) {
+        setIsPlayingChapterAudio(true);
+        return;
+      }
       if (!chapterData || chapterData.verses.length === 0) return;
       soundEngine.stopSpeaking();
       soundEngine.playClick();
@@ -436,7 +444,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
       const fullChapterText = `${book.name} Chapter ${selectedChapter}. ` +
         chapterData.verses.map(v => `${v.verse}. ${v.text}`).join(' ');
 
-      soundEngine.speakVerse(fullChapterText, () => setIsPlayingChapterAudio(false));
+      soundEngine.speakVerse(fullChapterText, () => setIsPlayingChapterAudio(false), undefined, 'chapter');
     }
   };
 

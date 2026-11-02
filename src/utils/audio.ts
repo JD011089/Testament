@@ -2,7 +2,7 @@
 // 100% Offline-capable, zero external asset dependencies with Neural Studio Voice streaming
 
 export type NarratorProfile = 'cinematic' | 'brotherhood' | 'scholar' | 'grace';
-export type VoicePlaybackState = 'idle' | 'loading' | 'playing' | 'error';
+export type VoicePlaybackState = 'idle' | 'loading' | 'playing' | 'paused' | 'error';
 
 export interface VoiceMetadata {
   id: NarratorProfile;
@@ -118,6 +118,9 @@ class SoundEngine {
   private currentAudioElement: HTMLAudioElement | null = null;
   private cachedVoices: SpeechSynthesisVoice[] = [];
   private currentPlaybackState: VoicePlaybackState = 'idle';
+  /** Identifies the narration currently loaded so pause/resume cannot cross-wire different clips. */
+  private activeNarrationId: string | null = null;
+  private pausedNarrationId: string | null = null;
 
   public getPlaybackState(): VoicePlaybackState {
     return this.currentPlaybackState;
@@ -773,17 +776,94 @@ class SoundEngine {
 
   // --- STUDIO AUDIO & ON-DEVICE VOICE NARRATION (NO NETWORK COST) ---
 
-  public speakVerse(text: string, onEnd?: () => void, audioAssetUrl?: string) {
+  public speakVerse(text: string, onEnd?: () => void, audioAssetUrl?: string, narrationId?: string) {
     this.stopSpeaking();
+    this.activeNarrationId = narrationId ?? null;
     this.playCinematicSwell();
     this.duckAmbience();
 
     const handleFinished = () => {
+      this.activeNarrationId = null;
+      this.pausedNarrationId = null;
       this.restoreAmbience();
       if (onEnd) onEnd();
     };
 
     this.playAssetOrSpeech(normalizeScriptureForSpeech(text), handleFinished, audioAssetUrl);
+  }
+
+  /**
+   * Pauses the active narration in place. Unlike `stopSpeaking`, this keeps the
+   * audio/speech cursor so a later `resumeSpeaking` continues where it left off.
+   */
+  public pauseSpeaking(narrationId?: string): boolean {
+    if (narrationId && this.activeNarrationId !== narrationId) return false;
+
+    if (this.currentAudioElement && !this.currentAudioElement.paused) {
+      try {
+        this.currentAudioElement.pause();
+        this.pausedNarrationId = this.activeNarrationId ?? '';
+        this.setPlaybackState('paused');
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    if (
+      typeof window !== 'undefined' &&
+      'speechSynthesis' in window &&
+      window.speechSynthesis.speaking &&
+      !window.speechSynthesis.paused
+    ) {
+      try {
+        window.speechSynthesis.pause();
+        this.pausedNarrationId = this.activeNarrationId ?? '';
+        this.setPlaybackState('paused');
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    return false;
+  }
+
+  /** Resumes narration paused by `pauseSpeaking` from its exact position. */
+  public resumeSpeaking(narrationId?: string): boolean {
+    const paused = this.pausedNarrationId;
+    if (narrationId && paused !== narrationId) return false;
+
+    if (this.currentAudioElement && this.currentAudioElement.paused && paused !== null) {
+      this.pausedNarrationId = null;
+      this.currentAudioElement.play().catch(() => {
+        this.setPlaybackState('error', 'Audio unavailable');
+      });
+      return true;
+    }
+
+    if (
+      typeof window !== 'undefined' &&
+      'speechSynthesis' in window &&
+      paused !== null &&
+      window.speechSynthesis.paused
+    ) {
+      try {
+        this.pausedNarrationId = null;
+        window.speechSynthesis.resume();
+        this.setPlaybackState('playing');
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    return false;
+  }
+
+  public isNarrationPaused(narrationId?: string): boolean {
+    if (this.pausedNarrationId === null) return false;
+    return narrationId ? this.pausedNarrationId === narrationId : true;
   }
 
   private playAssetOrSpeech(text: string, onFinished: () => void, audioAssetUrl?: string) {
@@ -892,6 +972,10 @@ class SoundEngine {
   }
 
   public stopSpeaking() {
+    // Reset pause bookkeeping so a later play starts a fresh narration.
+    this.activeNarrationId = null;
+    this.pausedNarrationId = null;
+
     // 1. Stop bundled audio element
     if (this.currentAudioElement) {
       try {
