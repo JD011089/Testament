@@ -10,6 +10,8 @@ import {
   rescheduleNotificationAlarms,
   saveNotificationPrefs,
   sendTestDeviceNotification,
+  sendTestPush,
+  syncPushSubscription,
   type NotificationPermissionState,
   type NotificationPrefs,
 } from '../utils/notificationPrefs';
@@ -52,10 +54,13 @@ export function NotificationSettingsModal({ onClose }: NotificationSettingsModal
       setPermission(result);
       if (result === 'granted') {
         soundEngine.playVictory();
-        const next = await persist({
+        const next = saveNotificationPrefs({
           appUpdates: true,
           dailyMission: prefs.dailyMission || prefs.memoryPulse ? prefs.dailyMission : true,
         });
+        setPrefs(next);
+        // Register push while the permission click is still the active gesture.
+        await syncPushSubscription(next, true);
         await rescheduleNotificationAlarms(next);
         showToast(t('notifications.enabled'));
       } else if (result === 'denied') {
@@ -90,7 +95,12 @@ export function NotificationSettingsModal({ onClose }: NotificationSettingsModal
       if (permission !== 'granted') {
         await enableDeviceNotifications();
       }
-      const ok = await sendTestDeviceNotification();
+      if (getNotificationPermission() === 'granted') {
+        // A test tap is also a chance to (re)register push if it was missed.
+        await syncPushSubscription(getNotificationPrefs(), true);
+      }
+      const pushed = await sendTestPush();
+      const ok = pushed || await sendTestDeviceNotification();
       showToast(ok ? t('notifications.testSent') : t('notifications.testFailed'));
     } finally {
       setBusy(false);

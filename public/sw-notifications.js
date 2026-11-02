@@ -48,17 +48,68 @@ function idbDelete(db, key) {
   });
 }
 
+// ─── Core: recurring plan → next alarm timestamp ─────────────────────────────
+
+function computeNextAlarm(plan, afterTimestamp) {
+  if (!plan || !Array.isArray(plan.slots) || plan.slots.length === 0) return null;
+  let best = null;
+  for (const slot of plan.slots) {
+    if (!slot || typeof slot.time !== 'string') continue;
+    const match = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(slot.time);
+    if (!match) continue;
+
+    const target = new Date(afterTimestamp);
+    target.setHours(Number(match[1]), Number(match[2]), 0, 0);
+    if (target.getTime() <= afterTimestamp) {
+      target.setDate(target.getDate() + 1);
+    }
+    if (!best || target.getTime() < best.targetTimestamp) {
+      best = {
+        targetTimestamp: target.getTime(),
+        title: slot.title || 'Testament reminder',
+        options: slot.options || {},
+        slot: slot.id || null,
+        todayKey: plan.todayKey || ''
+      };
+    }
+  }
+  return best;
+}
+
+async function rescheduleFromPlan(db, plan, afterTimestamp) {
+  const next = computeNextAlarm(plan, afterTimestamp);
+  if (!next) {
+    await idbDelete(db, 'pendingAlarm');
+    return;
+  }
+  await idbPut(db, { id: 'pendingAlarm', ...next });
+}
+
 // ─── Core: check IDB for a pending alarm and fire if its time has come ────────
 
 async function checkAndFirePendingAlarm() {
   let db;
   try {
     db = await openDB();
-    const alarm = await idbGet(db, 'pendingAlarm');
+    const plan = await idbGet(db, 'plan');
+    let alarm = await idbGet(db, 'pendingAlarm');
+
+    if (!alarm && plan) {
+      await rescheduleFromPlan(db, plan, Date.now());
+      alarm = await idbGet(db, 'pendingAlarm');
+    }
     if (!alarm) return;
 
     const now = Date.now();
     if (now < alarm.targetTimestamp) return; // Not time yet
+
+    // Skip reminders that are more than half a day stale instead of firing a burst.
+    const isStale = now - alarm.targetTimestamp > 12 * 60 * 60 * 1000;
+    if (isStale) {
+      await idbDelete(db, 'pendingAlarm');
+      await rescheduleFromPlan(db, plan, now);
+      return;
+    }
 
     // Time has passed — show the notification
     await self.registration.showNotification(alarm.title, alarm.options).catch(() => {});
@@ -76,8 +127,9 @@ async function checkAndFirePendingAlarm() {
       timestamp: now
     });
 
-    // Clear the pending alarm so it doesn't double-fire
+    // Arm the next occurrence so reminders keep firing without opening the app.
     await idbDelete(db, 'pendingAlarm');
+    await rescheduleFromPlan(db, plan, now);
 
     // Notify any open app windows that the alarm fired
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
@@ -154,6 +206,28 @@ self.addEventListener('message', (event) => {
       await self.registration.update().catch(() => {});
     }
 
+  } else if (event.data?.type === 'SET_NOTIFICATION_PLAN') {
+    // Persist the recurring plan so the SW can arm every future occurrence.
+    const { slots, todayKey } = event.data;
+    if (Array.isArray(slots)) {
+      let db;
+      try {
+        db = await openDB();
+        const plan = {
+          id: 'plan',
+          slots: slots.filter((slot) => slot && typeof slot.time === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(slot.time)),
+          todayKey: todayKey || ''
+        };
+        await idbPut(db, plan);
+        await idbDelete(db, 'pendingAlarm');
+        await rescheduleFromPlan(db, plan, Date.now());
+      } catch {
+        // Ignore IDB failures
+      } finally {
+        if (db) db.close();
+      }
+    }
+
   } else if (event.data?.type === 'SCHEDULE_ALARM') {
     // Store the alarm as an absolute timestamp in IDB instead of a setTimeout.
     // This survives SW termination — the alarm will fire on next SW wakeup.
@@ -183,6 +257,7 @@ self.addEventListener('message', (event) => {
     try {
       db = await openDB();
       await idbDelete(db, 'pendingAlarm');
+      await idbDelete(db, 'plan');
     } catch {
       // Ignore
     } finally {
@@ -190,6 +265,18 @@ self.addEventListener('message', (event) => {
     }
   }
   })());
+});
+
+// ─── Background wakeups: any navigation or sync can deliver a due alarm ──────
+
+self.addEventListener('fetch', (event) => {
+  if (event.request.mode === 'navigate') {
+    event.waitUntil(checkAndFirePendingAlarm());
+  }
+});
+
+self.addEventListener('sync', (event) => {
+  event.waitUntil(checkAndFirePendingAlarm());
 });
 
 // ─── Periodic background sync (Android Chrome PWA) ───────────────────────────
@@ -245,7 +332,7 @@ self.addEventListener('push', (event) => {
           body: data.body,
           icon: '/icons/icon-192.png',
           badge: '/icons/badge-96.png',
-          tag: data.data?.verseId ? `testament-verse-${data.data.verseId}` : 'testament-pulse',
+          tag: data.tag || (data.data?.verseId ? `testament-verse-${data.data.verseId}` : 'testament-pulse'),
           renotify: true,
           data: data.data || {}
         };

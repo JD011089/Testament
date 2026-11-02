@@ -6,6 +6,8 @@ import {
   ChevronRight, 
   Volume2, 
   VolumeX, 
+  Play,
+  Pause,
   Brain, 
   Sparkles,
   Flame,
@@ -22,7 +24,7 @@ import {
   Share2
 } from 'lucide-react';
 import type { CanonBook } from '../data/canon';
-import { soundEngine, NARRATOR_VOICES, type NarratorProfile } from '../utils/audio';
+import { soundEngine, NARRATOR_VOICES, type NarratorProfile, type NarrationProgressDetail } from '../utils/audio';
 import { useModalLock } from '../utils/useModalLock';
 import { VoiceSelectorModal } from './VoiceSelectorModal';
 import { 
@@ -65,6 +67,16 @@ interface OpenBookModalProps {
   launchToken?: number;
   highlightVerseStart?: number;
   highlightVerseEnd?: number;
+}
+
+function formatClock(totalSeconds: number): string {
+  if (!Number.isFinite(totalSeconds) || totalSeconds <= 0) return '--:--';
+  const whole = Math.ceil(totalSeconds);
+  const hours = Math.floor(whole / 3600);
+  const minutes = Math.floor((whole % 3600) / 60);
+  const seconds = whole % 60;
+  if (hours > 0) return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  return `${minutes}:${String(seconds).padStart(2, '0')}`;
 }
 
 export const OpenBookModal: React.FC<OpenBookModalProps> = ({
@@ -120,12 +132,50 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
   const [readingLayout, setReadingLayout] = useState<ReadingLayout>(() => loadReadingPrefs().layout);
   const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
   const [isPlayingChapterAudio, setIsPlayingChapterAudio] = useState(false);
+  const [isChapterAudioPaused, setIsChapterAudioPaused] = useState(false);
+  const [chapterAudioProgress, setChapterAudioProgress] = useState({
+    elapsedSec: 0,
+    durationSec: 0,
+    remainingSec: 0,
+    progress: 0,
+  });
   const [activeReadingVerse, setActiveReadingVerse] = useState<number | null>(null);
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [currentVoice, setCurrentVoice] = useState<NarratorProfile>(() => soundEngine.getNarratorProfile());
 
   const modalRef = useModalLock(book !== null);
   const readerScrollRef = useRef<HTMLDivElement | null>(null);
+
+  const resetChapterAudio = useCallback(() => {
+    setIsPlayingChapterAudio(false);
+    setIsChapterAudioPaused(false);
+    setChapterAudioProgress({ elapsedSec: 0, durationSec: 0, remainingSec: 0, progress: 0 });
+  }, []);
+
+  useEffect(() => {
+    const handleProgress = (event: Event) => {
+      const detail = (event as CustomEvent<NarrationProgressDetail>).detail;
+      if (!detail || detail.narrationId !== 'chapter') return;
+      setChapterAudioProgress({
+        elapsedSec: detail.elapsedSec,
+        durationSec: detail.durationSec,
+        remainingSec: detail.remainingSec,
+        progress: detail.progress,
+      });
+      if (detail.state === 'playing') {
+        setIsPlayingChapterAudio(true);
+        setIsChapterAudioPaused(false);
+      } else if (detail.state === 'paused') {
+        setIsPlayingChapterAudio(true);
+        setIsChapterAudioPaused(true);
+      } else {
+        setIsPlayingChapterAudio(false);
+        setIsChapterAudioPaused(false);
+      }
+    };
+    window.addEventListener('testament:voice-progress', handleProgress);
+    return () => window.removeEventListener('testament:voice-progress', handleProgress);
+  }, []);
 
   // Default the active scripture translation to the matching language when app language changes
   useEffect(() => {
@@ -237,7 +287,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
   // Briefing opens clean. A launch token lands on the cited chapter in the reader.
   useEffect(() => {
     if (!book) return;
-    setIsPlayingChapterAudio(false);
+    resetChapterAudio();
     setSelectedVerse(null);
     soundEngine.stopSpeaking();
     if (launchToken) {
@@ -334,7 +384,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
     if (!target) return;
     soundEngine.playPageTurn();
     setIsPlayingAudio(false);
-    setIsPlayingChapterAudio(false);
+    resetChapterAudio();
     soundEngine.stopSpeaking();
     if (target.book !== book.name) {
       const targetBook = allBooks.find(b => b.name === target.book);
@@ -349,7 +399,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
     if (!target) return;
     soundEngine.playPageTurn();
     setIsPlayingAudio(false);
-    setIsPlayingChapterAudio(false);
+    resetChapterAudio();
     soundEngine.stopSpeaking();
     if (target.book !== book.name) {
       const targetBook = allBooks.find(b => b.name === target.book);
@@ -362,7 +412,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
     if (nextBook) {
       soundEngine.playPageTurn();
       setIsPlayingAudio(false);
-      setIsPlayingChapterAudio(false);
+      resetChapterAudio();
       soundEngine.stopSpeaking();
       onSelectBook(nextBook);
     }
@@ -372,7 +422,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
     if (prevBook) {
       soundEngine.playPageTurn();
       setIsPlayingAudio(false);
-      setIsPlayingChapterAudio(false);
+      resetChapterAudio();
       soundEngine.stopSpeaking();
       onSelectBook(prevBook);
     }
@@ -429,29 +479,47 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
 
   const handleToggleChapterAudio = () => {
     if (isPlayingChapterAudio) {
-      if (!soundEngine.pauseSpeaking('chapter')) soundEngine.stopSpeaking();
-      setIsPlayingChapterAudio(false);
-    } else {
-      if (soundEngine.resumeSpeaking('chapter')) {
-        setIsPlayingChapterAudio(true);
+      if (isChapterAudioPaused) {
+        if (soundEngine.resumeSpeaking('chapter')) {
+          setIsChapterAudioPaused(false);
+          return;
+        }
+        // Paused clip is gone (browser reclaimed it): start over cleanly.
+        soundEngine.stopSpeaking();
+        resetChapterAudio();
         return;
       }
-      if (!chapterData || chapterData.verses.length === 0) return;
+      if (soundEngine.pauseSpeaking('chapter')) {
+        setIsChapterAudioPaused(true);
+        return;
+      }
       soundEngine.stopSpeaking();
-      soundEngine.playClick();
-      setIsPlayingChapterAudio(true);
-
-      const fullChapterText = `${book.name} Chapter ${selectedChapter}. ` +
-        chapterData.verses.map(v => `${v.verse}. ${v.text}`).join(' ');
-
-      soundEngine.speakVerse(fullChapterText, () => setIsPlayingChapterAudio(false), undefined, 'chapter');
+      resetChapterAudio();
+      return;
     }
+
+    if (!chapterData || chapterData.verses.length === 0) return;
+    soundEngine.stopSpeaking();
+    soundEngine.playClick();
+    resetChapterAudio();
+    setIsPlayingChapterAudio(true);
+    setChapterAudioProgress({ elapsedSec: 0, durationSec: 0, remainingSec: 0, progress: 0 });
+
+    const fullChapterText = `${book.name} Chapter ${selectedChapter}. ` +
+      chapterData.verses.map(v => `${v.verse}. ${v.text}`).join(' ');
+
+    soundEngine.speakVerse(
+      fullChapterText,
+      () => resetChapterAudio(),
+      undefined,
+      'chapter'
+    );
   };
 
   const handleSpeakSingleVerse = (verseNum: number, text: string) => {
     soundEngine.stopSpeaking();
     soundEngine.playClick();
-    setIsPlayingChapterAudio(false);
+    resetChapterAudio();
     setActiveReadingVerse(verseNum);
     soundEngine.speakVerse(`${book.name} ${selectedChapter}:${verseNum}. ${text}`, () => {
       setActiveReadingVerse(null);
@@ -1042,13 +1110,20 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                         ? 'bg-amber-500 text-stone-950 border-amber-600 shadow-glow'
                         : 'bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 text-stone-700 dark:text-stone-300 border-stone-250 dark:border-stone-800'
                     }`}
-                    title="Listen to full chapter"
+                    title={isPlayingChapterAudio ? (isChapterAudioPaused ? 'Resume chapter audio' : 'Pause chapter audio') : 'Listen to full chapter'}
                   >
                     {isPlayingChapterAudio ? (
-                      <>
-                        <VolumeX className="w-3.5 h-3.5 animate-pulse" />
-                        <span>Pause</span>
-                      </>
+                      isChapterAudioPaused ? (
+                        <>
+                          <Play className="w-3.5 h-3.5" />
+                          <span>Resume</span>
+                        </>
+                      ) : (
+                        <>
+                          <Pause className="w-3.5 h-3.5 animate-pulse" />
+                          <span>Pause</span>
+                        </>
+                      )
                     ) : (
                       <>
                         <Volume2 className="w-3.5 h-3.5 text-amber-500" />
@@ -1077,13 +1152,20 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                         ? 'bg-amber-500 text-stone-950 border-amber-600 shadow-glow'
                         : 'bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 text-stone-700 dark:text-stone-300 border-stone-250 dark:border-stone-800'
                     }`}
-                    title="Listen to chapter"
+                    title={isPlayingChapterAudio ? (isChapterAudioPaused ? 'Resume chapter audio' : 'Pause chapter audio') : 'Listen to chapter'}
                   >
                     {isPlayingChapterAudio ? (
-                      <>
-                        <VolumeX className="w-3.5 h-3.5 animate-pulse" />
-                        <span>Pause</span>
-                      </>
+                      isChapterAudioPaused ? (
+                        <>
+                          <Play className="w-3.5 h-3.5" />
+                          <span>Resume</span>
+                        </>
+                      ) : (
+                        <>
+                          <Pause className="w-3.5 h-3.5 animate-pulse" />
+                          <span>Pause</span>
+                        </>
+                      )
                     ) : (
                       <>
                         <Volume2 className="w-3.5 h-3.5 text-amber-500" />
@@ -1105,6 +1187,56 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                     <SlidersHorizontal className="w-4 h-4 text-amber-800 dark:text-amber-500" />
                   </button>
                 </div>
+
+                {/* Chapter audio progress + pause/resume */}
+                {isPlayingChapterAudio && (
+                  <div className="w-full flex items-center gap-2.5 pt-1.5 border-t border-stone-200 dark:border-stone-800">
+                    <button
+                      type="button"
+                      onClick={handleToggleChapterAudio}
+                      aria-label={isChapterAudioPaused ? 'Resume chapter audio' : 'Pause chapter audio'}
+                      className="w-9 h-9 rounded-full bg-amber-500 text-stone-950 flex items-center justify-center shrink-0 hover:bg-amber-400 transition-colors"
+                    >
+                      {isChapterAudioPaused ? <Play className="w-4 h-4 ml-0.5" /> : <Pause className="w-4 h-4" />}
+                    </button>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2 text-[10px] font-mono text-stone-500 dark:text-stone-400 mb-1">
+                        <span className="truncate font-semibold text-amber-800 dark:text-amber-400">
+                          {isChapterAudioPaused ? 'Paused' : 'Listening'} · {book.name} {selectedChapter}
+                        </span>
+                        <span className="shrink-0">
+                          {formatClock(chapterAudioProgress.remainingSec)} left
+                        </span>
+                      </div>
+                      <div
+                        className="h-1.5 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden"
+                        role="progressbar"
+                        aria-label={`Chapter audio progress for ${book.name} ${selectedChapter}`}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={Math.round(chapterAudioProgress.progress * 100)}
+                      >
+                        <div
+                          className="h-full rounded-full bg-amber-500 transition-[width] duration-500 ease-linear"
+                          style={{ width: `${Math.max(2, chapterAudioProgress.progress * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        soundEngine.stopSpeaking();
+                        resetChapterAudio();
+                      }}
+                      aria-label="Stop chapter audio"
+                      title="Stop audio"
+                      className="p-2 rounded-full text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-850 transition-colors shrink-0"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+
                 {readingLayout === 'flow' && selectedVerse != null && chapterData?.verses.some((verse) => verse.verse === selectedVerse) && (
                   <div className="w-full pt-1 border-t border-stone-200 dark:border-stone-800">
                     <p className="text-xs font-semibold text-amber-800 dark:text-amber-400 mb-1.5">

@@ -201,6 +201,9 @@ export function initPwaUpdateEngine(): () => void {
         periodicSync.register('testament-update-check', {
           minInterval: 60 * 60 * 1000 // 1 hour
         }).catch(() => {});
+        periodicSync.register('testament-memory-pulse', {
+          minInterval: 12 * 60 * 60 * 1000 // browser-controlled best effort
+        }).catch(() => {});
       } catch {
         // Periodic sync not permitted or supported
       }

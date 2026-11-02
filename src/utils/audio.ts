@@ -4,6 +4,18 @@
 export type NarratorProfile = 'cinematic' | 'brotherhood' | 'scholar' | 'grace';
 export type VoicePlaybackState = 'idle' | 'loading' | 'playing' | 'paused' | 'error';
 
+export interface NarrationProgressDetail {
+  narrationId: string | null;
+  state: VoicePlaybackState;
+  elapsedSec: number;
+  durationSec: number;
+  remainingSec: number;
+  progress: number;
+}
+
+/** Rough narration speed used to estimate speech-synthesis duration (characters/second). */
+const SPEECH_CHARS_PER_SECOND = 14.5;
+
 export interface VoiceMetadata {
   id: NarratorProfile;
   name: string;
@@ -121,6 +133,33 @@ class SoundEngine {
   /** Identifies the narration currently loaded so pause/resume cannot cross-wire different clips. */
   private activeNarrationId: string | null = null;
   private pausedNarrationId: string | null = null;
+  private progressTimer: ReturnType<typeof setInterval> | null = null;
+  private speechGeneration = 0;
+  private speechSession: {
+    generation: number;
+    fullText: string;
+    offsetChars: number;
+    boundaryChar: number;
+    startedAt: number;
+    elapsedMs: number;
+    durationSec: number;
+    onFinished: () => void;
+    voice: SpeechSynthesisVoice | null;
+    lang: string;
+    pitch: number;
+    rate: number;
+  } | null = null;
+  private pausedSpeech: {
+    fullText: string;
+    resumeChar: number;
+    elapsedMs: number;
+    durationSec: number;
+    onFinished: () => void;
+    voice: SpeechSynthesisVoice | null;
+    lang: string;
+    pitch: number;
+    rate: number;
+  } | null = null;
 
   public getPlaybackState(): VoicePlaybackState {
     return this.currentPlaybackState;
@@ -804,26 +843,47 @@ class SoundEngine {
         this.currentAudioElement.pause();
         this.pausedNarrationId = this.activeNarrationId ?? '';
         this.setPlaybackState('paused');
+        this.emitAudioProgress(this.currentAudioElement);
         return true;
       } catch {
         return false;
       }
     }
 
-    if (
-      typeof window !== 'undefined' &&
-      'speechSynthesis' in window &&
-      window.speechSynthesis.speaking &&
-      !window.speechSynthesis.paused
-    ) {
+    const session = this.speechSession;
+    if (session && this.currentPlaybackState === 'playing') {
+      const elapsedMs = this.getSpeechElapsedMs();
+      const estimatedChar = Math.floor(
+        session.fullText.length * Math.min(1, elapsedMs / Math.max(1, session.durationSec * 1000))
+      );
+      // Prefer the last spoken word boundary so resuming repeats at most one word.
+      const resumeChar = session.boundaryChar > session.offsetChars
+        ? session.boundaryChar
+        : Math.max(session.offsetChars, estimatedChar);
+
+      this.pausedSpeech = {
+        fullText: session.fullText,
+        resumeChar,
+        elapsedMs,
+        durationSec: session.durationSec,
+        onFinished: session.onFinished,
+        voice: session.voice,
+        lang: session.lang,
+        pitch: session.pitch,
+        rate: session.rate,
+      };
+      this.pausedNarrationId = this.activeNarrationId ?? '';
+      this.setPlaybackState('paused');
+      this.emitSpeechProgress();
+      this.stopProgressTicker();
+      this.speechSession = null;
+      this.speechGeneration += 1;
       try {
-        window.speechSynthesis.pause();
-        this.pausedNarrationId = this.activeNarrationId ?? '';
-        this.setPlaybackState('paused');
-        return true;
+        window.speechSynthesis.cancel();
       } catch {
-        return false;
+        /* ignore */
       }
+      return true;
     }
 
     return false;
@@ -842,20 +902,12 @@ class SoundEngine {
       return true;
     }
 
-    if (
-      typeof window !== 'undefined' &&
-      'speechSynthesis' in window &&
-      paused !== null &&
-      window.speechSynthesis.paused
-    ) {
-      try {
-        this.pausedNarrationId = null;
-        window.speechSynthesis.resume();
-        this.setPlaybackState('playing');
-        return true;
-      } catch {
-        return false;
-      }
+    if (this.pausedSpeech && paused !== null) {
+      const resume = this.pausedSpeech;
+      this.pausedSpeech = null;
+      this.pausedNarrationId = null;
+      this.speakSpeechFrom(resume.resumeChar, resume);
+      return true;
     }
 
     return false;
@@ -864,6 +916,65 @@ class SoundEngine {
   public isNarrationPaused(narrationId?: string): boolean {
     if (this.pausedNarrationId === null) return false;
     return narrationId ? this.pausedNarrationId === narrationId : true;
+  }
+
+  private emitProgress(detail: NarrationProgressDetail) {
+    if (typeof window === 'undefined') return;
+    window.dispatchEvent(new CustomEvent<NarrationProgressDetail>('testament:voice-progress', { detail }));
+  }
+
+  private emitAudioProgress(audio: HTMLAudioElement) {
+    const durationSec = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : 0;
+    const elapsedSec = Math.max(0, Math.min(durationSec || audio.currentTime, audio.currentTime || 0));
+    this.emitProgress({
+      narrationId: this.activeNarrationId,
+      state: this.currentPlaybackState,
+      elapsedSec,
+      durationSec,
+      remainingSec: Math.max(0, durationSec - elapsedSec),
+      progress: durationSec > 0 ? Math.min(1, elapsedSec / durationSec) : 0,
+    });
+  }
+
+  private getSpeechElapsedMs(): number {
+    const session = this.speechSession;
+    if (!session) return 0;
+    const running = this.currentPlaybackState === 'playing' ? Date.now() - session.startedAt : 0;
+    return session.elapsedMs + running;
+  }
+
+  private emitSpeechProgress() {
+    const session = this.speechSession;
+    if (!session) return;
+    const elapsedSec = this.getSpeechElapsedMs() / 1000;
+    // If the device voice runs longer than estimated, extend the estimate so the
+    // remaining time does not sit at 0:00 while narration is still speaking.
+    if (elapsedSec > session.durationSec) {
+      session.durationSec = elapsedSec + 15;
+    }
+    const durationSec = session.durationSec;
+    this.emitProgress({
+      narrationId: this.activeNarrationId,
+      state: this.currentPlaybackState,
+      elapsedSec,
+      durationSec,
+      remainingSec: Math.max(0, durationSec - elapsedSec),
+      progress: durationSec > 0 ? Math.min(1, elapsedSec / durationSec) : 0,
+    });
+  }
+
+  private startProgressTicker() {
+    this.stopProgressTicker();
+    this.progressTimer = setInterval(() => {
+      if (this.speechSession) this.emitSpeechProgress();
+    }, 500);
+  }
+
+  private stopProgressTicker() {
+    if (this.progressTimer) {
+      clearInterval(this.progressTimer);
+      this.progressTimer = null;
+    }
   }
 
   private playAssetOrSpeech(text: string, onFinished: () => void, audioAssetUrl?: string) {
@@ -876,10 +987,16 @@ class SoundEngine {
       try {
         const audio = new Audio(audioAssetUrl);
         this.currentAudioElement = audio;
-        audio.onplay = () => this.setPlaybackState('playing');
+        audio.onloadedmetadata = () => this.emitAudioProgress(audio);
+        audio.ontimeupdate = () => this.emitAudioProgress(audio);
+        audio.onplay = () => {
+          this.setPlaybackState('playing');
+          this.emitAudioProgress(audio);
+        };
         audio.onended = () => {
           this.currentAudioElement = null;
           this.setPlaybackState('idle');
+          this.emitAudioProgress(audio);
           onFinished();
         };
         audio.onerror = () => {
@@ -927,54 +1044,137 @@ class SoundEngine {
       return;
     }
 
+    const currentLang = (typeof document !== 'undefined' && document.documentElement?.lang) ||
+                        (typeof localStorage !== 'undefined' && localStorage.getItem('testament_language')) ||
+                        'en';
+
+    this.speakSpeechFrom(0, {
+      fullText: text,
+      elapsedMs: 0,
+      durationSec: Math.max(10, text.length / SPEECH_CHARS_PER_SECOND),
+      onFinished,
+      voice: this.getFallbackVoice(this.currentNarratorProfile),
+      lang: currentLang === 'fr' ? 'fr-FR' : currentLang === 'es' ? 'es-ES' : 'en-US',
+      pitch: 1.0,
+      rate: 1.0,
+    });
+  }
+
+  /**
+   * Speaks from a character offset. Pausing cancels speech and resuming starts a
+   * fresh utterance at the last word boundary, which works on browsers where
+   * `speechSynthesis.pause()/resume()` is unreliable (notably mobile Safari).
+   */
+  private speakSpeechFrom(
+    charIndex: number,
+    params: {
+      fullText: string;
+      elapsedMs: number;
+      durationSec: number;
+      onFinished: () => void;
+      voice: SpeechSynthesisVoice | null;
+      lang: string;
+      pitch: number;
+      rate: number;
+    }
+  ) {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      params.onFinished();
+      return;
+    }
+
+    let start = Math.max(0, Math.min(params.fullText.length, charIndex));
+    while (start < params.fullText.length && /\s/.test(params.fullText[start])) start += 1;
+    const segment = params.fullText.slice(start);
+
+    if (!segment.trim()) {
+      this.setPlaybackState('idle');
+      params.onFinished();
+      return;
+    }
+
     try {
-      window.speechSynthesis.cancel();
-
-      const matchedVoice = this.getFallbackVoice(this.currentNarratorProfile);
-
-      const utterance = new SpeechSynthesisUtterance(text);
-
-      const currentLang = (typeof document !== 'undefined' && document.documentElement?.lang) || 
-                          (typeof localStorage !== 'undefined' && localStorage.getItem('testament_language')) || 
-                          'en';
-      utterance.lang = currentLang === 'fr' ? 'fr-FR' : currentLang === 'es' ? 'es-ES' : 'en-US';
-
-      // Natural on-device voice at standard rate 1.0 and pitch 1.0
-      utterance.pitch = 1.0;
-      utterance.rate = 1.0;
-      if (matchedVoice) {
-        utterance.voice = matchedVoice;
+      const generation = ++this.speechGeneration;
+      try {
+        window.speechSynthesis.cancel();
+      } catch {
+        /* ignore */
       }
 
+      const utterance = new SpeechSynthesisUtterance(segment);
+      utterance.lang = params.lang;
+      utterance.pitch = params.pitch;
+      utterance.rate = params.rate;
+      if (params.voice) utterance.voice = params.voice;
+
+      this.speechSession = {
+        generation,
+        fullText: params.fullText,
+        offsetChars: start,
+        boundaryChar: start,
+        startedAt: Date.now(),
+        elapsedMs: params.elapsedMs,
+        durationSec: params.durationSec,
+        onFinished: params.onFinished,
+        voice: params.voice,
+        lang: params.lang,
+        pitch: params.pitch,
+        rate: params.rate,
+      };
+
       let finishedCalled = false;
-      const callFinishedOnce = () => {
-        if (!finishedCalled) {
-          finishedCalled = true;
-          onFinished();
+      const finish = (state: 'idle' | 'error', errorDetail?: string) => {
+        if (this.speechGeneration !== generation || finishedCalled) return;
+        finishedCalled = true;
+        const session = this.speechSession;
+        this.stopProgressTicker();
+        if (session) {
+          this.emitProgress({
+            narrationId: this.activeNarrationId,
+            state,
+            elapsedSec: session.durationSec,
+            durationSec: session.durationSec,
+            remainingSec: 0,
+            progress: 1,
+          });
+        }
+        this.speechSession = null;
+        this.setPlaybackState(state, errorDetail);
+        params.onFinished();
+      };
+
+      utterance.onboundary = (event: SpeechSynthesisEvent) => {
+        const session = this.speechSession;
+        if (!session || session.generation !== generation) return;
+        if (typeof event.charIndex === 'number') {
+          session.boundaryChar = session.offsetChars + event.charIndex;
+          this.emitSpeechProgress();
         }
       };
-
-      utterance.onend = () => {
-        this.setPlaybackState('idle');
-        callFinishedOnce();
-      };
-      utterance.onerror = () => {
-        this.setPlaybackState('error', 'Device voice unavailable');
-        callFinishedOnce();
-      };
+      utterance.onend = () => finish('idle');
+      utterance.onerror = () => finish('error', 'Device voice unavailable');
 
       this.setPlaybackState('playing');
+      this.startProgressTicker();
+      this.emitSpeechProgress();
       window.speechSynthesis.speak(utterance);
     } catch {
+      this.speechSession = null;
+      this.stopProgressTicker();
       this.setPlaybackState('error', 'Device voice unavailable');
-      onFinished();
+      params.onFinished();
     }
   }
 
   public stopSpeaking() {
     // Reset pause bookkeeping so a later play starts a fresh narration.
+    const wasNarrating = this.activeNarrationId !== null || this.currentPlaybackState !== 'idle';
     this.activeNarrationId = null;
     this.pausedNarrationId = null;
+    this.speechGeneration += 1;
+    this.speechSession = null;
+    this.pausedSpeech = null;
+    this.stopProgressTicker();
 
     // 1. Stop bundled audio element
     if (this.currentAudioElement) {
@@ -997,6 +1197,16 @@ class SoundEngine {
     }
 
     this.setPlaybackState('idle');
+    if (wasNarrating) {
+      this.emitProgress({
+        narrationId: null,
+        state: 'idle',
+        elapsedSec: 0,
+        durationSec: 0,
+        remainingSec: 0,
+        progress: 0,
+      });
+    }
 
     this.restoreAmbience();
   }

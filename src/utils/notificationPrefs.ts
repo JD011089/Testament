@@ -90,21 +90,118 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
   }
 }
 
-function msUntilNextTime(hhmm: string): number {
-  const [hStr, mStr] = hhmm.split(':');
-  const h = Number(hStr);
-  const m = Number(mStr);
-  const now = new Date();
-  const target = new Date(now);
-  target.setHours(h, m, 0, 0);
-  if (target.getTime() <= now.getTime()) {
-    target.setDate(target.getDate() + 1);
-  }
-  return Math.max(60_000, target.getTime() - now.getTime());
-}
-
 function todayKey(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const output = new Uint8Array(rawData.length);
+  for (let index = 0; index < rawData.length; index += 1) {
+    output[index] = rawData.charCodeAt(index);
+  }
+  return output;
+}
+
+let pushSyncCache: { key: string; ok: boolean; at: number } | null = null;
+
+/**
+ * Registers the device with Web Push and syncs the chosen reminder times.
+ * Server-side dispatch is what makes delivery reliable when the app is closed.
+ */
+export async function syncPushSubscription(prefs = getNotificationPrefs(), force = false): Promise<boolean> {
+  const cacheKey = `${prefs.dailyMission}:${prefs.morningTime}:${prefs.memoryPulse}:${prefs.recallTime}:${getNotificationPermission()}`;
+  if (!force && pushSyncCache && pushSyncCache.key === cacheKey && (pushSyncCache.ok || Date.now() - pushSyncCache.at < 60_000)) {
+    return pushSyncCache.ok;
+  }
+
+  const result = await subscribeToPush(prefs);
+  pushSyncCache = { key: cacheKey, ok: result, at: Date.now() };
+  return result;
+}
+
+async function subscribeToPush(prefs: NotificationPrefs): Promise<boolean> {
+  if (typeof window === 'undefined' || getNotificationPermission() !== 'granted') return false;
+  const publicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined;
+  if (!publicKey || !('serviceWorker' in navigator) || !('PushManager' in window)) return false;
+
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    let subscription = await registration.pushManager.getSubscription();
+    if (!subscription) {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey) as BufferSource,
+      });
+    }
+
+    const raw = subscription.toJSON();
+    if (!raw.endpoint || !raw.keys?.p256dh || !raw.keys?.auth) return false;
+
+    const slots: string[] = [];
+    if (prefs.dailyMission) slots.push(`morning:${prefs.morningTime}`);
+    if (prefs.memoryPulse) slots.push(`recall:${prefs.recallTime}`);
+
+    const response = await fetch('/api/notifications/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        subscription: { endpoint: raw.endpoint, keys: raw.keys },
+        slots,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+        enabled: slots.length > 0,
+      }),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+/** Cancels the server push registration when the user turns every reminder off. */
+export async function disablePushSubscription(): Promise<void> {
+  pushSyncCache = null;
+  if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    const subscription = await registration.pushManager.getSubscription();
+    if (!subscription) return;
+    await fetch('/api/notifications/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        subscription: subscription.toJSON(),
+        slots: [],
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+        enabled: false,
+      }),
+    });
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Sends a real Web Push message so the user can verify closed-app delivery. */
+export async function sendTestPush(): Promise<boolean> {
+  if (typeof window === 'undefined' || getNotificationPermission() !== 'granted') return false;
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return false;
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    const subscription = await registration.pushManager.getSubscription();
+    if (!subscription) return false;
+    const raw = subscription.toJSON();
+    if (!raw.endpoint || !raw.keys?.p256dh || !raw.keys?.auth) return false;
+    const response = await fetch('/api/notifications/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subscription: { endpoint: raw.endpoint, keys: raw.keys } }),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
 }
 
 async function postToServiceWorker(message: Record<string, unknown>): Promise<boolean> {
@@ -120,59 +217,65 @@ async function postToServiceWorker(message: Record<string, unknown>): Promise<bo
   }
 }
 
-/** Schedule the soonest enabled daily slot into the SW IndexedDB alarm. */
+/** Syncs server push, or schedules on-device alarms when push is unavailable. */
 export async function rescheduleNotificationAlarms(prefs = getNotificationPrefs()): Promise<void> {
-  await postToServiceWorker({ type: 'CANCEL_ALARM' });
+  if (getNotificationPermission() !== 'granted') {
+    await postToServiceWorker({ type: 'CANCEL_ALARM' });
+    return;
+  }
 
-  if (getNotificationPermission() !== 'granted') return;
+  // Web Push is the reliable path when the PWA/browser is closed.
+  const pushReady = await syncPushSubscription(prefs);
+  if (pushReady) {
+    await postToServiceWorker({ type: 'CANCEL_ALARM' });
+    return;
+  }
 
-  type Slot = { id: 'morning' | 'recall'; time: string; title: string; body: string };
-  const candidates: Slot[] = [];
+  type Slot = { id: 'morning' | 'recall'; time: string; title: string; body: string; url: string };
+  const slots: Slot[] = [];
   if (prefs.dailyMission) {
-    candidates.push({
+    slots.push({
       id: 'morning',
       time: prefs.morningTime,
       title: 'Testament — Morning mission',
       body: `Your daily story is ready (${formatTime12h(prefs.morningTime)}). Open Today to begin.`,
+      url: '/',
     });
   }
   if (prefs.memoryPulse) {
-    candidates.push({
+    slots.push({
       id: 'recall',
       time: prefs.recallTime,
       title: 'Testament — Memory pulse',
       body: `Quick verse recall (${formatTime12h(prefs.recallTime)}). Can you still say it?`,
+      url: '/practice',
     });
   }
-  if (candidates.length === 0) return;
 
-  let soonest = candidates[0];
-  let soonestMs = msUntilNextTime(soonest.time);
-  for (const slot of candidates.slice(1)) {
-    const ms = msUntilNextTime(slot.time);
-    if (ms < soonestMs) {
-      soonest = slot;
-      soonestMs = ms;
-    }
+  if (slots.length === 0) {
+    await postToServiceWorker({ type: 'CANCEL_ALARM' });
+    return;
   }
 
   await postToServiceWorker({
-    type: 'SCHEDULE_ALARM',
-    delayMs: soonestMs,
-    slot: soonest.id,
+    type: 'SET_NOTIFICATION_PLAN',
     todayKey: todayKey(),
-    title: soonest.title,
-    options: {
-      body: soonest.body,
-      icon: '/icons/icon-192.png',
-      badge: '/icons/badge-96.png',
-      tag: `testament-${soonest.id}`,
-      renotify: true,
-      data: {
-        type: soonest.id === 'morning' ? 'DAILY_MISSION' : 'MEMORY_PULSE',
-        url: soonest.id === 'morning' ? '/' : '/practice',
+    slots: slots.map((slot) => ({
+      id: slot.id,
+      time: slot.time,
+      title: slot.title,
+      options: {
+        body: slot.body,
+        icon: '/icons/icon-192.png',
+        badge: '/icons/badge-96.png',
+        tag: `testament-${slot.id}`,
+        renotify: false,
+        data: {
+          type: slot.id === 'morning' ? 'DAILY_MISSION' : 'MEMORY_PULSE',
+          url: slot.url,
+        },
       },
-    },
+    })),
   });
 }
 
