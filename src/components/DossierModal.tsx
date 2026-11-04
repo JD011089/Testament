@@ -63,7 +63,7 @@ export const DossierModal: React.FC<DossierModalProps> = ({
         {/* Header */}
         <div className="p-5 md:p-6 border-b border-stone-200/60 dark:border-stone-800 flex items-center justify-between bg-stone-50 dark:bg-stone-950/60">
           <div>
-            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
+            <div className="flex items-center gap-2 text-xs font-sans tabular-nums font-bold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
               <Zap className="w-4 h-4" />
               <span>Character Dossiers • Flawed Men, Real Impact</span>
             </div>
@@ -117,13 +117,13 @@ export const DossierModal: React.FC<DossierModalProps> = ({
 
             {/* Profile Core */}
             <div className="space-y-2 flex-1">
-              <span className="text-xs font-mono text-amber-800 dark:text-amber-400 uppercase tracking-widest font-bold">
+              <span className="text-xs font-sans tabular-nums text-amber-800 dark:text-amber-400 uppercase tracking-widest font-bold">
                 {character.era}
               </span>
               <h3 className="text-2xl md:text-3xl font-serif font-black text-stone-900 dark:text-parchment-50">
                 {character.name}
               </h3>
-              <div className="inline-block px-3 py-1 rounded-md bg-amber-500/15 text-xs font-mono text-amber-800 dark:text-amber-300">
+              <div className="inline-block px-3 py-1 rounded-md bg-amber-500/15 text-xs font-sans tabular-nums text-amber-800 dark:text-amber-300">
                 Code: {character.codename}
               </div>
               <p className="text-xs md:text-sm text-stone-700 dark:text-stone-300 pt-1">

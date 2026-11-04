@@ -91,10 +91,10 @@ export const StorytellerModal: React.FC<StorytellerModalProps> = ({
         <div className="flex items-center justify-between pb-3 border-b border-stone-200/70 dark:border-stone-800/70 shrink-0">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
+              <span className="text-[10px] font-sans tabular-nums uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
                 Storyteller Mode • Retell & Teach
               </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300">
+              <span className="text-[10px] font-sans tabular-nums px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300">
                 {step === 'prompt' ? 'Step 1 of 2: In Your Words' : 'Step 2 of 2: Side-by-Side'}
               </span>
             </div>
@@ -160,10 +160,10 @@ export const StorytellerModal: React.FC<StorytellerModalProps> = ({
                 {/* Column 1: User's Words */}
                 <div className="p-4 rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/50 flex flex-col">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold">
+                    <span className="text-[10px] font-sans tabular-nums uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold">
                       Your Retelling
                     </span>
-                    <span className="text-[10px] font-mono text-stone-500">
+                    <span className="text-[10px] font-sans tabular-nums text-stone-500">
                       Verbatim input
                     </span>
                   </div>
@@ -175,7 +175,7 @@ export const StorytellerModal: React.FC<StorytellerModalProps> = ({
                 {/* Column 2: App's Faithful Retelling */}
                 <div className="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/5 dark:bg-amber-950/20 flex flex-col space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-amber-900 dark:text-amber-300 font-bold">
+                    <span className="text-[10px] font-sans tabular-nums uppercase tracking-wider text-amber-900 dark:text-amber-300 font-bold">
                       Faithful Retelling
                     </span>
                   </div>

@@ -76,7 +76,7 @@ export const CharacterArcModal: React.FC<CharacterArcModalProps> = ({
   };
 
   return (
-    <FullPage title="People and character arcs" titleId="people-page-title" onBack={onClose} wide>
+    <FullPage title="People" titleId="people-page-title" onBack={onClose} wide>
       <div className="space-y-6">
             <p className="text-base text-stone-600 dark:text-stone-300">
               Follow their real human journey moment by moment
@@ -117,7 +117,7 @@ export const CharacterArcModal: React.FC<CharacterArcModalProps> = ({
                     <h3 className="text-base sm:text-lg font-serif font-black text-stone-900 dark:text-parchment-50">
                       {activeArc.name}
                     </h3>
-                    <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 font-semibold">
+                    <span className="text-[11px] font-sans tabular-nums text-amber-800 dark:text-amber-400 font-semibold">
                       {moments.length}{' '}moments
                     </span>
                   </div>
@@ -154,10 +154,10 @@ export const CharacterArcModal: React.FC<CharacterArcModalProps> = ({
                 <div className="p-5 rounded-2xl bg-stone-50 dark:bg-stone-850/80 border border-stone-200/80 dark:border-stone-800 space-y-4">
                   {/* Step Tracker */}
                   <div className="flex items-center justify-between text-xs text-stone-500 dark:text-stone-400">
-                    <span className="font-mono text-amber-800 dark:text-amber-400 font-bold uppercase tracking-wider">
+                    <span className="font-sans tabular-nums text-amber-800 dark:text-amber-400 font-bold uppercase tracking-wider">
                       Moment{' '}{currentMoment.order}{' '}of{' '}{moments.length}
                     </span>
-                    <span className="font-mono text-[11px] bg-stone-200/70 dark:bg-stone-800 px-2 py-0.5 rounded-md text-stone-800 dark:text-stone-200">
+                    <span className="font-sans tabular-nums text-[11px] bg-stone-200/70 dark:bg-stone-800 px-2 py-0.5 rounded-md text-stone-800 dark:text-stone-200">
                       {currentMoment.passageReference}
                     </span>
                   </div>
@@ -169,7 +169,7 @@ export const CharacterArcModal: React.FC<CharacterArcModalProps> = ({
 
                   {/* What Happened (2-3 sentences) */}
                   <div className="space-y-1">
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-stone-500 font-bold block">
+                    <span className="text-[10px] font-sans tabular-nums uppercase tracking-wider text-stone-500 font-bold block">
                       What Unfolded
                     </span>
                     <p className="text-xs sm:text-sm font-reading text-stone-800 dark:text-parchment-100 leading-relaxed">
@@ -179,7 +179,7 @@ export const CharacterArcModal: React.FC<CharacterArcModalProps> = ({
 
                   {/* The Human Angle */}
                   <div className="p-3 rounded-xl bg-amber-500/10 border-l-2 border-amber-500/80 text-xs text-stone-800 dark:text-parchment-100 space-y-1">
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold block">
+                    <span className="text-[10px] font-sans tabular-nums uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold block">
                       The Human Angle
                     </span>
                     <p className="font-reading leading-relaxed italic">
@@ -189,7 +189,7 @@ export const CharacterArcModal: React.FC<CharacterArcModalProps> = ({
 
                   {/* Reader Connection Line */}
                   <div className="space-y-1 pt-1">
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-stone-500 font-bold block">
+                    <span className="text-[10px] font-sans tabular-nums uppercase tracking-wider text-stone-500 font-bold block">
                       Connection to Your Life
                     </span>
                     <p className="text-xs sm:text-sm font-reading text-stone-900 dark:text-stone-200 leading-relaxed font-medium">
@@ -223,7 +223,7 @@ export const CharacterArcModal: React.FC<CharacterArcModalProps> = ({
                           </p>
                         </div>
                         {currentMoment.goDeeper.crossReference && (
-                          <div className="pt-1 text-[11px] font-mono text-amber-800 dark:text-amber-400">
+                          <div className="pt-1 text-[11px] font-sans tabular-nums text-amber-800 dark:text-amber-400">
                             {currentMoment.goDeeper.crossReference}
                           </div>
                         )}
@@ -250,7 +250,7 @@ export const CharacterArcModal: React.FC<CharacterArcModalProps> = ({
                 <span>Previous moment</span>
               </button>
 
-              <span className="text-xs font-mono text-stone-500 dark:text-stone-400 hidden sm:block">
+              <span className="text-xs font-sans tabular-nums text-stone-500 dark:text-stone-400 hidden sm:block">
                 {momentIndex + 1} / {moments.length}
               </span>
 

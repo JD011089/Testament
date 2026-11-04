@@ -17,7 +17,7 @@ export const HowTestamentWorksModal: React.FC<HowTestamentWorksModalProps> = ({
 
   return (
     <FullPage title="How Testament works" titleId="how-it-works-title" onBack={handleClose}>
-      <p className="text-sm font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
+      <p className="text-sm font-sans tabular-nums uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
         Trust and transparency
       </p>
       <div className="space-y-8">
@@ -58,7 +58,7 @@ export const HowTestamentWorksModal: React.FC<HowTestamentWorksModalProps> = ({
               </li>
               <li className="flex items-start gap-2">
                 <Check aria-hidden="true" className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                <span><strong>Reflections are clearly marked</strong> as <span className="font-mono text-[11px] text-amber-700 dark:text-amber-400">"Not Scripture"</span> so there is never ambiguity.</span>
+                <span><strong>Reflections are clearly marked</strong> as <span className="font-sans tabular-nums text-[11px] text-amber-700 dark:text-amber-400">"Not Scripture"</span> so there is never ambiguity.</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check aria-hidden="true" className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />

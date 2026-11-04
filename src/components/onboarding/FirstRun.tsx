@@ -15,9 +15,9 @@ export function FirstRun({ onDone }: FirstRunProps) {
   const [reminder, setReminder] = useState('08:00');
   const rootRef = useModalLock(true);
   const screens = useMemo(() => [
-    { icon: <Play className="w-8 h-8" />, title: t('firstRun.s1.title'), body: t('firstRun.s1.body') },
-    { icon: <Layers className="w-8 h-8" />, title: t('firstRun.s2.title'), body: t('firstRun.s2.body') },
-    { icon: <Bell className="w-8 h-8" />, title: t('firstRun.s3.title'), body: t('firstRun.s3.body') },
+    { icon: <Play className="w-6 h-6" />, art: '/images/stories/finished/david-and-goliath.jpg', title: t('firstRun.s1.title'), body: t('firstRun.s1.body') },
+    { icon: <Layers className="w-6 h-6" />, art: '/images/stories/finished/red-sea.jpg', title: t('firstRun.s2.title'), body: t('firstRun.s2.body') },
+    { icon: <Bell className="w-6 h-6" />, art: '/images/stories/finished/creation.jpg', title: t('firstRun.s3.title'), body: t('firstRun.s3.body') },
   ], [t]);
   const isLast = index === screens.length - 1;
   const screen = screens[index];
@@ -36,9 +36,22 @@ export function FirstRun({ onDone }: FirstRunProps) {
   };
 
   return (
-    <div ref={rootRef} className="fixed inset-0 z-50 bg-bg text-fg flex flex-col overscroll-none touch-pan-y">
-      <div className="flex-1 max-w-md mx-auto w-full px-6 flex flex-col justify-center gap-6 text-center">
-        <div className="w-16 h-16 mx-auto rounded-2xl bg-accent/15 border border-accent/40 flex items-center justify-center text-accent">
+    <div ref={rootRef} className="fixed inset-0 z-50 bg-bg text-fg flex flex-col overscroll-none touch-pan-y overflow-y-auto">
+      {/* Story art fills the top and fades into the page */}
+      <div className="relative h-[42dvh] min-h-[220px] shrink-0 overflow-hidden" aria-hidden="true">
+        {screens.map((s, i) => (
+          <img
+            key={s.art}
+            src={s.art}
+            alt=""
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${i === index ? 'opacity-100' : 'opacity-0'}`}
+            loading={i === 0 ? 'eager' : 'lazy'}
+          />
+        ))}
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_45%,rgb(var(--color-bg))_100%)]" />
+      </div>
+      <div className="flex-1 max-w-md mx-auto w-full px-6 -mt-8 relative flex flex-col items-center gap-4 text-center">
+        <div className="w-14 h-14 rounded-2xl bg-accent text-accent-on shadow-[0_10px_24px_-8px_rgb(var(--color-accent)/0.7)] flex items-center justify-center">
           {screen.icon}
         </div>
         <h1 className="text-title-1 font-serif text-fg">{screen.title}</h1>

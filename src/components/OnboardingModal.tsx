@@ -110,7 +110,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
     },
     {
       id: 'tactical' as const,
-      title: 'Tactical & Hands-On Drills',
+      title: 'Hands-on practice',
       desc: 'Practice tile puzzles, memory retention drills, and real-life scenario simulators.',
       icon: '🧠'
     },
@@ -235,7 +235,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 <h3 id="onboarding-modal-title" className="text-sm sm:text-base font-serif font-bold text-stone-900 dark:text-parchment-50">
                   Personalize Your Plan
                 </h3>
-                <span className="text-xs uppercase font-mono px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30">
+                <span className="text-xs uppercase font-sans tabular-nums px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30">
                   {step < 5 ? `Step ${step} of 4` : 'Ready'}
                 </span>
               </div>
@@ -281,7 +281,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
           {step === 1 && (
             <div className="space-y-4 animate-fadeIn">
               <div>
-                <div className="flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
+                <div className="flex items-center gap-1.5 text-xs font-sans tabular-nums font-bold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
                   <Shield className="w-3.5 h-3.5" />
                   <span>The front lines</span>
                 </div>
@@ -350,7 +350,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
           {step === 2 && (
             <div className="space-y-4 animate-fadeIn">
               <div>
-                <div className="flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
+                <div className="flex items-center gap-1.5 text-xs font-sans tabular-nums font-bold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
                   <Brain className="w-3.5 h-3.5" />
                   <span>Cognitive Style</span>
                 </div>
@@ -401,7 +401,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
           {step === 3 && (
             <div className="space-y-4 animate-fadeIn">
               <div>
-                <div className="flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
+                <div className="flex items-center gap-1.5 text-xs font-sans tabular-nums font-bold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
                   <BookOpen className="w-3.5 h-3.5" />
                   <span>Scripture Familiarity</span>
                 </div>
@@ -432,7 +432,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-1">
                           <h4 className="text-sm font-bold text-stone-900 dark:text-parchment-100">{fam.title}</h4>
-                          <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-amber-800 dark:text-amber-400 border border-stone-200 dark:border-stone-700">
+                          <span className="text-[11px] font-sans tabular-nums px-2 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-amber-800 dark:text-amber-400 border border-stone-200 dark:border-stone-700">
                             {fam.tag}
                           </span>
                         </div>
@@ -454,7 +454,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
           {step === 4 && (
             <div className="space-y-4 animate-fadeIn">
               <div>
-                <div className="flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
+                <div className="flex items-center gap-1.5 text-xs font-sans tabular-nums font-bold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
                   <Clock className="w-3.5 h-3.5" />
                   <span>Daily Commitment</span>
                 </div>
@@ -503,7 +503,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
           {step === 5 && (
             <div className="space-y-5 animate-fadeIn">
               <div className="text-center py-2">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-600/50 text-emerald-800 dark:text-emerald-300 text-xs font-mono font-bold mb-3 shadow-sm">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-600/50 text-emerald-800 dark:text-emerald-300 text-xs font-sans tabular-nums font-bold mb-3 shadow-sm">
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>Calibration Complete • +50 Starter XP Awarded</span>
                 </div>
@@ -519,7 +519,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               <div className="p-5 rounded-2xl bg-amber-50/60 dark:bg-gradient-to-br dark:from-[#1a1713] dark:to-[#101217] border-2 border-amber-400 dark:border-amber-500/70 shadow-sm dark:shadow-glow space-y-4">
                 <div className="flex items-start justify-between gap-3 border-b border-amber-200 dark:border-amber-900/40 pb-3">
                   <div>
-                    <div className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
+                    <div className="text-[11px] font-sans tabular-nums uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
                       Recommended Starter Quest
                     </div>
                     <h3 className="text-base sm:text-lg font-serif font-bold text-stone-900 dark:text-parchment-100 mt-0.5">
@@ -536,11 +536,11 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   </div>
 
                   <div className="p-3 rounded-xl bg-white dark:bg-stone-900/80 border border-amber-200 dark:border-stone-800 text-stone-800 dark:text-parchment-200 italic shadow-xs">
-                    <strong className="text-amber-800 dark:text-amber-300 not-italic">Primary Tactical Verse: </strong>
+                    <strong className="text-amber-800 dark:text-amber-300 not-italic">Key verse: </strong>
                     "{selectedBattleObj.primaryVerse}"
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 pt-1 text-[11px] text-stone-600 dark:text-stone-400 font-mono">
+                  <div className="grid grid-cols-2 gap-2 pt-1 text-[11px] text-stone-600 dark:text-stone-400 font-sans tabular-nums">
                     <div>
                       <span className="text-stone-500">Style: </span>
                       <span className="text-amber-800 dark:text-amber-300 font-bold uppercase">{learningStyle}</span>
@@ -556,7 +556,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               {/* Mode Selection on Onboarding */}
               <div className="space-y-2 pt-1">
                 <div className="text-left">
-                  <div className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
+                  <div className="text-[11px] font-sans tabular-nums uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
                     Learner Mode Lens
                   </div>
                   <p className="text-xs text-stone-600 dark:text-stone-400">
@@ -587,7 +587,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       >
                         <div className="flex items-center justify-between mb-0.5">
                           <span className="font-serif font-bold text-xs sm:text-sm">{m.title}</span>
-                          <span className="text-[9px] font-mono uppercase font-bold text-amber-800 dark:text-amber-400 px-1 py-0.2 rounded-sm bg-amber-500/10">
+                          <span className="text-[9px] font-sans tabular-nums uppercase font-bold text-amber-800 dark:text-amber-400 px-1 py-0.2 rounded-sm bg-amber-500/10">
                             {m.badge}
                           </span>
                         </div>

@@ -37,16 +37,16 @@ export const WeeklyRecapCard: React.FC<WeeklyRecapCardProps> = ({ forceExpanded 
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold">
+              <span className="text-[11px] font-sans tabular-nums uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold">
                 {recap.seriesHeroName
                   ? (recap.isMonday ? `Monday Recap • Your Week with ${recap.seriesHeroName}` : `Your Week with ${recap.seriesHeroName}`)
                   : (recap.isMonday ? "Monday Recap • Your Week in the Story" : "Your Week in the Story")}
               </span>
-              <span className="text-[10px] font-mono text-stone-500 dark:text-stone-400 bg-stone-200/60 dark:bg-stone-800 px-2 py-0.5 rounded-full">
+              <span className="text-[10px] font-sans tabular-nums text-stone-500 dark:text-stone-400 bg-stone-200/60 dark:bg-stone-800 px-2 py-0.5 rounded-full">
                 60-sec read
               </span>
               {streak > 0 && (
-                <span className="text-[10px] font-mono font-bold text-orange-700 dark:text-orange-300 bg-orange-500/15 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-sans tabular-nums font-bold text-orange-700 dark:text-orange-300 bg-orange-500/15 px-2 py-0.5 rounded-full">
                   {streak}d streak
                 </span>
               )}
@@ -71,7 +71,7 @@ export const WeeklyRecapCard: React.FC<WeeklyRecapCardProps> = ({ forceExpanded 
         <div className="mt-4 pt-3 border-t border-stone-200/60 dark:border-stone-800/60 space-y-4 animate-in fade-in duration-200">
           {/* Narrative Thread (2-3 sentences) */}
           <div className="p-3.5 rounded-xl bg-amber-500/10 border-l-2 border-amber-500 text-xs sm:text-sm font-reading text-stone-800 dark:text-parchment-100 leading-relaxed">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold block mb-1">
+            <span className="text-[10px] font-sans tabular-nums uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold block mb-1">
               The Narrative Thread
             </span>
             {recap.narrativeThread}
@@ -79,7 +79,7 @@ export const WeeklyRecapCard: React.FC<WeeklyRecapCardProps> = ({ forceExpanded 
 
           {/* 7-Day Timeline: Zero Guilt Language */}
           <div className="space-y-2">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-stone-600 dark:text-stone-400 font-bold block">
+            <span className="text-[11px] font-sans tabular-nums uppercase tracking-wider text-stone-600 dark:text-stone-400 font-bold block">
               The 7-Day Arc
             </span>
             <div className="space-y-1.5">
@@ -113,7 +113,7 @@ export const WeeklyRecapCard: React.FC<WeeklyRecapCardProps> = ({ forceExpanded 
               <Sparkles aria-hidden="true" className="w-3.5 h-3.5 text-amber-500" />
               <span>Where the story goes next</span>
             </span>
-            <span className="text-[11px] font-mono text-amber-700 dark:text-amber-400 flex items-center gap-1">
+            <span className="text-[11px] font-sans tabular-nums text-amber-700 dark:text-amber-400 flex items-center gap-1">
               <span>Tomorrow teaser ready</span>
               <ArrowRight aria-hidden="true" className="w-3 h-3" />
             </span>

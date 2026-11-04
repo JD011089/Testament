@@ -404,7 +404,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
               <span className="text-lg font-serif font-bold text-amber-800 dark:text-amber-400">
                 {verse.reference}
               </span>
-              <span className="text-xs px-2 py-0.5 rounded bg-stone-200/70 dark:bg-stone-800 text-stone-600 dark:text-stone-400 font-mono">
+              <span className="text-xs px-2 py-0.5 rounded bg-stone-200/70 dark:bg-stone-800 text-stone-600 dark:text-stone-400 font-sans tabular-nums">
                 {verse.translation}
               </span>
               {isMastered && (
@@ -414,7 +414,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                 </span>
               )}
               {verse.id === getDailyVerse(0, language).id && (
-                <span className="flex items-center gap-1 text-[11px] font-mono font-bold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/70 px-2 py-0.5 rounded-full">
+                <span className="flex items-center gap-1 text-[11px] font-sans tabular-nums font-bold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/70 px-2 py-0.5 rounded-full">
                   <Sparkles className="w-3 h-3 text-amber-800 dark:text-amber-400" />
                   <span>{t('forge.dailyTruth')}</span>
                 </span>
@@ -456,7 +456,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
           </div>
 
           <div className="p-3 bg-stone-200/50 dark:bg-stone-950/70 rounded-xl text-xs md:text-sm text-stone-700 dark:text-stone-300 italic">
-            <span className="not-italic inline-flex items-center gap-1 text-[10px] font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-300 bg-amber-500/15 px-2 py-0.5 rounded-full mb-1.5" role="note" aria-label="Plain English, Not Scripture">
+            <span className="not-italic inline-flex items-center gap-1 text-[10px] font-sans tabular-nums font-bold uppercase tracking-widest text-amber-800 dark:text-amber-300 bg-amber-500/15 px-2 py-0.5 rounded-full mb-1.5" role="note" aria-label="Plain English, Not Scripture">
               Plain English • Not Scripture
             </span>
             <span className="block">"{verse.plainEnglishSummary}"</span>
@@ -522,10 +522,10 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
           <div className="space-y-4">
             <div className="p-5 md:p-6 rounded-2xl bg-stone-100/70 dark:bg-stone-900/60 space-y-5">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-mono uppercase font-bold text-amber-800 dark:text-amber-400">
+                <span className="font-sans tabular-nums uppercase font-bold text-amber-800 dark:text-amber-400">
                   Quick Recall Drill • 1 Round
                 </span>
-                <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400">
+                <span className="text-[11px] font-sans tabular-nums text-stone-500 dark:text-stone-400">
                   {isCompleted ? '✓ Complete' : `Blank ${activeBlankStep + 1} of ${blankIndices.length}`}
                 </span>
               </div>
@@ -558,7 +558,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                     return (
                       <React.Fragment key={idx}>
                         <span
-                          className={`inline-flex items-center justify-center min-w-[3.75rem] h-6 px-3 py-0.5 rounded-lg border-b-2 align-middle transition-all font-mono text-xs ${
+                          className={`inline-flex items-center justify-center min-w-[3.75rem] h-6 px-3 py-0.5 rounded-lg border-b-2 align-middle transition-all font-sans tabular-nums text-xs ${
                             isCurrent
                               ? 'bg-amber-500/20 border-amber-500 text-amber-800 dark:text-amber-300 ring-2 ring-amber-500/60 shadow-xs animate-pulse font-bold'
                               : 'bg-stone-200/70 dark:bg-stone-800/80 border-stone-400/80 dark:border-stone-600 text-transparent'
@@ -607,7 +607,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
               ) : (
                 <div className="p-4 rounded-xl bg-emerald-500/15 text-stone-900 dark:text-parchment-50 flex items-center justify-between gap-3">
                   <div>
-                    <span className="text-xs font-mono uppercase font-bold text-emerald-800 dark:text-emerald-400 block">
+                    <span className="text-xs font-sans tabular-nums uppercase font-bold text-emerald-800 dark:text-emerald-400 block">
                       ✓ Recall round complete
                     </span>
                     <p className="text-xs text-stone-600 dark:text-stone-300 mt-0.5">
@@ -630,7 +630,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
           /* PROGRESSIVE REVEAL MODE */
           <div className="space-y-4">
             <div className="p-5 md:p-6 rounded-2xl bg-stone-100/70 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 space-y-4">
-              <div className="flex items-center justify-between text-xs font-mono text-stone-500 dark:text-stone-400">
+              <div className="flex items-center justify-between text-xs font-sans tabular-nums text-stone-500 dark:text-stone-400">
                 <span>Phrase {Math.min(revealedPhraseCount, phrases.length)} of {phrases.length}</span>
                 <span>{Math.round((Math.min(revealedPhraseCount, phrases.length) / phrases.length) * 100)}%</span>
               </div>
@@ -694,7 +694,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
 
             {/* Assembly Work Area */}
             <div>
-              <div className="text-xs uppercase font-mono tracking-wider text-stone-600 dark:text-stone-400 mb-2 flex items-center justify-between">
+              <div className="text-xs uppercase font-sans tabular-nums tracking-wider text-stone-600 dark:text-stone-400 mb-2 flex items-center justify-between">
                 <span>
                   {forgeMode === 'phrases'
                     ? `Phrase ${currentPhraseIdx + 1} of ${phrases.length} (${assembledWords.length}/${targetWords.length} words)`
@@ -708,7 +708,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
               <div className="min-h-[140px] md:min-h-[160px] p-4 md:p-5 rounded-2xl bg-stone-100/50 dark:bg-ink border border-dashed border-stone-300/70 dark:border-stone-800/70 flex flex-wrap items-center content-start gap-2.5 transition-colors">
                 {isPeeking ? (
                   <div className="w-full rounded-xl bg-stone-900 text-white p-4 md:p-5">
-                    <p className="text-xs font-mono uppercase tracking-widest text-amber-300 mb-2">Scripture (Verbatim)</p>
+                    <p className="text-xs font-sans tabular-nums uppercase tracking-widest text-amber-300 mb-2">Scripture (Verbatim)</p>
                     <p className="font-reading text-base md:text-lg italic leading-relaxed text-white">&ldquo;{verse.text}&rdquo;</p>
                   </div>
                 ) : (
@@ -716,7 +716,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                     {/* Previously completed phrases in phrase mode */}
                     {forgeMode === 'phrases' && completedPhrases.length > 0 && (
                       <div className="w-full pb-2 mb-2 border-b border-stone-200 dark:border-stone-800 flex flex-wrap gap-1.5 items-center">
-                        <span className="text-xs font-mono text-emerald-700 dark:text-emerald-400 font-bold mr-1">✓ Completed:</span>
+                        <span className="text-xs font-sans tabular-nums text-emerald-700 dark:text-emerald-400 font-bold mr-1">✓ Completed:</span>
                         {completedPhrases.map((phrase, idx) => (
                           <span key={idx} className="px-2 py-0.5 rounded-md bg-emerald-100/80 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-reading">
                             {phrase}
@@ -760,10 +760,10 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
 
             {/* Available Words Bank (≤8 tiles in phrase mode!) */}
             <div>
-              <div className="text-xs uppercase font-mono tracking-wider text-stone-600 dark:text-stone-400 mb-2 flex items-center justify-between">
+              <div className="text-xs uppercase font-sans tabular-nums tracking-wider text-stone-600 dark:text-stone-400 mb-2 flex items-center justify-between">
                 <span>{useFirstLetters ? t('forge.firstLetterTiles') : t('forge.wordTiles')}</span>
                 {forgeMode === 'phrases' && (
-                  <span className="text-xs font-mono text-amber-800 dark:text-amber-400">
+                  <span className="text-xs font-sans tabular-nums text-amber-800 dark:text-amber-400">
                     {availableWords.length} words in this phrase
                   </span>
                 )}
@@ -832,7 +832,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                 </p>
               ) : (
               <div className="p-3.5 rounded-xl bg-white/80 dark:bg-black/40 mb-3">
-                <div className="text-xs font-mono font-medium text-emerald-800 dark:text-emerald-300 mb-2 flex items-center justify-between">
+                <div className="text-xs font-sans tabular-nums font-medium text-emerald-800 dark:text-emerald-300 mb-2 flex items-center justify-between">
                   <span>{fsrsRated
                     ? <>{t('forge.howEasily')} <strong className="text-emerald-600 dark:text-emerald-400">{t('forge.retentionLogged')}</strong></>
                     : autoSaved
@@ -1050,7 +1050,7 @@ export const WordForge: React.FC<WordForgeProps> = ({
       {/* Header */}
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
+          <div className="flex items-center gap-2 text-xs font-sans tabular-nums font-semibold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
             <Flame className="w-4 h-4" />
             <span>{t('forge.badge')}</span>
           </div>
@@ -1132,7 +1132,7 @@ export const WordForge: React.FC<WordForgeProps> = ({
           {t('forge.previousVerse')}
         </button>
 
-        <span className="text-xs font-mono text-stone-500 dark:text-stone-400 font-medium">
+        <span className="text-xs font-sans tabular-nums text-stone-500 dark:text-stone-400 font-medium">
           {t('forge.verseCount', { current: safeIndex + 1, total: filteredVerses.length })}
         </span>
 

@@ -149,7 +149,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
                   <h3 id="psalms-medic-title" className="text-base sm:text-lg font-serif font-black text-stone-900 dark:text-parchment-50 leading-tight">
                     {t('medic.title')}
                   </h3>
-                  <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/60 text-amber-900 dark:text-amber-300 font-bold uppercase tracking-wider">
+                  <span className="text-[11px] font-sans tabular-nums px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/60 text-amber-900 dark:text-amber-300 font-bold uppercase tracking-wider">
                     {t('medic.badge')}
                   </span>
                 </div>
@@ -163,7 +163,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
             <div className="flex items-center gap-2">
               {onToggleAmbience && (
                 <div className="flex items-center gap-1 bg-stone-100 dark:bg-stone-950 p-1 rounded-xl border border-stone-250 dark:border-stone-800 text-xs">
-                  <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400 px-1.5 flex items-center gap-1">
+                  <span className="text-[11px] font-sans tabular-nums text-stone-500 dark:text-stone-400 px-1.5 flex items-center gap-1">
                     <Volume2 className="w-3 h-3 text-amber-800 dark:text-amber-500" />
                     <span className="hidden sm:inline">{t('medic.atmosphere')}</span>
                   </span>
@@ -220,7 +220,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
 
           {/* Crisis Mood Triage Selector */}
           <div className="px-4 py-3 border-b border-stone-200 dark:border-stone-800/80 bg-stone-50 dark:bg-stone-950/70 shrink-0">
-            <div className="text-[11px] font-mono text-stone-500 dark:text-stone-400 mb-2 flex items-center gap-1.5">
+            <div className="text-[11px] font-sans tabular-nums text-stone-500 dark:text-stone-400 mb-2 flex items-center gap-1.5">
               <Compass className="w-3.5 h-3.5 text-amber-800 dark:text-amber-500" />
               <span>{t('medic.triage')}</span>
             </div>
@@ -258,11 +258,11 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
               {/* Active Prescription Card */}
               <div className="p-5 sm:p-6 rounded-2xl bg-stone-50 dark:bg-ink-raised border-2 border-amber-500/25 dark:border-amber-500/30 shadow-xl relative overflow-hidden">
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400 flex items-center gap-1.5">
+                  <span className="text-xs font-sans tabular-nums font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400 flex items-center gap-1.5">
                     <span>{activeItem.moodIcon}</span>
                     <span>{t('medic.emergencyPrescription', { mood: getMoodLabel(activeItem.moodId) })}</span>
                   </span>
-                  <span className="text-sm font-mono font-bold text-amber-800 dark:text-amber-500">
+                  <span className="text-sm font-sans tabular-nums font-bold text-amber-800 dark:text-amber-500">
                     {activeItem.reference}
                   </span>
                 </div>
@@ -275,7 +275,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
                 <div className="p-3 rounded-xl bg-white dark:bg-black/40 border border-stone-250 dark:border-stone-800 text-xs text-stone-700 dark:text-stone-300 leading-relaxed mb-4 flex items-start gap-2.5">
                   <ShieldAlert className="w-4 h-4 text-amber-800 dark:text-amber-500 shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-mono font-bold text-amber-800 dark:text-amber-400 uppercase text-[11px] block mb-0.5">
+                    <span className="font-sans tabular-nums font-bold text-amber-800 dark:text-amber-400 uppercase text-[11px] block mb-0.5">
                       {t('medic.symptomAudit')}
                     </span>
                     <span>{activeItem.symptomCheck}</span>
@@ -284,7 +284,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
 
                 {/* Scripture & Street Breakdown */}
                 <div className="p-4 sm:p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/25 border border-amber-200 dark:border-amber-800/40 relative mb-4">
-                  <div className="flex items-center justify-between text-xs font-mono text-amber-800 dark:text-amber-400 mb-2">
+                  <div className="flex items-center justify-between text-xs font-sans tabular-nums text-amber-800 dark:text-amber-400 mb-2">
                     <span className="font-bold flex items-center gap-1">
                       <Sparkles className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
                       <span>{t('medic.scriptureUnderFire')}</span>
@@ -316,7 +316,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
 
                 {/* The 3-Step Field Medic Protocol */}
                 <div className="space-y-3 pt-2">
-                  <div className="text-xs font-mono font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400">
+                  <div className="text-xs font-sans tabular-nums font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400">
                     {t('medic.threeStepProtocol')}
                   </div>
 
@@ -328,11 +328,11 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
                           key={idx}
                           className="p-3.5 rounded-xl bg-white dark:bg-stone-900/90 border border-stone-250 dark:border-stone-800 text-xs sm:text-sm text-stone-800 dark:text-stone-200 leading-relaxed flex items-start gap-3"
                         >
-                          <span className="w-6 h-6 rounded-lg bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-500/40 flex items-center justify-center font-mono font-bold text-xs shrink-0 mt-0.5">
+                          <span className="w-6 h-6 rounded-lg bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-500/40 flex items-center justify-center font-sans tabular-nums font-bold text-xs shrink-0 mt-0.5">
                             {idx + 1}
                           </span>
                           <div>
-                            <span className="font-mono font-bold text-amber-800 dark:text-amber-400 text-xs block mb-0.5">
+                            <span className="font-sans tabular-nums font-bold text-amber-800 dark:text-amber-400 text-xs block mb-0.5">
                               {titles[idx]}
                             </span>
                             <span className="text-stone-700 dark:text-parchment-200">{step}</span>
@@ -390,7 +390,7 @@ export const PsalmsFieldMedicModal: React.FC<PsalmsFieldMedicModalProps> = ({
 
           {/* Footer */}
           <div className="p-3.5 sm:p-4 border-t border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-ink flex items-center justify-between text-xs text-stone-600 dark:text-stone-400 shrink-0">
-            <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400 flex items-center gap-1">
+            <span className="text-[11px] font-sans tabular-nums text-stone-500 dark:text-stone-400 flex items-center gap-1">
               <span>{t('medic.footerCombat')}</span>
             </span>
 

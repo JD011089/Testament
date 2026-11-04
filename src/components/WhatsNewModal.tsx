@@ -48,9 +48,36 @@ interface ReleaseMilestone {
 const ACTIVE_RELEASES: ReleaseMilestone[] = [
   {
     version: APP_VERSION,
-    tagline: 'AI-Free, Offline-First & Natural Voice',
+    tagline: 'A fresh new look, a new Bible, and reminders you can trust',
     dateBadge: 'Current Release',
     isLatest: true,
+    highlights: [
+      {
+        icon: <Sparkles className="w-4 h-4 text-amber-400" />,
+        title: 'New look',
+        description: 'Lapis blue and gold, new tab icons, and renamed tabs: Journey and Collection. Today puts the story art front and centre, and Settings is now five short groups.'
+      },
+      {
+        icon: <BookOpen className="w-4 h-4 text-amber-400" />,
+        title: 'A new Bible tab',
+        description: 'Any chapter in two taps. Highlights and notes that stay saved, a calmer reader, swipe between chapters, and an "About this book" page with the real key verse.'
+      },
+      {
+        icon: <Volume2 className="w-4 h-4 text-amber-400" />,
+        title: 'Better narration',
+        description: 'Clearer, more natural voices, long passages that no longer cut off, and read-along audio in the Bible that lights up each verse as it is read.'
+      },
+      {
+        icon: <Bell className="w-4 h-4 text-amber-400" />,
+        title: 'Reminders and installing',
+        description: 'Reminders shows whether alerts reach you with the app closed. iPhone users get step-by-step Home Screen install instructions.'
+      }
+    ]
+  },
+  {
+    version: 'v1.27.0',
+    tagline: 'AI-Free, Offline-First & Natural Voice',
+    dateBadge: 'Previous Release',
     highlights: [
       {
         icon: <Volume2 className="w-4 h-4 text-amber-400" />,
@@ -972,15 +999,15 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
             <div>
               <div className="flex items-center gap-2">
                 <h2 id="whatsnew-modal-title" className="text-lg sm:text-xl font-serif font-black text-stone-900 dark:text-parchment-50">
-                  Field Update Dispatches
+                  What’s new
                 </h2>
-                <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 font-bold">
+                <span className="text-xs font-sans tabular-nums px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 font-bold">
                   {APP_VERSION} Live
                 </span>
               </div>
 
               <p className="text-xs text-stone-500 dark:text-stone-400">
-                Chronological evolution and major features built in Testament
+                Everything that’s changed in Testament, newest first
               </p>
             </div>
           </div>
@@ -1004,7 +1031,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
                   soundEngine.playClick();
                   setActiveTab(release.version);
                 }}
-                className={`text-xs px-3 py-1.5 rounded-xl font-mono whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                className={`text-xs px-3 py-1.5 rounded-xl font-sans tabular-nums whitespace-nowrap transition-all flex items-center gap-1.5 ${
                   isSelected
                     ? 'bg-amber-500 text-accent-on font-bold shadow-sm'
                     : 'bg-white dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-400 hover:text-stone-950 dark:hover:text-stone-200'
@@ -1027,7 +1054,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
                 soundEngine.playClick();
                 setShowArchive(true);
               }}
-              className="text-xs px-3 py-1.5 rounded-xl font-mono whitespace-nowrap bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 transition-all"
+              className="text-xs px-3 py-1.5 rounded-xl font-sans tabular-nums whitespace-nowrap bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 transition-all"
             >
               + Archive (v1.0–v1.16.0)
             </button>
@@ -1039,7 +1066,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
                 setShowArchive(false);
                 setActiveTab('v1.17.0');
               }}
-              className="text-xs px-3 py-1.5 rounded-xl font-mono whitespace-nowrap bg-stone-300 dark:bg-stone-700 text-stone-700 dark:text-stone-300 hover:text-stone-900 dark:hover:text-stone-100 transition-all"
+              className="text-xs px-3 py-1.5 rounded-xl font-sans tabular-nums whitespace-nowrap bg-stone-300 dark:bg-stone-700 text-stone-700 dark:text-stone-300 hover:text-stone-900 dark:hover:text-stone-100 transition-all"
             >
               − Hide Archive
             </button>
@@ -1050,7 +1077,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
         <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 scrollbar-thin">
           <div className="flex items-center justify-between gap-3 pb-2 border-b border-stone-200 dark:border-stone-800/60">
             <div>
-              <span className="text-xs font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
+              <span className="text-xs font-sans tabular-nums uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
                 {selectedRelease.dateBadge}
               </span>
               <h3 className="text-base sm:text-lg font-serif font-bold text-stone-900 dark:text-parchment-100">
@@ -1058,7 +1085,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
               </h3>
             </div>
             {selectedRelease.isLatest && (
-              <span className="text-xs font-mono text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/60 px-2.5 py-1 rounded-full font-bold shrink-0">
+              <span className="text-xs font-sans tabular-nums text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/60 px-2.5 py-1 rounded-full font-bold shrink-0">
                 ✓ Installed
               </span>
             )}
@@ -1088,7 +1115,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
 
         {/* MODAL FOOTER */}
         <div className="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800/90 bg-stone-50 dark:bg-black/40 flex items-center justify-between gap-3 relative z-10">
-          <div className="text-xs font-mono text-stone-500 dark:text-stone-400 hidden sm:block">
+          <div className="text-xs font-sans tabular-nums text-stone-500 dark:text-stone-400 hidden sm:block">
             Testament {APP_VERSION} • The Living Word
           </div>
 
@@ -1097,7 +1124,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
             onClick={handleDismiss}
             className="btn-primary w-full sm:w-auto text-xs flex items-center justify-center gap-2 shadow-md"
           >
-            <span>Got It • Enter Field HQ</span>
+            <span>Got it</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>

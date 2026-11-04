@@ -241,7 +241,7 @@ export function NotificationSettingsModal({ onClose }: NotificationSettingsModal
                 type="time"
                 value={prefs.morningTime}
                 onChange={(e) => void handleTime('morningTime', e.target.value)}
-                className="rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-850 px-2 py-1.5 text-xs font-mono min-h-[40px]"
+                className="rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-850 px-2 py-1.5 text-xs font-sans tabular-nums min-h-[40px]"
               />
             </label>
           )}
@@ -260,7 +260,7 @@ export function NotificationSettingsModal({ onClose }: NotificationSettingsModal
                 type="time"
                 value={prefs.recallTime}
                 onChange={(e) => void handleTime('recallTime', e.target.value)}
-                className="rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-850 px-2 py-1.5 text-xs font-mono min-h-[40px]"
+                className="rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-850 px-2 py-1.5 text-xs font-sans tabular-nums min-h-[40px]"
               />
             </label>
           )}

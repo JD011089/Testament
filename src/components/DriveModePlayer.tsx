@@ -221,7 +221,7 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
       >
         {/* Top Header */}
         <div className="flex items-center justify-between pb-4 border-b border-stone-200 dark:border-stone-800">
-          <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400">
+          <div className="flex items-center gap-2 text-xs font-sans tabular-nums font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400">
             <Car className="w-4 h-4" />
             <span id="drive-mode-title">{t('drive.title')}</span>
           </div>
@@ -251,7 +251,7 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
           </div>
 
           <div className="space-y-1">
-            <span className="text-xs font-mono text-amber-800 dark:text-amber-500 uppercase tracking-widest font-bold">
+            <span className="text-xs font-sans tabular-nums text-amber-800 dark:text-amber-500 uppercase tracking-widest font-bold">
               {activeMode === 'mission'
                 ? `Today's Mission • ${todayMission.passageReference}`
                 : `${quest.heroName} • Act ${act.actNumber} of ${quest.acts.length}`}
@@ -308,7 +308,7 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
 
           {/* Dramatized Voice Style Selector */}
           <div className="flex items-center justify-between gap-2 p-3 bg-stone-50 dark:bg-stone-950/70 rounded-2xl border border-stone-200 dark:border-stone-800">
-            <div className="flex items-center gap-2 text-xs font-mono text-stone-600 dark:text-stone-400">
+            <div className="flex items-center gap-2 text-xs font-sans tabular-nums text-stone-600 dark:text-stone-400">
               <Mic className="w-4 h-4 text-amber-800 dark:text-amber-500" />
               <span>{t('drive.narrator')}</span>
             </div>
@@ -344,7 +344,7 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
 
           {/* Background Ambience Quick Selector */}
           <div className="flex items-center justify-between gap-2 p-3 bg-stone-50 dark:bg-stone-950/70 rounded-2xl border border-stone-200 dark:border-stone-800">
-            <div className="flex items-center gap-2 text-xs font-mono text-stone-600 dark:text-stone-400">
+            <div className="flex items-center gap-2 text-xs font-sans tabular-nums text-stone-600 dark:text-stone-400">
               <Volume2 className="w-4 h-4 text-amber-800 dark:text-amber-500" />
               <span>{t('drive.soundscape')}</span>
             </div>

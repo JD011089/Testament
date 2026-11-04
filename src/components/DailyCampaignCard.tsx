@@ -96,11 +96,11 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap mb-1">
-              <span className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold px-2 py-0.5 rounded-full bg-amber-500/10 flex items-center gap-1">
+              <span className="text-[11px] font-sans tabular-nums uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold px-2 py-0.5 rounded-full bg-amber-500/10 flex items-center gap-1">
                 <Target className="w-3 h-3 text-amber-800 dark:text-amber-400" />
                 <span>{t('campaign.title')}</span>
               </span>
-              <span className="text-xs font-mono text-stone-500 dark:text-stone-400">
+              <span className="text-xs font-sans tabular-nums text-stone-500 dark:text-stone-400">
                 {t('campaign.trackSuffix', { hero: getLocalizedHero(activeCampaign.heroName, language) })}
               </span>
             </div>
@@ -120,7 +120,7 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
 
         {/* Right Action: Track Selector & Reward Pill */}
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-800 dark:text-amber-300 text-xs font-mono font-bold">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-800 dark:text-amber-300 text-xs font-sans tabular-nums font-bold">
             <Award className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
             <span>+{activeCampaign.bonusXP} XP</span>
           </div>
@@ -134,7 +134,7 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
 
       {/* PROGRESS TRACKER SECTION - Clean and Unboxed */}
       <div className="relative z-10 mb-5 sm:mb-6">
-        <div className="flex items-center justify-between text-xs font-mono mb-2">
+        <div className="flex items-center justify-between text-xs font-sans tabular-nums mb-2">
           <div className="flex items-center gap-2">
             <span className="text-amber-800 dark:text-amber-400 font-bold uppercase tracking-wider text-[11px] sm:text-xs">
               {t('campaign.progression')}
@@ -189,7 +189,7 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
 
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
-                      <span className={`text-[11px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.2 rounded ${
+                      <span className={`text-[11px] font-sans tabular-nums font-bold uppercase tracking-wider px-1.5 py-0.2 rounded ${
                         isDone 
                           ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300' 
                           : isCurrent 
@@ -199,13 +199,13 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
                         {loc.badge}
                       </span>
                       {isCurrent && (
-                        <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 font-bold flex items-center gap-1">
+                        <span className="text-[11px] font-sans tabular-nums text-amber-800 dark:text-amber-400 font-bold flex items-center gap-1">
                           <Flame className="w-2.5 h-2.5 text-amber-800 dark:text-amber-400" />
                           <span>{t('campaign.currentObjective')}</span>
                         </span>
                       )}
                       {isDone && (
-                        <span className="text-[11px] font-mono text-emerald-700 dark:text-emerald-400 font-semibold">
+                        <span className="text-[11px] font-sans tabular-nums text-emerald-700 dark:text-emerald-400 font-semibold">
                           {t('campaign.completed')}
                         </span>
                       )}
@@ -251,7 +251,7 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
           <div className="flex items-center gap-3">
             <span className="text-3xl">🏆</span>
             <div>
-              <div className="text-xs font-mono uppercase tracking-widest text-emerald-800 dark:text-emerald-400 font-bold">
+              <div className="text-xs font-sans tabular-nums uppercase tracking-widest text-emerald-800 dark:text-emerald-400 font-bold">
                 {t('campaign.conquered')}
               </div>
               <p className="text-xs text-stone-700 dark:text-parchment-100">

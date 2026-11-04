@@ -219,7 +219,7 @@ export const PWAInstallPrompt: React.FC = () => {
               <h3 className="text-sm sm:text-lg font-serif font-bold text-stone-900 dark:text-parchment-50 leading-tight">
                 {t('pwa.installTitle')}
               </h3>
-              <span className="text-[11px] sm:text-[11px] uppercase tracking-wider px-1.5 sm:px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 font-mono font-bold border border-amber-300 dark:border-amber-500/30">
+              <span className="text-[11px] sm:text-[11px] uppercase tracking-wider px-1.5 sm:px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 font-sans tabular-nums font-bold border border-amber-300 dark:border-amber-500/30">
                 PWA
               </span>
             </div>

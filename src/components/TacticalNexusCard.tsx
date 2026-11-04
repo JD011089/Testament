@@ -66,7 +66,7 @@ export const TacticalNexusCard: React.FC<TacticalNexusCardProps> = ({ entityId, 
               <h4 className="text-xs sm:text-sm font-serif font-bold text-stone-900 dark:text-parchment-50">
                 {t('nexus.title', { count: items.length })}
               </h4>
-              <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-cyan-100 dark:bg-cyan-950/60 text-cyan-800 dark:text-cyan-300 font-bold border border-cyan-200 dark:border-cyan-800/50">
+              <span className="text-[11px] font-sans tabular-nums px-2 py-0.5 rounded-full bg-cyan-100 dark:bg-cyan-950/60 text-cyan-800 dark:text-cyan-300 font-bold border border-cyan-200 dark:border-cyan-800/50">
                 {items.length} Linked
               </span>
             </div>
@@ -96,7 +96,7 @@ export const TacticalNexusCard: React.FC<TacticalNexusCardProps> = ({ entityId, 
               >
                 <div>
                   <div className="flex items-center justify-between gap-1.5 mb-2">
-                    <span className={`text-[11px] font-mono px-2.5 py-0.5 rounded-md font-bold border ${getRelationshipBadgeStyle(connection.relationship)}`}>
+                    <span className={`text-[11px] font-sans tabular-nums px-2.5 py-0.5 rounded-md font-bold border ${getRelationshipBadgeStyle(connection.relationship)}`}>
                       {connection.badgeLabel}
                     </span>
                     <div className="flex items-center gap-1.5 text-xs text-stone-500 dark:text-stone-400 font-medium">
@@ -115,7 +115,7 @@ export const TacticalNexusCard: React.FC<TacticalNexusCardProps> = ({ entityId, 
                 </div>
 
                 <div className="flex items-center justify-between pt-2.5 border-t border-stone-200/70 dark:border-stone-850">
-                  <span className="text-xs font-mono font-medium text-amber-700 dark:text-amber-400 truncate max-w-[200px]">
+                  <span className="text-xs font-sans tabular-nums font-medium text-amber-700 dark:text-amber-400 truncate max-w-[200px]">
                     {target.scriptureRef || target.label}
                   </span>
                   {onOpenEntity && (
@@ -127,7 +127,7 @@ export const TacticalNexusCard: React.FC<TacticalNexusCardProps> = ({ entityId, 
                       }}
                       className="px-3 py-1 rounded-lg text-xs font-semibold bg-cyan-100/80 hover:bg-cyan-200 dark:bg-cyan-950 dark:hover:bg-cyan-900 text-cyan-800 dark:text-cyan-300 border border-cyan-300 dark:border-cyan-800/80 flex items-center gap-1.5 transition-all shadow-xs"
                     >
-                      <span>Open Intel</span>
+                      <span>Open</span>
                       <ExternalLink className="w-3 h-3" />
                     </button>
                   )}

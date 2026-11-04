@@ -98,7 +98,7 @@ export const DecisionJournalModal: React.FC<DecisionJournalModalProps> = ({
             <div className="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1">
               {/* Free-Text Reflection Composer */}
               <div className="p-4 rounded-2xl bg-amber-500/5 dark:bg-stone-850/90 border border-amber-500/25 space-y-2.5">
-                <span className="text-[11px] font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold block">
+                <span className="text-[11px] font-sans tabular-nums uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold block">
                   {t('journal.reflectionType')}
                 </span>
                 <textarea
@@ -149,12 +149,12 @@ export const DecisionJournalModal: React.FC<DecisionJournalModalProps> = ({
                         <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-850/70 border border-stone-200/80 dark:border-stone-800 space-y-3">
                           {/* Entry Header: Date & Passage + Delete entry button */}
                           <div className="flex items-center justify-between text-xs text-stone-500 dark:text-stone-400 flex-wrap gap-1">
-                            <span className="font-mono flex items-center gap-1 font-semibold text-amber-800 dark:text-amber-400">
+                            <span className="font-sans tabular-nums flex items-center gap-1 font-semibold text-amber-800 dark:text-amber-400">
                               <Calendar className="w-3 h-3" />
                               {formatDate(entry.dateKey, entry.timestamp)}
                             </span>
                             <div className="flex items-center gap-2">
-                              <span className="font-mono text-[11px] bg-stone-200/60 dark:bg-stone-800 px-2 py-0.5 rounded-md text-stone-700 dark:text-stone-300">
+                              <span className="font-sans tabular-nums text-[11px] bg-stone-200/60 dark:bg-stone-800 px-2 py-0.5 rounded-md text-stone-700 dark:text-stone-300">
                                 {isFreeReflection ? t('journal.reflectionType') : `${entry.heroName} (${entry.passageReference})`}
                               </span>
                               <button
@@ -178,7 +178,7 @@ export const DecisionJournalModal: React.FC<DecisionJournalModalProps> = ({
 
                           {/* User's Choice (Verbatim Own Words or Option Text) */}
                           <div className="p-3 rounded-xl bg-amber-500/10 border-l-2 border-amber-500">
-                            <span className="text-[10px] font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold block mb-1">
+                            <span className="text-[10px] font-sans tabular-nums uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold block mb-1">
                               {isFreeReflection ? t('journal.reflectionType') : (hasUserCustom ? t('journal.inYourOwnWords') : t('journal.yourDecision'))}
                             </span>
                             <p className="text-xs sm:text-sm font-serif font-bold text-stone-900 dark:text-parchment-50 leading-snug">

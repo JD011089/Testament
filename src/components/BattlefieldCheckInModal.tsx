@@ -214,7 +214,7 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
 
           {/* Header */}
           <div className="mb-6">
-            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400 mb-1.5">
+            <div className="flex items-center gap-2 text-xs font-sans tabular-nums font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400 mb-1.5">
               <Swords className="w-4 h-4" />
               <span>{t('battlefield.modalTitle')}</span>
             </div>
@@ -253,7 +253,7 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
                         {title}
                       </h4>
                       {isSelected && (
-                        <span className="flex items-center gap-1 text-[11px] font-mono text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/80 px-2 py-0.5 rounded-full">
+                        <span className="flex items-center gap-1 text-[11px] font-sans tabular-nums text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/80 px-2 py-0.5 rounded-full">
                           <CheckCircle2 className="w-3 h-3" />
                           <span>{t('battlefield.active')}</span>
                         </span>
@@ -262,7 +262,7 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
                     <p className="text-xs text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">
                       {subtitle}
                     </p>
-                    <div className="text-[11px] font-mono text-amber-800 dark:text-amber-300/80 mt-1.5 flex items-center gap-1">
+                    <div className="text-[11px] font-sans tabular-nums text-amber-800 dark:text-amber-300/80 mt-1.5 flex items-center gap-1">
                       <Sparkles className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
                       <span>{t('battlefield.fieldArmor', { ref: getBattlefieldPsalmReference(opt.id, opt.psalmReference) })}</span>
                     </div>
@@ -283,7 +283,7 @@ export const BattlefieldCheckInModal: React.FC<BattlefieldCheckInModalProps> = (
                 <span>{t('battlefield.resetRotation')}</span>
               </button>
             ) : (
-              <span className="text-stone-500 dark:text-stone-400 font-mono text-[11px]">
+              <span className="text-stone-500 dark:text-stone-400 font-sans tabular-nums text-[11px]">
                 {t('battlefield.generalRotation')}
               </span>
             )}

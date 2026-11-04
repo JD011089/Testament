@@ -40,7 +40,7 @@ export const CampaignNextTaskPrompt: React.FC<CampaignNextTaskPromptProps> = ({
               <span className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-300 dark:border-emerald-500/50 flex items-center justify-center text-emerald-700 dark:text-emerald-400 shrink-0">
                 <CheckCircle2 className="w-4 h-4" />
               </span>
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+              <span className="text-xs font-sans tabular-nums font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
                 <span>{t('nextTask.stepCompleted', { step: completedStepNumber })}</span>
               </span>
@@ -66,10 +66,10 @@ export const CampaignNextTaskPrompt: React.FC<CampaignNextTaskPromptProps> = ({
 
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
-                <span className="text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-800/60 text-amber-800 dark:text-amber-300">
+                <span className="text-[11px] font-sans tabular-nums font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-800/60 text-amber-800 dark:text-amber-300">
                   {nextStep.badge}
                 </span>
-                <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400">
+                <span className="text-[11px] font-sans tabular-nums text-stone-500 dark:text-stone-400">
                   {t('nextTask.stepOf', { step: nextStep.stepNumber })}
                 </span>
               </div>

@@ -92,7 +92,7 @@ export const ModeSelectorModal: React.FC<ModeSelectorModalProps> = ({
                       <span className="font-serif font-bold text-base text-stone-900 dark:text-parchment-50">
                         {mode.title}
                       </span>
-                      <span className="ml-2 text-[10px] font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold px-1.5 py-0.5 rounded-md bg-amber-500/15">
+                      <span className="ml-2 text-[10px] font-sans tabular-nums uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold px-1.5 py-0.5 rounded-md bg-amber-500/15">
                         {mode.badge}
                       </span>
                     </div>

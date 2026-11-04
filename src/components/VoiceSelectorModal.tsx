@@ -142,11 +142,11 @@ export const VoiceSelectorModal: React.FC<VoiceSelectorModalProps> = ({ isOpen, 
                         <span className="text-sm font-serif font-bold text-stone-900 dark:text-parchment-100">
                           {voice.name}
                         </span>
-                        <span className="text-[11px] font-mono px-2 py-0.2 rounded-full bg-stone-200/80 dark:bg-stone-800 text-stone-600 dark:text-stone-400">
+                        <span className="text-[11px] font-sans tabular-nums px-2 py-0.2 rounded-full bg-stone-200/80 dark:bg-stone-800 text-stone-600 dark:text-stone-400">
                           {voice.subtitle}
                         </span>
                         {isSelected && (
-                          <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 font-bold flex items-center gap-0.5">
+                          <span className="text-[11px] font-sans tabular-nums text-amber-800 dark:text-amber-400 font-bold flex items-center gap-0.5">
                             <Check className="w-3 h-3" />
                             <span>Active</span>
                           </span>
@@ -188,7 +188,7 @@ export const VoiceSelectorModal: React.FC<VoiceSelectorModalProps> = ({ isOpen, 
 
           {/* Footer note */}
           <div className="pt-3 border-t border-stone-200 dark:border-stone-800 flex items-center justify-between">
-            <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400">
+            <span className="text-[11px] font-sans tabular-nums text-stone-500 dark:text-stone-400">
               Applied app-wide to chapters, briefings & quests
             </span>
             <button

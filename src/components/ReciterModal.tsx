@@ -122,10 +122,10 @@ export const ReciterModal: React.FC<ReciterModalProps> = ({
         <div className="flex items-center justify-between pb-3 border-b border-stone-200/70 dark:border-stone-800/70 shrink-0">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
+              <span className="text-[10px] font-sans tabular-nums uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
                 Reciter Mode • Verse of the Week
               </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300">
+              <span className="text-[10px] font-sans tabular-nums px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300">
                 Day {dayNumber} of 7
               </span>
             </div>
@@ -182,7 +182,7 @@ export const ReciterModal: React.FC<ReciterModalProps> = ({
                       <span className="text-xs font-bold text-amber-900 dark:text-amber-300">
                         Day 1 Mission: Read it out loud
                       </span>
-                      <span className="text-[10px] font-mono uppercase bg-amber-500/20 text-amber-900 dark:text-amber-200 px-2 py-0.5 rounded-md font-bold">
+                      <span className="text-[10px] font-sans tabular-nums uppercase bg-amber-500/20 text-amber-900 dark:text-amber-200 px-2 py-0.5 rounded-md font-bold">
                         Scripture (Verbatim)
                       </span>
                     </div>
@@ -208,7 +208,7 @@ export const ReciterModal: React.FC<ReciterModalProps> = ({
                         Recite from memory, tap to check, then grade your rep.
                       </span>
                     </div>
-                    <span className="text-[10px] font-mono uppercase bg-amber-500/15 text-amber-900 dark:text-amber-300 px-1.5 py-0.5 rounded-md font-bold">
+                    <span className="text-[10px] font-sans tabular-nums uppercase bg-amber-500/15 text-amber-900 dark:text-amber-300 px-1.5 py-0.5 rounded-md font-bold">
                       Scripture (Verbatim)
                     </span>
                   </div>
@@ -241,7 +241,7 @@ export const ReciterModal: React.FC<ReciterModalProps> = ({
                           }`}
                         >
                           <div className="flex items-center justify-between mb-2">
-                            <span className="text-[11px] font-mono font-bold text-stone-500 dark:text-stone-400">
+                            <span className="text-[11px] font-sans tabular-nums font-bold text-stone-500 dark:text-stone-400">
                               Phrase {position + 1} of {phrasesToReciteIndices.length} {isLoopBack ? '(Loop-back)' : ''}
                             </span>
                             <button
@@ -318,7 +318,7 @@ export const ReciterModal: React.FC<ReciterModalProps> = ({
                     <CheckCircle2 aria-hidden="true" className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div>
-                    <span className="text-xs font-mono uppercase tracking-widest text-emerald-800 dark:text-emerald-400 font-bold block">
+                    <span className="text-xs font-sans tabular-nums uppercase tracking-widest text-emerald-800 dark:text-emerald-400 font-bold block">
                       Verse Mastered & Retired to Known Verses!
                     </span>
                     <p className="text-xs text-stone-700 dark:text-parchment-200 mt-0.5">
@@ -370,7 +370,7 @@ export const ReciterModal: React.FC<ReciterModalProps> = ({
                         <span className="font-serif font-bold text-stone-900 dark:text-parchment-50 text-sm">
                           {v.reference}
                         </span>
-                        <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full font-bold">
+                        <span className="text-[10px] font-sans tabular-nums text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full font-bold">
                           Mastered
                         </span>
                       </div>

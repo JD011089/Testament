@@ -627,7 +627,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
           <span className="sr-only">
             {currentScreen === 1 ? 'Step 1 of 3: Decide' : currentScreen === 2 ? 'Step 2 of 3: Story' : 'Step 3 of 3: Live It'}
           </span>
-          <span className="text-[11px] font-mono font-bold text-amber-800 dark:text-amber-400 uppercase tracking-wider ml-1" aria-hidden="true">
+          <span className="text-[11px] font-sans tabular-nums font-bold text-amber-800 dark:text-amber-400 uppercase tracking-wider ml-1" aria-hidden="true">
             {currentScreen === 1 ? '1. Decide' : currentScreen === 2 ? '2. Story' : '3. Live It'}
           </span>
         </div>
@@ -650,7 +650,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
               {/* Context Micro-Tag & Reflection Badge (M-4: aria-hidden decorative icons) */}
               <div>
                 <div className="flex items-center justify-between gap-2 flex-wrap mb-1.5">
-                  <span className="text-[11px] lg:text-xs font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
+                  <span className="text-[11px] lg:text-xs font-sans tabular-nums uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
                     {missionTitle}
                   </span>
                 </div>
@@ -826,7 +826,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                     <span className="text-xs sm:text-sm font-semibold text-amber-800 dark:text-amber-400">
                       Here's how your answer connects
                     </span>
-                    <span className="text-[10px] sm:text-[11px] font-mono text-amber-700 dark:text-amber-400" role="note" aria-label="Reflection, Not Scripture">
+                    <span className="text-[10px] sm:text-[11px] font-sans tabular-nums text-amber-700 dark:text-amber-400" role="note" aria-label="Reflection, Not Scripture">
                       Reflection • Not Scripture
                     </span>
                   </div>
@@ -842,7 +842,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                       {/* Connection as a separate, badged sentence (M-5) */}
                       <div className="pt-2.5 border-t border-amber-500/20">
                         <div className="flex items-center gap-1.5 mb-1">
-                          <span className="text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded-sm bg-amber-500/15 text-amber-800 dark:text-amber-300 font-bold" role="note">
+                          <span className="text-[10px] font-sans tabular-nums uppercase tracking-wider px-1.5 py-0.5 rounded-sm bg-amber-500/15 text-amber-800 dark:text-amber-300 font-bold" role="note">
                             Connection
                           </span>
                         </div>
@@ -870,7 +870,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   ? "1 person wrestled with this today."
                   : `${decisionStats.totalVotes} people wrestled with this today${decisionStats.topChoicePercentage > 0 ? ` — ${decisionStats.topChoicePercentage}% chose this path.` : '.'}`}
               </span>
-              <span className="font-mono text-[10px] text-stone-400 dark:text-stone-500">Anonymous</span>
+              <span className="font-sans tabular-nums text-[10px] text-stone-400 dark:text-stone-500">Anonymous</span>
             </div>
 
             {/* Story Header */}
@@ -879,7 +879,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                 <h2 className="text-lg sm:text-xl lg:text-2xl font-serif font-bold text-stone-900 dark:text-parchment-50">
                   What actually happened
                 </h2>
-                <span className="text-[10px] sm:text-[11px] font-mono text-stone-600 dark:text-stone-400" role="note" aria-label="Story retelling, Not Scripture">
+                <span className="text-[10px] sm:text-[11px] font-sans tabular-nums text-stone-600 dark:text-stone-400" role="note" aria-label="Story retelling, Not Scripture">
                   Story retelling • Not Scripture
                 </span>
               </div>
@@ -898,10 +898,10 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             <div className="p-5 sm:p-6 lg:p-7 rounded-3xl bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-stone-100/80 dark:to-stone-900/70 border-2 border-amber-500/30 dark:border-amber-500/40 shadow-sm space-y-3.5">
               <div className="flex items-center justify-between text-xs sm:text-sm flex-wrap gap-2">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono font-bold text-amber-800 dark:text-amber-400 text-xs sm:text-sm">
+                  <span className="font-sans tabular-nums font-bold text-amber-800 dark:text-amber-400 text-xs sm:text-sm">
                     {keyVerseRef}
                   </span>
-                  <span className="text-[10px] sm:text-[11px] font-mono uppercase bg-amber-500/20 text-amber-950 dark:text-amber-200 px-2 py-0.5 rounded-md font-bold">
+                  <span className="text-[10px] sm:text-[11px] font-sans tabular-nums uppercase bg-amber-500/20 text-amber-950 dark:text-amber-200 px-2 py-0.5 rounded-md font-bold">
                     Scripture (Verbatim)
                   </span>
                 </div>
@@ -914,7 +914,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                       soundEngine.playSnap();
                       setUseKjv((prev) => !prev);
                     }}
-                    className="text-[11px] sm:text-xs font-mono px-2.5 py-1 rounded-lg bg-stone-200/80 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
+                    className="text-[11px] sm:text-xs font-sans tabular-nums px-2.5 py-1 rounded-lg bg-stone-200/80 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
                   >
                     {useKjv ? 'Showing KJV' : 'WEB (Tap for KJV)'}
                   </button>
@@ -923,7 +923,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   <button
                     type="button"
                     onClick={handleSaveVerseCard}
-                    className="text-[11px] sm:text-xs font-mono px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-900 dark:text-amber-200 transition-colors inline-flex items-center gap-1 cursor-pointer"
+                    className="text-[11px] sm:text-xs font-sans tabular-nums px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-900 dark:text-amber-200 transition-colors inline-flex items-center gap-1 cursor-pointer"
                     title="Add verse to your Saved collection"
                   >
                     <Bookmark aria-hidden="true" className="w-3.5 h-3.5" />
@@ -935,7 +935,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                     type="button"
                     disabled={isSavingVerseCard}
                     onClick={handleShareImageCard}
-                    className="text-[11px] sm:text-xs font-mono px-2.5 py-1 rounded-lg bg-stone-200/80 hover:bg-stone-300 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 transition-colors inline-flex items-center gap-1 cursor-pointer"
+                    className="text-[11px] sm:text-xs font-sans tabular-nums px-2.5 py-1 rounded-lg bg-stone-200/80 hover:bg-stone-300 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 transition-colors inline-flex items-center gap-1 cursor-pointer"
                     title="Export or share Daybreak lock-screen image"
                   >
                     <Download aria-hidden="true" className="w-3.5 h-3.5" />
@@ -954,7 +954,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
               <div 
                 role="status"
                 aria-live="polite"
-                className="p-3 rounded-xl bg-amber-500/15 border border-amber-500/30 text-xs font-mono text-amber-900 dark:text-amber-200 flex items-center justify-between animate-in fade-in duration-200"
+                className="p-3 rounded-xl bg-amber-500/15 border border-amber-500/30 text-xs font-sans tabular-nums text-amber-900 dark:text-amber-200 flex items-center justify-between animate-in fade-in duration-200"
               >
                 <span className="flex items-center gap-1.5">
                   <CheckCircle2 aria-hidden="true" className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
@@ -1153,10 +1153,10 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             {/* The Verse verbatim */}
             <div className="p-4 sm:p-5 lg:p-6 rounded-3xl bg-stone-100/70 dark:bg-stone-900/60">
               <div className="flex items-center justify-between gap-2 mb-1.5">
-                <span className="font-mono font-bold text-amber-800 dark:text-amber-400 text-xs sm:text-sm">
+                <span className="font-sans tabular-nums font-bold text-amber-800 dark:text-amber-400 text-xs sm:text-sm">
                   {keyVerseRef}
                 </span>
-                <span className="text-[10px] sm:text-[11px] font-mono uppercase bg-amber-500/20 text-amber-950 dark:text-amber-200 px-2 py-0.5 rounded-md font-bold">
+                <span className="text-[10px] sm:text-[11px] font-sans tabular-nums uppercase bg-amber-500/20 text-amber-950 dark:text-amber-200 px-2 py-0.5 rounded-md font-bold">
                   Scripture (Verbatim)
                 </span>
               </div>
@@ -1168,11 +1168,11 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             {/* The Tailored Concrete Action Line */}
             <div className="p-5 sm:p-6 lg:p-7 rounded-3xl bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-transparent">
               <div className="flex items-center justify-between gap-2 mb-2">
-                <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400 flex items-center gap-1.5">
+                <span className="text-xs font-sans tabular-nums font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400 flex items-center gap-1.5">
                   <Sparkles aria-hidden="true" className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                   <span>Today's Move</span>
                 </span>
-                <span className="text-[10px] sm:text-[11px] font-mono text-amber-700 dark:text-amber-400" role="note" aria-label="Reflection, Not Scripture">
+                <span className="text-[10px] sm:text-[11px] font-sans tabular-nums text-amber-700 dark:text-amber-400" role="note" aria-label="Reflection, Not Scripture">
                   Reflection • Not Scripture
                 </span>
               </div>
@@ -1192,7 +1192,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                   👑
                 </div>
                 <div>
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold block">
+                  <span className="text-[10px] font-sans tabular-nums uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold block">
                     Rank Promotion Earned!
                   </span>
                   <p className="text-sm sm:text-base font-serif font-bold text-stone-900 dark:text-parchment-50">
@@ -1223,7 +1223,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                 </div>
 
                 {getDailyStreakCount() > 0 && (
-                  <div className="px-3 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-800 text-fg-secondary font-mono text-xs font-semibold shrink-0">
+                  <div className="px-3 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-800 text-fg-secondary font-sans tabular-nums text-xs font-semibold shrink-0">
                     🔥 {getDailyStreakCount()} day streak
                   </div>
                 )}
@@ -1252,7 +1252,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
               <div className="p-4 sm:p-5 rounded-3xl bg-amber-500/10 border border-amber-500/20 flex items-center gap-3 text-fg">
                 <span aria-hidden="true" className="text-3xl shrink-0">🏆</span>
                 <div>
-                  <span className="text-[11px] font-mono uppercase tracking-wider text-accent-text font-bold block">
+                  <span className="text-[11px] font-sans tabular-nums uppercase tracking-wider text-accent-text font-bold block">
                     Collection Unlocked: {quest.relicReward.name}
                   </span>
                   <p className="text-xs sm:text-sm text-fg-secondary">

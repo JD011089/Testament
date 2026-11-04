@@ -42,19 +42,19 @@ export function FullPage({ title, titleId, onBack, children, wide }: FullPagePro
 
   return (
     <div className="fixed inset-0 z-30 overflow-y-auto overscroll-contain bg-surface text-stone-900 dark:text-parchment-50">
-      <header className="sticky top-0 z-10 border-b border-stone-200 dark:border-stone-800 bg-surface/95 backdrop-blur-sm">
-        <div className={`${width} mx-auto flex items-center gap-3 px-4 sm:px-8 pt-[max(0.75rem,env(safe-area-inset-top))] pb-4`}>
+      <header className="sticky top-0 z-10 bg-surface/90 backdrop-blur-md">
+        <div className={`${width} mx-auto flex items-center gap-1 px-3 sm:px-6 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2`}>
           <button
             ref={backRef}
             type="button"
             onClick={onBack}
-            className="inline-flex items-center gap-1 min-h-[44px] pl-1 pr-3 -ml-1 rounded-full text-base font-semibold leading-6 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer"
+            className="w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-fg-muted hover:bg-stone-100 dark:hover:bg-stone-850 transition-colors cursor-pointer"
             aria-label={t('story.back')}
           >
             <ChevronLeft className="w-6 h-6" aria-hidden="true" />
-            <span>{t('story.back')}</span>
           </button>
-          <h1 id={titleId} className="text-title-1 text-stone-900 dark:text-parchment-50 truncate">
+          {/* Long titles wrap onto a second line rather than being cut off. */}
+          <h1 id={titleId} className="min-w-0 font-serif text-[1.6rem] font-semibold leading-tight text-fg [overflow-wrap:anywhere]">
             {title}
           </h1>
         </div>

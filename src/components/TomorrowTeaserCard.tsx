@@ -35,10 +35,10 @@ export const TomorrowTeaserCard: React.FC = () => {
           <div className="w-6 h-6 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
             <Lock aria-hidden="true" className="w-3.5 h-3.5" />
           </div>
-          <span className="text-[11px] font-mono uppercase tracking-wider text-stone-700 dark:text-stone-300 font-bold">
+          <span className="text-[11px] font-sans tabular-nums uppercase tracking-wider text-stone-700 dark:text-stone-300 font-bold">
             {formatSpaced(['Tomorrow', '•', teaser.heroName])}
           </span>
-          <span className="inline-flex items-center gap-1 text-[10px] font-mono text-stone-500 dark:text-stone-400 bg-stone-200/60 dark:bg-stone-800 px-2 py-0.5 rounded-full">
+          <span className="inline-flex items-center gap-1 text-[10px] font-sans tabular-nums text-stone-500 dark:text-stone-400 bg-stone-200/60 dark:bg-stone-800 px-2 py-0.5 rounded-full">
             <Clock aria-hidden="true" className="w-2.5 h-2.5" />
             <span>{teaser.unlockLabel}</span>
           </span>
@@ -69,7 +69,7 @@ export const TomorrowTeaserCard: React.FC = () => {
           <button
             type="button"
             aria-label="Dismiss"
-            className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] -my-2 -mr-1 px-1 text-[10px] font-mono text-amber-700 dark:text-amber-300 uppercase tracking-wider cursor-pointer"
+            className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] -my-2 -mr-1 px-1 text-[10px] font-sans tabular-nums text-amber-700 dark:text-amber-300 uppercase tracking-wider cursor-pointer"
           >
             Dismiss
           </button>
@@ -80,7 +80,7 @@ export const TomorrowTeaserCard: React.FC = () => {
       {!showLockedMessage && (
         <div className="mt-3 pt-2 border-t border-stone-200/50 dark:border-stone-800/50 flex items-center justify-between text-[11px] text-stone-500 dark:text-stone-400">
           <span>Unlocks at local midnight</span>
-          <span className="font-mono text-[10px] group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+          <span className="font-sans tabular-nums text-[10px] group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
             Locked until tomorrow →
           </span>
         </div>

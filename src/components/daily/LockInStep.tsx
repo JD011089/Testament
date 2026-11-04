@@ -160,7 +160,7 @@ function LadderTask({ text, level, onResult, t }: { text: string; level: LadderL
       <p className="text-small text-fg-muted">{task.instruction}</p>
       <p className="text-label text-fg-muted">{t('lockIn.removeHint')}</p>
       {task.mode === 'first-letter' && (
-        <p className="text-body text-fg-muted font-mono break-words">{firstLetterHint(text)}</p>
+        <p className="text-body text-fg-muted font-sans tabular-nums break-words">{firstLetterHint(text)}</p>
       )}
       <div className="min-h-[48px] rounded-xl border border-dashed border-line bg-surface-raised p-2 flex flex-wrap gap-1">
         {built.length === 0 && <span className="text-small text-fg-muted">{t('lockIn.placeholder')}</span>}

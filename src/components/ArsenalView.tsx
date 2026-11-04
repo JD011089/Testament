@@ -259,7 +259,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
                 </div>
 
                 <div className="pt-3 border-t border-stone-200/60 dark:border-stone-800/60 flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-[11px] text-stone-500 dark:text-stone-400 font-mono">
+                  <span className="text-[11px] text-stone-500 dark:text-stone-400 font-sans tabular-nums">
                     {verse.heroName ? `Story: ${verse.heroName}` : verse.category}
                   </span>
 
@@ -296,7 +296,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
 
       {Object.keys(notes).length > 0 && (
         <div className="mt-12 pt-8 border-t border-stone-200/60 dark:border-stone-800/60">
-          <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-3">
+          <div className="flex items-center gap-2 text-xs font-sans tabular-nums font-semibold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-3">
             <FileText className="w-4 h-4" />
             <span>{t('arsenal.personalJournal')}</span>
           </div>

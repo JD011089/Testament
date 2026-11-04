@@ -79,7 +79,7 @@ export const SceneIllustration: React.FC<SceneIllustrationProps> = ({ theme, cla
         className={`group relative w-full aspect-video rounded-2xl overflow-hidden border-2 border-amber-900/40 bg-stone-950 shadow-2xl transition-all duration-300 hover:border-amber-500/60 ${className}`}
       >
         {!isLoaded && (
-          <div className="absolute inset-0 bg-stone-900 animate-pulse flex items-center justify-center text-xs text-stone-500 font-mono">
+          <div className="absolute inset-0 bg-stone-900 animate-pulse flex items-center justify-center text-xs text-stone-500 font-sans tabular-nums">
             Loading artwork...
           </div>
         )}
@@ -97,7 +97,7 @@ export const SceneIllustration: React.FC<SceneIllustrationProps> = ({ theme, cla
 
         <div className="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-black/30 pointer-events-none" />
 
-        <div className="absolute top-3 left-3 px-3 py-1 bg-black/80 backdrop-blur-md rounded-lg border border-amber-600/40 text-[11px] font-mono tracking-wider uppercase text-amber-300 shadow-md">
+        <div className="absolute top-3 left-3 px-3 py-1 bg-black/80 backdrop-blur-md rounded-lg border border-amber-600/40 text-[11px] font-sans tabular-nums tracking-wider uppercase text-amber-300 shadow-md">
           {scene.location}
         </div>
 

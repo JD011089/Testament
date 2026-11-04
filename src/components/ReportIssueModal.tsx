@@ -140,7 +140,7 @@ export const ReportIssueModal: React.FC<ReportIssueModalProps> = ({
           <form onSubmit={handleSubmit} className="space-y-4">
             {contextInfo?.passageRef && (
               <p className="text-xs text-stone-500 dark:text-stone-400">
-                Passage: <span className="font-mono font-semibold text-stone-800 dark:text-stone-200">{contextInfo.passageRef}</span> ({contextInfo.heroName})
+                Passage: <span className="font-sans tabular-nums font-semibold text-stone-800 dark:text-stone-200">{contextInfo.passageRef}</span> ({contextInfo.heroName})
               </p>
             )}
 

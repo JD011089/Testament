@@ -354,7 +354,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   soundEngine.playClick();
                   onOpenWhatsNew?.();
                 }}
-                className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] -my-2 px-1.5 rounded-full text-[11px] font-mono text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-amber-300 transition-colors"
+                className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] -my-2 px-1.5 rounded-full text-[11px] font-sans tabular-nums text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-amber-300 transition-colors"
                 title={t('dashboard.versionTooltip')}
                 aria-label={t('dashboard.versionTooltip')}
               >
@@ -382,7 +382,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 soundEngine.playClick();
                 setShowCalendarModal(true);
               }}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/60 hover:bg-stone-300/70 dark:bg-stone-900 dark:hover:bg-stone-850 text-xs font-mono font-bold text-orange-700 dark:text-orange-300 transition-colors cursor-pointer"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/60 hover:bg-stone-300/70 dark:bg-stone-900 dark:hover:bg-stone-850 text-xs font-sans tabular-nums font-bold text-orange-700 dark:text-orange-300 transition-colors cursor-pointer"
               title="Daily Streak • Tap to set daily reminder"
               role="status"
               aria-label={`${streakCount} day streak`}
@@ -397,7 +397,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 soundEngine.playClick();
                 setShowCalendarModal(true);
               }}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/40 hover:bg-stone-200/70 dark:bg-stone-900/60 dark:hover:bg-stone-850 text-xs font-mono font-medium text-stone-500 dark:text-stone-400 transition-colors cursor-pointer"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-200/40 hover:bg-stone-200/70 dark:bg-stone-900/60 dark:hover:bg-stone-850 text-xs font-sans tabular-nums font-medium text-stone-500 dark:text-stone-400 transition-colors cursor-pointer"
               title="Start your streak today • Tap to set daily reminder"
               role="status"
               aria-label="Fresh start"
@@ -440,7 +440,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="p-6 sm:p-7 lg:p-8 rounded-3xl bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-stone-100/50 dark:to-stone-900/40 shadow-xs transition-colors">
             {/* Micro-tag */}
             <div className="flex items-center justify-between gap-2 mb-3.5 flex-wrap">
-              <span className="text-[11px] lg:text-xs font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
+              <span className="text-[11px] lg:text-xs font-sans tabular-nums uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold">
                 {formatSpaced(["Today's Mission", "•", `${dailyMission.heroName} (${dailyMission.passageReference})`])}
               </span>
             </div>
@@ -458,7 +458,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <span>Done for today • {dailyMission.keyVerseReference}</span>
                 </div>
                 <div className="text-xs sm:text-sm text-stone-700 dark:text-parchment-100 font-serif font-medium leading-relaxed">
-                  <strong className="font-mono text-[10px] uppercase tracking-wide text-emerald-800 dark:text-emerald-300 block mb-0.5">Today's Move:</strong>
+                  <strong className="font-sans tabular-nums text-[10px] uppercase tracking-wide text-emerald-800 dark:text-emerald-300 block mb-0.5">Today's Move:</strong>
                   {dailyMission.actionLine}
                 </div>
               </div>
@@ -554,7 +554,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="rounded-2xl border border-accent/35 bg-accent/5 p-4 space-y-3.5">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[10px] font-mono uppercase tracking-widest text-accent-text font-bold">
+                  <p className="text-[10px] font-sans tabular-nums uppercase tracking-widest text-accent-text font-bold">
                     {t('dashboard.activeSeries')}
                   </p>
                   <h3 className="text-base font-serif font-bold text-fg leading-tight mt-0.5 truncate">
@@ -614,7 +614,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <Compass className="w-4 h-4" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-[10px] font-mono uppercase tracking-widest text-accent-text font-bold">
+                <div className="text-[10px] font-sans tabular-nums uppercase tracking-widest text-accent-text font-bold">
                   {t('library.seriesBadge')}
                 </div>
                 <div className="text-sm font-semibold text-fg">{t('series.pickWeek')}</div>
@@ -628,11 +628,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
           MORE SECTION: Collapsed by default for a simpler, calmer home
           ========================================================================= */}
       <details className="mt-4 rounded-2xl bg-stone-100/50 dark:bg-stone-900/40 border border-stone-200/60 dark:border-stone-800/60 group transition-all">
-        <summary className="p-3.5 sm:p-4 text-xs font-mono font-semibold text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 cursor-pointer list-none flex items-center justify-between select-none">
+        <summary className="p-3.5 sm:p-4 text-xs font-sans tabular-nums font-semibold text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 cursor-pointer list-none flex items-center justify-between select-none">
           <span className="flex items-center gap-2">
             <span>More tools & reflections</span>
           </span>
-          <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 group-open:rotate-90 transition-transform">▸</span>
+          <span className="text-[11px] font-sans tabular-nums text-amber-800 dark:text-amber-400 group-open:rotate-90 transition-transform">▸</span>
         </summary>
         <div className="p-3.5 sm:p-4 pt-0 border-t border-stone-200/40 dark:border-stone-800/40 space-y-3">
           <div className="grid grid-cols-2 gap-2.5 sm:gap-3 pt-3">
@@ -703,7 +703,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                   <Award aria-hidden="true" className="w-4 h-4" />
                 </div>
-                <span className="text-[10px] font-mono font-bold text-amber-800 dark:text-amber-400 px-1.5 py-0.5 rounded-full bg-amber-500/10">
+                <span className="text-[10px] font-sans tabular-nums font-bold text-amber-800 dark:text-amber-400 px-1.5 py-0.5 rounded-full bg-amber-500/10">
                   {unlockedRelics.length}/{ALL_RELICS.length}
                 </span>
               </div>
@@ -774,7 +774,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {showRelics && (
             <div className="p-4 rounded-2xl bg-white dark:bg-stone-900/90 border border-amber-500/30 space-y-2.5 transition-all">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold block">
+                <span className="text-[11px] font-sans tabular-nums uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold block">
                   Unlocked Collection ({unlockedRelics.length}/{ALL_RELICS.length})
                 </span>
                 <button
@@ -821,11 +821,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {yesterdayVerse && !yesterdayRecalled && (
           <div className="p-5 rounded-2xl bg-stone-100/70 dark:bg-stone-900/60 transition-all">
             <div className="flex items-center justify-between gap-2 mb-2">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold flex items-center gap-1.5">
+              <span className="text-[11px] font-sans tabular-nums uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold flex items-center gap-1.5">
                 <RotateCw aria-hidden="true" className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                 <span>Remember yesterday's verse?</span>
               </span>
-              <span className="text-[10px] font-mono text-stone-500 dark:text-stone-400">
+              <span className="text-[10px] font-sans tabular-nums text-stone-500 dark:text-stone-400">
                 1-tap recall
               </span>
             </div>
@@ -922,7 +922,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <BookOpen className="w-4 h-4 text-amber-600 dark:text-amber-400" />
               </div>
               <div>
-                <span className="text-[11px] font-mono uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold block">
+                <span className="text-[11px] font-sans tabular-nums uppercase tracking-widest text-amber-800 dark:text-amber-400 font-bold block">
                   Continue Reading
                 </span>
                 <span className="text-xs font-serif font-bold text-stone-900 dark:text-parchment-50">
@@ -938,7 +938,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             whenever there is no recall/review/continue content to show yet. */}
         {!(yesterdayVerse && !yesterdayRecalled) && dueFSRSCount === 0 && !readingPlace && (
           <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-500/10 via-stone-100/60 to-stone-100/30 dark:from-amber-500/10 dark:via-stone-900/60 dark:to-stone-900/40 border border-stone-200/80 dark:border-stone-800/80">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold flex items-center gap-1.5">
+            <span className="text-[11px] font-sans tabular-nums uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold flex items-center gap-1.5">
               <ShieldCheck aria-hidden="true" className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
               <span>Your toolkit</span>
             </span>

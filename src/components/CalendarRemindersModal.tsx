@@ -256,14 +256,14 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
               <div className="p-4 rounded-2xl bg-stone-100/80 dark:bg-stone-850/60 border border-stone-200/70 dark:border-stone-800/70 space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-amber-700 dark:text-amber-400 font-bold block">
+                    <span className="text-[10px] font-sans tabular-nums uppercase tracking-wider text-amber-700 dark:text-amber-400 font-bold block">
                       Daily Morning Mission
                     </span>
                     <h3 className="text-sm font-bold text-stone-900 dark:text-parchment-100 mt-0.5">
                       Today's Mission — Testament
                     </h3>
                   </div>
-                  <span className="text-xs font-mono font-bold text-stone-700 dark:text-stone-300 bg-stone-200 dark:bg-stone-800 px-2.5 py-1 rounded-lg">
+                  <span className="text-xs font-sans tabular-nums font-bold text-stone-700 dark:text-stone-300 bg-stone-200 dark:bg-stone-800 px-2.5 py-1 rounded-lg">
                     {formatTime12h(morningTime)}
                   </span>
                 </div>
@@ -283,7 +283,7 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
                     type="time"
                     value={morningTime}
                     onChange={(e) => handleTimeChange('morning', e.target.value)}
-                    className="px-2.5 py-1 rounded-xl bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 text-xs font-mono font-bold text-stone-900 dark:text-parchment-100 focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer"
+                    className="px-2.5 py-1 rounded-xl bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 text-xs font-sans tabular-nums font-bold text-stone-900 dark:text-parchment-100 focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer"
                   />
                 </div>
 
@@ -295,7 +295,7 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
                       key={preset}
                       type="button"
                       onClick={() => handleTimeChange('morning', preset)}
-                      className={`text-[11px] font-mono px-2 py-0.5 rounded-lg border transition-colors cursor-pointer ${
+                      className={`text-[11px] font-sans tabular-nums px-2 py-0.5 rounded-lg border transition-colors cursor-pointer ${
                         morningTime === preset
                           ? 'bg-amber-500 text-accent-on font-bold border-amber-500'
                           : 'bg-stone-200/50 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-300/50 dark:border-stone-700 hover:border-amber-400'
@@ -333,14 +333,14 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
               <div className="p-4 rounded-2xl bg-stone-100/80 dark:bg-stone-850/60 border border-stone-200/70 dark:border-stone-800/70 space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-700 dark:text-emerald-400 font-bold block">
+                    <span className="text-[10px] font-sans tabular-nums uppercase tracking-wider text-emerald-700 dark:text-emerald-400 font-bold block">
                       Daily Verse Recall
                     </span>
                     <h3 className="text-sm font-bold text-stone-900 dark:text-parchment-100 mt-0.5">
                       Still got yesterday's verse? — Testament
                     </h3>
                   </div>
-                  <span className="text-xs font-mono font-bold text-stone-700 dark:text-stone-300 bg-stone-200 dark:bg-stone-800 px-2.5 py-1 rounded-lg">
+                  <span className="text-xs font-sans tabular-nums font-bold text-stone-700 dark:text-stone-300 bg-stone-200 dark:bg-stone-800 px-2.5 py-1 rounded-lg">
                     {formatTime12h(recallTime)}
                   </span>
                 </div>
@@ -371,7 +371,7 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
                     type="time"
                     value={recallTime}
                     onChange={(e) => handleTimeChange('recall', e.target.value)}
-                    className="px-2.5 py-1 rounded-xl bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 text-xs font-mono font-bold text-stone-900 dark:text-parchment-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                    className="px-2.5 py-1 rounded-xl bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 text-xs font-sans tabular-nums font-bold text-stone-900 dark:text-parchment-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
                   />
                 </div>
 
@@ -383,7 +383,7 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
                       key={preset}
                       type="button"
                       onClick={() => handleTimeChange('recall', preset)}
-                      className={`text-[11px] font-mono px-2 py-0.5 rounded-lg border transition-colors cursor-pointer ${
+                      className={`text-[11px] font-sans tabular-nums px-2 py-0.5 rounded-lg border transition-colors cursor-pointer ${
                         recallTime === preset
                           ? 'bg-emerald-600 text-white font-bold border-emerald-600'
                           : 'bg-stone-200/50 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-300/50 dark:border-stone-700 hover:border-emerald-400'

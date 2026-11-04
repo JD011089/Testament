@@ -150,7 +150,7 @@ export function SeriesPickerModal({ isOpen, onClose, onSeriesSelected }: SeriesP
             {detail ? <ArrowLeft className="w-4 h-4" /> : <X className="w-4 h-4" />}
           </button>
           <div className="min-w-0 flex-1 pt-0.5">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-accent-text font-bold">
+            <p className="text-[10px] font-sans tabular-nums uppercase tracking-widest text-accent-text font-bold">
               {detail
                 ? isDetailActive
                   ? t('series.dayOfSeven', { day: detailDay })
@@ -201,7 +201,7 @@ export function SeriesPickerModal({ isOpen, onClose, onSeriesSelected }: SeriesP
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-semibold text-fg">{series.heroName}</span>
                         {isActive && day != null && (
-                          <span className="text-[10px] font-mono font-bold text-accent-text bg-accent/15 px-1.5 py-0.5 rounded-md">
+                          <span className="text-[10px] font-sans tabular-nums font-bold text-accent-text bg-accent/15 px-1.5 py-0.5 rounded-md">
                             {t('series.dayChip', { day })}
                           </span>
                         )}
@@ -255,7 +255,7 @@ export function SeriesPickerModal({ isOpen, onClose, onSeriesSelected }: SeriesP
                         }`}
                       >
                         <span
-                          className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-[11px] font-mono font-bold ${
+                          className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-[11px] font-sans tabular-nums font-bold ${
                             isDone
                               ? 'bg-emerald-500 text-white'
                               : isToday
@@ -276,7 +276,7 @@ export function SeriesPickerModal({ isOpen, onClose, onSeriesSelected }: SeriesP
                             {m.momentTitle}
                           </div>
                           <div
-                            className={`text-[11px] font-mono mt-0.5 truncate ${
+                            className={`text-[11px] font-sans tabular-nums mt-0.5 truncate ${
                               locked ? 'text-stone-300 dark:text-stone-600' : 'text-fg-muted'
                             }`}
                           >
@@ -284,7 +284,7 @@ export function SeriesPickerModal({ isOpen, onClose, onSeriesSelected }: SeriesP
                           </div>
                         </div>
                         {isToday && canOpen && (
-                          <span className="text-[10px] font-mono font-bold uppercase tracking-wide text-accent-text shrink-0 pr-0.5">
+                          <span className="text-[10px] font-sans tabular-nums font-bold uppercase tracking-wide text-accent-text shrink-0 pr-0.5">
                             {t('series.today')}
                           </span>
                         )}

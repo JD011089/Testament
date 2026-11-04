@@ -497,7 +497,7 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
           className="mb-6"
           eyebrow="Scripture Arcade"
           eyebrowIcon={<Gamepad2 className="w-4 h-4" />}
-          title="Trivia Gauntlet"
+          title="Bible Trivia"
           subtitle="Ten questions drawn straight from the verses, stories, and books inside your Bible. Miss one and you'll be pointed to the exact passage to study it — then it comes back later until you get it."
         />
       )}
@@ -541,7 +541,7 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
                       : 'text-stone-600 dark:text-stone-300 hover:bg-stone-200/60 dark:hover:bg-stone-800'
                   }`}
                 >
-                  {option === 'relaxed' ? 'Relaxed Â· 20s each' : 'Arcade Â· accelerating clock'}
+                  {option === 'relaxed' ? 'Relaxed · 20s each' : 'Arcade · accelerating clock'}
                 </button>
               ))}
             </div>
@@ -551,22 +551,22 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
                 <div className="p-3 rounded-2xl bg-white/70 dark:bg-stone-900/60">
                   <Target className="w-5 h-5 mx-auto text-amber-600 dark:text-amber-400 mb-1" />
                   <div className="text-sm font-serif font-black text-stone-900 dark:text-parchment-50">{QUESTIONS_PER_RUN} Qs</div>
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-stone-500 dark:text-stone-400">{bank.length} in bank</div>
+                  <div className="text-[10px] font-sans tabular-nums uppercase tracking-wider text-stone-500 dark:text-stone-400">{bank.length} in bank</div>
                 </div>
                 <div className="p-3 rounded-2xl bg-white/70 dark:bg-stone-900/60">
                   <Heart className="w-5 h-5 mx-auto text-red-500 mb-1" />
                   <div className="text-sm font-serif font-black text-stone-900 dark:text-parchment-50">{STARTING_LIVES} Lives</div>
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-stone-500 dark:text-stone-400">Miss = 1 life</div>
+                  <div className="text-[10px] font-sans tabular-nums uppercase tracking-wider text-stone-500 dark:text-stone-400">Miss = 1 life</div>
                 </div>
                 <div className="p-3 rounded-2xl bg-white/70 dark:bg-stone-900/60">
                   <Flame className="w-5 h-5 mx-auto text-orange-500 mb-1" />
                   <div className="text-sm font-serif font-black text-stone-900 dark:text-parchment-50">Combos</div>
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-stone-500 dark:text-stone-400">Up to 2× points</div>
+                  <div className="text-[10px] font-sans tabular-nums uppercase tracking-wider text-stone-500 dark:text-stone-400">Up to 2× points</div>
                 </div>
                 <div className="p-3 rounded-2xl bg-white/70 dark:bg-stone-900/60">
                   <Crown className="w-5 h-5 mx-auto text-amber-500 mb-1" />
                   <div className="text-sm font-serif font-black text-stone-900 dark:text-parchment-50">Boss</div>
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-stone-500 dark:text-stone-400">2× final Q</div>
+                  <div className="text-[10px] font-sans tabular-nums uppercase tracking-wider text-stone-500 dark:text-stone-400">2× final Q</div>
                 </div>
               </div>
 
@@ -584,13 +584,13 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
                 {mode === 'relaxed'
                   ? 'Relaxed gives you 20 seconds on every question — the clock never shrinks. Change the mode above anytime.'
                   : 'Arcade starts at 13 seconds and shortens each question; the final boss question is worth double. Miss one and you lose a life.'}
-                {' '}Keyboard: press <kbd className="px-1.5 py-0.5 rounded bg-stone-200 dark:bg-stone-800 font-mono text-[10px]">1–4</kbd> to
-                answer, <kbd className="px-1.5 py-0.5 rounded bg-stone-200 dark:bg-stone-800 font-mono text-[10px]">Enter</kbd> to continue.
+                {' '}Keyboard: press <kbd className="px-1.5 py-0.5 rounded bg-stone-200 dark:bg-stone-800 font-sans tabular-nums text-[10px]">1–4</kbd> to
+                answer, <kbd className="px-1.5 py-0.5 rounded bg-stone-200 dark:bg-stone-800 font-sans tabular-nums text-[10px]">Enter</kbd> to continue.
               </p>
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl bg-stone-100/70 dark:bg-stone-900/50">
-              <div className="flex items-center gap-2 text-xs font-mono text-stone-600 dark:text-stone-400">
+              <div className="flex items-center gap-2 text-xs font-sans tabular-nums text-stone-600 dark:text-stone-400">
                 <Trophy className="w-4 h-4 text-amber-500" />
                 <span>High score: <strong className="text-stone-900 dark:text-parchment-50">{highScore}</strong></span>
                 <span className="text-stone-400">•</span>
@@ -602,7 +602,7 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
                 className="btn-gold w-full sm:w-auto px-7 py-3.5 rounded-2xl text-sm flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Swords className="w-4 h-4" />
-                <span>Enter the Gauntlet</span>
+                <span>Start the quiz</span>
               </button>
             </div>
           </motion.div>
@@ -627,12 +627,12 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
               </button>
 
               <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-stone-100 dark:bg-stone-900 text-xs font-mono font-bold text-amber-800 dark:text-amber-300">
+                <span className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-stone-100 dark:bg-stone-900 text-xs font-sans tabular-nums font-bold text-amber-800 dark:text-amber-300">
                   <Zap className="w-3.5 h-3.5 text-amber-500" />
                   {score}
                 </span>
                 {combo >= 2 && (
-                  <span className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-orange-500/15 text-xs font-mono font-bold text-orange-700 dark:text-orange-300">
+                  <span className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-orange-500/15 text-xs font-sans tabular-nums font-bold text-orange-700 dark:text-orange-300">
                     <Flame className="w-3.5 h-3.5" />
                     {combo}× combo
                   </span>
@@ -650,7 +650,7 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
 
             {/* Progress + timer */}
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-[11px] font-mono text-stone-500 dark:text-stone-400">
+              <div className="flex items-center justify-between text-[11px] font-sans tabular-nums text-stone-500 dark:text-stone-400">
                 <span>Question {index + 1} of {questions.length}</span>
                 <span className="flex items-center gap-1">
                   <Timer className="w-3 h-3" />
@@ -670,18 +670,18 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
             }`}>
               <div className="flex items-center gap-2 mb-3 flex-wrap">
                 {isBoss && (
-                  <span className="flex items-center gap-1 text-[10px] font-mono font-bold uppercase tracking-widest text-accent-on bg-amber-500 px-2 py-0.5 rounded-full">
+                  <span className="flex items-center gap-1 text-[10px] font-sans tabular-nums font-bold uppercase tracking-widest text-accent-on bg-amber-500 px-2 py-0.5 rounded-full">
                     <Crown className="w-3 h-3" />
                     Final Boss • 2× points
                   </span>
                 )}
                 {isReviewQuestion && (
-                  <span className="flex items-center gap-1 text-[10px] font-mono font-bold uppercase tracking-widest text-indigo-700 dark:text-indigo-300 bg-indigo-500/15 px-2 py-0.5 rounded-full">
+                  <span className="flex items-center gap-1 text-[10px] font-sans tabular-nums font-bold uppercase tracking-widest text-indigo-700 dark:text-indigo-300 bg-indigo-500/15 px-2 py-0.5 rounded-full">
                     <RotateCcw className="w-3 h-3" />
                     Review round
                   </span>
                 )}
-                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-sans tabular-nums font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">
                   {question.tag}
                 </span>
               </div>
@@ -721,7 +721,7 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
                         !answered ? 'cursor-pointer' : 'cursor-default'
                       }`}
                     >
-                      <span className={`w-6 h-6 rounded-lg shrink-0 flex items-center justify-center text-xs font-mono font-bold ${
+                      <span className={`w-6 h-6 rounded-lg shrink-0 flex items-center justify-center text-xs font-sans tabular-nums font-bold ${
                         answered && isCorrectOption
                           ? 'bg-emerald-500 text-stone-950'
                           : answered && isPicked
@@ -759,9 +759,9 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
                       {answered.correct ? 'Correct!' : answered.pickedIndex === null ? 'Time up!' : 'Not quite'}
                     </span>
                     {answered.correct ? (
-                      <span className="text-xs font-mono font-bold text-amber-800 dark:text-amber-400">+{answered.earned} pts</span>
+                      <span className="text-xs font-sans tabular-nums font-bold text-amber-800 dark:text-amber-400">+{answered.earned} pts</span>
                     ) : (
-                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-rose-700 dark:text-rose-300 bg-rose-500/15 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-sans tabular-nums font-bold uppercase tracking-wider text-rose-700 dark:text-rose-300 bg-rose-500/15 px-2 py-0.5 rounded-full">
                         Will return to study
                       </span>
                     )}
@@ -775,12 +775,12 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
                   ) : (
                     <div className="mb-3 p-4 rounded-2xl bg-white/80 dark:bg-stone-950/60 border border-amber-500/30">
                       <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
-                        <span className="flex items-center gap-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400">
+                        <span className="flex items-center gap-1.5 text-[11px] font-sans tabular-nums font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400">
                           <BookOpen className="w-3.5 h-3.5" />
                           Learn this Scripture
                         </span>
                         {question.scripture && (
-                          <span className="text-xs font-mono font-bold text-stone-900 dark:text-parchment-50">
+                          <span className="text-xs font-sans tabular-nums font-bold text-stone-900 dark:text-parchment-50">
                             {question.scripture.reference}
                             {question.scripture.translation ? ` • ${question.scripture.translation}` : ''}
                           </span>
@@ -847,10 +847,10 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
                 {outcome === 'victory' ? <Trophy className="w-8 h-8" /> : <Heart className="w-8 h-8" />}
               </div>
               <h2 className="text-2xl sm:text-3xl font-serif font-black text-stone-900 dark:text-parchment-50">
-                {outcome === 'victory' ? 'Gauntlet Cleared!' : 'Gauntlet Over'}
+                {outcome === 'victory' ? 'You did it!' : 'Quiz over'}
               </h2>
               {newBest && (
-                <span className="inline-flex items-center gap-1 mt-2 text-xs font-mono font-bold text-amber-800 dark:text-amber-300 bg-amber-500/15 px-3 py-1 rounded-full">
+                <span className="inline-flex items-center gap-1 mt-2 text-xs font-sans tabular-nums font-bold text-amber-800 dark:text-amber-300 bg-amber-500/15 px-3 py-1 rounded-full">
                   <Sparkles className="w-3.5 h-3.5" />
                   New high score!
                 </span>
@@ -859,26 +859,26 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
               <div className="text-5xl font-serif font-black text-amber-800 dark:text-amber-400 mt-4 mb-1">
                 {score}
               </div>
-              <div className="text-xs font-mono uppercase tracking-widest text-stone-500 dark:text-stone-400 mb-5">
+              <div className="text-xs font-sans tabular-nums uppercase tracking-widest text-stone-500 dark:text-stone-400 mb-5">
                 Points
               </div>
 
               <div className={`grid grid-cols-2 sm:grid-cols-3 gap-3`}>
                 <div className="p-3 rounded-2xl bg-white/70 dark:bg-stone-900/60">
                   <div className="text-lg font-serif font-black text-stone-900 dark:text-parchment-50">{correctCount}/{attempted}</div>
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-stone-500 dark:text-stone-400">Correct / answered</div>
+                  <div className="text-[10px] font-sans tabular-nums uppercase tracking-wider text-stone-500 dark:text-stone-400">Correct / answered</div>
                 </div>
                 <div className="p-3 rounded-2xl bg-white/70 dark:bg-stone-900/60">
                   <div className="text-lg font-serif font-black text-stone-900 dark:text-parchment-50">{accuracy}%</div>
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-stone-500 dark:text-stone-400">Accuracy</div>
+                  <div className="text-[10px] font-sans tabular-nums uppercase tracking-wider text-stone-500 dark:text-stone-400">Accuracy</div>
                 </div>
                 <div className="p-3 rounded-2xl bg-white/70 dark:bg-stone-900/60">
                   <div className="text-lg font-serif font-black text-stone-900 dark:text-parchment-50">{bestCombo}×</div>
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-stone-500 dark:text-stone-400">Best combo</div>
+                  <div className="text-[10px] font-sans tabular-nums uppercase tracking-wider text-stone-500 dark:text-stone-400">Best combo</div>
                 </div>
               </div>
 
-              <div className="flex items-center justify-center gap-3 text-xs font-mono text-stone-500 dark:text-stone-400 mt-4">
+              <div className="flex items-center justify-center gap-3 text-xs font-sans tabular-nums text-stone-500 dark:text-stone-400 mt-4">
                 <span className="flex items-center gap-1"><Trophy className="w-3.5 h-3.5 text-amber-500" /> High: <strong className="text-stone-900 dark:text-parchment-50">{highScore}</strong></span>
                 <span className="text-stone-400">•</span>
                 <span className="flex items-center gap-1"><Flame className="w-3.5 h-3.5 text-orange-500" /> Best combo: <strong className="text-stone-900 dark:text-parchment-50">{bestComboEver}×</strong></span>
@@ -886,7 +886,7 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
 
               {missedThisRun.length > 0 && (
                 <div className="mt-5 text-left">
-                  <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-wider text-indigo-800 dark:text-indigo-300 mb-2">
+                  <div className="flex items-center gap-2 text-[11px] font-sans tabular-nums uppercase tracking-wider text-indigo-800 dark:text-indigo-300 mb-2">
                     <BookOpen className="w-3.5 h-3.5" />
                     {missedThisRun.length} missed this run — added to your review
                   </div>
@@ -903,7 +903,7 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
                               soundEngine.playSnap();
                               onStudyVerse(reference);
                             }}
-                            className="px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-800 dark:text-indigo-300 text-xs font-mono cursor-pointer"
+                            className="px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-800 dark:text-indigo-300 text-xs font-sans tabular-nums cursor-pointer"
                           >
                             {reference}
                           </button>
@@ -912,7 +912,7 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
                       return (
                         <span
                           key={q.id}
-                          className="px-3 py-1.5 rounded-xl bg-stone-200/60 dark:bg-stone-800/60 text-stone-600 dark:text-stone-400 text-xs font-mono"
+                          className="px-3 py-1.5 rounded-xl bg-stone-200/60 dark:bg-stone-800/60 text-stone-600 dark:text-stone-400 text-xs font-sans tabular-nums"
                         >
                           {reference ?? q.tag}
                         </span>
