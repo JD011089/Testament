@@ -212,6 +212,13 @@ export function App() {
     return getDailyStreakCount();
   });
 
+  // Story Player records the streak itself when a story is finished.
+  useEffect(() => {
+    const refresh = () => setStreakCount(getDailyStreakCount());
+    window.addEventListener('testament-streak-updated', refresh);
+    return () => window.removeEventListener('testament-streak-updated', refresh);
+  }, []);
+
   const recordActivityStreak = () => {
     const next = recordDailyActivityStreak();
     setStreakCount(next);

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import type { InteractionCard, Story, StoryArc, StoryCard, TapRevealConfig } from '../../types/story';
 import { getStoryCardIndex, isStoryCompleted, markStoryComplete, saveStoryCursor } from '../../utils/storyProgress';
 import { addVerseCard } from '../../utils/deck';
+import { recordDailyActivityStreak } from '../../utils/dailyEngine';
 import { celebrate, isSoundEnabled } from '../../utils/feedback';
 import { soundEngine } from '../../utils/audio';
 import { useLanguage } from '../../context/LanguageContext';
@@ -112,6 +113,9 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
 
   const finish = useCallback(() => {
     markStoryComplete(story.id);
+    // Finishing a story is the main daily activity, so it counts toward the streak.
+    recordDailyActivityStreak();
+    window.dispatchEvent(new CustomEvent('testament-streak-updated'));
     setCompleted(true);
     celebrate('payoff');
     onCompleted?.(story);

@@ -2,8 +2,9 @@ import { useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { getStoryById } from '../content/stories';
 import { getDailyStoryId, nextStoryIdAfter } from '../utils/dailyStory';
-import { isStoryCompleted } from '../utils/storyProgress';
-import { todayKey, getDueVerses } from '../utils/spacedRepetition';
+import { getStoryProgress, isStoryCompleted } from '../utils/storyProgress';
+import { todayKey } from '../utils/spacedRepetition';
+import { getDeckReviewQueue } from '../utils/deckReview';
 import { getDeckVerseCards } from '../utils/deck';
 import { registerDynamicBibleVerse } from '../utils/verseRegistry';
 import { loadReadingPlace } from '../utils/readingPlace';
@@ -21,6 +22,14 @@ interface TodayScreenProps {
   onReadChapter: (passage: string) => void;
   onPracticeVerse?: (ref: string) => void;
   onContinueReading?: () => void;
+}
+
+/** True when this story was finished today, from any entry point (Today, Map or a /story link). */
+function finishedToday(storyId: string): boolean {
+  const completedAt = getStoryProgress(storyId)?.completedAt;
+  if (!completedAt) return false;
+  const finished = new Date(completedAt);
+  return !Number.isNaN(finished.getTime()) && finished.toDateString() === new Date().toDateString();
 }
 
 function readStepIndex(storyId: string): number {
@@ -98,16 +107,14 @@ export function TodayScreen({
   const { t, language } = useLanguage();
   const [storyId] = useState(() => getDailyStoryId());
   const story = getStoryById(storyId);
-  const [step, setStep] = useState(() => readStepIndex(storyId) >= 1 ? 4 : 0);
+  const [step, setStep] = useState(() => readStepIndex(storyId) >= 1 || finishedToday(storyId) ? 4 : 0);
   const [playing, setPlaying] = useState(false);
 
   const tomorrow = useMemo(() => getStoryById(nextStoryIdAfter(storyId)) ?? null, [storyId]);
   const week = useMemo(() => activeDaysThisWeek(streakCount), [streakCount, step]);
   const deckVerses = useMemo(() => getDeckVerseCards(), [step]);
-  const dueVerses = useMemo(() => {
-    const deckRefs = new Set(deckVerses.map((card) => card.ref));
-    return getDueVerses().filter((state) => deckRefs.has(state.ref));
-  }, [deckVerses]);
+  // Overdue reviews first, then verses collected but never practiced.
+  const reviewQueue = useMemo(() => getDeckReviewQueue(deckVerses), [deckVerses]);
   const readingPlace = useMemo(() => loadReadingPlace(), []);
 
   if (!story) {
@@ -141,7 +148,7 @@ export function TodayScreen({
   const hour = new Date().getHours();
   const timeOfDay: 'morning' | 'day' | 'evening' = hour < 11 ? 'morning' : hour >= 18 ? 'evening' : 'day';
 
-  const practiceTarget = dueVerses[0]?.ref ?? deckVerses[0]?.ref ?? null;
+  const practiceTarget = reviewQueue[0]?.card.ref ?? deckVerses[0]?.ref ?? null;
   const startReview = () => {
     if (!practiceTarget || !onPracticeVerse) {
       onOpenDeck?.();
@@ -161,11 +168,11 @@ export function TodayScreen({
     setPlaying(true);
   };
 
-  const reviewTitle = dueVerses.length > 0
+  const reviewTitle = reviewQueue.length > 0
     ? t('today.tileReview')
     : deckVerses.length > 0 ? t('today.tilePractice') : t('today.tileEmpty');
-  const reviewDetail = dueVerses.length > 0
-    ? t('today.tileReviewDetail', { minutes: Math.max(1, Math.round(dueVerses.length * 0.5)) })
+  const reviewDetail = reviewQueue.length > 0
+    ? t('today.tileReviewDetail', { minutes: Math.max(1, Math.round(reviewQueue.length * 0.5)) })
     : deckVerses.length > 0
       ? t('today.tilePracticeDetail', { count: deckVerses.length })
       : t('today.tileEmptyDetail');
@@ -313,9 +320,9 @@ export function TodayScreen({
           <span className="grid h-8 w-8 place-items-center rounded-[0.6rem] bg-secondary/15 text-secondary-text">
             <RefreshCw className="h-4 w-4" aria-hidden="true" />
           </span>
-          {dueVerses.length > 0 && (
+          {reviewQueue.length > 0 && (
             <span className="absolute right-2.5 top-2.5 grid h-5 min-w-5 place-items-center rounded-full bg-secondary-text px-1.5 text-[11px] font-bold text-white dark:text-secondary-on">
-              {dueVerses.length}
+              {reviewQueue.length}
             </span>
           )}
           <span className="mt-1.5 text-[0.85rem] font-bold leading-tight text-fg">{reviewTitle}</span>

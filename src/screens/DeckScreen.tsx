@@ -3,7 +3,7 @@ import { readDeck, setVerseStrength, type CardStrength, type DeckVerseCard } fro
 import { registerDynamicBibleVerse } from '../utils/verseRegistry';
 import { getStoryStop } from '../content/stories';
 import { isStoryCompleted } from '../utils/storyProgress';
-import { getDueVerses } from '../utils/spacedRepetition';
+import { getDeckReviewQueue } from '../utils/deckReview';
 import { celebrate } from '../utils/feedback';
 import { shareVerseCard } from '../utils/shareCard';
 import { getStoryIllustrationUrl } from '../utils/storyIllustrations';
@@ -38,17 +38,15 @@ export function DeckScreen({ onPractice, onReadChapter }: DeckScreenProps) {
   const [flipped, setFlipped] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
-  const verseCards = cards.filter((card): card is DeckVerseCard => card.type === 'verse');
+  const verseCards = useMemo(() => cards.filter((card): card is DeckVerseCard => card.type === 'verse'), [cards]);
   const tierCounts = useMemo(() => {
     const counts: Record<CardStrength, number> = { gold: 0, silver: 0, bronze: 0 };
     for (const card of verseCards) counts[card.strength] += 1;
     return counts;
   }, [verseCards]);
 
-  const dueRefs = useMemo(() => {
-    const refs = new Set(verseCards.map((card) => card.ref));
-    return getDueVerses().filter((state) => refs.has(state.ref)).map((state) => state.ref);
-  }, [verseCards]);
+  // Overdue reviews first, then verses collected but never practiced (same data Practice writes).
+  const dueRefs = useMemo(() => getDeckReviewQueue(verseCards).map((item) => item.card.ref), [verseCards]);
 
   const arcs = useMemo(() => {
     const set = new Set<string>();
