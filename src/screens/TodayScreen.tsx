@@ -317,12 +317,12 @@ export function TodayScreen({
         <button
           type="button"
           onClick={startReview}
-          className="relative flex items-center gap-2.5 rounded-[1.1rem] border border-line bg-surface-raised p-3 text-left shadow-sm transition hover:border-accent/60 active:scale-[0.98]"
+          className="relative flex flex-col items-start gap-2 rounded-[1.1rem] border border-line bg-surface-raised p-3 text-left shadow-sm transition hover:border-accent/60 active:scale-[0.98]"
         >
           <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-amber-100 text-accent-text dark:bg-amber-500/15">
             <RefreshCw className="h-4 w-4" aria-hidden="true" />
           </span>
-          <span className="min-w-0">
+          <span className="w-full min-w-0">
             <span className="block truncate text-[0.85rem] font-bold leading-tight text-fg">{reviewTitle}</span>
             <span className="block truncate text-[11px] text-fg-muted">{reviewDetail}</span>
           </span>
@@ -337,12 +337,12 @@ export function TodayScreen({
           <button
             type="button"
             onClick={() => { celebrate('tap'); onContinueReading(); }}
-            className="flex items-center gap-2.5 rounded-[1.1rem] border border-line bg-surface-raised p-3 text-left shadow-sm transition hover:border-accent/60 active:scale-[0.98]"
+            className="flex flex-col items-start gap-2 rounded-[1.1rem] border border-line bg-surface-raised p-3 text-left shadow-sm transition hover:border-accent/60 active:scale-[0.98]"
           >
             <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-amber-100 text-accent-text dark:bg-amber-500/15">
               <BookOpen className="h-4 w-4" aria-hidden="true" />
             </span>
-            <span className="min-w-0">
+            <span className="w-full min-w-0">
               <span className="block truncate text-[0.85rem] font-bold leading-tight text-fg">
                 {readingPlace ? `${readingPlace.bookName} ${readingPlace.chapter}` : t('today.tileOpenBible')}
               </span>
