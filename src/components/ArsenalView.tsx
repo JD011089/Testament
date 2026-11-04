@@ -165,7 +165,7 @@ export const ArsenalView: React.FC<ArsenalViewProps> = ({
               }}
               className={`text-xs px-3.5 py-1.5 rounded-full font-medium whitespace-nowrap transition-all ${
                 activeFilter === f.id
-                  ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                  ? 'bg-amber-500 text-accent-on font-bold shadow-sm'
                   : 'bg-stone-200/50 dark:bg-stone-900 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
               }`}
             >

@@ -149,11 +149,11 @@ test('complete the daily loop, land the card in Deck, and resume', async ({ page
   await expect(page.getByRole('heading', { name: /Done for today/ })).toBeVisible();
 
   // Card landed in Deck
-  await page.getByRole('button', { name: 'Deck', exact: true }).click();
+  await page.getByRole('button', { name: 'Collection', exact: true }).click();
   await expect(page.getByText('1 Samuel 17:47').first()).toBeVisible();
 
   // Reload resumes with the card still collected
   await page.reload();
-  await page.getByRole('button', { name: 'Deck', exact: true }).click();
+  await page.getByRole('button', { name: 'Collection', exact: true }).click();
   await expect(page.getByText('1 Samuel 17:47').first()).toBeVisible();
 });

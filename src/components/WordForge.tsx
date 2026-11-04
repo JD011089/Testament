@@ -476,7 +476,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
             onClick={() => setForgeMode('recall')}
             className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
               forgeMode === 'recall' 
-                ? 'bg-amber-500 text-stone-950 font-bold shadow-xs' 
+                ? 'bg-amber-500 text-accent-on font-bold shadow-xs' 
                 : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
             }`}
           >
@@ -487,7 +487,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
             onClick={() => setForgeMode('phrases')}
             className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
               forgeMode === 'phrases' 
-                ? 'bg-amber-500 text-stone-950 font-bold shadow-xs' 
+                ? 'bg-amber-500 text-accent-on font-bold shadow-xs' 
                 : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
             }`}
           >
@@ -498,7 +498,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
             onClick={() => setForgeMode('reveal')}
             className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
               forgeMode === 'reveal' 
-                ? 'bg-amber-500 text-stone-950 font-bold shadow-xs' 
+                ? 'bg-amber-500 text-accent-on font-bold shadow-xs' 
                 : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
             }`}
           >
@@ -509,7 +509,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
             onClick={() => setForgeMode('full')}
             className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
               forgeMode === 'full' 
-                ? 'bg-amber-500 text-stone-950 font-bold shadow-xs' 
+                ? 'bg-amber-500 text-accent-on font-bold shadow-xs' 
                 : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
             }`}
           >
@@ -590,7 +590,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                           className={`px-4 py-2.5 rounded-xl font-semibold text-xs sm:text-sm shadow-xs transition-all cursor-pointer ${
                             isWrong
                               ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/40 animate-shake'
-                              : 'bg-white dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 dark:hover:bg-amber-400 dark:hover:text-stone-950 text-stone-900 dark:text-parchment-100'
+                              : 'bg-white dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 dark:hover:bg-amber-400 dark:hover:text-stone-950 text-accent-on dark:text-parchment-100'
                           }`}
                         >
                           {chip}
@@ -683,7 +683,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                   onClick={handlePeek}
                   className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold ${
                     isPeeking
-                      ? 'bg-amber-500 text-stone-950'
+                      ? 'bg-amber-500 text-accent-on'
                       : 'bg-stone-200/70 dark:bg-stone-800 text-stone-700 dark:text-stone-200 hover:bg-stone-300 dark:hover:bg-stone-700'
                   }`}
                 >
@@ -775,7 +775,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                     layout
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleSelectWord(item)}
-                    className="px-4 py-2.5 rounded-xl text-sm md:text-base font-reading font-medium bg-white dark:bg-ink-overlay text-stone-900 dark:text-parchment-200 hover:bg-amber-100 dark:hover:bg-stone-800 active:bg-amber-600 active:text-stone-950 focus-visible:ring-2 focus-visible:ring-amber-500 transition-colors shadow-xs"
+                    className="px-4 py-2.5 rounded-xl text-sm md:text-base font-reading font-medium bg-white dark:bg-ink-overlay text-accent-on dark:text-parchment-200 hover:bg-amber-100 dark:hover:bg-stone-800 active:bg-amber-600 active:text-stone-950 focus-visible:ring-2 focus-visible:ring-amber-500 transition-colors shadow-xs"
                   >
                     {useFirstLetters ? getGhostDisplay(item.word) : item.word}
                   </motion.button>
@@ -1104,7 +1104,7 @@ export const WordForge: React.FC<WordForgeProps> = ({
               }}
               className={`text-xs px-3.5 py-1.5 rounded-full font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-amber-500 ${
                 selectedCategory === cat
-                  ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                  ? 'bg-amber-500 text-accent-on font-bold shadow-sm'
                   : 'bg-stone-200/70 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
               }`}
             >

@@ -13,7 +13,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { StoryPlayer } from '../components/story/StoryPlayer';
 import { getStoryIllustrationUrl } from '../utils/storyIllustrations';
 import { getStoryTeaser } from '../content/stories/teasers';
-import { BookOpen, Check, ChevronRight, Flame, Headphones, Play, RotateCcw, RefreshCw, Settings } from 'lucide-react';
+import { BookOpen, Check, ChevronRight, Flame, Headphones, Play, RotateCcw, RefreshCw, UserRound } from 'lucide-react';
 
 interface TodayScreenProps {
   streakCount?: number;
@@ -178,80 +178,80 @@ export function TodayScreen({
       : t('today.tileEmptyDetail');
 
   return (
-    <div className="relative isolate mx-auto flex w-full max-w-2xl flex-1 flex-col px-3 pt-2 pb-4 sm:px-4 xl:pt-6 xl:pb-6">
-      {/* Time-of-day sky tint behind the header */}
+    <div className="relative isolate mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 pt-2 pb-4 sm:px-5 xl:pt-6 xl:pb-6">
+      {/* Soft time-of-day wash behind the header */}
       <div
         aria-hidden="true"
         className={`pointer-events-none fixed inset-x-0 top-0 -z-10 h-72 ${
           timeOfDay === 'morning'
-            ? 'bg-[linear-gradient(180deg,rgba(240,190,120,0.30),transparent)] dark:bg-[linear-gradient(180deg,rgba(228,184,121,0.10),transparent)]'
+            ? 'bg-[linear-gradient(180deg,rgba(226,182,94,0.16),transparent)] dark:bg-[linear-gradient(180deg,rgba(226,182,94,0.08),transparent)]'
             : timeOfDay === 'evening'
-              ? 'bg-[linear-gradient(180deg,rgba(84,120,172,0.20),transparent)] dark:bg-[linear-gradient(180deg,rgba(52,88,124,0.55),transparent)]'
-              : 'bg-[linear-gradient(180deg,rgba(164,189,199,0.22),transparent)] dark:bg-[linear-gradient(180deg,rgba(43,74,99,0.30),transparent)]'
+              ? 'bg-[linear-gradient(180deg,rgba(35,64,142,0.14),transparent)] dark:bg-[linear-gradient(180deg,rgba(35,64,142,0.45),transparent)]'
+              : 'bg-[linear-gradient(180deg,rgba(35,64,142,0.07),transparent)] dark:bg-[linear-gradient(180deg,rgba(35,64,142,0.28),transparent)]'
         }`}
       />
 
-      {/* Header: date, title + greeting, streak */}
-      <header className="flex items-start justify-between gap-3 px-1">
+      {/* Header: date, greeting, streak + profile */}
+      <header className="flex items-end justify-between gap-3 px-1">
         <div className="min-w-0">
-          <p className="font-display text-[10px] font-bold uppercase tracking-[0.16em] text-accent-text">{dateLabel}</p>
-          <h1 className="mt-0.5 flex items-baseline gap-2 whitespace-nowrap font-serif text-[1.85rem] font-semibold leading-tight text-fg">
-            {t('today.title')}
-            <span className="truncate font-sans text-xs font-medium text-fg-muted">· {t(greetingKey())}</span>
+          <p className="text-[10.5px] font-bold uppercase tracking-[0.14em] text-fg-muted">{dateLabel}</p>
+          <h1 className="mt-0.5 whitespace-nowrap font-serif text-[1.65rem] font-semibold leading-tight text-fg">
+            <span className="sr-only">{t('today.title')}: </span>
+            {t(greetingKey())}
           </h1>
         </div>
-        <div className="flex shrink-0 items-center gap-1.5 pt-0.5 xl:hidden">
-          <span className="inline-flex h-8 items-center gap-1 whitespace-nowrap rounded-full border border-accent/40 bg-accent/15 px-2.5 text-xs font-bold text-accent-text">
-            <Flame className="h-3.5 w-3.5" aria-hidden="true" /> {streakCount > 0 ? `${streakCount}d` : 'New'}
+        <div className="flex shrink-0 items-center gap-2 pb-0.5 xl:hidden">
+          <span className="inline-flex h-9 items-center gap-1 whitespace-nowrap rounded-full border border-line bg-surface-raised px-3 text-xs font-bold text-secondary-text">
+            <Flame className={`h-4 w-4 ${streakCount > 0 ? 'fill-current' : ''}`} aria-hidden="true" /> {streakCount > 0 ? streakCount : 'New'}
           </span>
           <button
             type="button"
             onClick={() => window.dispatchEvent(new CustomEvent('testament-open-settings'))}
             aria-label={t('nav.settings')}
-            className="grid !min-h-8 h-8 w-8 place-items-center rounded-full border border-line bg-surface-raised text-fg-muted transition hover:text-fg"
+            className="grid !min-h-9 h-9 w-9 place-items-center rounded-full border border-line bg-amber-100 text-accent-text transition hover:ring-2 hover:ring-accent/40 dark:bg-amber-500/15"
           >
-            <Settings className="h-4 w-4" />
+            <UserRound className="h-[18px] w-[18px]" />
           </button>
         </div>
       </header>
 
-      {/* Week as dots */}
-      <div className="mt-2 flex justify-between px-3" aria-label={t('today.weekLabel')} role="list">
+      {/* This week */}
+      <div className="mt-3 flex justify-between px-1" aria-label={t('today.weekLabel')} role="list">
         {week.map((day) => (
-          <div key={day.date.toDateString()} role="listitem" className="flex w-6 flex-col items-center gap-1">
-            <span className={`text-[10px] font-semibold uppercase ${
-              day.isToday ? 'font-extrabold text-accent-text' : day.future ? 'text-fg-muted/60' : 'text-fg-muted'
+          <div key={day.date.toDateString()} role="listitem" className="flex w-8 flex-col items-center gap-1">
+            <span className={`text-[10px] font-bold uppercase ${
+              day.isToday ? 'text-accent-text' : day.future ? 'text-fg-muted/60' : 'text-fg-muted'
             }`}>{dayInitial(day.date)}</span>
             {day.active ? (
-              <span className="grid h-3 w-3 place-items-center rounded-full bg-accent text-accent-on">
-                {day.isToday && <Check className="h-2 w-2" strokeWidth={4} aria-hidden="true" />}
+              <span className="grid h-7 w-7 place-items-center rounded-full bg-accent text-accent-on shadow-sm">
+                <Check className="h-3.5 w-3.5" strokeWidth={3.5} aria-hidden="true" />
               </span>
             ) : day.isToday ? (
-              <span className="h-2.5 w-2.5 rounded-full border-2 border-accent" />
+              <span className="h-7 w-7 rounded-full border-2 border-accent bg-surface-raised" />
             ) : (
-              <span className="h-[7px] w-[7px] rounded-full bg-line-strong/60" />
+              <span className="h-7 w-7 rounded-full border-[1.5px] border-dashed border-line-strong/70" />
             )}
           </div>
         ))}
       </div>
 
-      {/* Story card: title and hook on the art */}
-      <section className="mt-3 rounded-[1.6rem] border border-accent/45 bg-surface-raised p-1.5 shadow-[0_0_0_3px_rgb(var(--color-bg)),0_0_0_4px_rgb(var(--color-accent)/0.35),0_14px_30px_rgba(120,84,30,0.14)] dark:shadow-[0_0_30px_rgb(var(--color-accent)/0.10)]">
-        <div className="relative h-[clamp(14rem,36vh,22rem)] overflow-hidden rounded-[1.25rem]">
-          <img
-            src={scene}
-            alt=""
-            aria-hidden="true"
-            className={`absolute inset-0 h-full w-full object-cover object-[38%_40%] ${done ? 'saturate-[.75]' : ''}`}
-            loading="eager"
-            fetchPriority="high"
-          />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(14,10,6,0)_32%,rgba(14,10,6,0.88)_100%)]" aria-hidden="true" />
-          <span className="absolute left-2.5 top-2.5 rounded-full bg-surface-raised/90 px-2.5 py-1 font-display text-[9px] font-bold uppercase tracking-[0.12em] text-accent-text backdrop-blur">
+      {/* Today's story: full-bleed art with everything on it */}
+      <section className="relative mt-4 h-[clamp(17rem,42vh,24rem)] overflow-hidden rounded-[1.6rem] shadow-[0_18px_40px_-16px_rgba(10,15,30,0.55)]">
+        <img
+          src={scene}
+          alt=""
+          aria-hidden="true"
+          className={`absolute inset-0 h-full w-full object-cover object-[38%_40%] ${done ? 'saturate-[.75]' : ''}`}
+          loading="eager"
+          fetchPriority="high"
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.35)_0%,transparent_26%,transparent_40%,rgba(8,8,14,0.92)_100%)]" aria-hidden="true" />
+        <div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2">
+          <span className="rounded-full border border-white/25 bg-white/15 px-3 py-1.5 text-[11px] font-bold text-white backdrop-blur-md">
             {story.passage} · {t('today.duration', { minutes: story.estMinutes })}
           </span>
           {done ? (
-            <span className="absolute right-2.5 top-2.5 grid h-8 w-8 place-items-center rounded-full bg-success text-white shadow">
+            <span className="grid h-8 w-8 place-items-center rounded-full bg-success text-white shadow">
               <Check className="h-4 w-4" strokeWidth={3} aria-hidden="true" />
             </span>
           ) : (
@@ -259,89 +259,95 @@ export function TodayScreen({
               type="button"
               onClick={() => startStory(true)}
               aria-label={t('today.listenAria')}
-              className="absolute right-2.5 top-2.5 inline-flex !min-h-8 h-8 items-center gap-1.5 rounded-full border border-white/30 bg-black/40 px-3 text-[11px] font-semibold text-white backdrop-blur-md transition hover:bg-black/55 active:scale-95"
+              className="inline-flex !min-h-8 h-8 items-center gap-1.5 rounded-full border border-white/25 bg-white/15 px-3 text-[11px] font-bold text-white backdrop-blur-md transition hover:bg-white/25 active:scale-95"
             >
               <Headphones className="h-3.5 w-3.5" aria-hidden="true" /> {t('today.listen')}
             </button>
           )}
-          <div className="absolute inset-x-3.5 bottom-3 text-white">
-            <p className="font-display text-[9px] font-bold uppercase tracking-[0.16em] text-[#F1CF94]">
-              {t('today.storyEyebrow')} · {story.arc}
-            </p>
-            <h2 className="mt-1 font-serif text-[1.7rem] font-semibold leading-[1.05] drop-shadow sm:text-4xl">{story.title}</h2>
-            {hook && <p className="mt-1.5 line-clamp-2 font-serif text-[0.8rem] leading-snug text-white/85 sm:text-sm">{hook}</p>}
-          </div>
         </div>
-
-        {done ? (
-          <div className="px-2.5 pb-2 pt-3">
-            <h2 className="font-serif text-xl font-semibold text-fg">{t('today.done')}</h2>
-            <p className="mt-0.5 text-small text-fg-secondary">
-              {tomorrow ? t('today.tomorrow', { title: tomorrow.title, passage: tomorrow.passage }) : t('today.mapFinished')}
-            </p>
-            <div className="mt-2.5 flex flex-wrap gap-2">
-              <button type="button" className="btn-secondary !min-h-10 !rounded-full px-4 text-sm" onClick={() => startStory()}>
-                <RotateCcw className="h-4 w-4" /> {t('today.playAgain')}
-              </button>
-              {onOpenMap && (
-                <button type="button" className="btn-quiet !min-h-10 text-sm text-accent-text" onClick={() => { celebrate('tap'); onOpenMap(); }}>
-                  {t('today.openMap')} <ChevronRight className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center gap-3 px-2.5 pb-1.5 pt-3">
-            <div className="min-w-0 flex-1">
-              <p className="font-display text-[9px] font-bold uppercase tracking-[0.16em] text-accent-text">{t('today.youllKeep')}</p>
-              <p className="mt-0.5 line-clamp-2 font-serif text-[0.95rem] italic leading-snug text-fg">“{keepLine}”</p>
-              <p className="text-[11px] text-fg-muted">{story.verse.ref}</p>
-            </div>
+        <div className="absolute inset-x-4 bottom-4 text-white">
+          <p className="font-display text-[10px] font-bold uppercase tracking-[0.16em] text-[#E8C070]">
+            {t('today.storyEyebrow')} · {story.arc}
+          </p>
+          <h2 className="mt-1 font-serif text-[1.85rem] font-semibold leading-[1.05] drop-shadow sm:text-4xl">{story.title}</h2>
+          {hook && <p className="mt-1.5 line-clamp-2 text-[0.82rem] leading-snug text-white/85 sm:text-sm">{hook}</p>}
+          {!done && (
             <button
               type="button"
               aria-label={isStoryCompleted(story.id) ? t('today.playAgain') : t('today.playStory')}
-              className="inline-flex h-12 shrink-0 items-center gap-2 rounded-full border border-accent-border/60 bg-gradient-to-b from-[#ECC285] to-accent-hover px-5 font-bold text-accent-on shadow-[0_6px_16px_rgba(154,106,34,0.35),inset_0_1px_0_rgba(255,255,255,0.35)] transition hover:brightness-105 active:scale-95 dark:from-[#F3CF90] dark:to-accent dark:shadow-[0_0_24px_rgb(var(--color-accent)/0.35)]"
+              className="mt-3.5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-accent px-5 font-bold text-accent-on shadow-[0_8px_22px_-6px_rgb(var(--color-accent)/0.8)] transition hover:bg-accent-hover active:scale-[0.98]"
               onClick={() => startStory()}
             >
               <Play className="h-4 w-4 fill-current" aria-hidden="true" />
               <span>{t('today.begin')}</span>
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </section>
+
+      {done ? (
+        <div className="mt-3 rounded-[1.25rem] border border-line bg-surface-raised px-4 py-3.5 shadow-sm">
+          <h2 className="font-serif text-xl font-semibold text-fg">{t('today.done')}</h2>
+          <p className="mt-0.5 text-small text-fg-secondary">
+            {tomorrow ? t('today.tomorrow', { title: tomorrow.title, passage: tomorrow.passage }) : t('today.mapFinished')}
+          </p>
+          <div className="mt-2.5 flex flex-wrap gap-2">
+            <button type="button" className="btn-secondary !min-h-10 !rounded-full px-4 text-sm" onClick={() => startStory()}>
+              <RotateCcw className="h-4 w-4" /> {t('today.playAgain')}
+            </button>
+            {onOpenMap && (
+              <button type="button" className="btn-quiet !min-h-10 text-sm text-accent-text" onClick={() => { celebrate('tap'); onOpenMap(); }}>
+                {t('today.openMap')} <ChevronRight className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="mt-3 flex items-start gap-3 rounded-[1.25rem] border border-line bg-surface-raised px-4 py-3 shadow-sm">
+          <span className="font-serif text-[2.4rem] leading-[0.8] text-[#B8862B] dark:text-[#E2B65E]" aria-hidden="true">“</span>
+          <div className="min-w-0 flex-1">
+            <p className="line-clamp-2 font-serif text-[0.98rem] italic leading-snug text-fg">{keepLine}</p>
+            <p className="mt-1 text-[11px] font-semibold text-fg-muted">{t('today.youllKeep')} · {story.verse.ref}</p>
+          </div>
+        </div>
+      )}
 
       {/* Review and reading, side by side */}
       <div className="mt-2.5 grid grid-cols-2 gap-2.5">
         <button
           type="button"
           onClick={startReview}
-          className="relative flex flex-col items-start rounded-[1.1rem] border border-line bg-surface-raised px-3 py-2.5 text-left shadow-sm transition hover:border-accent/60 active:scale-[0.98]"
+          className="relative flex items-center gap-2.5 rounded-[1.1rem] border border-line bg-surface-raised p-3 text-left shadow-sm transition hover:border-accent/60 active:scale-[0.98]"
         >
-          <span className="grid h-8 w-8 place-items-center rounded-[0.6rem] bg-secondary/15 text-secondary-text">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-amber-100 text-accent-text dark:bg-amber-500/15">
             <RefreshCw className="h-4 w-4" aria-hidden="true" />
           </span>
+          <span className="min-w-0">
+            <span className="block truncate text-[0.85rem] font-bold leading-tight text-fg">{reviewTitle}</span>
+            <span className="block truncate text-[11px] text-fg-muted">{reviewDetail}</span>
+          </span>
           {reviewQueue.length > 0 && (
-            <span className="absolute right-2.5 top-2.5 grid h-5 min-w-5 place-items-center rounded-full bg-secondary-text px-1.5 text-[11px] font-bold text-white dark:text-secondary-on">
+            <span className="absolute right-2 top-2 grid h-5 min-w-5 place-items-center rounded-full bg-secondary px-1.5 text-[11px] font-bold text-secondary-on">
               {reviewQueue.length}
             </span>
           )}
-          <span className="mt-1.5 text-[0.85rem] font-bold leading-tight text-fg">{reviewTitle}</span>
-          <span className="text-[11px] text-fg-muted">{reviewDetail}</span>
         </button>
 
         {onContinueReading && (
           <button
             type="button"
             onClick={() => { celebrate('tap'); onContinueReading(); }}
-            className="flex flex-col items-start rounded-[1.1rem] border border-line bg-surface-raised px-3 py-2.5 text-left shadow-sm transition hover:border-accent/60 active:scale-[0.98]"
+            className="flex items-center gap-2.5 rounded-[1.1rem] border border-line bg-surface-raised p-3 text-left shadow-sm transition hover:border-accent/60 active:scale-[0.98]"
           >
-            <span className="grid h-8 w-8 place-items-center rounded-[0.6rem] bg-accent/15 text-accent-text">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-amber-100 text-accent-text dark:bg-amber-500/15">
               <BookOpen className="h-4 w-4" aria-hidden="true" />
             </span>
-            <span className="mt-1.5 truncate text-[0.85rem] font-bold leading-tight text-fg">
-              {readingPlace ? `${readingPlace.bookName} ${readingPlace.chapter}` : t('today.tileOpenBible')}
+            <span className="min-w-0">
+              <span className="block truncate text-[0.85rem] font-bold leading-tight text-fg">
+                {readingPlace ? `${readingPlace.bookName} ${readingPlace.chapter}` : t('today.tileOpenBible')}
+              </span>
+              <span className="block truncate text-[11px] text-fg-muted">{readingPlace ? t('today.tileRead') : t('today.tileAnyBook')}</span>
             </span>
-            <span className="text-[11px] text-fg-muted">{readingPlace ? t('today.tileRead') : t('today.tileAnyBook')}</span>
           </button>
         )}
       </div>

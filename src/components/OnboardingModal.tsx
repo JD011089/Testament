@@ -314,7 +314,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                         <div className="flex items-center justify-between">
                           <h4 className="text-sm font-bold text-stone-900 dark:text-parchment-100">{b.title}</h4>
                           <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[11px] shrink-0 ${
-                            isSelected ? 'bg-amber-500 text-stone-950 font-bold' : 'border border-stone-300 dark:border-stone-700'
+                            isSelected ? 'bg-amber-500 text-accent-on font-bold' : 'border border-stone-300 dark:border-stone-700'
                           }`}>
                             {isSelected ? '✓' : ''}
                           </div>
@@ -385,7 +385,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       </div>
                       <div className="mt-3 pt-2 flex items-center justify-end">
                         <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[11px] ${
-                          isSelected ? 'bg-amber-500 text-stone-950 font-bold' : 'border border-stone-300 dark:border-stone-700'
+                          isSelected ? 'bg-amber-500 text-accent-on font-bold' : 'border border-stone-300 dark:border-stone-700'
                         }`}>
                           {isSelected ? '✓' : ''}
                         </div>
@@ -439,7 +439,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                         <p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed">{fam.desc}</p>
                       </div>
                       <div className={`w-4 h-4 rounded-full mt-1 flex items-center justify-center text-[11px] shrink-0 ${
-                        isSelected ? 'bg-amber-500 text-stone-950 font-bold' : 'border border-stone-300 dark:border-stone-700'
+                        isSelected ? 'bg-amber-500 text-accent-on font-bold' : 'border border-stone-300 dark:border-stone-700'
                       }`}>
                         {isSelected ? '✓' : ''}
                       </div>
@@ -488,7 +488,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                         <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5">{cad.desc}</p>
                       </div>
                       <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[11px] shrink-0 ${
-                        isSelected ? 'bg-amber-500 text-stone-950 font-bold' : 'border border-stone-300 dark:border-stone-700'
+                        isSelected ? 'bg-amber-500 text-accent-on font-bold' : 'border border-stone-300 dark:border-stone-700'
                       }`}>
                         {isSelected ? '✓' : ''}
                       </div>
@@ -602,7 +602,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               <div className="pt-2 flex flex-col gap-2.5">
                 <button
                   onClick={() => handleFinishCalibration(false, false)}
-                  className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-bold text-sm sm:text-base flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
+                  className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-500 text-accent-on font-bold text-sm sm:text-base flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
                 >
                   <Sparkles className="w-4 h-4 text-stone-950" />
                   <span>Start today's mission</span>

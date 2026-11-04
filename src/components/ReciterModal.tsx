@@ -150,7 +150,7 @@ export const ReciterModal: React.FC<ReciterModalProps> = ({
             onClick={() => setActiveTab('practice')}
             className={`flex-1 py-2 px-3 rounded-xl text-xs font-serif font-bold transition-all cursor-pointer ${
               activeTab === 'practice'
-                ? 'bg-amber-500 text-stone-950 shadow-xs'
+                ? 'bg-amber-500 text-accent-on shadow-xs'
                 : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900'
             }`}
           >
@@ -161,7 +161,7 @@ export const ReciterModal: React.FC<ReciterModalProps> = ({
             onClick={() => setActiveTab('known')}
             className={`flex-1 py-2 px-3 rounded-xl text-xs font-serif font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               activeTab === 'known'
-                ? 'bg-amber-500 text-stone-950 shadow-xs'
+                ? 'bg-amber-500 text-accent-on shadow-xs'
                 : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900'
             }`}
           >
@@ -398,7 +398,7 @@ export const ReciterModal: React.FC<ReciterModalProps> = ({
                 onClick={handleFinishDay}
                 className={`px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
                   allRated
-                    ? 'bg-amber-500 hover:bg-amber-400 text-stone-950'
+                    ? 'bg-amber-500 hover:bg-amber-400 text-accent-on'
                     : 'bg-stone-200 dark:bg-stone-800 text-stone-400 cursor-not-allowed opacity-60'
                 }`}
               >

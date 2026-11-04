@@ -3,7 +3,7 @@
     var saved = localStorage.getItem('testament_theme');
     // Daybreak (light) is default unless user explicitly chose dark
     var isDark = saved === 'dark';
-    var color = isDark ? '#131722' : '#F8F1E0';
+    var color = isDark ? '#0D1325' : '#F6F4EF';
     if (isDark) {
       document.documentElement.classList.add('dark');
       document.documentElement.classList.remove('light');

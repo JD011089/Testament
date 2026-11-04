@@ -131,7 +131,7 @@ export const VoiceSelectorModal: React.FC<VoiceSelectorModalProps> = ({ isOpen, 
                   <div className="flex items-start gap-3 min-w-0">
                     <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 mt-0.5 ${
                       isSelected
-                        ? 'bg-amber-500 text-stone-950 font-bold'
+                        ? 'bg-amber-500 text-accent-on font-bold'
                         : 'bg-stone-200/80 dark:bg-stone-800 text-stone-600 dark:text-stone-400'
                     }`}>
                       {key === 'cinematic' ? '🎬' : key === 'brotherhood' ? '🤝' : key === 'scholar' ? '📜' : '🕊️'}
@@ -164,7 +164,7 @@ export const VoiceSelectorModal: React.FC<VoiceSelectorModalProps> = ({ isOpen, 
                     onClick={(e) => handlePlaySample(key, e)}
                     className={`shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all mt-0.5 ${
                       isPreviewing
-                        ? 'bg-amber-500 text-stone-950 border-amber-600 font-bold shadow-xs'
+                        ? 'bg-amber-500 text-accent-on border-amber-600 font-bold shadow-xs'
                         : 'bg-white hover:bg-stone-100 dark:bg-stone-800 dark:hover:bg-stone-750 text-stone-700 dark:text-stone-300 border-stone-250 dark:border-stone-700'
                     }`}
                     title={isPreviewing ? 'Stop sample' : 'Listen to voice sample'}

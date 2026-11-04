@@ -180,17 +180,20 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
               soundEngine.playClick();
               openReader(book, readingPlace.chapter);
             }}
-            className="w-full mb-4 flex items-center justify-between gap-3 rounded-2xl bg-accent/10 border border-accent/40 px-4 py-3 text-left hover:bg-accent/15 transition-colors"
+            className="w-full mb-4 flex items-center gap-4 rounded-[1.4rem] bg-accent text-accent-on px-4 py-3.5 text-left shadow-[0_12px_28px_-12px_rgb(var(--color-accent)/0.7)] hover:bg-accent-hover transition-colors"
           >
-            <div>
-              <div className="text-[11px] font-mono uppercase tracking-widest text-accent-text font-bold">
+            <span className="w-11 h-14 shrink-0 rounded-[6px_10px_10px_6px] bg-white/20 dark:bg-black/15 border-l-4 border-white/45 dark:border-black/25 flex items-center justify-center font-serif font-semibold text-lg" aria-hidden="true">
+              {readingPlace.bookName.replace(/^\d\s*/, '').slice(0, 2)}
+            </span>
+            <div className="flex-1 min-w-0">
+              <div className="text-[10.5px] uppercase tracking-[0.12em] font-bold opacity-80">
                 {t('library.continueReading')}
               </div>
-              <div className="text-title-3 text-fg">
+              <div className="font-serif text-xl font-semibold truncate">
                 {readingPlace.bookName} {readingPlace.chapter}
               </div>
             </div>
-            <BookOpen className="w-5 h-5 text-accent shrink-0" />
+            <BookOpen className="w-5 h-5 shrink-0 opacity-90" />
           </button>
         )}
 

@@ -203,7 +203,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                   }}
                   className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 ${
                     activeTab === 'simulator'
-                      ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                      ? 'bg-amber-500 text-accent-on font-bold shadow-sm'
                       : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                   }`}
                 >
@@ -217,7 +217,7 @@ export const ProverbsCodexModal: React.FC<ProverbsCodexModalProps> = ({
                   }}
                   className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 ${
                     activeTab === 'vault'
-                      ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                      ? 'bg-amber-500 text-accent-on font-bold shadow-sm'
                       : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                   }`}
                 >

@@ -37,9 +37,9 @@ export const translations: Record<Language, Record<string, string>> = {
     'nav.dailyStreak': 'Daily streak',
     'nav.scriptureXp': 'Scripture XP',
 
-    'nav.map': 'Map',
+    'nav.map': 'Journey',
     'nav.mapTooltip': 'Story map from Creation to the early church',
-    'nav.deck': 'Deck',
+    'nav.deck': 'Collection',
     'nav.deckTooltip': 'Verses and characters you have collected',
     'nav.freshStart': 'Fresh start',
     'nav.settings': 'Settings',
@@ -118,7 +118,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'map.storyCollection': 'Story collection',
     'map.chooseStory': 'Choose a story to continue your journey.',
     'map.storyComplete': 'Complete',
-    'deck.title': 'My Deck',
+    'deck.title': 'My Collection',
     'deck.subtitleCount': '{count} cards collected.',
     'deck.subtitleEmpty': 'Finish a story and its verse lands here.',
     'deck.empty': 'No cards yet. Finish a story and its verse lands here.',
@@ -838,7 +838,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'nav.dailyStreak': 'Racha diaria',
     'nav.scriptureXp': 'XP de Escrituras',
 
-    'nav.map': 'Mapa',
+    'nav.map': 'Camino',
     'nav.mapTooltip': 'Mapa de historias desde la Creación hasta la iglesia primitiva',
     'nav.deck': 'Colección',
     'nav.deckTooltip': 'Versículos y personajes que has coleccionado',
@@ -1638,7 +1638,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'nav.dailyStreak': 'Série quotidienne',
     'nav.scriptureXp': 'XP Écritures',
 
-    'nav.map': 'Carte',
+    'nav.map': 'Parcours',
     'nav.mapTooltip': 'Carte des récits de la Création à l\'Église primitive',
     'nav.deck': 'Collection',
     'nav.deckTooltip': 'Versets et personnages que vous avez collectés',

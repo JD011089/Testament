@@ -1256,13 +1256,27 @@ export function App() {
               setPeopleFocus({});
               openPage('people');
             }}
-            onOpenRelics={() => {
+            onOpenCollection={() => {
               dismissPageRoute();
-              window.dispatchEvent(new CustomEvent('testament-open-relics'));
+              setCurrentTab('deck');
+              window.scrollTo({ top: 0 });
             }}
             onOpenHowItWorks={() => openPage('how-it-works')}
             onOpenLearnerMode={() => openPage('learner-mode')}
+            onOpenDriveMode={() => {
+              dismissPageRoute();
+              openModalWithHistory('drivemode', () => setIsDriveModeOpen(true));
+            }}
+            onOpenWhatsNew={() => openModalWithHistory('whatsnew', () => setIsWhatsNewOpen(true))}
             activeLearnerMode={learnerMode}
+            streakCount={streakCount}
+            currentAmbience={currentAmbience}
+            onSetAmbience={(next) => {
+              soundEngine.playSnap();
+              if (next === 'none') soundEngine.stopAmbience();
+              else soundEngine.startAmbience(next);
+              setCurrentAmbience(next);
+            }}
           />
         </Suspense>
       )}

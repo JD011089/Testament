@@ -62,78 +62,80 @@ export default {
         // stone-400/500 are theme-driven greys so dark mode no longer reuses the
         // light browns (#76695A / #645749) that fell to 2.1-3.4:1 on navy.
         stone: {
-          50: '#FBF8F1',
-          100: '#F6EEDD',
-          150: '#EFE3CC',
-          200: '#E7D7BA',
-          250: '#DECBA8',
-          300: '#D5BF97',
-          400: 'rgb(var(--stone-400) / <alpha-value>)', // #76695A light / #A89C86 dark
-          500: 'rgb(var(--stone-500) / <alpha-value>)', // #645749 light / #9C9483 dark
-          600: '#53483C',
-          700: '#433A31',
-          750: '#383028',
-          800: '#2D3446', // night navy tone
-          850: '#232A3B',
-          900: '#1A1F2D',
-          950: '#131722',
+          // Neutral linen (light end) to night lapis (dark end).
+          50: '#FAF9F6',
+          100: '#F3F1EB',
+          150: '#ECE9E1',
+          200: '#E4E0D5',
+          250: '#D9D4C7',
+          300: '#CBC5B6',
+          400: 'rgb(var(--stone-400) / <alpha-value>)',
+          500: 'rgb(var(--stone-500) / <alpha-value>)',
+          600: '#3C4458',
+          700: '#2C3447',
+          750: '#222A3C',
+          800: '#1E2742', // night lapis tone
+          850: '#18213A',
+          900: '#121A2E',
+          950: '#0A0F1E',
         },
 
         // Remapped amber scale: tuned with gold accent highlights.
         // amber-500 is theme-driven so flat-gold buttons/accents stop reusing
         // the light-theme gold (#D49D5F) in dark mode; dark renders #E4B879.
         amber: {
-          50: '#FFFDF8',
-          100: '#FFF5E0',
-          200: '#FCE7BF',
-          300: '#F7D69B',
-          400: '#EDCB93',
-          500: 'rgb(var(--amber-500) / <alpha-value>)', // #D49D5F light / #E4B879 dark
-          600: '#8A5424', // Passed AA contrast (replaces low-contrast #d97706 on light)
-          700: '#A04E14',
-          800: '#783A0E',
-          900: '#552809',
-          950: '#381A05',
+          // Accent scale, theme-driven: lapis blue in light, gold in dark (see index.css).
+          50: 'rgb(var(--amber-50) / <alpha-value>)',
+          100: 'rgb(var(--amber-100) / <alpha-value>)',
+          200: 'rgb(var(--amber-200) / <alpha-value>)',
+          300: 'rgb(var(--amber-300) / <alpha-value>)',
+          400: 'rgb(var(--amber-400) / <alpha-value>)',
+          500: 'rgb(var(--amber-500) / <alpha-value>)',
+          600: 'rgb(var(--amber-600) / <alpha-value>)',
+          700: 'rgb(var(--amber-700) / <alpha-value>)',
+          800: 'rgb(var(--amber-800) / <alpha-value>)',
+          900: 'rgb(var(--amber-900) / <alpha-value>)',
+          950: 'rgb(var(--amber-950) / <alpha-value>)',
         },
 
         // Parchment scale
         parchment: {
-          50: '#FFFDF8',
-          100: '#F8F1E0',
-          200: '#F3EAD3',
-          300: '#E7D7BA',
-          400: '#C9BEA6',
-          500: '#AD9E82',
-          800: '#3C3127',
-          900: '#231D17',
-          950: '#14100C',
+          50: '#F8F4EA',
+          100: '#EEE7D6',
+          200: '#E2DBC9',
+          300: '#CFC8B6',
+          400: '#B5AE9E',
+          500: '#99927F',
+          800: '#2B2F3A',
+          900: '#1A1E28',
+          950: '#0E1119',
         },
 
         // Iron / Ink scale (night navy Vesper palette)
         iron: {
-          700: '#333B50',
-          800: '#232A3B',
-          850: '#1E2433',
-          900: '#1A1F2D',
-          950: '#131722',
+          700: '#243052',
+          800: '#18213A',
+          850: '#141D33',
+          900: '#121A2E',
+          950: '#0A0F1E',
         },
         ink: {
-          DEFAULT: '#131722',
-          raised: '#1A1F2D',
-          overlay: '#232A3B',
+          DEFAULT: '#0D1325',
+          raised: '#141D33',
+          overlay: '#18213A',
         },
 
         // Ember / bronze accents
         ember: {
-          400: '#F0A35E',
-          500: '#D49D5F',
-          600: '#C38A4B',
-          700: '#A04E14',
+          400: '#E8C070',
+          500: '#E2B65E',
+          600: '#C99A40',
+          700: '#A27A2E',
         },
         bronze: {
-          400: '#E4B879',
-          500: '#D49D5F',
-          600: '#B27B3F',
+          400: '#E8C070',
+          500: '#E2B65E',
+          600: '#B8862B',
         },
       },
       fontFamily: {
@@ -143,10 +145,10 @@ export default {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },
       boxShadow: {
-        glow: '0 0 25px -5px rgba(212, 157, 95, 0.30)',
-        'glow-ember': '0 0 25px -5px rgba(212, 157, 95, 0.30)',
-        'glow-gold': '0 0 25px -5px rgba(212, 157, 95, 0.30)',
-        'glow-amber': '0 0 25px -5px rgba(212, 157, 95, 0.30)',
+        glow: '0 0 25px -5px rgb(var(--color-accent) / 0.30)',
+        'glow-ember': '0 0 25px -5px rgb(var(--color-accent) / 0.30)',
+        'glow-gold': '0 0 25px -5px rgb(var(--color-accent) / 0.30)',
+        'glow-amber': '0 0 25px -5px rgb(var(--color-accent) / 0.30)',
       }
     },
   },

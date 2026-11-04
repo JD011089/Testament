@@ -229,7 +229,7 @@ export const DailyCampaignCard: React.FC<DailyCampaignCardProps> = ({
                       isDone 
                         ? 'bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 text-stone-700 dark:text-stone-300' 
                         : isCurrent 
-                        ? 'bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold' 
+                        ? 'bg-amber-500 hover:bg-amber-400 text-accent-on font-bold' 
                         : 'bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300'
                     }`}
                   >

@@ -94,7 +94,7 @@ export const CharacterArcModal: React.FC<CharacterArcModalProps> = ({
                     onClick={() => handleSelectCharacter(c.id)}
                     className={`text-xs px-3 py-1.5 rounded-xl font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
                       isSelected
-                        ? 'bg-amber-500 text-stone-950 font-bold shadow-xs'
+                        ? 'bg-amber-500 text-accent-on font-bold shadow-xs'
                         : 'bg-white dark:bg-stone-850 border border-stone-200 dark:border-stone-750 text-stone-700 dark:text-stone-300 hover:border-amber-500/40'
                     }`}
                   >
@@ -132,7 +132,7 @@ export const CharacterArcModal: React.FC<CharacterArcModalProps> = ({
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-all cursor-pointer ${
                     isFollowing
                       ? 'bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900'
-                      : 'bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold'
+                      : 'bg-amber-500 hover:bg-amber-400 text-accent-on font-bold'
                   }`}
                 >
                   {isFollowing ? (
@@ -261,7 +261,7 @@ export const CharacterArcModal: React.FC<CharacterArcModalProps> = ({
                 className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors ${
                   momentIndex === moments.length - 1
                     ? 'text-stone-400 dark:text-stone-600 cursor-not-allowed'
-                    : 'bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-xs cursor-pointer'
+                    : 'bg-amber-500 hover:bg-amber-400 text-accent-on shadow-xs cursor-pointer'
                 }`}
               >
                 <span>Next moment</span>

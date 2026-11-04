@@ -686,7 +686,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                       />
                       <div aria-hidden="true" className={`w-4 h-4 rounded-full mt-0.5 shrink-0 flex items-center justify-center transition-colors ${
                         isSelected 
-                          ? 'bg-amber-500 text-stone-950 font-bold' 
+                          ? 'bg-amber-500 text-accent-on font-bold' 
                           : 'border border-stone-400 dark:border-stone-600'
                       }`}>
                         {isSelected && <span className="w-1.5 h-1.5 bg-stone-950 rounded-full" />}
@@ -719,7 +719,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
                     />
                     <div aria-hidden="true" className={`w-4 h-4 rounded-full mt-0.5 shrink-0 flex items-center justify-center transition-colors ${
                       isCustomMode 
-                        ? 'bg-amber-500 text-stone-950 font-bold' 
+                        ? 'bg-amber-500 text-accent-on font-bold' 
                         : 'border border-stone-400 dark:border-stone-600'
                     }`}>
                       {isCustomMode && <span className="w-1.5 h-1.5 bg-stone-950 rounded-full" />}

@@ -1,21 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  Compass, 
-  BookOpen, 
-  Car, 
-  Volume2, 
-  VolumeX, 
-  Flame, 
-  Sparkles,
-  Map as MapIcon,
-  Layers,
-  Settings
-} from 'lucide-react';
+import { Flame, UserRound } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
-import { ThemeToggle } from './ThemeToggle';
-import { LanguageToggle } from './LanguageToggle';
 import { useLanguage } from '../context/LanguageContext';
-import { APP_VERSION } from '../config/version';
+import { TodayIcon, JourneyIcon, BibleIcon, CollectionIcon } from './NavIcons';
 
 export type NavTab = 'today' | 'dashboard' | 'map' | 'library' | 'game' | 'practice' | 'arsenal' | 'wordforge' | 'dilemmas' | 'deck';
 
@@ -58,25 +45,23 @@ function useHideOnScrollDown(): [boolean, (hidden: boolean) => void] {
 interface NavigationProps {
   currentTab: NavTab | 'not-found';
   onSelectTab: (tab: NavTab) => void;
-  currentAmbience: 'none' | 'campfire' | 'wind' | 'sanctuary';
-  onToggleAmbience: () => void;
-  onOpenDriveMode: () => void;
+  /** Kept for API compatibility: ambience and Drive Mode now live in Settings. */
+  currentAmbience?: 'none' | 'campfire' | 'wind' | 'sanctuary';
+  onToggleAmbience?: () => void;
+  onOpenDriveMode?: () => void;
   streakCount?: number;
   xp?: number;
   onOpenSettings?: () => void;
   onOpenWhatsNew?: () => void;
 }
 
+type IconComponent = React.FC<{ active?: boolean; className?: string }>;
+
 export const Navigation: React.FC<NavigationProps> = ({
   currentTab,
   onSelectTab,
-  currentAmbience,
-  onToggleAmbience,
-  onOpenDriveMode,
   streakCount = 0,
-  xp: _xp,
   onOpenSettings,
-  onOpenWhatsNew
 }) => {
   const { t } = useLanguage();
   const [navHidden, setNavHidden] = useHideOnScrollDown();
@@ -91,218 +76,127 @@ export const Navigation: React.FC<NavigationProps> = ({
     return currentTab === itemTab;
   };
 
-  const navItems: { tab: NavTab; label: string; mobileLabel?: string; tooltip: string; icon: React.ReactNode }[] = [
-    {
-      tab: 'today',
-      label: t('nav.home'),
-      mobileLabel: t('nav.home'),
-      tooltip: t('nav.homeTooltip'),
-      icon: <Compass className="w-6 h-6 xl:w-4 xl:h-4" strokeWidth={2} />
-    },
-    {
-      tab: 'map',
-      label: t('nav.map'),
-      mobileLabel: t('nav.map'),
-      tooltip: t('nav.mapTooltip'),
-      icon: <MapIcon className="w-6 h-6 xl:w-4 xl:h-4" strokeWidth={2} />
-    },
-    {
-      tab: 'library',
-      label: t('nav.library'),
-      mobileLabel: t('nav.library'),
-      tooltip: t('nav.libraryTooltip'),
-      icon: <BookOpen className="w-6 h-6 xl:w-4 xl:h-4" strokeWidth={2} />
-    },
-    {
-      tab: 'deck',
-      label: t('nav.deck'),
-      mobileLabel: t('nav.deck'),
-      tooltip: t('nav.deckTooltip'),
-      icon: <Layers className="w-6 h-6 xl:w-4 xl:h-4" strokeWidth={2} />
-    },
+  const navItems: { tab: NavTab; label: string; tooltip: string; Icon: IconComponent }[] = [
+    { tab: 'today', label: t('nav.home'), tooltip: t('nav.homeTooltip'), Icon: TodayIcon },
+    { tab: 'map', label: t('nav.map'), tooltip: t('nav.mapTooltip'), Icon: JourneyIcon },
+    { tab: 'library', label: t('nav.library'), tooltip: t('nav.libraryTooltip'), Icon: BibleIcon },
+    { tab: 'deck', label: t('nav.deck'), tooltip: t('nav.deckTooltip'), Icon: CollectionIcon },
   ];
+
+  const openSettings = () => {
+    soundEngine.playClick();
+    if (onOpenSettings) {
+      onOpenSettings();
+    } else {
+      window.dispatchEvent(new CustomEvent('testament-open-settings'));
+    }
+  };
 
   return (
     <>
       {/* ============================================================ */}
-      {/* 1. DESKTOP TOP NAVIGATION BAR (Visible on xl: screens & up) */}
+      {/* 1. DESKTOP TOP BAR (xl and up): brand · tabs · streak + profile */}
       {/* ============================================================ */}
-      <header className="hidden xl:block fixed top-0 left-0 right-0 z-40 bg-white/90 dark:bg-ink/90 backdrop-blur-md border-b border-stone-200 dark:border-stone-800/80 transition-all">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
-          
-          {/* Brand Logo & Title */}
-          <div 
+      <header className="hidden xl:block fixed top-0 left-0 right-0 z-40 bg-surface-raised/90 dark:bg-ink/90 backdrop-blur-md border-b border-line transition-all">
+        <div className="max-w-7xl mx-auto px-6 h-16 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+          <button
+            type="button"
             onClick={() => {
               soundEngine.playClick();
-              onSelectTab('dashboard');
+              onSelectTab('today');
             }}
-            className="flex items-center gap-3 cursor-pointer group"
+            className="flex items-center gap-3 cursor-pointer group justify-self-start"
           >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-glow border border-amber-400/40 group-hover:scale-105 transition-transform">
-              <Sparkles className="w-5 h-5 text-black" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-display font-extrabold text-base tracking-widest text-stone-900 dark:text-parchment-50 group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-colors">
-                  {t('nav.brand')}
-                </span>
-                <span className="text-xs font-serif italic text-amber-800 dark:text-amber-400 font-medium">
-                  • {t('nav.tagline')}
-                </span>
-                {onOpenWhatsNew && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      soundEngine.playClick();
-                      onOpenWhatsNew();
-                    }}
-                    title={t('nav.whatsNew', { version: APP_VERSION })}
-                    aria-label={t('nav.whatsNew', { version: APP_VERSION })}
-                    className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] -my-2 px-1.5 rounded-full text-[10px] font-mono text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-amber-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer"
-                  >
-                    {APP_VERSION}
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
+            <span className="w-9 h-9 rounded-xl bg-accent text-accent-on flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
+              <TodayIcon active className="w-5 h-5" />
+            </span>
+            <span className="font-display font-bold text-sm tracking-[0.2em] text-fg">
+              {t('nav.brand')}
+            </span>
+          </button>
 
-          {/* Central Nav Tabs */}
-          <nav className="flex items-center gap-1 bg-stone-100 dark:bg-stone-950/80 p-1 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-inner">
-            {navItems.map((item) => {
-              const isActive = isTabActive(item.tab);
+          <nav className="flex items-center gap-1 bg-stone-100 dark:bg-stone-900 p-1 rounded-full border border-line">
+            {navItems.map(({ tab, label, tooltip, Icon }) => {
+              const isActive = isTabActive(tab);
               return (
                 <button
-                  key={item.tab}
+                  key={tab}
+                  type="button"
                   onClick={() => {
                     soundEngine.playClick();
-                    onSelectTab(item.tab);
+                    onSelectTab(tab);
                   }}
-                  title={item.tooltip}
-                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  title={tooltip}
+                  aria-current={isActive ? 'page' : undefined}
+                  className={`flex items-center gap-2 px-4 rounded-full text-sm font-semibold transition-all min-h-[40px] ${
                     isActive
-                      ? 'btn-segment-selected shadow-sm'
-                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/60 dark:hover:bg-stone-900/60'
+                      ? 'bg-surface-raised dark:bg-stone-800 text-accent-text shadow-sm'
+                      : 'text-fg-muted hover:text-fg'
                   }`}
                 >
-                  {item.icon}
-                  <span>{item.label}</span>
+                  <Icon active={isActive} className="w-[18px] h-[18px]" />
+                  <span>{label}</span>
                 </button>
               );
             })}
           </nav>
 
-          {/* Right Action Controls: Guide, Audio, Streak, XP, Language Toggle & Theme Toggle */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onOpenDriveMode}
-              title={t('nav.driveModeTooltip')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 hover:border-amber-500/40 text-xs font-medium transition-all"
-            >
-              <Car className="w-3.5 h-3.5 text-amber-500" />
-              <span>{t('nav.driveMode')}</span>
-            </button>
-
-            {/* Ambient Audio Toggle */}
-            <button
-              onClick={onToggleAmbience}
-              title={currentAmbience !== 'none' ? t('nav.ambientPlaying', { ambience: currentAmbience }) : t('nav.ambientTooltip')}
-              className={`p-2 rounded-xl border text-xs transition-all ${
-                currentAmbience !== 'none'
-                  ? 'bg-amber-500/20 border-amber-500 text-amber-800 dark:text-amber-300'
-                  : 'bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+          <div className="flex items-center gap-2 justify-self-end">
+            <div
+              title={t('nav.dailyStreak')}
+              className={`flex items-center gap-1.5 h-9 px-3 rounded-full border border-line bg-surface-raised dark:bg-stone-900 text-sm font-bold ${
+                streakCount > 0 ? 'text-secondary-text' : 'text-fg-muted font-medium'
               }`}
             >
-              {currentAmbience !== 'none' ? (
-                <Volume2 className="w-4 h-4 text-amber-500 animate-pulse" />
-              ) : (
-                <VolumeX className="w-4 h-4" />
-              )}
-            </button>
-
-            {/* Streak Pill */}
-            {streakCount > 0 ? (
-              <div 
-                title={t('nav.dailyStreak')} 
-                className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs font-mono font-bold text-orange-800 dark:text-orange-300"
-              >
-                <Flame className="w-3.5 h-3.5 fill-orange-500/20 text-orange-500" />
-                <span>{streakCount}d</span>
-              </div>
-            ) : (
-              <div 
-                title={t('nav.dailyStreak')} 
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs font-mono font-medium text-stone-500 dark:text-stone-400"
-              >
-                <Flame className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500" />
-                <span>{t('nav.freshStart')}</span>
-              </div>
-            )}
-
-            {/* XP Badge removed: progress is the deck and the map. */}
-
-            {/* Language Switcher Button */}
-            <LanguageToggle />
-
-            {/* Theme Toggle Button */}
-            <ThemeToggle />
-
-            {/* Desktop Settings Menu Button */}
+              <Flame className={`w-4 h-4 ${streakCount > 0 ? 'fill-current' : ''}`} />
+              <span>{streakCount > 0 ? streakCount : t('nav.freshStart')}</span>
+            </div>
             <button
               type="button"
-              onClick={() => {
-                soundEngine.playClick();
-                if (onOpenSettings) {
-                  onOpenSettings();
-                } else {
-                  window.dispatchEvent(new CustomEvent('testament-open-settings'));
-                }
-              }}
+              onClick={openSettings}
               title={t('nav.settingsTooltip')}
               aria-label={t('nav.settings')}
-              className="p-2 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 transition-all cursor-pointer"
+              className="w-10 h-10 min-h-0 rounded-full bg-amber-100 dark:bg-amber-500/15 text-accent-text border border-line flex items-center justify-center hover:ring-2 hover:ring-accent/40 transition-all cursor-pointer"
             >
-              <Settings className="w-4 h-4" />
+              <UserRound className="w-5 h-5" />
             </button>
           </div>
         </div>
       </header>
 
       {/* ============================================================ */}
-      {/* 3. FLOATING BOTTOM NAV (Visible below xl: screens) */}
+      {/* 2. FLOATING BOTTOM NAV (below xl) */}
       {/* ============================================================ */}
       <nav
         role="navigation"
         aria-label={t('nav.mobileAria')}
         data-hidden={navHidden ? 'true' : undefined}
         onFocusCapture={() => setNavHidden(false)}
-        className={`xl:hidden fixed z-40 left-1/2 -translate-x-1/2 bottom-[max(0.75rem,env(safe-area-inset-bottom))] w-[calc(100%-1.5rem)] max-w-sm rounded-full bg-surface-raised/95 dark:bg-ink/95 backdrop-blur-xl border border-line/90 dark:border-stone-700/80 px-2 py-1.5 shadow-[0_10px_36px_rgba(31,35,48,0.12),0_2px_8px_rgba(31,35,48,0.05)] transition-transform duration-300 ease-out ${
+        className={`xl:hidden fixed z-40 left-1/2 -translate-x-1/2 bottom-[max(0.75rem,env(safe-area-inset-bottom))] w-[calc(100%-1.5rem)] max-w-sm rounded-full bg-surface-raised/90 dark:bg-stone-900/90 backdrop-blur-xl border border-line p-1.5 shadow-[0_12px_34px_-10px_rgba(10,15,30,0.25),0_2px_6px_rgba(10,15,30,0.06)] transition-transform duration-300 ease-out ${
           navHidden ? 'translate-y-[calc(100%+2.5rem)]' : 'translate-y-0'
         }`}
       >
         <div className="grid grid-cols-4 items-stretch w-full gap-0.5">
-          {navItems.map((item) => {
-            const isActive = isTabActive(item.tab);
+          {navItems.map(({ tab, label, Icon }) => {
+            const isActive = isTabActive(tab);
             return (
               <button
-                key={item.tab}
+                key={tab}
+                type="button"
                 onClick={() => {
                   soundEngine.playClick();
-                  onSelectTab(item.tab);
+                  onSelectTab(tab);
                 }}
                 aria-current={isActive ? 'page' : undefined}
-                className={`relative flex flex-col items-center justify-center min-h-[48px] py-1.5 px-0.5 rounded-full transition-all focus-visible:ring-2 focus-visible:ring-accent w-full min-w-0 active:scale-95 ${
+                className={`relative flex flex-col items-center justify-center min-h-[52px] py-1 px-0.5 rounded-full transition-all focus-visible:ring-2 focus-visible:ring-accent w-full min-w-0 active:scale-95 ${
                   isActive
-                    ? 'text-accent-text dark:text-amber-300 font-bold bg-accent/20'
-                    : 'text-fg-muted hover:text-fg hover:bg-stone-100/80 dark:hover:bg-stone-800/50'
+                    ? 'text-accent-text bg-amber-100 dark:bg-amber-500/15 font-bold'
+                    : 'text-fg-muted hover:text-fg'
                 }`}
               >
-                <div className="shrink-0">
-                  {item.icon}
-                </div>
-                <span className="text-[10px] leading-tight font-semibold w-full text-center block mt-0.5 truncate">
-                  {item.mobileLabel || item.label}
+                <Icon active={isActive} className="w-6 h-6 shrink-0" />
+                <span className="text-[10.5px] leading-tight font-semibold w-full text-center block mt-0.5 truncate">
+                  {label}
                 </span>
               </button>
             );
@@ -312,4 +206,3 @@ export const Navigation: React.FC<NavigationProps> = ({
     </>
   );
 };
-

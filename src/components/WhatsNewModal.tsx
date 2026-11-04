@@ -1006,7 +1006,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
                 }}
                 className={`text-xs px-3 py-1.5 rounded-xl font-mono whitespace-nowrap transition-all flex items-center gap-1.5 ${
                   isSelected
-                    ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                    ? 'bg-amber-500 text-accent-on font-bold shadow-sm'
                     : 'bg-white dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-400 hover:text-stone-950 dark:hover:text-stone-200'
                 }`}
               >

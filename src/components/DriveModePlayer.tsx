@@ -289,8 +289,8 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
               aria-label={isPlaying ? t('drive.pause') : t('drive.play')}
               className={`p-6 rounded-3xl transition-all shadow-md active:scale-95 flex items-center justify-center focus-visible:ring-2 focus-visible:ring-amber-500 ${
                 isPlaying 
-                  ? 'bg-amber-500 text-stone-950 animate-pulse' 
-                  : 'bg-gradient-to-r from-amber-500 to-amber-400 text-stone-950'
+                  ? 'bg-amber-500 text-accent-on animate-pulse' 
+                  : 'bg-gradient-to-r from-amber-500 to-amber-400 text-accent-on'
               }`}
             >
               {isPlaying ? <Pause className="w-8 h-8" /> : <Play className="w-8 h-8 ml-1" />}
@@ -332,7 +332,7 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
                   }}
                   className={`px-2.5 py-1 rounded-xl text-xs font-semibold transition-all ${
                     narratorProfile === p.id
-                      ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                      ? 'bg-amber-500 text-accent-on font-bold shadow-sm'
                       : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-400 hover:text-stone-950 dark:hover:text-white border border-stone-200 dark:border-stone-800'
                   }`}
                 >
@@ -354,7 +354,7 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
                 onClick={() => onToggleAmbience('campfire')}
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1 ${
                   currentAmbience === 'campfire'
-                    ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                    ? 'bg-amber-500 text-accent-on font-bold shadow-sm'
                     : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-400 hover:text-stone-950 dark:hover:text-white border border-stone-200 dark:border-stone-800'
                 }`}
               >
@@ -366,7 +366,7 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
                 onClick={() => onToggleAmbience('wind')}
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1 ${
                   currentAmbience === 'wind'
-                    ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                    ? 'bg-amber-500 text-accent-on font-bold shadow-sm'
                     : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-400 hover:text-stone-950 dark:hover:text-white border border-stone-200 dark:border-stone-800'
                 }`}
               >
@@ -378,7 +378,7 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
                 onClick={() => onToggleAmbience('sanctuary')}
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1 ${
                   currentAmbience === 'sanctuary'
-                    ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                    ? 'bg-amber-500 text-accent-on font-bold shadow-sm'
                     : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-400 hover:text-stone-950 dark:hover:text-white border border-stone-200 dark:border-stone-800'
                 }`}
               >

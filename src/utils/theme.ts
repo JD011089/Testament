@@ -1,7 +1,7 @@
 export type AppTheme = 'light' | 'dark';
 
-export const DAYBREAK_STATUS_COLOR = '#F8F1E0';
-export const VESPERS_STATUS_COLOR = '#131722';
+export const DAYBREAK_STATUS_COLOR = '#F6F4EF';
+export const VESPERS_STATUS_COLOR = '#0D1325';
 
 export function getStoredTheme(): AppTheme {
   try {

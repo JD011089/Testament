@@ -618,7 +618,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
         <button type="button" onClick={() => handleSendVerseToForge(verseNum, text)} className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold text-stone-700 dark:text-stone-200 transition-colors">Memorize</button>
         <button type="button" onClick={() => handleSaveVerseToArsenal(verseNum, text)} className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold text-stone-700 dark:text-stone-200 transition-colors">Save</button>
         <button type="button" onClick={() => handleSpeakSingleVerse(verseNum, text)} className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold text-stone-700 dark:text-stone-200 transition-colors">Listen</button>
-        <button type="button" onClick={() => handleToggleHighlight(verseNum)} className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors ${highlightedVerses[verseNum] ? 'bg-amber-400 text-stone-950 font-bold' : 'bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-stone-700 dark:text-stone-200'}`}>
+        <button type="button" onClick={() => handleToggleHighlight(verseNum)} className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors ${highlightedVerses[verseNum] ? 'bg-amber-400 text-accent-on font-bold' : 'bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-stone-700 dark:text-stone-200'}`}>
           <Highlighter className="w-3 h-3" />
           <span>{highlightedVerses[verseNum] ? 'Highlighted' : 'Highlight'}</span>
         </button>
@@ -689,7 +689,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                 }}
                 className={`px-2 py-1 rounded-md text-[11px] font-bold transition-all ${
                   activeMode === 'briefing'
-                    ? 'bg-amber-500 text-stone-950 shadow-xs'
+                    ? 'bg-amber-500 text-accent-on shadow-xs'
                     : 'text-stone-600 dark:text-stone-400'
                 }`}
               >
@@ -702,7 +702,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                 }}
                 className={`px-2 py-1 rounded-md text-[11px] font-bold transition-all ${
                   activeMode === 'reader'
-                    ? 'bg-amber-500 text-stone-950 shadow-xs'
+                    ? 'bg-amber-500 text-accent-on shadow-xs'
                     : 'text-stone-600 dark:text-stone-400'
                 }`}
               >
@@ -738,7 +738,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                 }}
                 className={`flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   activeMode === 'briefing'
-                    ? 'bg-amber-500 text-stone-950 shadow-xs'
+                    ? 'bg-amber-500 text-accent-on shadow-xs'
                     : 'text-stone-600 dark:text-stone-400 hover:text-stone-950 dark:hover:text-stone-100'
                 }`}
               >
@@ -753,7 +753,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                 }}
                 className={`flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   activeMode === 'reader'
-                    ? 'bg-amber-500 text-stone-950 shadow-xs'
+                    ? 'bg-amber-500 text-accent-on shadow-xs'
                     : 'text-stone-600 dark:text-stone-400 hover:text-stone-950 dark:hover:text-stone-100'
                 }`}
               >
@@ -842,7 +842,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                     onClick={handleToggleBriefingAudio}
                     className={`w-full flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border text-xs font-semibold transition-all ${
                       isPlayingAudio
-                        ? 'bg-amber-500 text-stone-950 border-amber-400 shadow-glow'
+                        ? 'bg-amber-500 text-accent-on border-amber-400 shadow-glow'
                         : 'bg-white hover:bg-stone-100 dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700 hover:border-amber-500/50 shadow-xs'
                     }`}
                   >
@@ -873,7 +873,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                     className="mb-5 p-3.5 rounded-2xl bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/40 text-left cursor-pointer transition-all shadow-xs flex items-center justify-between group"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-amber-500 text-stone-950 flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                      <div className="w-9 h-9 rounded-xl bg-amber-500 text-accent-on flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
                         <BookOpen className="w-4 h-4" />
                       </div>
                       <div>
@@ -1107,7 +1107,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                     onClick={handleToggleChapterAudio}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
                       isPlayingChapterAudio
-                        ? 'bg-amber-500 text-stone-950 border-amber-600 shadow-glow'
+                        ? 'bg-amber-500 text-accent-on border-amber-600 shadow-glow'
                         : 'bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 text-stone-700 dark:text-stone-300 border-stone-250 dark:border-stone-800'
                     }`}
                     title={isPlayingChapterAudio ? (isChapterAudioPaused ? 'Resume chapter audio' : 'Pause chapter audio') : 'Listen to full chapter'}
@@ -1149,7 +1149,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                     onClick={handleToggleChapterAudio}
                     className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition-all min-h-[36px] ${
                       isPlayingChapterAudio
-                        ? 'bg-amber-500 text-stone-950 border-amber-600 shadow-glow'
+                        ? 'bg-amber-500 text-accent-on border-amber-600 shadow-glow'
                         : 'bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-850 text-stone-700 dark:text-stone-300 border-stone-250 dark:border-stone-800'
                     }`}
                     title={isPlayingChapterAudio ? (isChapterAudioPaused ? 'Resume chapter audio' : 'Pause chapter audio') : 'Listen to chapter'}
@@ -1195,7 +1195,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                       type="button"
                       onClick={handleToggleChapterAudio}
                       aria-label={isChapterAudioPaused ? 'Resume chapter audio' : 'Pause chapter audio'}
-                      className="w-9 h-9 rounded-full bg-amber-500 text-stone-950 flex items-center justify-center shrink-0 hover:bg-amber-400 transition-colors"
+                      className="w-9 h-9 rounded-full bg-amber-500 text-accent-on flex items-center justify-center shrink-0 hover:bg-amber-400 transition-colors"
                     >
                       {isChapterAudioPaused ? <Play className="w-4 h-4 ml-0.5" /> : <Pause className="w-4 h-4" />}
                     </button>
@@ -1326,7 +1326,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                             onClick={() => chooseFontSize(size)}
                             className={`py-3 px-1 rounded-xl text-xs font-mono min-h-[44px] flex items-center justify-center transition-all ${
                               readingFontSize === size
-                                ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                                ? 'bg-amber-500 text-accent-on font-bold shadow-sm'
                                 : 'bg-stone-100 dark:bg-stone-900 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-800'
                             }`}
                           >
@@ -1345,7 +1345,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                           onClick={() => chooseLayout('verses')}
                           className={`py-3 px-3 rounded-xl text-xs font-bold min-h-[44px] flex items-center justify-center transition-all ${
                             readingLayout === 'verses'
-                              ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                              ? 'bg-amber-500 text-accent-on font-bold shadow-sm'
                               : 'bg-stone-100 dark:bg-stone-900 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-800'
                           }`}
                         >
@@ -1356,7 +1356,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                           onClick={() => chooseLayout('flow')}
                           className={`py-3 px-3 rounded-xl text-xs font-bold min-h-[44px] flex items-center justify-center transition-all ${
                             readingLayout === 'flow'
-                              ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                              ? 'bg-amber-500 text-accent-on font-bold shadow-sm'
                               : 'bg-stone-100 dark:bg-stone-900 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-800'
                           }`}
                         >
@@ -1537,7 +1537,7 @@ export const OpenBookModal: React.FC<OpenBookModalProps> = ({
                           }
                         }}
                         disabled={selectedChapter >= totalChapters && allBooks.findIndex(b => b.id === book.id) >= allBooks.length - 1}
-                        className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-xs font-bold text-stone-950 disabled:opacity-30 disabled:pointer-events-none shadow-xs transition-colors cursor-pointer"
+                        className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-xs font-bold text-accent-on disabled:opacity-30 disabled:pointer-events-none shadow-xs transition-colors cursor-pointer"
                       >
                         <span>{selectedChapter >= totalChapters && allBooks.findIndex(b => b.id === book.id) < allBooks.length - 1 ? 'Next Book →' : 'Next Ch'}</span>
                         <ChevronRight className="w-4 h-4 shrink-0" />

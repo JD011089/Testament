@@ -257,7 +257,7 @@ export const PWAInstallPrompt: React.FC = () => {
       <div className="space-y-2 pt-1">
         <button
           onClick={handleInstallClick}
-          className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 transition-all shadow-glow cursor-pointer active:scale-[0.98]"
+          className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-accent-on font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 transition-all shadow-glow cursor-pointer active:scale-[0.98]"
         >
           <Download className="w-5 h-5 text-stone-950 stroke-[2.5]" />
           <span>{t('pwa.installBtn')}</span>

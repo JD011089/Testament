@@ -115,7 +115,7 @@ export const DecisionJournalModal: React.FC<DecisionJournalModalProps> = ({
                     onClick={handleSaveReflection}
                     className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       reflectionText.trim()
-                        ? 'bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-xs'
+                        ? 'bg-amber-500 hover:bg-amber-400 text-accent-on shadow-xs'
                         : 'bg-stone-200 dark:bg-stone-800 text-stone-400 cursor-not-allowed'
                     }`}
                   >

@@ -232,7 +232,7 @@ export const StorytellerModal: React.FC<StorytellerModalProps> = ({
                 onClick={handleAdvanceToCompare}
                 className={`px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
                   userText.trim()
-                    ? 'bg-amber-500 hover:bg-amber-400 text-stone-950'
+                    ? 'bg-amber-500 hover:bg-amber-400 text-accent-on'
                     : 'bg-stone-200 dark:bg-stone-800 text-stone-400 cursor-not-allowed opacity-60'
                 }`}
               >

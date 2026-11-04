@@ -98,7 +98,7 @@ export const ModeSelectorModal: React.FC<ModeSelectorModalProps> = ({
                     </div>
                   </div>
                   {isSelected ? (
-                    <div className="w-6 h-6 rounded-full bg-amber-500 text-stone-950 flex items-center justify-center shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-amber-500 text-accent-on flex items-center justify-center shrink-0">
                       <Check aria-hidden="true" className="w-4 h-4 stroke-[3]" />
                     </div>
                   ) : (

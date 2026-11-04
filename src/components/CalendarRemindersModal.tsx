@@ -297,7 +297,7 @@ export const CalendarRemindersModal: React.FC<CalendarRemindersModalProps> = ({
                       onClick={() => handleTimeChange('morning', preset)}
                       className={`text-[11px] font-mono px-2 py-0.5 rounded-lg border transition-colors cursor-pointer ${
                         morningTime === preset
-                          ? 'bg-amber-500 text-stone-950 font-bold border-amber-500'
+                          ? 'bg-amber-500 text-accent-on font-bold border-amber-500'
                           : 'bg-stone-200/50 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-300/50 dark:border-stone-700 hover:border-amber-400'
                       }`}
                     >

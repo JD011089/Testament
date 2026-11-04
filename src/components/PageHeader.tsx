@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Flame, Settings } from 'lucide-react';
+import { Flame, UserRound } from 'lucide-react';
 import { getDailyStreakCount } from '../utils/dailyEngine';
 
 interface PageHeaderProps {
@@ -52,19 +52,19 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         <div className="flex items-center gap-1.5 shrink-0 xl:hidden pt-0.5">
           <div
             title={streak > 0 ? 'Daily streak' : 'Fresh start'}
-            className="inline-flex items-center gap-1 h-9 px-3 rounded-full bg-surface-raised border border-line text-label font-bold text-accent-text"
+            className="inline-flex items-center gap-1 h-9 px-3 rounded-full bg-surface-raised border border-line text-xs font-bold text-secondary-text"
           >
-            <Flame className="w-3.5 h-3.5 fill-accent/25 text-accent" aria-hidden="true" />
-            <span>{streak > 0 ? `${streak}d` : 'New'}</span>
+            <Flame className={`w-4 h-4 ${streak > 0 ? 'fill-current' : ''}`} aria-hidden="true" />
+            <span>{streak > 0 ? streak : 'New'}</span>
           </div>
           <button
             type="button"
             onClick={openSettings}
             title="Settings & Preferences"
             aria-label="Settings"
-            className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-surface-raised hover:bg-stone-100 dark:hover:bg-stone-850 border border-line text-fg-muted hover:text-fg transition-colors cursor-pointer"
+            className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-amber-100 dark:bg-amber-500/15 border border-line text-accent-text hover:ring-2 hover:ring-accent/40 transition-all cursor-pointer"
           >
-            <Settings className="w-4 h-4" aria-hidden="true" />
+            <UserRound className="w-[18px] h-[18px]" aria-hidden="true" />
           </button>
         </div>
       </div>

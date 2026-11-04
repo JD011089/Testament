@@ -91,7 +91,7 @@ export const DossierModal: React.FC<DossierModalProps> = ({
               }}
               className={`flex-shrink-0 px-4 py-2 rounded-xl transition-all text-xs font-semibold ${
                 selectedCharIndex === idx
-                  ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                  ? 'bg-amber-500 text-accent-on font-bold shadow-sm'
                   : 'bg-stone-200/60 dark:bg-stone-950/60 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-800'
               }`}
             >

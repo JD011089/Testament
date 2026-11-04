@@ -537,7 +537,7 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
                   }}
                   className={`flex-1 px-4 py-2.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
                     mode === option
-                      ? 'bg-amber-500 text-stone-950'
+                      ? 'bg-amber-500 text-accent-on'
                       : 'text-stone-600 dark:text-stone-300 hover:bg-stone-200/60 dark:hover:bg-stone-800'
                   }`}
                 >
@@ -670,7 +670,7 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
             }`}>
               <div className="flex items-center gap-2 mb-3 flex-wrap">
                 {isBoss && (
-                  <span className="flex items-center gap-1 text-[10px] font-mono font-bold uppercase tracking-widest text-stone-950 bg-amber-500 px-2 py-0.5 rounded-full">
+                  <span className="flex items-center gap-1 text-[10px] font-mono font-bold uppercase tracking-widest text-accent-on bg-amber-500 px-2 py-0.5 rounded-full">
                     <Crown className="w-3 h-3" />
                     Final Boss • 2× points
                   </span>
@@ -842,7 +842,7 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
                 : 'bg-stone-100/70 dark:bg-stone-900/50 border-stone-200/70 dark:border-stone-800/70'
             }`}>
               <div className={`w-16 h-16 mx-auto rounded-3xl flex items-center justify-center mb-3 ${
-                outcome === 'victory' ? 'bg-amber-500 text-stone-950 shadow-glow' : 'bg-stone-200 dark:bg-stone-800 text-stone-500 dark:text-stone-400'
+                outcome === 'victory' ? 'bg-amber-500 text-accent-on shadow-glow' : 'bg-stone-200 dark:bg-stone-800 text-stone-500 dark:text-stone-400'
               }`}>
                 {outcome === 'victory' ? <Trophy className="w-8 h-8" /> : <Heart className="w-8 h-8" />}
               </div>

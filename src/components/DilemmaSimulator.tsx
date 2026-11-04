@@ -449,7 +449,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                     }}
                     className={`text-xs px-3.5 py-2 rounded-full font-medium whitespace-nowrap min-h-[44px] flex items-center transition-all focus-visible:ring-2 focus-visible:ring-amber-500 ${
                       selectedCategory === cat
-                        ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                        ? 'bg-amber-500 text-accent-on font-bold shadow-sm'
                         : 'bg-stone-200/50 dark:bg-stone-900/80 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                     }`}
                   >
@@ -481,7 +481,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                   onClick={() => handleSelectDilemma(d.id)}
                   className={`text-xs px-3.5 py-2 rounded-xl font-medium whitespace-nowrap transition-all flex items-center gap-1.5 ${
                     isSelected
-                      ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                      ? 'bg-amber-500 text-accent-on font-bold shadow-sm'
                       : 'bg-stone-200/50 hover:bg-stone-200 dark:bg-stone-900/70 dark:hover:bg-stone-850 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                   }`}
                 >
@@ -504,7 +504,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
           }}
           className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
             activeMode === 'heart_check'
-              ? 'bg-amber-500 text-stone-950 shadow-sm font-extrabold'
+              ? 'bg-amber-500 text-accent-on shadow-sm font-extrabold'
               : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
           }`}
         >
@@ -519,7 +519,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
           }}
           className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
             activeMode === 'playbook'
-              ? 'bg-amber-500 text-stone-950 shadow-sm font-extrabold'
+              ? 'bg-amber-500 text-accent-on shadow-sm font-extrabold'
               : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
           }`}
         >
@@ -607,7 +607,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                     isEvaluating
                       ? 'bg-amber-500/80 text-stone-950 cursor-wait animate-pulse'
                       : userText.trim() || selectedFeeling
-                        ? 'bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-sm cursor-pointer font-extrabold'
+                        ? 'bg-amber-500 hover:bg-amber-400 text-accent-on shadow-sm cursor-pointer font-extrabold'
                         : 'bg-stone-200 dark:bg-stone-800 text-stone-400 dark:text-stone-500 cursor-not-allowed'
                   }`}
                 >
@@ -1166,7 +1166,7 @@ export const DilemmaSimulator: React.FC<DilemmaSimulatorProps> = ({
                         isSelected
                           ? 'bg-stone-300/60 dark:bg-stone-800 text-stone-800 dark:text-stone-300'
                           : play.isRecommended
-                            ? 'bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-sm font-bold'
+                            ? 'bg-amber-500 hover:bg-amber-400 text-accent-on shadow-sm font-bold'
                             : 'bg-stone-200/70 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300'
                       }`}
                     >
