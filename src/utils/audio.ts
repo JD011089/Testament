@@ -1129,11 +1129,11 @@ class SoundEngine {
 
   private playAssetOrSpeech(text: string, onFinished: () => void, audioAssetUrl?: string) {
     // Bundled studio narration is free, instant, and works offline.
-    if (
-      audioAssetUrl &&
-      SoundEngine.AVAILABLE_STUDIO_AUDIO.has(audioAssetUrl) &&
-      this.currentNarratorProfile === 'cinematic'
-    ) {
+    // Story narration clips are recorded per narrator, so any listed clip is valid.
+    // The older journey clips only exist in the Cinematic voice.
+    const isNarrationClip = !!audioAssetUrl && audioAssetUrl.startsWith('/audio/narration/');
+    const isJourneyClip = !!audioAssetUrl && SoundEngine.AVAILABLE_STUDIO_AUDIO.has(audioAssetUrl) && this.currentNarratorProfile === 'cinematic';
+    if (audioAssetUrl && (isNarrationClip || isJourneyClip)) {
       try {
         const audio = new Audio(audioAssetUrl);
         this.currentAudioElement = audio;
@@ -1149,14 +1149,17 @@ class SoundEngine {
           this.emitAudioProgress(audio);
           onFinished();
         };
-        audio.onerror = () => {
+        // Fall back to the device voice once, and only if this clip is still the
+        // current one (a stopped clip's rejected play() must not start speech).
+        let fellBack = false;
+        const fallBack = () => {
+          if (fellBack || this.currentAudioElement !== audio) return;
+          fellBack = true;
           this.currentAudioElement = null;
           this.fallbackSpeak(text, onFinished);
         };
-        audio.play().catch(() => {
-          this.currentAudioElement = null;
-          this.fallbackSpeak(text, onFinished);
-        });
+        audio.onerror = fallBack;
+        audio.play().catch(fallBack);
         return;
       } catch {
         /* fall through to device speech */

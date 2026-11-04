@@ -10,7 +10,8 @@
     "test": "playwright test",
     "verify:verses": "playwright test scripts/verify-verses.ts",
     "test:e2e": "playwright test --config playwright.e2e.config.ts",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "narration": "node scripts/narration/generate.ts"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",

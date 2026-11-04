@@ -7,6 +7,10 @@ import {
 import { useFontSize, FONT_SCALE_STEPS, type FontScaleStep } from '../context/FontSizeContext';
 import { useLanguage, type Language } from '../context/LanguageContext';
 import { soundEngine, NARRATOR_VOICES, friendlyVoiceName, type NarratorProfile } from '../utils/audio';
+import { studioProfiles, type NarrationManifest } from '../utils/narrationScript';
+import narrationManifestRaw from '../content/stories/narration-manifest.json';
+
+const STUDIO_PROFILES = studioProfiles(narrationManifestRaw as NarrationManifest);
 import { getStoredTheme, applyTheme, type AppTheme } from '../utils/theme';
 import { loadReadingPlace, saveReadingPlace } from '../utils/readingPlace';
 import { BIBLE_TRANSLATIONS, getDefaultTranslationForLanguage, type TranslationId } from '../utils/bibleService';
@@ -631,7 +635,9 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 serif
                 selected={currentVoice === vKey}
                 title={meta.name}
-                hint={voiceNames[vKey] ? `${meta.subtitle} · ${voiceNames[vKey]}` : meta.subtitle}
+                hint={STUDIO_PROFILES.has(vKey)
+                  ? `${meta.subtitle} · Studio recording in stories`
+                  : voiceNames[vKey] ? `${meta.subtitle} · ${voiceNames[vKey]}` : meta.subtitle}
                 onSelect={() => selectVoice(vKey)}
                 leading={
                   <button

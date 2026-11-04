@@ -51,3 +51,6 @@ twa/signing.properties
 
 # Supabase CLI link state (contains project connection details)
 supabase/.temp/
+
+# Generated narration review page
+scripts/narration/review.html

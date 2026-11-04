@@ -5,6 +5,10 @@ import { addVerseCard } from '../../utils/deck';
 import { recordDailyActivityStreak } from '../../utils/dailyEngine';
 import { celebrate, isSoundEnabled } from '../../utils/feedback';
 import { soundEngine } from '../../utils/audio';
+import { findNarrationClip, spokenTextForCard, type NarrationManifest } from '../../utils/narrationScript';
+import narrationManifestRaw from '../../content/stories/narration-manifest.json';
+
+const NARRATION_MANIFEST = narrationManifestRaw as NarrationManifest;
 import { useLanguage } from '../../context/LanguageContext';
 import { useModalLock } from '../../utils/useModalLock';
 import { VerseLine } from './VerseLine';
@@ -133,12 +137,22 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
   }, [story.id, story.arc]);
 
   // Narration audio: auto-play (if enabled) and stop when leaving the card.
+  // Plays the studio recording when one exists for this narrator, else the device voice.
   useEffect(() => {
     if (card.type !== 'narration' || !narrationAudioEnabled()) return;
-    const line = card.scriptureLine ? card.scriptureLine.text : card.text;
-    soundEngine.speakVerse(line);
+    const line = spokenTextForCard(card);
+    if (!line) return;
+    const profile = soundEngine.getNarratorProfile();
+    const clip = findNarrationClip(NARRATION_MANIFEST, story.id, index, profile);
+    soundEngine.speakVerse(line, undefined, clip?.url);
+
+    // Warm the next recorded clip so the following card starts without a gap.
+    const nextIndex = story.cards.findIndex((c, i) => i > index && c.type === 'narration');
+    const next = nextIndex >= 0 ? findNarrationClip(NARRATION_MANIFEST, story.id, nextIndex, profile) : null;
+    if (next) fetch(next.url).catch(() => { /* offline: the device voice covers it */ });
+
     return () => { soundEngine.stopSpeaking(); };
-  }, [card]);
+  }, [card, index, story.id, story.cards]);
 
   // Pause audio on tab hidden.
   useEffect(() => {
