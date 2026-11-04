@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { MemoryVerse } from '../types';
 import { getAllVerses, getVerseById, normalizeVerseSlug } from '../utils/verseRegistry';
@@ -7,7 +7,7 @@ import { soundEngine } from '../utils/audio';
 import { getDailyVerse } from '../utils/dailyEngine';
 import { CalendarRemindersModal } from './CalendarRemindersModal';
 import confetti from 'canvas-confetti';
-import { recordFSRSReview, getFSRSCard, previewFSRSDays, getDueFSRSCards, isVerseMastered } from '../utils/fsrsEngine';
+import { recordFSRSReview, getFSRSCard, previewFSRSDays, getDueFSRSCards, isVerseMastered, loadFSRSCards, saveFSRSCards, type FSRSCard } from '../utils/fsrsEngine';
 import { 
   RotateCcw, 
   Eye, 
@@ -144,6 +144,13 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
   const [fsrsRated, setFsrsRated] = useState<boolean>(false);
   const [scheduledNextDays, setScheduledNextDays] = useState<number | null>(null);
+  // Finishing a drill saves a review on its own ("Good", or "Hard" after a
+  // mistake or hint). Tapping a rating afterwards replaces that automatic one.
+  const [hadMistakes, setHadMistakes] = useState<boolean>(false);
+  const [autoSaved, setAutoSaved] = useState<boolean>(false);
+  // Day counts for each rating, taken before the automatic save so the buttons stay accurate.
+  const [ratingPreview, setRatingPreview] = useState<number[] | null>(null);
+  const autoSave = useRef<{ verseId: string; before: FSRSCard | undefined } | null>(null);
 
   const [lastWrongChip, setLastWrongChip] = useState<string | null>(null);
 
@@ -167,12 +174,11 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
           spread: 70,
           origin: { y: 0.7 }
         });
-        if (isVerseMastered(verse.id)) {
-          onVerseMastered(verse.id);
-        }
+        saveCompletedDrill();
       }
     } else {
       soundEngine.playClick();
+      setHadMistakes(true);
       setLastWrongChip(word);
       setRecallError(`Try again for blank #${activeBlankStep + 1}`);
       setTimeout(() => {
@@ -196,9 +202,31 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
     return firstLetterOf(word) + '•'.repeat(Math.min(3, word.length - 1));
   };
 
+  const saveCompletedDrill = () => {
+    // A peek already logged this round as "Again".
+    if (fsrsRated || hasPeeked) return;
+    const before = loadFSRSCards()[verse.id];
+    setRatingPreview(([1, 2, 3, 4] as const).map((r) => previewFSRSDays(verse.id, r)));
+    const updated = recordFSRSReview(verse.id, hadMistakes || hintLevel > 0 ? 2 : 3);
+    autoSave.current = { verseId: verse.id, before };
+    setScheduledNextDays(updated.stability);
+    setAutoSaved(true);
+    if (isVerseMastered(verse.id)) {
+      onVerseMastered(verse.id);
+    }
+  };
+
   const handleRateFSRS = (rating: 1 | 2 | 3 | 4) => {
     if (fsrsRated) return;
     soundEngine.playSnap();
+    // Undo the automatic review for this round so it isn't counted twice.
+    if (autoSave.current?.verseId === verse.id) {
+      const cards = loadFSRSCards();
+      if (autoSave.current.before) cards[verse.id] = autoSave.current.before;
+      else delete cards[verse.id];
+      saveFSRSCards(cards);
+    }
+    autoSave.current = null;
     const updated = recordFSRSReview(verse.id, rating);
     setScheduledNextDays(updated.stability);
     setFsrsRated(true);
@@ -214,7 +242,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
   }, []);
 
   const handleAdvance = () => {
-    // Never auto-log a review: explicit 1-4 rating required to schedule retention.
+    // The finished drill was already saved; a rating tap is optional.
     onNextVerse();
   };
 
@@ -244,6 +272,10 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
     setHasPeeked(false);
     setFsrsRated(false);
     setScheduledNextDays(null);
+    setHadMistakes(false);
+    setAutoSaved(false);
+    setRatingPreview(null);
+    autoSave.current = null;
   };
 
   useEffect(() => {
@@ -255,6 +287,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
   const handleHint = () => {
     if (!nextWord || isCompleted) return;
     soundEngine.playSnap();
+    setHadMistakes(true);
     setHintLevel(level => (level >= 2 ? 2 : ((level + 1) as 1 | 2)));
   };
 
@@ -284,6 +317,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
     if (forgeMode === 'phrases') {
       if (newAssembled.length === targetWords.length) {
         const isCorrect = newAssembled.map(w => w.word).join(' ') === targetWords.join(' ');
+        if (!isCorrect) setHadMistakes(true);
         if (isCorrect) {
           soundEngine.playVictory();
           const nextCompleted = [...completedPhrases, phrases[currentPhraseIdx]];
@@ -303,15 +337,14 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
               origin: { y: 0.75 },
               colors: ['#ea580c', '#f59e0b', '#10b981', '#fbbf24']
             });
-            if (!hasPeeked && isVerseMastered(verse.id)) {
-              onVerseMastered(verse.id);
-            }
+            saveCompletedDrill();
           }
         }
       }
     } else {
       if (newAssembled.length === targetWords.length) {
         const isCorrect = newAssembled.map(w => w.word).join(' ') === targetWords.join(' ');
+        if (!isCorrect) setHadMistakes(true);
         if (isCorrect) {
           setIsCompleted(true);
           soundEngine.playVictory();
@@ -321,9 +354,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
             origin: { y: 0.75 },
             colors: ['#ea580c', '#f59e0b', '#10b981', '#fbbf24']
           });
-          if (!hasPeeked && isVerseMastered(verse.id)) {
-            onVerseMastered(verse.id);
-          }
+          saveCompletedDrill();
         }
       }
     }
@@ -580,7 +611,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                       ✓ Recall round complete
                     </span>
                     <p className="text-xs text-stone-600 dark:text-stone-300 mt-0.5">
-                      +20 XP • Verse memory locked in.
+                      {t('forge.recallSaved')}
                     </p>
                   </div>
                   <button
@@ -802,7 +833,11 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
               ) : (
               <div className="p-3.5 rounded-xl bg-white/80 dark:bg-black/40 mb-3">
                 <div className="text-xs font-mono font-medium text-emerald-800 dark:text-emerald-300 mb-2 flex items-center justify-between">
-                  <span>{t('forge.howEasily')} {fsrsRated && <strong className="text-emerald-600 dark:text-emerald-400">{t('forge.retentionLogged')}</strong>}</span>
+                  <span>{fsrsRated
+                    ? <>{t('forge.howEasily')} <strong className="text-emerald-600 dark:text-emerald-400">{t('forge.retentionLogged')}</strong></>
+                    : autoSaved
+                      ? <strong className="text-emerald-700 dark:text-emerald-400">{t('forge.autoSaved')}</strong>
+                      : t('forge.howEasily')}</span>
                   {scheduledNextDays && (
                     <span className="text-amber-800 dark:text-amber-400 font-bold">{t('forge.scheduledIn', { days: scheduledNextDays })}</span>
                   )}
@@ -814,7 +849,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                     className="p-2 rounded-lg bg-stone-100 dark:bg-stone-900 hover:bg-red-500/20 text-[11px] font-medium text-red-700 dark:text-red-300 text-center transition-all disabled:opacity-50"
                   >
                     <div className="font-bold">{t('forge.again')}</div>
-                    <div className="text-[11px] text-stone-500 dark:text-stone-400">{previewFSRSDays(verse.id, 1)}d</div>
+                    <div className="text-[11px] text-stone-500 dark:text-stone-400">{ratingPreview?.[0] ?? previewFSRSDays(verse.id, 1)}d</div>
                   </button>
                   <button
                     onClick={() => handleRateFSRS(2)}
@@ -822,7 +857,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                     className="p-2 rounded-lg bg-stone-100 dark:bg-stone-900 hover:bg-amber-500/20 text-[11px] font-medium text-amber-800 dark:text-amber-300 text-center transition-all disabled:opacity-50"
                   >
                     <div className="font-bold">{t('forge.hard')}</div>
-                    <div className="text-[11px] text-stone-500 dark:text-stone-400">{previewFSRSDays(verse.id, 2)}d</div>
+                    <div className="text-[11px] text-stone-500 dark:text-stone-400">{ratingPreview?.[1] ?? previewFSRSDays(verse.id, 2)}d</div>
                   </button>
                   <button
                     onClick={() => handleRateFSRS(3)}
@@ -830,7 +865,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                     className="p-2 rounded-lg bg-stone-100 dark:bg-stone-900 hover:bg-emerald-500/20 text-[11px] font-medium text-emerald-700 dark:text-emerald-300 text-center transition-all disabled:opacity-50"
                   >
                     <div className="font-bold">{t('forge.good')}</div>
-                    <div className="text-[11px] text-stone-500 dark:text-stone-400">{previewFSRSDays(verse.id, 3)}d</div>
+                    <div className="text-[11px] text-stone-500 dark:text-stone-400">{ratingPreview?.[2] ?? previewFSRSDays(verse.id, 3)}d</div>
                   </button>
                   <button
                     onClick={() => handleRateFSRS(4)}
@@ -838,7 +873,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                     className="p-2 rounded-lg bg-stone-100 dark:bg-stone-900 hover:bg-cyan-500/20 text-[11px] font-medium text-cyan-800 dark:text-cyan-300 text-center transition-all disabled:opacity-50"
                   >
                     <div className="font-bold">{t('forge.easy')}</div>
-                    <div className="text-[11px] text-stone-500 dark:text-stone-400">{previewFSRSDays(verse.id, 4)}d</div>
+                    <div className="text-[11px] text-stone-500 dark:text-stone-400">{ratingPreview?.[3] ?? previewFSRSDays(verse.id, 4)}d</div>
                   </button>
                 </div>
               </div>

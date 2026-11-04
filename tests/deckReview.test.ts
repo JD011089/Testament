@@ -31,7 +31,8 @@ test('practice history recorded by Practice decides due vs later', async () => {
   const { registerDynamicBibleVerse } = await import('../src/utils/verseRegistry');
 
   // Practice records under the registry id for the verse, exactly as WordForge does.
-  const verse = registerDynamicBibleVerse('Exodus 14:14', 'Sample text.', 'WEB');
+  // (Labelled 'Plain English' so this shared registry entry can't trip the translations test.)
+  const verse = registerDynamicBibleVerse('Exodus 14:14', 'Sample text.', 'Plain English');
   recordFSRSReview(verse.id, 4); // "easy": next review is days away
 
   const items = getDeckReviewItems([deckCard('Exodus 14:14')]);
@@ -49,7 +50,7 @@ test('practice history recorded by Practice decides due vs later', async () => {
 test('due reviews come before never-practiced verses', async () => {
   const { getDeckReviewQueue } = await import('../src/utils/deckReview');
   const { registerDynamicBibleVerse } = await import('../src/utils/verseRegistry');
-  const verse = registerDynamicBibleVerse('Genesis 1:1', 'Sample text.', 'WEB');
+  const verse = registerDynamicBibleVerse('Genesis 1:1', 'Sample text.', 'Plain English');
   store.set('testament_fsrs_cards', JSON.stringify({
     [verse.id]: { verseId: verse.id, stability: 1, difficulty: 5, reps: 1, lapses: 0, state: 'review', lastReviewDate: '2019-12-30', nextReviewDate: '2020-01-01', retrievability: 1 },
   }));
