@@ -1,0 +1,440 @@
+{
+  "creation": {
+    "light": {
+      "x": 52,
+      "y": 34,
+      "zoom": 1.6
+    },
+    "sky": {
+      "x": 45,
+      "y": 16,
+      "zoom": 1.35
+    },
+    "land": {
+      "x": 26,
+      "y": 38,
+      "zoom": 1.4
+    },
+    "life": {
+      "x": 80,
+      "y": 62,
+      "zoom": 1.6
+    }
+  },
+  "noah": {
+    "ship": {
+      "x": 40,
+      "y": 64,
+      "zoom": 1.35
+    },
+    "animals": {
+      "x": 64,
+      "y": 48,
+      "zoom": 1.7
+    },
+    "people": {
+      "x": 27,
+      "y": 40,
+      "zoom": 1.7
+    }
+  },
+  "abrahams-call": {
+    "country": {
+      "x": 72,
+      "y": 45,
+      "zoom": 1.3
+    },
+    "relatives": {
+      "x": 15,
+      "y": 47,
+      "zoom": 1.8
+    },
+    "house": {
+      "x": 7,
+      "y": 45,
+      "zoom": 1.8
+    }
+  },
+  "joseph": {
+    "pit": {
+      "x": 22,
+      "y": 78,
+      "zoom": 1.5
+    },
+    "sale": {
+      "x": 52,
+      "y": 72,
+      "zoom": 1.4
+    },
+    "egypt": {
+      "x": 60,
+      "y": 36,
+      "zoom": 1.6
+    }
+  },
+  "moses-burning-bush": {
+    "pharaoh": {
+      "x": 35,
+      "y": 48,
+      "zoom": 1.6
+    },
+    "people": {
+      "x": 15,
+      "y": 42,
+      "zoom": 1.3
+    },
+    "name": {
+      "x": 67,
+      "y": 40,
+      "zoom": 1.7
+    }
+  },
+  "red-sea": {
+    "hand": {
+      "x": 16,
+      "y": 52,
+      "zoom": 1.7
+    },
+    "wind": {
+      "x": 82,
+      "y": 26,
+      "zoom": 1.5
+    },
+    "path": {
+      "x": 52,
+      "y": 62,
+      "zoom": 1.5
+    }
+  },
+  "ruth": {
+    "go": {
+      "x": 46,
+      "y": 52,
+      "zoom": 1.5
+    },
+    "people": {
+      "x": 30,
+      "y": 60,
+      "zoom": 1.6
+    },
+    "god": {
+      "x": 55,
+      "y": 18,
+      "zoom": 1.3
+    }
+  },
+  "david-and-goliath": {
+    "helmet": {
+      "x": 72,
+      "y": 12,
+      "zoom": 2.4
+    },
+    "coat": {
+      "x": 73,
+      "y": 27,
+      "zoom": 2
+    },
+    "legs": {
+      "x": 73,
+      "y": 46,
+      "zoom": 2
+    },
+    "javelin": {
+      "x": 70,
+      "y": 19,
+      "zoom": 2.2
+    },
+    "spear": {
+      "x": 65,
+      "y": 9,
+      "zoom": 2
+    }
+  },
+  "elijah-carmel": {
+    "offering": {
+      "x": 58,
+      "y": 27,
+      "zoom": 1.9
+    },
+    "wood": {
+      "x": 58,
+      "y": 41,
+      "zoom": 2
+    },
+    "stones": {
+      "x": 58,
+      "y": 54,
+      "zoom": 1.8
+    },
+    "water": {
+      "x": 45,
+      "y": 82,
+      "zoom": 1.7
+    }
+  },
+  "elijah-still-small-voice": {
+    "wind": {
+      "x": 83,
+      "y": 42,
+      "zoom": 1.8
+    },
+    "quake": {
+      "x": 66,
+      "y": 84,
+      "zoom": 1.7
+    },
+    "fire": {
+      "x": 74,
+      "y": 28,
+      "zoom": 2
+    },
+    "voice": {
+      "x": 37,
+      "y": 52,
+      "zoom": 1.6
+    }
+  },
+  "daniel-lions-den": {
+    "windows": {
+      "x": 52,
+      "y": 42,
+      "zoom": 1.4
+    },
+    "jerusalem": {
+      "x": 76,
+      "y": 50,
+      "zoom": 1.9
+    },
+    "times": {
+      "x": 74,
+      "y": 15,
+      "zoom": 1.8
+    }
+  },
+  "jonah": {
+    "joppa": {
+      "x": 38,
+      "y": 68,
+      "zoom": 1.4
+    },
+    "ship": {
+      "x": 72,
+      "y": 50,
+      "zoom": 1.5
+    },
+    "tarshish": {
+      "x": 58,
+      "y": 32,
+      "zoom": 1.7
+    }
+  },
+  "esther": {
+    "gather": {
+      "x": 15,
+      "y": 55,
+      "zoom": 1.6
+    },
+    "fast": {
+      "x": 41,
+      "y": 58,
+      "zoom": 1.7
+    },
+    "king": {
+      "x": 54,
+      "y": 36,
+      "zoom": 2
+    }
+  },
+  "birth-of-jesus": {
+    "fear": {
+      "x": 34,
+      "y": 76,
+      "zoom": 1.6
+    },
+    "news": {
+      "x": 88,
+      "y": 28,
+      "zoom": 1.7
+    },
+    "joy": {
+      "x": 52,
+      "y": 74,
+      "zoom": 1.6
+    },
+    "savior": {
+      "x": 88,
+      "y": 28,
+      "zoom": 2.2
+    }
+  },
+  "jesus-calms-the-storm": {
+    "wind": {
+      "x": 30,
+      "y": 20,
+      "zoom": 1.4
+    },
+    "sea": {
+      "x": 50,
+      "y": 82,
+      "zoom": 1.4
+    }
+  },
+  "feeding-the-5000": {
+    "thanks": {
+      "x": 33,
+      "y": 70,
+      "zoom": 1.7
+    },
+    "loaves": {
+      "x": 14,
+      "y": 88,
+      "zoom": 2
+    },
+    "fish": {
+      "x": 41,
+      "y": 91,
+      "zoom": 2.2
+    },
+    "enough": {
+      "x": 70,
+      "y": 56,
+      "zoom": 1.3
+    }
+  },
+  "peter-walks-on-water": {
+    "wind": {
+      "x": 50,
+      "y": 16,
+      "zoom": 1.4
+    },
+    "fear": {
+      "x": 52,
+      "y": 48,
+      "zoom": 2
+    },
+    "sink": {
+      "x": 45,
+      "y": 78,
+      "zoom": 1.6
+    }
+  },
+  "prodigal-son": {
+    "saw": {
+      "x": 74,
+      "y": 52,
+      "zoom": 1.6
+    },
+    "ran": {
+      "x": 31,
+      "y": 78,
+      "zoom": 1.8
+    },
+    "kiss": {
+      "x": 42,
+      "y": 32,
+      "zoom": 2
+    }
+  },
+  "good-samaritan": {
+    "near": {
+      "x": 37,
+      "y": 40,
+      "zoom": 1.7
+    },
+    "saw": {
+      "x": 46,
+      "y": 70,
+      "zoom": 1.8
+    },
+    "mercy": {
+      "x": 40,
+      "y": 56,
+      "zoom": 1.9
+    }
+  },
+  "zacchaeus": {
+    "half": {
+      "x": 13,
+      "y": 42,
+      "zoom": 1.6
+    },
+    "restore": {
+      "x": 12,
+      "y": 24,
+      "zoom": 2
+    }
+  },
+  "the-cross": {
+    "words": {
+      "x": 63,
+      "y": 38,
+      "zoom": 1.8
+    },
+    "head": {
+      "x": 63,
+      "y": 33,
+      "zoom": 2.4
+    },
+    "spirit": {
+      "x": 50,
+      "y": 22,
+      "zoom": 1.3
+    }
+  },
+  "the-resurrection": {
+    "early": {
+      "x": 20,
+      "y": 32,
+      "zoom": 1.8
+    },
+    "stone": {
+      "x": 73,
+      "y": 58,
+      "zoom": 1.8
+    },
+    "empty": {
+      "x": 59,
+      "y": 52,
+      "zoom": 2
+    }
+  },
+  "pentecost": {
+    "sound": {
+      "x": 13,
+      "y": 30,
+      "zoom": 1.6
+    },
+    "filled": {
+      "x": 47,
+      "y": 48,
+      "zoom": 1.25
+    },
+    "speak": {
+      "x": 45,
+      "y": 40,
+      "zoom": 1.9
+    }
+  },
+  "road-to-damascus": {
+    "voice": {
+      "x": 45,
+      "y": 18,
+      "zoom": 1.6
+    },
+    "scales": {
+      "x": 41,
+      "y": 46,
+      "zoom": 2.2
+    },
+    "sight": {
+      "x": 41,
+      "y": 50,
+      "zoom": 1.6
+    },
+    "baptism": {
+      "x": 12,
+      "y": 32,
+      "zoom": 1.8
+    }
+  }
+}
