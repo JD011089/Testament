@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Compass, 
   BookOpen, 
@@ -18,6 +18,42 @@ import { useLanguage } from '../context/LanguageContext';
 import { APP_VERSION } from '../config/version';
 
 export type NavTab = 'today' | 'dashboard' | 'map' | 'library' | 'game' | 'practice' | 'arsenal' | 'wordforge' | 'dilemmas' | 'deck';
+
+/**
+ * Phone nav: slides away while you scroll down to read, and comes back as
+ * soon as you scroll up or get near the top of the page.
+ */
+function useHideOnScrollDown(): [boolean, (hidden: boolean) => void] {
+  const [hidden, setHidden] = useState(false);
+
+  useEffect(() => {
+    const TOP_ZONE = 80;
+    const THRESHOLD = 8;
+    let lastY = window.scrollY;
+
+    // setState bails out when the value is unchanged, so running this on
+    // every scroll event is cheap.
+    const onScroll = () => {
+      const y = window.scrollY;
+      const delta = y - lastY;
+      if (y < TOP_ZONE) {
+        setHidden(false);
+        lastY = y;
+      } else if (delta > THRESHOLD) {
+        setHidden(true);
+        lastY = y;
+      } else if (delta < -THRESHOLD) {
+        setHidden(false);
+        lastY = y;
+      }
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  return [hidden, setHidden];
+}
 
 interface NavigationProps {
   currentTab: NavTab | 'not-found';
@@ -43,6 +79,7 @@ export const Navigation: React.FC<NavigationProps> = ({
   onOpenWhatsNew
 }) => {
   const { t } = useLanguage();
+  const [navHidden, setNavHidden] = useHideOnScrollDown();
 
   const isTabActive = (itemTab: NavTab) => {
     if (itemTab === 'practice') {
@@ -238,7 +275,11 @@ export const Navigation: React.FC<NavigationProps> = ({
       <nav
         role="navigation"
         aria-label={t('nav.mobileAria')}
-        className="xl:hidden fixed z-40 left-1/2 -translate-x-1/2 bottom-[max(0.75rem,env(safe-area-inset-bottom))] w-[calc(100%-1.5rem)] max-w-sm rounded-full bg-surface-raised/95 dark:bg-ink/95 backdrop-blur-xl border border-line/90 dark:border-stone-700/80 px-2 py-1.5 shadow-[0_10px_36px_rgba(31,35,48,0.12),0_2px_8px_rgba(31,35,48,0.05)]"
+        data-hidden={navHidden ? 'true' : undefined}
+        onFocusCapture={() => setNavHidden(false)}
+        className={`xl:hidden fixed z-40 left-1/2 -translate-x-1/2 bottom-[max(0.75rem,env(safe-area-inset-bottom))] w-[calc(100%-1.5rem)] max-w-sm rounded-full bg-surface-raised/95 dark:bg-ink/95 backdrop-blur-xl border border-line/90 dark:border-stone-700/80 px-2 py-1.5 shadow-[0_10px_36px_rgba(31,35,48,0.12),0_2px_8px_rgba(31,35,48,0.05)] transition-transform duration-300 ease-out ${
+          navHidden ? 'translate-y-[calc(100%+2.5rem)]' : 'translate-y-0'
+        }`}
       >
         <div className="grid grid-cols-4 items-stretch w-full gap-0.5">
           {navItems.map((item) => {
