@@ -65,12 +65,37 @@ function numberToWordsEn(numStr: string): string {
   return String(num);
 }
 
+const NUMBERED_BOOKS = 'Samuel|Kings|Chronicles|Corinthians|Thessalonians|Timothy|Peter|John';
+const ORDINALS_EN: Record<string, string> = { '1': 'First', '2': 'Second', '3': 'Third' };
+const VERSE_WORD: Record<string, { one: string; many: string; through: string }> = {
+  es: { one: 'versículo', many: 'versículos', through: 'al' },
+  fr: { one: 'verset', many: 'versets', through: 'à' },
+};
+
+/** Current UI language as a two-letter prefix (en, es, fr). */
+export function currentSpeechLang(): string {
+  const raw = (typeof document !== 'undefined' && document.documentElement?.lang) ||
+    (typeof localStorage !== 'undefined' && localStorage.getItem('testament_language')) ||
+    'en';
+  return raw.toLowerCase().slice(0, 2);
+}
+
 /**
  * Normalizes scripture references, punctuation, and markdown formatting
  * to create smooth, human-like cadence with natural pauses.
  */
-export function normalizeScriptureForSpeech(text: string): string {
-  return text
+export function normalizeScriptureForSpeech(text: string, lang: string = 'en'): string {
+  const isEn = !(lang === 'es' || lang === 'fr');
+  let out = text;
+  if (isEn) {
+    // "1 Kings" is read "First Kings", not "one Kings".
+    out = out.replace(new RegExp(`\\b([123])\\s+(${NUMBERED_BOOKS})\\b`, 'g'), (_m, n, book) => `${ORDINALS_EN[n]} ${book}`);
+  }
+  // All-caps divine names (KJV style) can be spelled out letter by letter.
+  out = out.replace(/\bLORD\b/g, 'Lord').replace(/\bGOD\b/g, 'God');
+
+  const words = VERSE_WORD[lang];
+  return out
     // 1. Strip badges & annotations (labels must never be spoken)
     .replace(/[\u2728\u2729\u2605\u2B50]?\s*(?:Plain\s+English|Reflection|Story\s+retelling)\s*[•\-–—·*]\s*Not\s+Scripture/gi, ' ')
     .replace(/[\u2728\u2729\u2605\u2B50]?\s*(?:Plain\s+English|Plain\s+English\s+takeaway)\s*:?/gi, ' ')
@@ -81,7 +106,13 @@ export function normalizeScriptureForSpeech(text: string): string {
     // 3. Strip emojis
     .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}]/gu, ' ')
     // 4. Expand verse references: "Genesis 45:5" -> "Genesis forty-five, verse five"
-    .replace(/\b(\d?\s*[A-Za-z]+(?:\s+[A-Za-z]+){0,3})\s+(\d+):(\d+)(?:-(\d+))?\b/g, (_match, book, ch, vs, endVs) => {
+    .replace(/\b(\d?\s*[A-Za-zÀ-ÿ]+(?:\s+[A-Za-zÀ-ÿ]+){0,3})\s+(\d+):(\d+)(?:-(\d+))?\b/g, (_match, book, ch, vs, endVs) => {
+      if (words) {
+        // Spanish/French voices read digits well; just make the structure clear.
+        return endVs
+          ? `${book} ${ch}, ${words.many} ${vs} ${words.through} ${endVs}`
+          : `${book} ${ch}, ${words.one} ${vs}`;
+      }
       const chWord = numberToWordsEn(ch);
       const vsWord = numberToWordsEn(vs);
       if (endVs) {
@@ -90,7 +121,7 @@ export function normalizeScriptureForSpeech(text: string): string {
       }
       return `${book} ${chWord}, verse ${vsWord}`;
     })
-    .replace(/(\d+):(\d+)/g, (_m, ch, vs) => `${numberToWordsEn(ch)}, verse ${numberToWordsEn(vs)}`)
+    .replace(/(\d+):(\d+)/g, (_m, ch, vs) => (words ? `${ch}, ${words.one} ${vs}` : `${numberToWordsEn(ch)}, verse ${numberToWordsEn(vs)}`))
     // 5. Clean markdown and brackets
     .replace(/\*\*(.*?)\*\*/g, '$1')
     .replace(/\*(.*?)\*/g, '$1')
@@ -109,6 +140,158 @@ export function normalizeScriptureForSpeech(text: string): string {
     .replace(/\s+/g, ' ')
     .replace(/,\s*$/, '.')
     .trim();
+}
+
+/**
+ * Splits narration into sentence-sized pieces. Speaking one long utterance is
+ * unreliable: Chrome's online voices silently stop after ~15 seconds, and
+ * short pieces give natural breaths between sentences.
+ */
+export function splitForSpeech(text: string, maxLen = 160): { text: string; start: number }[] {
+  const pieces: { text: string; start: number }[] = [];
+  const sentenceRe = /[^.!?;:]+(?:[.!?;:]+["”’')\]]*|$)\s*/g;
+  const push = (start: number, end: number) => {
+    const raw = text.slice(start, end);
+    const lead = raw.length - raw.trimStart().length;
+    const trimmed = raw.trim();
+    if (trimmed) pieces.push({ text: trimmed, start: start + lead });
+  };
+
+  let chunkStart = -1;
+  let chunkEnd = -1;
+  let m: RegExpExecArray | null;
+  while ((m = sentenceRe.exec(text)) !== null) {
+    if (m[0].length === 0) { sentenceRe.lastIndex += 1; continue; }
+    const sStart = m.index;
+    const sEnd = m.index + m[0].length;
+
+    if (sEnd - sStart > maxLen) {
+      // Very long sentence: flush, then cut at commas or spaces.
+      if (chunkStart >= 0) push(chunkStart, chunkEnd);
+      chunkStart = -1;
+      let pos = sStart;
+      while (sEnd - pos > maxLen) {
+        const window = text.slice(pos, pos + maxLen);
+        let cut = Math.max(window.lastIndexOf(', '), window.lastIndexOf('; '));
+        if (cut < maxLen * 0.4) cut = window.lastIndexOf(' ');
+        if (cut <= 0) cut = maxLen;
+        push(pos, pos + cut + 1);
+        pos += cut + 1;
+      }
+      push(pos, sEnd);
+      continue;
+    }
+
+    if (chunkStart >= 0 && sEnd - chunkStart > maxLen) {
+      push(chunkStart, chunkEnd);
+      chunkStart = -1;
+    }
+    if (chunkStart < 0) chunkStart = sStart;
+    chunkEnd = sEnd;
+  }
+  if (chunkStart >= 0) push(chunkStart, chunkEnd);
+  return pieces;
+}
+
+/** Per-narrator delivery so each voice option sounds distinct even on the same device voice. */
+const PROFILE_DELIVERY: Record<NarratorProfile, { rate: number; pitch: number }> = {
+  cinematic: { rate: 0.93, pitch: 0.94 },
+  brotherhood: { rate: 1.0, pitch: 1.0 },
+  scholar: { rate: 0.95, pitch: 0.98 },
+  grace: { rate: 0.9, pitch: 1.03 },
+};
+
+/** Preferred voice names per narrator, best first (Edge/Windows, Google, Apple). */
+const PROFILE_VOICE_NAMES: Record<NarratorProfile, string[]> = {
+  cinematic: ['andrew', 'christopher', 'guy', 'brian', 'davis', 'tony', 'roger', 'steffan', 'evan', 'nathan', 'tom', 'alex', 'aaron', 'google uk english male', 'google us english'],
+  brotherhood: ['brian', 'guy', 'eric', 'andrew', 'jason', 'roger', 'evan', 'nathan', 'alex', 'aaron', 'google uk english male', 'google us english'],
+  scholar: ['ryan', 'thomas', 'oliver', 'arthur', 'george', 'daniel', 'google uk english male'],
+  grace: ['ava', 'emma', 'jenny', 'aria', 'michelle', 'sonia', 'libby', 'maisie', 'samantha', 'zoe', 'allison', 'susan', 'serena', 'karen', 'moira', 'google us english', 'google uk english female'],
+};
+
+const FEMALE_HINTS = ['ava', 'emma', 'jenny', 'aria', 'michelle', 'sonia', 'libby', 'maisie', 'samantha', 'zoe', 'allison', 'susan', 'serena', 'karen', 'moira', 'female', 'zira', 'hazel', 'ana', 'nicky', 'kate', 'tessa', 'fiona', 'victoria'];
+const MALE_HINTS = ['andrew', 'christopher', 'guy', 'brian', 'eric', 'davis', 'tony', 'roger', 'steffan', 'jason', 'evan', 'nathan', 'tom', 'alex', 'aaron', 'ryan', 'thomas', 'oliver', 'arthur', 'george', 'daniel', 'male', 'fred', 'david', 'mark', 'rishi', 'gordon', 'lee'];
+
+/** Novelty and very old voices that sound robotic. */
+const ROBOTIC_VOICES = [
+  'albert', 'bad news', 'bahh', 'bells', 'boing', 'bubbles', 'cellos', 'good news', 'jester', 'organ',
+  'superstar', 'trinoids', 'whisper', 'wobble', 'zarvox', 'junior', 'ralph', 'kathy', 'fred',
+  'grandma', 'grandpa', 'rocko', 'sandy', 'shelley', 'eddy', 'flo', 'reed',
+  'microsoft david', 'microsoft zira', 'microsoft mark', 'microsoft hazel', 'desktop', 'espeak',
+];
+
+const hasWord = (name: string, word: string) => new RegExp(`(^|[^a-z])${word}([^a-z]|$)`).test(name);
+
+/** How natural a device voice is likely to sound (higher is better). */
+export function voiceQualityScore(voice: Pick<SpeechSynthesisVoice, 'name' | 'localService'>): number {
+  const n = voice.name.toLowerCase();
+  if (ROBOTIC_VOICES.some((bad) => n.includes(bad))) return -100;
+  let score = 0;
+  if (n.includes('natural')) score += 40; // Edge / Windows 11 neural voices
+  if (n.includes('neural')) score += 35;
+  if (n.includes('premium')) score += 32; // Apple downloaded voices
+  if (n.includes('enhanced')) score += 26;
+  if (n.includes('online')) score += 10;
+  if (n.startsWith('google')) score += 18; // Chrome's network voices
+  if (n.includes('siri')) score += 14;
+  if (n.includes('compact')) score -= 10;
+  return score;
+}
+
+/** Picks the best-sounding installed voice for a narrator and language. */
+export function pickNarratorVoice(
+  voices: SpeechSynthesisVoice[],
+  profile: NarratorProfile,
+  langPrefix: string
+): SpeechSynthesisVoice | null {
+  if (voices.length === 0) return null;
+
+  const wantLang = langPrefix === 'es' || langPrefix === 'fr' ? langPrefix : 'en';
+  let pool = voices.filter((v) => v.lang.toLowerCase().replace('_', '-').startsWith(wantLang));
+  if (pool.length === 0) pool = voices;
+
+  const preferred = wantLang === 'en' ? PROFILE_VOICE_NAMES[profile] : [];
+  const wantsFemale = profile === 'grace';
+  const wantsUk = profile === 'scholar';
+
+  const score = (v: SpeechSynthesisVoice) => {
+    const n = v.name.toLowerCase();
+    const lang = v.lang.toLowerCase();
+    let s = voiceQualityScore(v);
+    const idx = preferred.findIndex((p) => (p.includes(' ') ? n.includes(p) : hasWord(n, p)));
+    if (idx >= 0) s += 20 - Math.min(idx, 12);
+    const female = FEMALE_HINTS.some((h) => hasWord(n, h));
+    const male = MALE_HINTS.some((h) => hasWord(n, h));
+    if (wantsFemale ? female : male) s += 8;
+    if (wantsFemale ? male : female) s -= 8;
+    if (wantLang === 'en') {
+      const uk = lang.includes('gb') || lang.includes('uk');
+      if (wantsUk) s += uk ? 10 : 0;
+      else if (lang.includes('us')) s += 4;
+    }
+    if (v.default) s += 1;
+    return s;
+  };
+
+  let best: SpeechSynthesisVoice | null = null;
+  let bestScore = -Infinity;
+  for (const v of pool) {
+    const s = score(v);
+    if (s > bestScore) { best = v; bestScore = s; }
+  }
+  return best;
+}
+
+/** Short, friendly form of a device voice name: "Microsoft Andrew Online (Natural) - English (United States)" -> "Andrew (Natural)". */
+export function friendlyVoiceName(name: string): string {
+  const natural = /natural|neural/i.test(name) ? ' (Natural)' : /premium/i.test(name) ? ' (Premium)' : /enhanced/i.test(name) ? ' (Enhanced)' : '';
+  const core = name
+    .replace(/^(Microsoft|Google|Apple)\s+/i, '')
+    .replace(/\s*-\s*.*$/, '')
+    .replace(/\s*\((?:Natural|Neural|Premium|Enhanced|Compact)\)/gi, '')
+    .replace(/\s+Online/i, '')
+    .trim();
+  return `${core || name}${natural}`;
 }
 
 const SOUND_PREF_KEY = 'testament_sound_enabled';
@@ -740,77 +923,44 @@ class SoundEngine {
   private getFallbackVoice(profile: NarratorProfile): SpeechSynthesisVoice | null {
     this.refreshVoices();
     const voices = this.cachedVoices.length > 0 ? this.cachedVoices : (typeof window !== 'undefined' ? window.speechSynthesis.getVoices() : []);
-    if (voices.length === 0) return null;
+    return pickNarratorVoice(voices, profile, currentSpeechLang());
+  }
 
-    const currentLang = (typeof document !== 'undefined' && document.documentElement?.lang) || 
-                        (typeof localStorage !== 'undefined' && localStorage.getItem('testament_language')) || 
-                        'en';
-    const langPrefix = currentLang.toLowerCase().slice(0, 2);
+  /** Name of the device voice a narrator will use (for Settings), or null if none is available yet. */
+  public getNarratorVoiceName(profile: NarratorProfile = this.currentNarratorProfile): string | null {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return null;
+    return this.getFallbackVoice(profile)?.name ?? null;
+  }
 
-    const naturalScore = (voice: SpeechSynthesisVoice): number => {
-      const n = voice.name.toLowerCase();
-      let score = 0;
-      if (n.includes('natural')) score += 6;
-      if (n.includes('neural')) score += 5;
-      if (n.includes('premium') || n.includes('enhanced')) score += 5;
-      if (n.includes('online')) score += 4;
-      if (n.includes('google')) score += 3;
-      if (n.includes('siri')) score += 2;
-      return score;
+  /** True when the device has at least one natural-sounding voice for the current language. */
+  public hasNaturalVoice(): boolean {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return false;
+    this.refreshVoices();
+    const lang = currentSpeechLang();
+    const want = lang === 'es' || lang === 'fr' ? lang : 'en';
+    return this.cachedVoices.some((v) => v.lang.toLowerCase().startsWith(want) && voiceQualityScore(v) >= 18);
+  }
+
+  /**
+   * Chrome loads its voice list asynchronously. Speaking before it arrives uses
+   * the robotic default voice, so wait briefly for the list when it is empty.
+   */
+  private whenVoicesReady(callback: () => void) {
+    this.refreshVoices();
+    if (this.cachedVoices.length > 0 || typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      callback();
+      return;
+    }
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      window.speechSynthesis.removeEventListener('voiceschanged', finish);
+      this.refreshVoices();
+      callback();
     };
-
-    const chooseVoice = (
-      pool: SpeechSynthesisVoice[],
-      preferredNames: string[]
-    ): SpeechSynthesisVoice | null => {
-      const ranked = [...pool].sort((a, b) => naturalScore(b) - naturalScore(a));
-      for (const name of preferredNames) {
-        const match = ranked.find(v => v.name.toLowerCase().includes(name));
-        if (match) return match;
-      }
-      return ranked[0] || null;
-    };
-
-    if (langPrefix === 'fr' || langPrefix === 'es') {
-      const localized = voices.filter(v => v.lang.toLowerCase().startsWith(langPrefix));
-      if (localized.length > 0) return chooseVoice(localized, []);
-    }
-
-    const enVoices = voices.filter(v => v.lang.toLowerCase().startsWith('en'));
-    const pool = enVoices.length > 0 ? enVoices : voices;
-
-    // Skip the old robotic desktop voices when anything better is available.
-    const nonRobotic = pool.filter(v => {
-      const n = v.name.toLowerCase();
-      return !n.includes('microsoft david') && !n.includes('microsoft zira') && !n.includes('microsoft mark') && !n.includes('desktop');
-    });
-    const activePool = nonRobotic.length > 0 ? nonRobotic : pool;
-
-    const maleNames = ['andrew', 'brian', 'guy', 'christopher', 'eric', 'ryan', 'alex', 'daniel', 'george', 'oliver'];
-    const femaleNames = ['aria', 'jenny', 'samantha', 'serena', 'karen', 'moira', 'ava', 'zoe', 'emma', 'olivia'];
-
-    if (profile === 'scholar') {
-      const ukPool = activePool.filter(v => {
-        const lang = v.lang.toLowerCase();
-        return lang.includes('gb') || lang.includes('uk');
-      });
-      const uk = chooseVoice(ukPool.length > 0 ? ukPool : activePool, maleNames);
-      if (uk) return uk;
-    }
-
-    if (profile === 'grace') {
-      return chooseVoice(activePool, femaleNames);
-    }
-
-    if (profile === 'cinematic') {
-      return chooseVoice(activePool, ['andrew', 'brian', 'christopher', 'guy', 'ryan', 'alex']);
-    }
-
-    if (profile === 'brotherhood') {
-      return chooseVoice(activePool, ['guy', 'andrew', 'brian', 'christopher', 'alex']);
-    }
-
-    return chooseVoice(activePool, maleNames);
+    window.speechSynthesis.addEventListener('voiceschanged', finish);
+    window.setTimeout(finish, 800);
   }
 
   // --- STUDIO AUDIO & ON-DEVICE VOICE NARRATION (NO NETWORK COST) ---
@@ -818,7 +968,7 @@ class SoundEngine {
   public speakVerse(text: string, onEnd?: () => void, audioAssetUrl?: string, narrationId?: string) {
     this.stopSpeaking();
     this.activeNarrationId = narrationId ?? null;
-    this.playCinematicSwell();
+    // No sound effect under the voice: a drone competes with speech and muddies it.
     this.duckAmbience();
 
     const handleFinished = () => {
@@ -828,7 +978,7 @@ class SoundEngine {
       if (onEnd) onEnd();
     };
 
-    this.playAssetOrSpeech(normalizeScriptureForSpeech(text), handleFinished, audioAssetUrl);
+    this.playAssetOrSpeech(normalizeScriptureForSpeech(text, currentSpeechLang()), handleFinished, audioAssetUrl);
   }
 
   /**
@@ -1044,19 +1194,25 @@ class SoundEngine {
       return;
     }
 
-    const currentLang = (typeof document !== 'undefined' && document.documentElement?.lang) ||
-                        (typeof localStorage !== 'undefined' && localStorage.getItem('testament_language')) ||
-                        'en';
+    const langPrefix = currentSpeechLang();
+    const profile = this.currentNarratorProfile;
+    const delivery = PROFILE_DELIVERY[profile] ?? PROFILE_DELIVERY.brotherhood;
+    const generation = this.speechGeneration;
 
-    this.speakSpeechFrom(0, {
-      fullText: text,
-      elapsedMs: 0,
-      durationSec: Math.max(10, text.length / SPEECH_CHARS_PER_SECOND),
-      onFinished,
-      voice: this.getFallbackVoice(this.currentNarratorProfile),
-      lang: currentLang === 'fr' ? 'fr-FR' : currentLang === 'es' ? 'es-ES' : 'en-US',
-      pitch: 1.0,
-      rate: 1.0,
+    this.whenVoicesReady(() => {
+      // Stopped or replaced while waiting for the voice list.
+      if (this.speechGeneration !== generation) return;
+      const voice = this.getFallbackVoice(profile);
+      this.speakSpeechFrom(0, {
+        fullText: text,
+        elapsedMs: 0,
+        durationSec: Math.max(10, text.length / (SPEECH_CHARS_PER_SECOND * delivery.rate)),
+        onFinished,
+        voice,
+        lang: voice?.lang || (langPrefix === 'fr' ? 'fr-FR' : langPrefix === 'es' ? 'es-ES' : 'en-US'),
+        pitch: delivery.pitch,
+        rate: delivery.rate,
+      });
     });
   }
 
@@ -1064,6 +1220,7 @@ class SoundEngine {
    * Speaks from a character offset. Pausing cancels speech and resuming starts a
    * fresh utterance at the last word boundary, which works on browsers where
    * `speechSynthesis.pause()/resume()` is unreliable (notably mobile Safari).
+   * Text is spoken sentence by sentence (see `splitForSpeech`).
    */
   private speakSpeechFrom(
     charIndex: number,
@@ -1086,8 +1243,9 @@ class SoundEngine {
     let start = Math.max(0, Math.min(params.fullText.length, charIndex));
     while (start < params.fullText.length && /\s/.test(params.fullText[start])) start += 1;
     const segment = params.fullText.slice(start);
+    const pieces = splitForSpeech(segment);
 
-    if (!segment.trim()) {
+    if (!segment.trim() || pieces.length === 0) {
       this.setPlaybackState('idle');
       params.onFinished();
       return;
@@ -1097,15 +1255,11 @@ class SoundEngine {
       const generation = ++this.speechGeneration;
       try {
         window.speechSynthesis.cancel();
+        // Chrome can get stuck in a paused state after cancel; make sure it is running.
+        window.speechSynthesis.resume();
       } catch {
         /* ignore */
       }
-
-      const utterance = new SpeechSynthesisUtterance(segment);
-      utterance.lang = params.lang;
-      utterance.pitch = params.pitch;
-      utterance.rate = params.rate;
-      if (params.voice) utterance.voice = params.voice;
 
       this.speechSession = {
         generation,
@@ -1143,21 +1297,47 @@ class SoundEngine {
         params.onFinished();
       };
 
-      utterance.onboundary = (event: SpeechSynthesisEvent) => {
-        const session = this.speechSession;
-        if (!session || session.generation !== generation) return;
-        if (typeof event.charIndex === 'number') {
-          session.boundaryChar = session.offsetChars + event.charIndex;
-          this.emitSpeechProgress();
+      const speakPiece = (index: number) => {
+        if (this.speechGeneration !== generation) return;
+        if (index >= pieces.length) {
+          finish('idle');
+          return;
         }
+        const piece = pieces[index];
+        const pieceStart = start + piece.start;
+        const session = this.speechSession;
+        if (session && session.generation === generation) session.boundaryChar = pieceStart;
+
+        const utterance = new SpeechSynthesisUtterance(piece.text);
+        utterance.lang = params.lang;
+        utterance.pitch = params.pitch;
+        utterance.rate = params.rate;
+        if (params.voice) utterance.voice = params.voice;
+
+        utterance.onboundary = (event: SpeechSynthesisEvent) => {
+          const current = this.speechSession;
+          if (!current || current.generation !== generation) return;
+          if (typeof event.charIndex === 'number') {
+            current.boundaryChar = pieceStart + event.charIndex;
+            this.emitSpeechProgress();
+          }
+        };
+        utterance.onend = () => speakPiece(index + 1);
+        utterance.onerror = (event: SpeechSynthesisErrorEvent) => {
+          // "interrupted"/"canceled" come from our own cancel(); the generation check ignores them.
+          if (event.error === 'interrupted' || event.error === 'canceled') {
+            if (this.speechGeneration === generation) speakPiece(index + 1);
+            return;
+          }
+          finish('error', 'Device voice unavailable');
+        };
+        window.speechSynthesis.speak(utterance);
       };
-      utterance.onend = () => finish('idle');
-      utterance.onerror = () => finish('error', 'Device voice unavailable');
 
       this.setPlaybackState('playing');
       this.startProgressTicker();
       this.emitSpeechProgress();
-      window.speechSynthesis.speak(utterance);
+      speakPiece(0);
     } catch {
       this.speechSession = null;
       this.stopProgressTicker();

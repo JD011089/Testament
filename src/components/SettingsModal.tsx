@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { useFontSize, FONT_SCALE_STEPS, type FontScaleStep } from '../context/FontSizeContext';
 import { useLanguage, type Language } from '../context/LanguageContext';
-import { soundEngine, NARRATOR_VOICES, type NarratorProfile } from '../utils/audio';
+import { soundEngine, NARRATOR_VOICES, friendlyVoiceName, type NarratorProfile } from '../utils/audio';
 import { getStoredTheme, applyTheme, type AppTheme } from '../utils/theme';
 import { loadReadingPlace, saveReadingPlace } from '../utils/readingPlace';
 import { BIBLE_TRANSLATIONS, getDefaultTranslationForLanguage, type TranslationId } from '../utils/bibleService';
@@ -222,6 +222,26 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
     const place = loadReadingPlace();
     return place?.translation || 'web';
   });
+
+  // Device voice behind each narrator. The voice list can load late, so refresh when the sheet opens.
+  const [voiceNames, setVoiceNames] = useState<Partial<Record<NarratorProfile, string>>>({});
+  const [naturalVoice, setNaturalVoice] = useState(true);
+  useEffect(() => {
+    if (sheet !== 'voice') return;
+    const read = () => {
+      const names: Partial<Record<NarratorProfile, string>> = {};
+      (Object.keys(NARRATOR_VOICES) as NarratorProfile[]).forEach((p) => {
+        const n = soundEngine.getNarratorVoiceName(p);
+        if (n) names[p] = friendlyVoiceName(n);
+      });
+      setVoiceNames(names);
+      setNaturalVoice(soundEngine.hasNaturalVoice() || Object.keys(names).length === 0);
+    };
+    read();
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    window.speechSynthesis.addEventListener('voiceschanged', read);
+    return () => window.speechSynthesis.removeEventListener('voiceschanged', read);
+  }, [sheet, language]);
 
   const stats = useMemo(() => {
     let stories = 0;
@@ -611,7 +631,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 serif
                 selected={currentVoice === vKey}
                 title={meta.name}
-                hint={meta.subtitle}
+                hint={voiceNames[vKey] ? `${meta.subtitle} · ${voiceNames[vKey]}` : meta.subtitle}
                 onSelect={() => selectVoice(vKey)}
                 leading={
                   <button
@@ -626,9 +646,15 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
               />
             );
           })}
-          <p className="text-xs leading-5 text-fg-muted pt-2">
-            Narration uses the most natural voice installed on your device. For the best sound, use Microsoft Edge, Safari, or your phone's browser.
-          </p>
+          {naturalVoice ? (
+            <p className="text-xs leading-5 text-fg-muted pt-2">
+              Narration uses the most natural voice installed on your device.
+            </p>
+          ) : (
+            <p className="text-xs leading-5 text-fg-secondary pt-2 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-line px-3 py-2">
+              This device only has basic voices, so narration may sound robotic. For a natural voice, open Testament in Microsoft Edge, or on iPhone go to Settings › Accessibility › Spoken Content › Voices and download an Enhanced or Premium voice.
+            </p>
+          )}
         </Sheet>
       )}
 
