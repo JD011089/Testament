@@ -143,7 +143,7 @@ export function TodayScreen({
     return `${before ? '…' : ''}${phrase}${after ? '…' : ''}`;
   })();
 
-  const dateLabel = new Date().toLocaleDateString(language, { weekday: 'long', month: 'short', day: 'numeric' });
+  const dateLabel = new Date().toLocaleDateString(language, { weekday: 'short', month: 'short', day: 'numeric' });
   const dayInitial = (date: Date) => date.toLocaleDateString(language, { weekday: 'narrow' });
   const hour = new Date().getHours();
   const timeOfDay: 'morning' | 'day' | 'evening' = hour < 11 ? 'morning' : hour >= 18 ? 'evening' : 'day';
@@ -191,16 +191,12 @@ export function TodayScreen({
         }`}
       />
 
-      {/* Header: date, greeting, streak + profile */}
-      <header className="flex items-end justify-between gap-3 px-1">
-        <div className="min-w-0">
-          <p className="text-[10.5px] font-bold uppercase tracking-[0.14em] text-fg-muted">{dateLabel}</p>
-          <h1 className="mt-0.5 whitespace-nowrap font-serif text-[1.65rem] font-semibold leading-tight text-fg">
-            <span className="sr-only">{t('today.title')}: </span>
-            {t(greetingKey())}
-          </h1>
-        </div>
-        <div className="flex shrink-0 items-center gap-2 pb-0.5 xl:hidden">
+      {/* Header: date with streak + profile on one row, greeting on its own line
+          so large text or narrow phones can never push them into each other. */}
+      <header className="px-1">
+        <div className="flex min-h-9 items-center justify-between gap-3">
+          <p className="min-w-0 truncate text-[10.5px] font-bold uppercase tracking-[0.14em] text-fg-muted">{dateLabel}</p>
+        <div className="flex shrink-0 items-center gap-2 xl:hidden">
           <span className="inline-flex h-9 items-center gap-1 whitespace-nowrap rounded-full border border-line bg-surface-raised px-3 text-xs font-bold text-secondary-text">
             <Flame className={`h-4 w-4 ${streakCount > 0 ? 'fill-current' : ''}`} aria-hidden="true" /> {streakCount > 0 ? streakCount : 'New'}
           </span>
@@ -213,6 +209,11 @@ export function TodayScreen({
             <UserRound className="h-[18px] w-[18px]" />
           </button>
         </div>
+        </div>
+        <h1 className="mt-0.5 font-serif text-[1.65rem] font-semibold leading-tight text-fg">
+          <span className="sr-only">{t('today.title')}: </span>
+          {t(greetingKey())}
+        </h1>
       </header>
 
       {/* This week */}
@@ -236,7 +237,9 @@ export function TodayScreen({
       </div>
 
       {/* Today's story: full-bleed art with everything on it */}
-      <section className="relative mt-4 h-[clamp(17rem,42vh,24rem)] overflow-hidden rounded-[1.6rem] shadow-[0_18px_40px_-16px_rgba(10,15,30,0.55)]">
+      {/* Chips and text sit in normal flow (not pinned), so at large text sizes the
+          card grows taller instead of stacking text on top of itself. */}
+      <section className="relative mt-4 flex min-h-[clamp(17rem,42vh,24rem)] flex-col justify-between overflow-hidden rounded-[1.6rem] shadow-[0_18px_40px_-16px_rgba(10,15,30,0.55)]">
         <img
           src={scene}
           alt=""
@@ -246,8 +249,8 @@ export function TodayScreen({
           fetchPriority="high"
         />
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.35)_0%,transparent_26%,transparent_40%,rgba(8,8,14,0.92)_100%)]" aria-hidden="true" />
-        <div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2">
-          <span className="rounded-full border border-white/25 bg-white/15 px-3 py-1.5 text-[11px] font-bold text-white backdrop-blur-md">
+        <div className="relative flex items-start justify-between gap-2 p-3">
+          <span className="min-w-0 truncate whitespace-nowrap rounded-full border border-white/25 bg-white/15 px-3 py-1.5 text-[11px] font-bold text-white backdrop-blur-md">
             {story.passage} · {t('today.duration', { minutes: story.estMinutes })}
           </span>
           {done ? (
@@ -259,13 +262,13 @@ export function TodayScreen({
               type="button"
               onClick={() => startStory(true)}
               aria-label={t('today.listenAria')}
-              className="inline-flex !min-h-8 h-8 items-center gap-1.5 rounded-full border border-white/25 bg-white/15 px-3 text-[11px] font-bold text-white backdrop-blur-md transition hover:bg-white/25 active:scale-95"
+              className="inline-flex !min-h-8 h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-white/25 bg-white/15 px-3 text-[11px] font-bold text-white backdrop-blur-md transition hover:bg-white/25 active:scale-95"
             >
               <Headphones className="h-3.5 w-3.5" aria-hidden="true" /> {t('today.listen')}
             </button>
           )}
         </div>
-        <div className="absolute inset-x-4 bottom-4 text-white">
+        <div className="relative px-4 pb-4 pt-10 text-white">
           <p className="font-display text-[10px] font-bold uppercase tracking-[0.16em] text-[#E8C070]">
             {t('today.storyEyebrow')} · {story.arc}
           </p>
@@ -317,7 +320,7 @@ export function TodayScreen({
         <button
           type="button"
           onClick={startReview}
-          className="relative flex flex-col items-start gap-2 rounded-[1.1rem] border border-line bg-surface-raised p-3 text-left shadow-sm transition hover:border-accent/60 active:scale-[0.98]"
+          className="relative flex min-w-0 flex-col items-start gap-2 overflow-hidden rounded-[1.1rem] border border-line bg-surface-raised p-3 text-left shadow-sm transition hover:border-accent/60 active:scale-[0.98]"
         >
           <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-amber-100 text-accent-text dark:bg-amber-500/15">
             <RefreshCw className="h-4 w-4" aria-hidden="true" />
@@ -337,7 +340,7 @@ export function TodayScreen({
           <button
             type="button"
             onClick={() => { celebrate('tap'); onContinueReading(); }}
-            className="flex flex-col items-start gap-2 rounded-[1.1rem] border border-line bg-surface-raised p-3 text-left shadow-sm transition hover:border-accent/60 active:scale-[0.98]"
+            className="flex min-w-0 flex-col items-start gap-2 overflow-hidden rounded-[1.1rem] border border-line bg-surface-raised p-3 text-left shadow-sm transition hover:border-accent/60 active:scale-[0.98]"
           >
             <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-amber-100 text-accent-text dark:bg-amber-500/15">
               <BookOpen className="h-4 w-4" aria-hidden="true" />

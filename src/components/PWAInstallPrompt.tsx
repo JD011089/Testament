@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, X, Smartphone, Monitor, CheckCircle2, ArrowUpRight } from 'lucide-react';
+import { Download, X, Smartphone, Monitor, CheckCircle2, Share, SquarePlus } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
 import { useModalLock } from '../utils/useModalLock';
 import { useLanguage } from '../context/LanguageContext';
@@ -29,11 +29,16 @@ export const PWAInstallPrompt: React.FC = () => {
   const [isInstalled, setIsInstalled] = useState<boolean>(() => checkIsPWAInstalled());
   const [isIOS] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
-    return /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+    const ua = window.navigator.userAgent.toLowerCase();
+    // iPadOS reports itself as a Mac; touch support gives it away.
+    return /iphone|ipad|ipod/.test(ua) || (/macintosh/.test(ua) && window.navigator.maxTouchPoints > 1);
   });
   const [isModalMode, setIsModalMode] = useState(false);
   const pwaModalRef = useModalLock(isVisible && isModalMode);
-  const [installState, setInstallState] = useState<'ready' | 'prompted' | 'manual_needed'>('ready');
+  const [installState, setInstallState] = useState<'ready' | 'prompted' | 'ask' | 'manual_needed'>('ready');
+  // Answer to "Do you have an iPhone or iPad?" (null until asked).
+  const [hasIphone, setHasIphone] = useState<boolean | null>(null);
+  const showIphoneSteps = hasIphone ?? isIOS;
 
   const [isDismissed, setIsDismissed] = useState<boolean>(() => {
     try {
@@ -151,8 +156,8 @@ export const PWAInstallPrompt: React.FC = () => {
       }
     }
 
-    // If deferredPrompt is not available (Safari iOS, or desktop browser requiring manual address-bar click)
-    setInstallState('manual_needed');
+    // No one-tap install here (iPhone/iPad, or a browser that needs the menu): ask which device.
+    setInstallState('ask');
   };
 
   const handleMarkAlreadyInstalled = () => {
@@ -259,24 +264,85 @@ export const PWAInstallPrompt: React.FC = () => {
           onClick={handleInstallClick}
           className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-accent-on font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 transition-all shadow-glow cursor-pointer active:scale-[0.98]"
         >
-          <Download className="w-5 h-5 text-stone-950 stroke-[2.5]" />
+          <Download className="w-5 h-5 stroke-[2.5]" />
           <span>{t('pwa.installBtn')}</span>
         </button>
 
-        {/* If deferredPrompt not immediately available, show clear visual instructions */}
+        {installState === 'ready' && (
+          <button
+            type="button"
+            onClick={() => { soundEngine.playClick(); setHasIphone(true); setInstallState('manual_needed'); }}
+            className="w-full min-h-[40px] text-xs font-semibold text-accent-text underline underline-offset-2 flex items-center justify-center gap-1.5"
+          >
+            <Smartphone className="w-4 h-4" aria-hidden="true" />
+            <span>{t('pwa.haveIphone')}</span>
+          </button>
+        )}
+
+        {/* No one-tap install: ask which device, then show the right steps */}
+        {installState === 'ask' && (
+          <div className="mt-2 p-3.5 rounded-xl bg-stone-50 dark:bg-stone-900/90 border border-line space-y-2.5 animate-fadeIn">
+            <p className="text-sm font-bold text-fg">{t('pwa.askIphone')}</p>
+            <div className="grid gap-2">
+              <button
+                type="button"
+                onClick={() => { soundEngine.playClick(); setHasIphone(true); setInstallState('manual_needed'); }}
+                className={`min-h-[44px] rounded-xl px-3 text-sm font-bold flex items-center justify-center gap-2 ${
+                  isIOS ? 'bg-accent text-accent-on' : 'border border-line text-fg bg-surface-raised'
+                }`}
+              >
+                <Smartphone className="w-4 h-4" aria-hidden="true" /> {t('pwa.yesIphone')}
+              </button>
+              <button
+                type="button"
+                onClick={() => { soundEngine.playClick(); setHasIphone(false); setInstallState('manual_needed'); }}
+                className={`min-h-[44px] rounded-xl px-3 text-sm font-bold flex items-center justify-center gap-2 ${
+                  isIOS ? 'border border-line text-fg bg-surface-raised' : 'bg-accent text-accent-on'
+                }`}
+              >
+                <Monitor className="w-4 h-4" aria-hidden="true" /> {t('pwa.noIphone')}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step-by-step instructions for the chosen device */}
         {installState === 'manual_needed' && (
           <div className="mt-3 p-3.5 rounded-xl bg-stone-50 dark:bg-stone-900/90 border border-amber-500/40 text-xs text-stone-700 dark:text-stone-200 space-y-2 animate-fadeIn">
-            {isIOS ? (
+            {showIphoneSteps ? (
               <>
-                <div className="text-amber-800 dark:text-amber-400 font-bold flex items-center gap-1.5 text-xs">
-                  <Smartphone className="w-4 h-4 text-amber-800 dark:text-amber-400" />
+                <div className="text-accent-text font-bold flex items-center gap-1.5 text-xs">
+                  <Smartphone className="w-4 h-4" aria-hidden="true" />
                   <span>{t('pwa.installOnIphone')}</span>
                 </div>
-                <div className="text-stone-600 dark:text-stone-300 space-y-1 pl-1 text-[11px] leading-relaxed">
-                  <p>{t('pwa.iphoneStep1')} (square with up arrow <ArrowUpRight className="w-3 h-3 inline" />).</p>
-                  <p>{t('pwa.iphoneStep2')}</p>
-                  <p>{t('pwa.iphoneStep3')}</p>
-                </div>
+                <ol className="space-y-2.5 pt-1">
+                  {([
+                    ['pwa.ios1', 'pwa.ios1Hint'],
+                    ['pwa.ios2', 'pwa.ios2Hint'],
+                    ['pwa.ios3', null],
+                    ['pwa.ios4', 'pwa.ios4Hint'],
+                    ['pwa.ios5', 'pwa.ios5Hint'],
+                  ] as const).map(([step, hint], i) => (
+                    <li key={step} className="flex gap-2.5">
+                      <span className="w-6 h-6 shrink-0 rounded-full bg-accent text-accent-on text-[11px] font-bold flex items-center justify-center">{i + 1}</span>
+                      <span className="min-w-0 pt-0.5">
+                        <span className="flex items-center gap-1.5 text-[13px] font-semibold text-fg">
+                          {t(step)}
+                          {step === 'pwa.ios2' && <Share className="w-4 h-4 shrink-0 text-accent-text" aria-hidden="true" />}
+                          {step === 'pwa.ios3' && <SquarePlus className="w-4 h-4 shrink-0 text-accent-text" aria-hidden="true" />}
+                        </span>
+                        {hint && <span className="block text-[11px] leading-snug text-fg-muted mt-0.5">{t(hint)}</span>}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+                <button
+                  type="button"
+                  onClick={() => setInstallState('ask')}
+                  className="min-h-0 text-[11px] text-fg-muted underline underline-offset-2"
+                >
+                  {t('pwa.back')}
+                </button>
               </>
             ) : (
               <>
@@ -311,10 +377,10 @@ export const PWAInstallPrompt: React.FC = () => {
       {/* Footer / Dismiss */}
       <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-stone-200 dark:border-stone-800/80 text-xs text-stone-500 dark:text-stone-400">
         <button
-          onClick={() => setInstallState(installState === 'manual_needed' ? 'ready' : 'manual_needed')}
+          onClick={() => setInstallState(installState === 'ready' ? 'ask' : 'ready')}
           className="text-amber-800 dark:text-amber-400/90 hover:text-amber-800 dark:hover:text-amber-300 underline text-[11px]"
         >
-          {installState === 'manual_needed' ? t('pwa.hideTips') : t('pwa.needHelp')}
+          {installState === 'ready' ? t('pwa.needHelp') : t('pwa.hideTips')}
         </button>
 
         <div className="flex items-center gap-2">
@@ -349,7 +415,7 @@ export const PWAInstallPrompt: React.FC = () => {
         <div 
           ref={pwaModalRef}
           tabIndex={-1}
-          className="max-w-md w-full animate-scaleUp focus:outline-none" 
+          className="max-w-md w-full max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-3xl animate-scaleUp focus:outline-none" 
           onClick={e => e.stopPropagation()}
         >
           {cardContent}
@@ -360,7 +426,7 @@ export const PWAInstallPrompt: React.FC = () => {
 
   // Floating banner mode (positioned cleanly above bottom nav bar)
   return (
-    <div className="fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] left-4 right-4 md:left-auto md:right-6 md:bottom-6 md:w-96 z-50 animate-bounce-short">
+    <div className="fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] left-4 right-4 md:left-auto md:right-6 md:bottom-6 md:w-96 z-50 animate-bounce-short max-h-[calc(100dvh-8.5rem)] overflow-y-auto overscroll-contain rounded-2xl">
       {cardContent}
     </div>
   );
