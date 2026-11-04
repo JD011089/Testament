@@ -311,6 +311,17 @@ class SoundEngine {
       : 'cinematic'
   );
   private currentAudioElement: HTMLAudioElement | null = null;
+  /** Listener-chosen speed (Bible read-along), applied on top of each narrator's pace. */
+  private rateMultiplier = 1;
+
+  public setRateMultiplier(multiplier: number) {
+    this.rateMultiplier = Math.min(1.6, Math.max(0.7, multiplier));
+    if (this.currentAudioElement) this.currentAudioElement.playbackRate = this.rateMultiplier;
+  }
+
+  public getRateMultiplier(): number {
+    return this.rateMultiplier;
+  }
   private cachedVoices: SpeechSynthesisVoice[] = [];
   private currentPlaybackState: VoicePlaybackState = 'idle';
   /** Identifies the narration currently loaded so pause/resume cannot cross-wire different clips. */
@@ -1136,6 +1147,7 @@ class SoundEngine {
     if (audioAssetUrl && (isNarrationClip || isJourneyClip)) {
       try {
         const audio = new Audio(audioAssetUrl);
+        audio.playbackRate = this.rateMultiplier;
         this.currentAudioElement = audio;
         audio.onloadedmetadata = () => this.emitAudioProgress(audio);
         audio.ontimeupdate = () => this.emitAudioProgress(audio);
@@ -1209,12 +1221,12 @@ class SoundEngine {
       this.speakSpeechFrom(0, {
         fullText: text,
         elapsedMs: 0,
-        durationSec: Math.max(10, text.length / (SPEECH_CHARS_PER_SECOND * delivery.rate)),
+        durationSec: Math.max(10, text.length / (SPEECH_CHARS_PER_SECOND * delivery.rate * this.rateMultiplier)),
         onFinished,
         voice,
         lang: voice?.lang || (langPrefix === 'fr' ? 'fr-FR' : langPrefix === 'es' ? 'es-ES' : 'en-US'),
         pitch: delivery.pitch,
-        rate: delivery.rate,
+        rate: delivery.rate * this.rateMultiplier,
       });
     });
   }

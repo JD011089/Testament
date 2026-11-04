@@ -724,3 +724,14 @@
   from { transform: translateY(24px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
+
+/* Bible reader "sepia" page: warm paper, brown ink. */
+.reader-sepia {
+  --color-surface: 244 236 216;
+  --color-surface-raised: 250 244 230;
+  --color-border: 226 212 184;
+  --color-border-strong: 205 188 156;
+  --color-text-primary: 59 47 37;
+  --color-text-secondary: 91 70 54;
+  --color-text-muted: 120 98 78;
+}

@@ -183,7 +183,7 @@ export function App() {
 
   const [unlockedRelics, setUnlockedRelics] = useState<string[]>(() => readStringArray('testament_unlocked_relics'));
 
-  const [bookmarkedVerses, setBookmarkedVerses] = useState<string[]>(() => readStringArray('testament_bookmarked_verses'));
+  const [, setBookmarkedVerses] = useState<string[]>(() => readStringArray('testament_bookmarked_verses'));
 
   const [xp, setXp] = useState<number>(() => {
     return Number(localStorage.getItem('testament_xp')) || 0;
@@ -776,12 +776,6 @@ export function App() {
     persistNumber('testament_xp', newXp);
   };
 
-  const handleSaveBookmark = (verseId: string) => {
-    if (bookmarkedVerses.includes(verseId)) return false;
-    setBookmarkedVerses(addBookmark(verseId));
-    return true;
-  };
-
   const handleCompleteOnboarding = (
     profile: UserCalibrationProfile, 
     startRecommendedQuest?: boolean
@@ -1038,12 +1032,6 @@ export function App() {
             {currentTab === 'library' && (
               <Suspense fallback={<ViewFallback />}>
               <CanonLibraryPage 
-                onBackToDashboard={() => {
-                  soundEngine.playClick();
-                  // Mobile nav has Today, not Dashboard — avoid dumping users on the old home chrome.
-                  setCurrentTab('today');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
                 onOpenWordForge={(verseId) => {
                   soundEngine.stopSpeaking();
                   setPracticeEntry('memorize');
@@ -1051,13 +1039,10 @@ export function App() {
                   setCurrentTab('wordforge');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                onSetMemoryVerse={(verseId) => {
-                  setActiveMemoryVerse(verseId);
-                }}
                 onSelectStoryQuest={(questId) => {
                   handleSelectQuestById(questId);
                 }}
-                onSaveBookmark={handleSaveBookmark}
+                onPlayStory={handlePlayStory}
                 onOpenDilemma={(dilemmaId) => {
                   soundEngine.stopSpeaking();
                   setTargetDilemmaId(dilemmaId);

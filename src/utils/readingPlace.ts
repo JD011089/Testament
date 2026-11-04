@@ -12,9 +12,13 @@ export interface ReadingPlace {
   translation: TranslationId;
 }
 
+export type ReadingPage = 'app' | 'sepia' | 'dark';
+
 export interface ReadingPrefs {
   fontSize: ReadingFontSize;
   layout: ReadingLayout;
+  showVerseNumbers: boolean;
+  page: ReadingPage;
 }
 
 interface StoredReading {
@@ -22,8 +26,13 @@ interface StoredReading {
   visited: Record<string, number>;
   fontSize: ReadingFontSize;
   layout: ReadingLayout;
+  /** True once the reader picked a layout themselves; until then paragraphs are the default. */
+  layoutChosen?: boolean;
+  showVerseNumbers?: boolean;
+  page?: ReadingPage;
 }
 
+const PAGES: ReadingPage[] = ['app', 'sepia', 'dark'];
 const FONT_SIZES: ReadingFontSize[] = ['sm', 'base', 'lg', 'xl'];
 const LAYOUTS: ReadingLayout[] = ['verses', 'flow'];
 const TRANSLATIONS: TranslationId[] = ['web', 'kjv', 'bbe', 'rvr', 'rv2004', 'ls1910', 'bds', 'valera', 'rv1960', 'lsg', 'frlsg'];
@@ -41,7 +50,7 @@ function isTranslation(value: unknown): value is TranslationId {
 }
 
 function emptyStore(): StoredReading {
-  return { place: null, visited: {}, fontSize: 'base', layout: 'verses' };
+  return { place: null, visited: {}, fontSize: 'base', layout: 'flow' };
 }
 
 function read(): StoredReading {
@@ -67,7 +76,10 @@ function read(): StoredReading {
       place: validPlace,
       visited,
       fontSize: isFontSize(parsed.fontSize) ? parsed.fontSize : 'base',
-      layout: isLayout(parsed.layout) ? parsed.layout : 'verses',
+      layout: parsed.layoutChosen && isLayout(parsed.layout) ? parsed.layout : 'flow',
+      layoutChosen: parsed.layoutChosen === true,
+      showVerseNumbers: parsed.showVerseNumbers !== false,
+      page: PAGES.includes(parsed.page as ReadingPage) ? parsed.page : 'app',
     };
   } catch {
     return emptyStore();
@@ -93,7 +105,12 @@ export function loadVisitedChapters(): Record<string, number> {
 
 export function loadReadingPrefs(): ReadingPrefs {
   const stored = read();
-  return { fontSize: stored.fontSize, layout: stored.layout };
+  return {
+    fontSize: stored.fontSize,
+    layout: stored.layout,
+    showVerseNumbers: stored.showVerseNumbers !== false,
+    page: stored.page ?? 'app',
+  };
 }
 
 export function saveReadingPlace(place: ReadingPlace) {
@@ -111,5 +128,8 @@ export function saveReadingPrefs(prefs: Partial<ReadingPrefs>) {
     ...stored,
     fontSize: prefs.fontSize ?? stored.fontSize,
     layout: prefs.layout ?? stored.layout,
+    layoutChosen: prefs.layout ? true : stored.layoutChosen,
+    showVerseNumbers: prefs.showVerseNumbers ?? stored.showVerseNumbers,
+    page: prefs.page ?? stored.page,
   });
 }
