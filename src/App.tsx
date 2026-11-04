@@ -927,6 +927,21 @@ export function App() {
                   onOpenMap={() => setCurrentTab('map')}
                   onOpenDeck={() => setCurrentTab('deck')}
                   onReadChapter={handleReadChapterFromStory}
+                  onPracticeVerse={handlePracticeVerseFromArsenal}
+                  onContinueReading={() => {
+                    const place = loadReadingPlace();
+                    soundEngine.stopSpeaking();
+                    if (place) {
+                      setLibraryPassage({
+                        book: place.bookName,
+                        chapter: place.chapter,
+                        verseStart: 0,
+                        verseEnd: 0,
+                      });
+                    }
+                    setCurrentTab('library');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
                 />
               </Suspense>
             )}

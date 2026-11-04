@@ -675,3 +675,16 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Metallic seals for Deck card tiers (bronze / silver / gold). */
+@layer components {
+  .foil-gold {
+    background: linear-gradient(135deg, #7a5418, #f6dc9c 30%, #b88433 52%, #fbe7b5 70%, #8a6120);
+  }
+  .foil-silver {
+    background: linear-gradient(135deg, #6b7280, #eef1f5 32%, #9aa3ae 55%, #f7f8fa 72%, #6b7280);
+  }
+  .foil-bronze {
+    background: linear-gradient(135deg, #6b3d1c, #e2a873 34%, #9a5b2c 55%, #f0c08f 72%, #6b3d1c);
+  }
+}
