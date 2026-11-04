@@ -244,5 +244,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     }
   }
 
+  // One line per run so delivery can be checked in the Vercel logs.
+  console.log(`push-dispatch checked=${rows.length} sent=${sent} failed=${failed} removed=${removed}`);
   res.status(200).json({ ok: true, checked: rows.length, sent, failed, removed });
 }

@@ -28,11 +28,24 @@ export function NotificationSettingsModal({ onClose }: NotificationSettingsModal
   const [permission, setPermission] = useState<NotificationPermissionState>(() => getNotificationPermission());
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  // Whether this device is registered for server push (reminders with the app closed).
+  const [pushReady, setPushReady] = useState<boolean | null>(null);
+  // iPhone/iPad Safari only supports push for apps added to the Home Screen.
+  const [iosNeedsInstall] = useState(() => {
+    const ua = navigator.userAgent.toLowerCase();
+    const ios = /iphone|ipad|ipod/.test(ua) || (/macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    const standalone = window.matchMedia('(display-mode: standalone)').matches
+      || (navigator as unknown as { standalone?: boolean }).standalone === true;
+    return ios && !standalone;
+  });
 
   useEffect(() => {
     setPrefs(getNotificationPrefs());
     setPermission(getNotificationPermission());
     setToast(null);
+    if (getNotificationPermission() === 'granted') {
+      void syncPushSubscription().then(setPushReady);
+    }
   }, []);
 
   const showToast = (message: string) => {
@@ -60,7 +73,7 @@ export function NotificationSettingsModal({ onClose }: NotificationSettingsModal
         });
         setPrefs(next);
         // Register push while the permission click is still the active gesture.
-        await syncPushSubscription(next, true);
+        setPushReady(await syncPushSubscription(next, true));
         await rescheduleNotificationAlarms(next);
         showToast(t('notifications.enabled'));
       } else if (result === 'denied') {
@@ -97,11 +110,16 @@ export function NotificationSettingsModal({ onClose }: NotificationSettingsModal
       }
       if (getNotificationPermission() === 'granted') {
         // A test tap is also a chance to (re)register push if it was missed.
-        await syncPushSubscription(getNotificationPrefs(), true);
+        setPushReady(await syncPushSubscription(getNotificationPrefs(), true));
       }
       const pushed = await sendTestPush();
-      const ok = pushed || await sendTestDeviceNotification();
-      showToast(ok ? t('notifications.testSent') : t('notifications.testFailed'));
+      if (pushed) {
+        showToast(t('notifications.testSent'));
+        return;
+      }
+      // Only a local notification worked: say so, so nobody assumes closed-app reminders work.
+      const local = await sendTestDeviceNotification();
+      showToast(local ? t('notifications.testLocalOnly') : t('notifications.testFailed'));
     } finally {
       setBusy(false);
     }
@@ -178,6 +196,25 @@ export function NotificationSettingsModal({ onClose }: NotificationSettingsModal
           <p className="text-[11px] text-stone-600 dark:text-stone-400 leading-relaxed">
             {t('notifications.deniedHint')}
           </p>
+        )}
+
+        {permission === 'granted' && pushReady !== null && (
+          <p className={`text-xs font-semibold leading-relaxed ${pushReady ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-800 dark:text-amber-300'}`}>
+            {pushReady ? `✓ ${t('notifications.backgroundOn')}` : t('notifications.backgroundOff')}
+          </p>
+        )}
+
+        {iosNeedsInstall && (
+          <div className="rounded-2xl border border-line bg-surface-raised px-3.5 py-3 space-y-2">
+            <p className="text-xs leading-relaxed text-fg-secondary">{t('notifications.iosInstall')}</p>
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new Event('open-pwa-install'))}
+              className="btn-secondary text-xs !min-h-10 px-3"
+            >
+              {t('notifications.iosInstallBtn')}
+            </button>
+          </div>
         )}
 
         <div className="space-y-2">

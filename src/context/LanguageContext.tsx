@@ -504,6 +504,11 @@ export const translations: Record<Language, Record<string, string>> = {
     'notifications.testSent': 'Test notification sent',
     'notifications.updateTestSent': 'Update-style notification sent',
     'notifications.testFailed': 'Couldn’t send notification — check permission',
+    'notifications.backgroundOn': "Reminders arrive even when Testament is closed.",
+    'notifications.backgroundOff': "Reminders only arrive while Testament is open on this device.",
+    'notifications.iosInstall': "On iPhone and iPad, reminders need Testament on your Home Screen. Install it, open it from the Home Screen, then turn reminders on there.",
+    'notifications.iosInstallBtn': "How to install",
+    'notifications.testLocalOnly': "Test shown, but this device can’t get reminders while the app is closed",
 
     // Additional Dashboard Actions & Stats
     'dashboard.briefingBtn': '45-second summary',
@@ -1318,6 +1323,11 @@ export const translations: Record<Language, Record<string, string>> = {
     'notifications.testSent': 'Notificación de prueba enviada',
     'notifications.updateTestSent': 'Notificación de actualización enviada',
     'notifications.testFailed': 'No se pudo enviar — revisa el permiso',
+    'notifications.backgroundOn': "Los recordatorios llegan aunque Testament esté cerrada.",
+    'notifications.backgroundOff': "Los recordatorios solo llegan mientras Testament está abierta en este dispositivo.",
+    'notifications.iosInstall': "En iPhone y iPad, los recordatorios necesitan Testament en la pantalla de inicio. Instálala, ábrela desde la pantalla de inicio y activa los recordatorios allí.",
+    'notifications.iosInstallBtn': "Cómo instalar",
+    'notifications.testLocalOnly': "Prueba mostrada, pero este dispositivo no recibe recordatorios con la app cerrada",
 
     // Additional Dashboard Actions & Stats
     'dashboard.briefingBtn': 'Resumen 45s',
@@ -2132,6 +2142,11 @@ export const translations: Record<Language, Record<string, string>> = {
     'notifications.testSent': 'Notification test envoyée',
     'notifications.updateTestSent': 'Notification de mise à jour envoyée',
     'notifications.testFailed': 'Envoi impossible — vérifiez la permission',
+    'notifications.backgroundOn': "Les rappels arrivent même quand Testament est fermée.",
+    'notifications.backgroundOff': "Les rappels n’arrivent que lorsque Testament est ouverte sur cet appareil.",
+    'notifications.iosInstall': "Sur iPhone et iPad, les rappels nécessitent Testament sur l’écran d’accueil. Installez-la, ouvrez-la depuis l’écran d’accueil, puis activez les rappels.",
+    'notifications.iosInstallBtn': "Comment installer",
+    'notifications.testLocalOnly': "Test affiché, mais cet appareil ne reçoit pas de rappels quand l’app est fermée",
 
     // Additional Dashboard Actions & Stats
     'dashboard.briefingBtn': 'Briefing 45s',
