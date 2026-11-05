@@ -19,10 +19,9 @@ import {
   Mic
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import { getDailyCuratedPassage } from '../data/dailyPassages';
-import { getTodayBattlefieldId } from '../utils/battlefield';
-import { getDailyMissionSync } from '../utils/dailyMissionPipeline';
-import { getTodayDateKey } from '../utils/dailyEngine';
+import { getDailyStory } from '../utils/dailyStory';
+import { getStoryIllustrationUrl } from '../utils/storyIllustrations';
+import { spokenTextForCard } from '../utils/narrationScript';
 
 interface DriveModePlayerProps {
   isOpen: boolean;
@@ -67,10 +66,8 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
 
   if (!isOpen) return null;
 
-  // Resolve today's mission
-  const activeBattlefieldId = getTodayBattlefieldId();
-  const todayPassage = getDailyCuratedPassage(0, activeBattlefieldId);
-  const todayMission = getDailyMissionSync(getTodayDateKey(), 0, activeBattlefieldId);
+  // Today's story: the same one the Today screen shows
+  const todayStory = getDailyStory();
 
   const quest = STORY_QUESTS[currentQuestIndex];
   const act = quest.acts[currentActIndex];
@@ -94,16 +91,18 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
     setIsPlaying(true);
     setActiveMode('mission');
 
-    const hero = todayMission.heroName || todayPassage.heroName;
-    const ref = todayMission.passageReference || todayPassage.reference;
-    const scenario = todayMission.scenarioQuestion;
-    const story = todayMission.storyRetelling.join(' ');
-    const scripture = `${todayMission.keyVerseReference}. ${todayMission.keyVerseText}`;
-    const action = todayMission.actionLine;
+    if (!todayStory) {
+      setIsPlaying(false);
+      return;
+    }
+    const narration = todayStory.cards.map(spokenTextForCard).filter(Boolean).join(' ');
+    const choice = todayStory.cards.find((card) => card.type === 'choice');
+    const decision = choice ? ` The Decision: ${choice.prompt}. What really happened: ${choice.whatHappened.text}.` : '';
+    const scripture = `${todayStory.verse.ref}. ${todayStory.verse.text}`;
 
     const briefingText = language === 'en'
-      ? `Today's Mission Briefing. ${hero}. Scripture reference: ${ref}. The Decision: ${scenario}. What unfolded: ${story}. Verbatim Scripture: ${scripture}. Your move today: ${action}`
-      : `Misión de hoy. ${hero}. ${ref}. ${scenario}. ${scripture}`;
+      ? `Today's Story. ${todayStory.title}. Scripture reference: ${todayStory.passage}. ${narration}${decision} Scripture: ${scripture}${todayStory.reflection ? ` Think about this today: ${todayStory.reflection}` : ''}`
+      : `Historia de hoy. ${todayStory.title}. ${todayStory.passage}. ${scripture}`;
 
     soundEngine.speakVerse(briefingText, () => {
       setIsPlaying(false);
@@ -242,8 +241,8 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
         <div className="my-auto space-y-5 text-center">
           <div className="w-36 h-36 sm:w-48 sm:h-48 mx-auto rounded-3xl overflow-hidden border-2 border-amber-400 dark:border-amber-500/40 shadow-md dark:shadow-glow bg-stone-100 dark:bg-stone-950">
             <ArtImage
-              src={activeMode === 'mission' ? '/images/valley_battlefield.jpg' : getThemeImage(act.visualTheme)}
-              alt={activeMode === 'mission' ? todayMission.heroName : quest.title}
+              src={activeMode === 'mission' && todayStory ? getStoryIllustrationUrl(todayStory.id) : getThemeImage(act.visualTheme)}
+              alt={activeMode === 'mission' ? todayStory?.title ?? '' : quest.title}
               width={1376}
               height={768}
               className="w-full h-full object-cover"
@@ -253,20 +252,20 @@ export const DriveModePlayer: React.FC<DriveModePlayerProps> = ({
           <div className="space-y-1">
             <span className="text-xs font-sans tabular-nums text-amber-800 dark:text-amber-500 uppercase tracking-widest font-bold">
               {activeMode === 'mission'
-                ? `Today's Mission • ${todayMission.passageReference}`
+                ? `Today's Story • ${todayStory?.passage ?? ''}`
                 : `${quest.heroName} • Act ${act.actNumber} of ${quest.acts.length}`}
             </span>
             <h3 className="text-2xl sm:text-3xl font-serif font-black text-stone-900 dark:text-parchment-50">
-              {activeMode === 'mission' ? todayMission.heroName : act.actTitle}
+              {activeMode === 'mission' ? todayStory?.title : act.actTitle}
             </h3>
             <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 font-medium">
-              {activeMode === 'mission' ? `Briefing: "${todayMission.scenarioQuestion}"` : quest.title}
+              {activeMode === 'mission' ? todayStory?.cards.find((card) => card.type === 'choice')?.prompt : quest.title}
             </p>
           </div>
 
           <p className="text-xs sm:text-sm text-stone-700 dark:text-parchment-200/90 italic max-w-lg mx-auto font-reading">
             {activeMode === 'mission'
-              ? `"${todayMission.keyVerseText}" — ${todayMission.keyVerseReference}`
+              ? todayStory && `"${todayStory.verse.text}" — ${todayStory.verse.ref}`
               : `"${act.sceneAtmosphere}"`}
           </p>
         </div>
