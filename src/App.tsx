@@ -832,7 +832,7 @@ export function App() {
         className={`flex w-full flex-1 flex-col pt-3 sm:pt-4 xl:pt-16 ${
         activeQuest || activeDailyMission || activeStory
           ? 'pb-4 xl:pb-8'
-          : 'pb-[calc(6.75rem+env(safe-area-inset-bottom,0px))] xl:pb-10'
+          : 'pb-[calc(5rem+env(safe-area-inset-bottom,0px))] xl:pb-10'
       }`}>
         {activeDailyMission ? (
           <StoryViewer 

@@ -78,7 +78,7 @@ export const Navigation: React.FC<NavigationProps> = ({
             </span>
           </button>
 
-          <nav className="flex items-center gap-1 bg-stone-100 dark:bg-stone-900 p-1 rounded-full border border-line">
+          <nav className="flex items-stretch self-stretch gap-2">
             {navItems.map(({ tab, label, tooltip, Icon }) => {
               const isActive = isTabActive(tab);
               return (
@@ -91,10 +91,10 @@ export const Navigation: React.FC<NavigationProps> = ({
                   }}
                   title={tooltip}
                   aria-current={isActive ? 'page' : undefined}
-                  className={`flex items-center gap-2 px-4 rounded-full text-sm font-semibold transition-all min-h-[40px] ${
+                  className={`flex items-center gap-2 px-4 text-sm font-semibold transition-colors border-b-2 -mb-px ${
                     isActive
-                      ? 'bg-surface-raised dark:bg-stone-800 text-accent-text shadow-sm'
-                      : 'text-fg-muted hover:text-fg'
+                      ? 'border-accent text-accent-text'
+                      : 'border-transparent text-fg-muted hover:text-fg'
                   }`}
                 >
                   <Icon active={isActive} className="w-[18px] h-[18px]" />
@@ -133,9 +133,9 @@ export const Navigation: React.FC<NavigationProps> = ({
       <nav
         role="navigation"
         aria-label={t('nav.mobileAria')}
-        className={`xl:hidden fixed z-40 left-1/2 -translate-x-1/2 bottom-[max(0.75rem,env(safe-area-inset-bottom))] w-[calc(100%-1.5rem)] max-w-sm rounded-full bg-surface-raised/90 dark:bg-stone-900/90 backdrop-blur-xl border border-line p-1.5 shadow-[0_12px_34px_-10px_rgba(10,15,30,0.25),0_2px_6px_rgba(10,15,30,0.06)]`}
+        className="xl:hidden fixed z-40 inset-x-0 bottom-0 bg-surface-raised/95 dark:bg-stone-900/95 backdrop-blur-xl border-t border-line pb-[env(safe-area-inset-bottom)]"
       >
-        <div className="grid grid-cols-4 items-stretch w-full gap-0.5">
+        <div className="grid grid-cols-4 items-stretch w-full max-w-lg mx-auto">
           {navItems.map(({ tab, label, Icon }) => {
             const isActive = isTabActive(tab);
             return (
@@ -147,12 +147,15 @@ export const Navigation: React.FC<NavigationProps> = ({
                   onSelectTab(tab);
                 }}
                 aria-current={isActive ? 'page' : undefined}
-                className={`relative flex flex-col items-center justify-center min-h-[52px] py-1 px-0.5 rounded-full transition-all focus-visible:ring-2 focus-visible:ring-accent w-full min-w-0 active:scale-95 ${
+                className={`relative flex flex-col items-center justify-center min-h-[56px] py-1.5 px-0.5 transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent w-full min-w-0 ${
                   isActive
-                    ? 'text-accent-text bg-amber-100 dark:bg-amber-500/15 font-bold'
+                    ? 'text-accent-text font-bold'
                     : 'text-fg-muted hover:text-fg'
                 }`}
               >
+                {isActive && (
+                  <span aria-hidden className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-8 rounded-b bg-accent" />
+                )}
                 <Icon active={isActive} className="w-6 h-6 shrink-0" />
                 <span className="text-[10.5px] leading-tight font-semibold w-full text-center block mt-0.5 truncate">
                   {label}
