@@ -171,6 +171,10 @@ export function validateStory(raw: unknown): ValidationResult {
 
   const quiz = validateQuizItems(raw.quiz ?? [], 'story', errors);
 
+  if (raw.reflection !== undefined && typeof raw.reflection !== 'string') {
+    errors.push('story: reflection must be a string');
+  }
+
   if (errors.length > 0) return { ok: false, errors };
 
   const story: Story = {
@@ -182,6 +186,7 @@ export function validateStory(raw: unknown): ValidationResult {
     estMinutes: raw.estMinutes as number,
     cards,
     verse: raw.verse as Story['verse'],
+    reflection: raw.reflection as string | undefined,
     quiz
   };
   return { ok: true, story };

@@ -1,10 +1,10 @@
 export interface DailyCampaignStep {
   stepNumber: 1 | 2 | 3 | 4;
-  type: 'quest' | 'dilemma' | 'wordforge' | 'canon' | 'proverb' | 'psalm';
+  type: 'quest' | 'wordforge' | 'canon' | 'proverb' | 'psalm';
   title: string;
   badge: string;
   subtitle: string;
-  targetId: string; // questId, dilemmaId, verseId, or bookId
+  targetId: string; // questId, verseId, or bookId
   targetSecondaryId?: string; // e.g. actId for quest
   actionLabel: string;
   icon: string;
@@ -57,19 +57,8 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
       },
       {
         stepNumber: 2,
-        type: 'dilemma',
-        title: 'Step 2: "What\'s The Play?" Tactical Sim',
-        badge: 'Real-Life Dilemma',
-        subtitle: 'Family Undermining Your Ambition',
-        targetId: 'dilemma-toxic-family',
-        actionLabel: 'Solve Family Mockery Sim',
-        icon: '🛡️',
-        intel: 'Apply David’s reaction to his eldest brother Eliab: never waste high-caliber ammo on low-caliber hecklers.'
-      },
-      {
-        stepNumber: 3,
         type: 'wordforge',
-        title: 'Step 3: Practice Memory Lock',
+        title: 'Step 2: Practice Memory Lock',
         badge: 'Scripture Memory Drill',
         subtitle: '1 Samuel 17:45 • "I Come in the Name of the Lord"',
         targetId: 'story-david-act-1',
@@ -78,9 +67,9 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
         intel: 'Cement the unshakeable truth into your mind so intimidation evaporates when pressure hits.'
       },
       {
-        stepNumber: 4,
+        stepNumber: 3,
         type: 'canon',
-        title: 'Step 4: Scriptorium Field Codex',
+        title: 'Step 3: Scriptorium Field Codex',
         badge: '3D Library Codex',
         subtitle: '1 Samuel • The Crown & The Crucible',
         targetId: 'canon-1samuel',
@@ -116,19 +105,8 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
       },
       {
         stepNumber: 2,
-        type: 'dilemma',
-        title: 'Step 2: "What\'s The Play?" Tactical Sim',
-        badge: 'Real-Life Dilemma',
-        subtitle: 'The Workplace Credit Thief',
-        targetId: 'dilemma-credit-thief',
-        actionLabel: 'Outsmart The Credit Thief',
-        icon: '🛡️',
-        intel: 'A peer takes credit for your 60 hours of labor. Execute the Joseph Play: mastery, timestamps, and undeniable receipts.'
-      },
-      {
-        stepNumber: 3,
         type: 'wordforge',
-        title: 'Step 3: Practice Memory Lock',
+        title: 'Step 2: Practice Memory Lock',
         badge: 'Scripture Memory Drill',
         subtitle: 'Genesis 50:20 • "God Meant It for Good"',
         targetId: 'story-joseph-act-1',
@@ -137,9 +115,9 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
         intel: 'Lock in the master truth that human malice cannot overturn God’s tactical assignment for your life.'
       },
       {
-        stepNumber: 4,
+        stepNumber: 3,
         type: 'canon',
-        title: 'Step 4: Scriptorium Field Codex',
+        title: 'Step 3: Scriptorium Field Codex',
         badge: '3D Library Codex',
         subtitle: 'Genesis • The Foundations of Covenant',
         targetId: 'canon-genesis',
@@ -175,19 +153,8 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
       },
       {
         stepNumber: 2,
-        type: 'dilemma',
-        title: 'Step 2: "What\'s The Play?" Tactical Sim',
-        badge: 'Real-Life Dilemma',
-        subtitle: 'The Financial Emergency & The Panic Loan',
-        targetId: 'dilemma-financial-panic',
-        actionLabel: 'Defeat The Panic Spiral',
-        icon: '🛡️',
-        intel: 'When an unexpected crisis threatens your livelihood, reject predatory quick-fixes and hold your ground.'
-      },
-      {
-        stepNumber: 3,
         type: 'wordforge',
-        title: 'Step 3: Practice Memory Lock',
+        title: 'Step 2: Practice Memory Lock',
         badge: 'Scripture Memory Drill',
         subtitle: 'Exodus 14:14 • "The Lord Will Fight For You"',
         targetId: 'story-moses-act-1',
@@ -196,9 +163,9 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
         intel: 'Memorize the command given to 2 million panicking Israelites: be still and watch God open the sea.'
       },
       {
-        stepNumber: 4,
+        stepNumber: 3,
         type: 'canon',
-        title: 'Step 4: Scriptorium Field Codex',
+        title: 'Step 3: Scriptorium Field Codex',
         badge: '3D Library Codex',
         subtitle: 'Exodus • The Iron Crucible & Rescue Protocol',
         targetId: 'canon-exodus',
@@ -234,19 +201,8 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
       },
       {
         stepNumber: 2,
-        type: 'dilemma',
-        title: 'Step 2: "What\'s The Play?" Tactical Sim',
-        badge: 'Real-Life Dilemma',
-        subtitle: 'The "Nobody Will Know" Deal',
-        targetId: 'dilemma-dirty-money',
-        actionLabel: 'Refuse The Shady Contract',
-        icon: '🛡️',
-        intel: 'Your manager invites you to fudge audit numbers for a massive quarterly bonus. Execute the fiery furnace standard.'
-      },
-      {
-        stepNumber: 3,
         type: 'wordforge',
-        title: 'Step 3: Practice Memory Lock',
+        title: 'Step 2: Practice Memory Lock',
         badge: 'Scripture Memory Drill',
         subtitle: 'Daniel 6:22 • "God Shut The Lions\' Mouths"',
         targetId: 'story-daniel-act-3',
@@ -255,9 +211,9 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
         intel: 'Lock into memory the testimony of untarnished integrity that muzzles royal predators.'
       },
       {
-        stepNumber: 4,
+        stepNumber: 3,
         type: 'canon',
-        title: 'Step 4: Scriptorium Field Codex',
+        title: 'Step 3: Scriptorium Field Codex',
         badge: '3D Library Codex',
         subtitle: 'Daniel • Empire Protocol & The Unshakable Throne',
         targetId: 'canon-daniel',
@@ -293,19 +249,8 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
       },
       {
         stepNumber: 2,
-        type: 'dilemma',
-        title: 'Step 2: "What\'s The Play?" Tactical Sim',
-        badge: 'Real-Life Dilemma',
-        subtitle: 'The 80-Hour Burnout & Snapping at Home',
-        targetId: 'dilemma-burnout-home',
-        actionLabel: 'Halt The Burnout Crash',
-        icon: '🛡️',
-        intel: 'Exhausted after an 80-hour week, you walk through your front door on a short fuse. Reset your nervous system before destroying relationships.'
-      },
-      {
-        stepNumber: 3,
         type: 'wordforge',
-        title: 'Step 3: Practice Memory Lock',
+        title: 'Step 2: Practice Memory Lock',
         badge: 'Scripture Memory Drill',
         subtitle: '1 Kings 19:12 • "A Gentle Whisper in the Wind"',
         targetId: 'story-elijah-act-1',
@@ -314,9 +259,9 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
         intel: 'Remember that God does not always speak in the hurricane or the earthquake, but in quiet, restorative stillness.'
       },
       {
-        stepNumber: 4,
+        stepNumber: 3,
         type: 'canon',
-        title: 'Step 4: Scriptorium Field Codex',
+        title: 'Step 3: Scriptorium Field Codex',
         badge: '3D Library Codex',
         subtitle: '1 Kings • The Splendor & The Divided Realm',
         targetId: 'canon-1kings',
@@ -352,19 +297,8 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
       },
       {
         stepNumber: 2,
-        type: 'dilemma',
-        title: 'Step 2: "What\'s The Play?" Tactical Sim',
-        badge: 'Real-Life Dilemma',
-        subtitle: 'The Group Chat Mockery & Public Pressure',
-        targetId: 'dilemma-group-chat-pressure',
-        actionLabel: 'Take A Principled Stand',
-        icon: '🛡️',
-        intel: 'When a group chat of colleagues starts roasting a vulnerable peer, refuse cowardly conformity and draw the line.'
-      },
-      {
-        stepNumber: 3,
         type: 'wordforge',
-        title: 'Step 3: Practice Memory Lock',
+        title: 'Step 2: Practice Memory Lock',
         badge: 'Scripture Memory Drill',
         subtitle: 'Esther 4:14 • "For Such a Time as This"',
         targetId: 'story-esther-act-2',
@@ -373,9 +307,9 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
         intel: 'Lock in the reality of divine placement: you are not in your current position by accident, but for an assignment.'
       },
       {
-        stepNumber: 4,
+        stepNumber: 3,
         type: 'canon',
-        title: 'Step 4: Scriptorium Field Codex',
+        title: 'Step 3: Scriptorium Field Codex',
         badge: '3D Library Codex',
         subtitle: 'Esther • Silent Sovereignty in Susa',
         targetId: 'canon-esther',
@@ -411,19 +345,8 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
       },
       {
         stepNumber: 2,
-        type: 'dilemma',
-        title: 'Step 2: "What\'s The Play?" Tactical Sim',
-        badge: 'Real-Life Dilemma',
-        subtitle: 'The Scapegoating Boss',
-        targetId: 'dilemma-boss-scapegoat',
-        actionLabel: 'Neutralize Slander With Facts',
-        icon: '🛡️',
-        intel: 'Sanballat and Tobiah smear your motives. Keep your head clear, document the timeline, and let execution silence the noise.'
-      },
-      {
-        stepNumber: 3,
         type: 'wordforge',
-        title: 'Step 3: Practice Memory Lock',
+        title: 'Step 2: Practice Memory Lock',
         badge: 'Scripture Memory Drill',
         subtitle: 'Nehemiah 4:14 • "Remember The Lord, Great & Awesome"',
         targetId: 'story-nehemiah-act-2',
@@ -432,9 +355,9 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
         intel: 'Memorize the battle cry that rallies weary teams: remember who fights for your families and homes.'
       },
       {
-        stepNumber: 4,
+        stepNumber: 3,
         type: 'canon',
-        title: 'Step 4: Scriptorium Field Codex',
+        title: 'Step 3: Scriptorium Field Codex',
         badge: '3D Library Codex',
         subtitle: 'Nehemiah • The Rebuilder’s Strategic Code',
         targetId: 'canon-nehemiah',
@@ -470,19 +393,8 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
       },
       {
         stepNumber: 2,
-        type: 'dilemma',
-        title: 'Step 2 • What would you do?',
-        badge: 'Real-Life Scenario',
-        subtitle: 'Navigating Broken Trust & Rumors',
-        targetId: 'dilemma-friend-betrayal',
-        actionLabel: 'Try scenario',
-        icon: '🛡️',
-        intel: 'Someone in your inner circle betrayed your confidence. Choose biblical restoration over spiteful retaliation.'
-      },
-      {
-        stepNumber: 3,
         type: 'wordforge',
-        title: 'Step 3: Practice Memory Lock',
+        title: 'Step 2: Practice Memory Lock',
         badge: 'Scripture Memory Drill',
         subtitle: 'John 21:17 • "Feed My Sheep"',
         targetId: 'story-peter-act-1',
@@ -491,9 +403,9 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
         intel: 'Lock in the moment of three-fold restoration: your worst failures do not disqualify your higher calling.'
       },
       {
-        stepNumber: 4,
+        stepNumber: 3,
         type: 'canon',
-        title: 'Step 4: Scriptorium Field Codex',
+        title: 'Step 3: Scriptorium Field Codex',
         badge: '3D Library Codex',
         subtitle: '1 Peter • Exile Protocol & Fiery Crucible',
         targetId: 'canon-1peter',
@@ -529,19 +441,8 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
       },
       {
         stepNumber: 2,
-        type: 'dilemma',
-        title: 'Step 2: "What\'s The Play?" Tactical Sim',
-        badge: 'Real-Life Dilemma',
-        subtitle: 'The Demotion & Crushed Ego',
-        targetId: 'dilemma-sudden-layoff',
-        actionLabel: 'Pivot When Stripped of Rank',
-        icon: '🛡️',
-        intel: 'When corporate strips your team from 32,000 to 300, execute the Ziklag Pivot: find strength in God and attack.'
-      },
-      {
-        stepNumber: 3,
         type: 'wordforge',
-        title: 'Step 3: Practice Memory Lock',
+        title: 'Step 2: Practice Memory Lock',
         badge: 'Scripture Memory Drill',
         subtitle: 'Judges 7:20 • "A Sword for the Lord & Gideon"',
         targetId: 'story-gideon-act-2',
@@ -550,9 +451,9 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
         intel: 'Lock into memory the principle of broken clay jars: human self-sufficiency must break before divine light blazes.'
       },
       {
-        stepNumber: 4,
+        stepNumber: 3,
         type: 'canon',
-        title: 'Step 4: Scriptorium Field Codex',
+        title: 'Step 3: Scriptorium Field Codex',
         badge: '3D Library Codex',
         subtitle: 'Judges • The Anarchy Spiral & Flawed Heroes',
         targetId: 'canon-judges',
@@ -588,19 +489,8 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
       },
       {
         stepNumber: 2,
-        type: 'dilemma',
-        title: 'Step 2: "What\'s The Play?" Tactical Sim',
-        badge: 'Real-Life Dilemma',
-        subtitle: 'Late Night Isolation & The Secret Escape',
-        targetId: 'dilemma-digital-temptation',
-        actionLabel: 'Fortify Your Guard In Isolation',
-        icon: '🛡️',
-        intel: 'Alone in a hotel room at 1 AM with exhaustion creeping in. Break the loop before cheap dopamine steals your edge.'
-      },
-      {
-        stepNumber: 3,
         type: 'wordforge',
-        title: 'Step 3: Practice Memory Lock',
+        title: 'Step 2: Practice Memory Lock',
         badge: 'Scripture Memory Drill',
         subtitle: 'Acts 16:25 • "Praying & Singing at Midnight"',
         targetId: 'story-paul-act-1',
@@ -609,9 +499,9 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
         intel: 'Memorize the supernatural counter-punch: praise when your feet are locked in wooden stocks.'
       },
       {
-        stepNumber: 4,
+        stepNumber: 3,
         type: 'canon',
-        title: 'Step 4: Scriptorium Field Codex',
+        title: 'Step 3: Scriptorium Field Codex',
         badge: '3D Library Codex',
         subtitle: 'Philippians • Joy in Chains & Outlaw Fellowship',
         targetId: 'canon-philippians',
@@ -647,19 +537,8 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
       },
       {
         stepNumber: 2,
-        type: 'dilemma',
-        title: 'Step 2: "What\'s The Play?" Tactical Sim',
-        badge: 'Real-Life Dilemma',
-        subtitle: 'The Estranged Relative Asking for Bailout',
-        targetId: 'dilemma-estrangement-grudge',
-        actionLabel: 'Set Boundaries With Mercy',
-        icon: '🛡️',
-        intel: 'Balance true forgiveness with wise, firm guardrails when dealing with family members who burned bridges.'
-      },
-      {
-        stepNumber: 3,
         type: 'wordforge',
-        title: 'Step 3: Practice Memory Lock',
+        title: 'Step 2: Practice Memory Lock',
         badge: 'Scripture Memory Drill',
         subtitle: 'Jonah 2:9 • "Salvation Comes From the Lord"',
         targetId: 'story-jonah-act-2',
@@ -668,9 +547,9 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
         intel: 'Lock into memory the surrender confession uttered from the pitch-black belly of the great fish.'
       },
       {
-        stepNumber: 4,
+        stepNumber: 3,
         type: 'canon',
-        title: 'Step 4: Scriptorium Field Codex',
+        title: 'Step 3: Scriptorium Field Codex',
         badge: '3D Library Codex',
         subtitle: 'Jonah • The Reluctant Mercy',
         targetId: 'canon-jonah',
@@ -706,19 +585,8 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
       },
       {
         stepNumber: 2,
-        type: 'dilemma',
-        title: 'Step 2: "What\'s The Play?" Tactical Sim',
-        badge: 'Real-Life Dilemma',
-        subtitle: 'The Overstepping In-Laws',
-        targetId: 'dilemma-inlaw-boundary',
-        actionLabel: 'Establish Peaceful Guardrails',
-        icon: '🛡️',
-        intel: 'Navigate complex generational family dynamics with high respect, unbreakable loyalty, and clear adult boundaries.'
-      },
-      {
-        stepNumber: 3,
         type: 'wordforge',
-        title: 'Step 3: Practice Memory Lock',
+        title: 'Step 2: Practice Memory Lock',
         badge: 'Scripture Memory Drill',
         subtitle: 'Ruth 1:16 • "Where You Go, I Will Go"',
         targetId: 'story-ruth-act-1',
@@ -727,9 +595,9 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
         intel: 'Memorize the definitive anthem of covenant fidelity that echoes through David’s entire royal lineage.'
       },
       {
-        stepNumber: 4,
+        stepNumber: 3,
         type: 'canon',
-        title: 'Step 4: Scriptorium Field Codex',
+        title: 'Step 3: Scriptorium Field Codex',
         badge: '3D Library Codex',
         subtitle: 'Ruth • The Kinsman Redeemer Protocol',
         targetId: 'canon-ruth',
@@ -765,19 +633,8 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
       },
       {
         stepNumber: 2,
-        type: 'dilemma',
-        title: 'Step 2: "What\'s The Play?" Tactical Sim',
-        badge: 'Real-Life Dilemma',
-        subtitle: 'The 48-Hour Marital Cold War',
-        targetId: 'dilemma-marital-silent-war',
-        actionLabel: 'Break The Stone Silence',
-        icon: '🛡️',
-        intel: 'Marching silently without petty venting until the appointed moment: drop pride, confess first, and tear down emotional walls.'
-      },
-      {
-        stepNumber: 3,
         type: 'wordforge',
-        title: 'Step 3: Practice Memory Lock',
+        title: 'Step 2: Practice Memory Lock',
         badge: 'Scripture Memory Drill',
         subtitle: 'Joshua 1:9 • "Be Strong and Courageous"',
         targetId: 'verse-1',
@@ -786,9 +643,9 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
         intel: 'Cement the core command into your nervous system: you do not step into tomorrow’s battlefield alone.'
       },
       {
-        stepNumber: 4,
+        stepNumber: 3,
         type: 'canon',
-        title: 'Step 4: Scriptorium Field Codex',
+        title: 'Step 3: Scriptorium Field Codex',
         badge: '3D Library Codex',
         subtitle: 'Joshua • Conquest Chronicle & Claiming Ground',
         targetId: 'canon-joshua',
@@ -824,19 +681,8 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
       },
       {
         stepNumber: 2,
-        type: 'dilemma',
-        title: 'Step 2: "What\'s The Play?" Tactical Sim',
-        badge: 'Real-Life Dilemma',
-        subtitle: 'The Social Media Envy Spiral',
-        targetId: 'dilemma-envy-spiral',
-        actionLabel: 'Extinguish The Envy Fire',
-        icon: '🛡️',
-        intel: 'Watching peers receive massive accolades while your hard grind goes unnoticed. Execute John’s Play: celebrate their fruit and stay on your post.'
-      },
-      {
-        stepNumber: 3,
         type: 'wordforge',
-        title: 'Step 3: Practice Memory Lock',
+        title: 'Step 2: Practice Memory Lock',
         badge: 'Scripture Memory Drill',
         subtitle: 'John 3:30 • "He Must Increase, I Must Decrease"',
         targetId: 'story-john-act-2',
@@ -845,9 +691,9 @@ export const DAILY_CAMPAIGNS: DailyCampaign[] = [
         intel: 'Lock into memory the master key to unshakeable inner peace: zero ego, zero jealousy, 100% mission.'
       },
       {
-        stepNumber: 4,
+        stepNumber: 3,
         type: 'canon',
-        title: 'Step 4: Scriptorium Field Codex',
+        title: 'Step 3: Scriptorium Field Codex',
         badge: '3D Library Codex',
         subtitle: 'Mark • The Servant Warrior & High-Tempo Mission',
         targetId: 'canon-mark',

@@ -33,7 +33,6 @@ import { useBibleStrings } from './bible/strings';
 interface CanonLibraryPageProps {
   onOpenWordForge?: (verseId: string) => void;
   onSelectStoryQuest?: (questId: string) => void;
-  onOpenDilemma?: (dilemmaId: string) => void;
   onPlayStory?: (storyId: string) => void;
   passageTarget?: { book: string; chapter: number; verseStart: number; verseEnd: number } | null;
   onPassageOpened?: () => void;
@@ -51,7 +50,6 @@ interface ReaderLaunch {
 export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
   onOpenWordForge,
   onSelectStoryQuest,
-  onOpenDilemma,
   onPlayStory,
   passageTarget,
   onPassageOpened,
@@ -339,7 +337,6 @@ export const CanonLibraryPage: React.FC<CanonLibraryPageProps> = ({
           onBack={() => setAbout(null)}
           onStartReading={(b, ch) => openReader(b, ch)}
           onPlayStory={onPlayStory}
-          onOpenDilemma={onOpenDilemma}
           onSelectStoryQuest={onSelectStoryQuest}
         />
       )}

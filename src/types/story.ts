@@ -137,6 +137,8 @@ export interface Story {
   estMinutes: number;
   cards: StoryCard[];
   verse: StoryVerse;
+  /** One personal question asked on the finish screen. */
+  reflection?: string;
   quiz: QuizItem[];
 }
 

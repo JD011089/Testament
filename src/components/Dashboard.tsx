@@ -63,7 +63,6 @@ interface DashboardProps {
   onPlayStory?: (storyId: string) => void;
   onOpenWordForge: (verseId?: string) => void;
   onOpenArsenal?: () => void;
-  onOpenDilemmas?: () => void;
   onOpenProverbs?: () => void;
   onOpenPsalms?: () => void;
   onOpenLibrary?: () => void;

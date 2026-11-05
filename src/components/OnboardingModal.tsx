@@ -111,7 +111,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
     {
       id: 'tactical' as const,
       title: 'Hands-on practice',
-      desc: 'Practice tile puzzles, memory retention drills, and real-life scenario simulators.',
+      desc: 'Practice tile puzzles and memory retention drills.',
       icon: '🧠'
     },
     {
@@ -153,7 +153,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
     {
       id: '10min' as const,
       title: '7 to 10 Minutes / One Story Act',
-      desc: 'One full story scene, dilemma choice, and unlocked scripture.',
+      desc: 'One full story scene, a choice, and unlocked scripture.',
       icon: '⏱️'
     },
     {

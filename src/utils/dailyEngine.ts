@@ -2,11 +2,7 @@ import { getAllVerses, getVerseById } from './verseRegistry';
 import type { MemoryVerse } from '../types';
 import { MORNING_BRIEFINGS } from '../data/morningBriefings';
 import type { MorningBriefing } from '../data/morningBriefings';
-import { REAL_LIFE_DILEMMAS } from '../data/dilemmas';
-import type { RealLifeDilemma } from '../data/dilemmas';
 import { STORY_QUESTS } from '../data/stories';
-import { getTodayDailyCampaign } from '../data/dailyCampaigns';
-import { getComposedDailyMission } from './missionComposer';
 import type { StoryQuest, StoryAct } from '../types';
 import type { UserCalibrationProfile } from '../components/OnboardingModal';
 import { getDueFSRSCards } from './fsrsEngine';
@@ -70,7 +66,6 @@ export const getDayIndex = (offsetDays = 0): number => {
 };
 
 import { getStoredLanguage, type SupportedLanguage } from '../context/LanguageContext';
-import { getLocalizedDilemma } from './localizedScripture';
 
 /**
  * Deterministically rotates today's verse across the entire 121-verse library
@@ -91,32 +86,6 @@ export const getDailyBriefing = (): MorningBriefing => {
 };
 
 
-/**
- * Deterministically aligns today's featured tactical dilemma with the 1 dilemma of today's Daily Campaign
- * (Requirement 6: There should only be 1 dilemma per daily campaign, or customized by today's Battlefield Check-in)
- */
-export const getDailyDilemma = (offsetDays = 0, lang?: SupportedLanguage): RealLifeDilemma => {
-  const activeLang = lang ?? getStoredLanguage();
-  const bfId = getTodayBattlefieldId();
-  if (bfId) {
-    if (bfId === 'anxiety-overwhelm') {
-      const match = REAL_LIFE_DILEMMAS.find(d => d.id === 'dilemma-burnout');
-      if (match) return getLocalizedDilemma(match, activeLang);
-    } else {
-      const match = REAL_LIFE_DILEMMAS.find(d => d.id === 'dilemma-credit-thief');
-      if (match) return getLocalizedDilemma(match, activeLang);
-    }
-  }
-
-  const campaign = offsetDays === 0 ? getComposedDailyMission() : getTodayDailyCampaign(offsetDays);
-  const dilemmaStep = campaign.steps.find(s => s.type === 'dilemma');
-  if (dilemmaStep) {
-    const matched = REAL_LIFE_DILEMMAS.find(d => d.id === dilemmaStep.targetId);
-    if (matched) return getLocalizedDilemma(matched, activeLang);
-  }
-  const index = (getDayIndex(offsetDays)) % REAL_LIFE_DILEMMAS.length;
-  return getLocalizedDilemma(REAL_LIFE_DILEMMAS[index], activeLang);
-};
 
 /**
  * Records when a verse was mastered/reviewed for Spaced Repetition

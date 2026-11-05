@@ -1,8 +1,6 @@
 import { STORY_QUESTS } from '../data/stories';
-import { REAL_LIFE_DILEMMAS } from '../data/dilemmas';
 import { BATTLEFIELD_OPTIONS } from '../components/BattlefieldCheckInModal';
 import {
-  getTodayDailyCampaign,
   getCampaignDateKey,
   getDailyCampaignProgress,
   type DailyCampaign,
@@ -12,7 +10,6 @@ import { getConnectedNexusItems } from '../data/nexusGraph';
 import { getStoryVerseForQuest, getVerseById } from './verseRegistry';
 import { getDueFSRSCards } from './fsrsEngine';
 import { getTodayBattlefieldId } from './battlefield';
-import { getQuestAttributes } from './narrativeMomentum';
 import type { StoryQuest, StoryAct } from '../types';
 
 export interface ComposedDailyMission extends DailyCampaign {
@@ -73,12 +70,6 @@ function readRecommendedQuestId(): string | null {
   return profile?.recommendedQuestId || null;
 }
 
-function resolveDilemmaId(id: string | undefined | null): string | null {
-  if (!id) return null;
-  if (REAL_LIFE_DILEMMAS.some(d => d.id === id)) return id;
-  return null;
-}
-
 function nextIncompleteAct(quest: StoryQuest, completed: string[]): StoryAct | null {
   return quest.acts.find(act => !completed.includes(act.id)) || null;
 }
@@ -113,31 +104,6 @@ function pickQuest(completed: string[], preferredId: string | null): { quest: St
   return { quest: fallback, act: fallback.acts[0] };
 }
 
-function pickDilemmaId(questId: string, battlefieldDilemma: string | null): string {
-  const fromBattlefield = resolveDilemmaId(battlefieldDilemma);
-  if (fromBattlefield) return fromBattlefield;
-
-  const linked = getConnectedNexusItems(questId).find(item => item.target.type === 'dilemma');
-  const fromNexus = resolveDilemmaId(linked?.target.id);
-  if (fromNexus) return fromNexus;
-
-  const attrs = getQuestAttributes(questId);
-  const ranked = (Object.entries(attrs) as [string, number][]).sort((a, b) => b[1] - a[1]);
-  if (ranked[0] && ranked[0][1] > 0) {
-    if (ranked[0][0] === 'patience') {
-      const burnout = resolveDilemmaId('dilemma-burnout-home');
-      if (burnout) return burnout;
-    }
-    if (ranked[0][0] === 'boldness') {
-      const credit = resolveDilemmaId('dilemma-credit-thief');
-      if (credit) return credit;
-    }
-  }
-
-  const calendar = getTodayDailyCampaign().steps.find(step => step.type === 'dilemma');
-  return resolveDilemmaId(calendar?.targetId) || 'dilemma-credit-thief';
-}
-
 function buildMission(): ComposedDailyMission {
   const dateKey = getCampaignDateKey();
   const cadence = readCadence();
@@ -145,8 +111,6 @@ function buildMission(): ComposedDailyMission {
   const battlefield = BATTLEFIELD_OPTIONS.find(option => option.id === battlefieldId) || null;
   const completed = readCompletedActs();
   const { quest, act } = pickQuest(completed, battlefield?.suggestedQuestId || null);
-  const dilemmaId = pickDilemmaId(quest.id, battlefield?.suggestedDilemmaId || null);
-  const dilemma = REAL_LIFE_DILEMMAS.find(item => item.id === dilemmaId) || REAL_LIFE_DILEMMAS[0];
 
   const dueCard = getDueFSRSCards()[0];
   const dueVerse = dueCard ? getVerseById(dueCard.verseId) : null;
@@ -176,22 +140,10 @@ function buildMission(): ComposedDailyMission {
     intel: act.sceneAtmosphere,
   };
 
-  const dilemmaStep: DailyCampaignStep = {
-    stepNumber: 2,
-    type: 'dilemma',
-    title: `Step 2 • What would you do?`,
-    badge: 'Real-Life Scenario',
-    subtitle: dilemma.title,
-    targetId: dilemma.id,
-    actionLabel: 'Try a scenario',
-    icon: '🛡️',
-    intel: dilemma.situationSetup.slice(0, 180),
-  };
-
   const forgeStep: DailyCampaignStep = {
-    stepNumber: 3,
+    stepNumber: 2,
     type: 'wordforge',
-    title: dueVerse ? 'Step 3 • Review a due verse' : 'Step 3 • Memorize the verse',
+    title: dueVerse ? 'Step 2 • Review a due verse' : 'Step 2 • Memorize the verse',
     badge: dueVerse ? 'Memory Review' : 'Scripture Memory',
     subtitle: forgeVerse ? forgeVerse.reference : quest.heroName,
     targetId: forgeVerse?.id || `story-${quest.id}`,
@@ -205,9 +157,9 @@ function buildMission(): ComposedDailyMission {
   let applyStep: DailyCampaignStep;
   if (proverb) {
     applyStep = {
-      stepNumber: 4,
+      stepNumber: 3,
       type: 'proverb',
-      title: 'Step 4 • Apply the proverb',
+      title: 'Step 3 • Apply the proverb',
       badge: 'Proverbs',
       subtitle: proverb.target.title,
       targetId: proverb.target.id,
@@ -217,9 +169,9 @@ function buildMission(): ComposedDailyMission {
     };
   } else if (psalm) {
     applyStep = {
-      stepNumber: 4,
+      stepNumber: 3,
       type: 'psalm',
-      title: 'Step 4 • Pray the psalm',
+      title: 'Step 3 • Pray the psalm',
       badge: 'Psalms',
       subtitle: psalm.target.title,
       targetId: psalm.target.id,
@@ -229,9 +181,9 @@ function buildMission(): ComposedDailyMission {
     };
   } else {
     applyStep = {
-      stepNumber: 4,
+      stepNumber: 3,
       type: 'canon',
-      title: 'Step 4 • Open the library',
+      title: 'Step 3 • Open the library',
       badge: 'Scripture Library',
       subtitle: 'One chapter, then close the loop',
       targetId: 'library',
@@ -241,13 +193,7 @@ function buildMission(): ComposedDailyMission {
     };
   }
 
-  const steps = cadence === '3min'
-    ? [
-        questStep,
-        { ...forgeStep, stepNumber: 2 as const, title: forgeStep.title.replace('Step 3', 'Step 2') },
-        { ...dilemmaStep, stepNumber: 3 as const, title: dilemmaStep.title.replace('Step 2', 'Step 3') },
-      ]
-    : [questStep, dilemmaStep, forgeStep, applyStep];
+  const steps = cadence === '3min' ? [questStep, forgeStep] : [questStep, forgeStep, applyStep];
 
   return {
     id: `adaptive-${dateKey}`,
@@ -284,7 +230,9 @@ export const getComposedDailyMission = (): ComposedDailyMission => {
     const stored = localStorage.getItem(snapshotKey);
     if (stored) {
       const snap = JSON.parse(stored) as ComposedDailyMission;
-      if (!snap || !Array.isArray(snap.steps) || snap.steps.length === 0) {
+      // Snapshots saved before Dilemmas was removed may still hold a dilemma step.
+      const hasRetiredStep = Array.isArray(snap?.steps) && snap.steps.some(step => (step.type as string) === 'dilemma');
+      if (!snap || !Array.isArray(snap.steps) || snap.steps.length === 0 || hasRetiredStep) {
         localStorage.removeItem(snapshotKey);
       } else {
         const sameSignals = snap.battlefieldId === battlefieldId && snap.cadence === cadence;

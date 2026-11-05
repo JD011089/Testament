@@ -4,7 +4,6 @@ import type { CanonBook } from '../../data/canon';
 import { soundEngine } from '../../utils/audio';
 import { fetchBibleChapter, type TranslationId } from '../../utils/bibleService';
 import { parseScriptureReference } from '../../utils/scriptureRef';
-import { dilemmasForBook } from '../../utils/bookLinks';
 import { getStoryIllustrationUrl } from '../../utils/storyIllustrations';
 import { loadVisitedChapters } from '../../utils/readingPlace';
 import { chapterCount, sectionForBook, shortBookName, storiesForBook } from '../../utils/bibleLibrary';
@@ -16,17 +15,15 @@ interface BookAboutProps {
   onBack: () => void;
   onStartReading: (book: CanonBook, chapter: number) => void;
   onPlayStory?: (storyId: string) => void;
-  onOpenDilemma?: (dilemmaId: string) => void;
   onSelectStoryQuest?: (questId: string) => void;
 }
 
 /** Plain-language introduction to a book, with its key verse quoted from the real translation. */
-export const BookAbout: React.FC<BookAboutProps> = ({ book, translation, onBack, onStartReading, onPlayStory, onOpenDilemma, onSelectStoryQuest }) => {
+export const BookAbout: React.FC<BookAboutProps> = ({ book, translation, onBack, onStartReading, onPlayStory, onSelectStoryQuest }) => {
   const s = useBibleStrings();
   const name = shortBookName(book.name);
   const section = sectionForBook(book);
   const stories = useMemo(() => storiesForBook(book.id), [book.id]);
-  const scenarios = useMemo(() => dilemmasForBook(book.name).slice(0, 3), [book.name]);
   const resumeAt = loadVisitedChapters()[book.id];
   const [keyVerse, setKeyVerse] = useState<{ ref: string; text: string } | null>(null);
 
@@ -118,7 +115,7 @@ export const BookAbout: React.FC<BookAboutProps> = ({ book, translation, onBack,
           </>
         )}
 
-        {(scenarios.length > 0 && onOpenDilemma) || (book.deepLinkType && book.deepLinkType !== 'dossier') ? (
+        {book.deepLinkType && book.deepLinkType !== 'dossier' ? (
           <>
             <h2 className="mt-5 mb-2 px-1 text-[10.5px] font-bold uppercase tracking-[0.13em] text-fg-muted">{s.more}</h2>
             <div className="rounded-[1.25rem] border border-line bg-surface-raised divide-y divide-line overflow-hidden">
@@ -131,9 +128,6 @@ export const BookAbout: React.FC<BookAboutProps> = ({ book, translation, onBack,
               {book.deepLinkType === 'psalms' && (
                 <MoreRow label="Psalms" onClick={() => window.dispatchEvent(new CustomEvent('open-psalms-medic'))} />
               )}
-              {onOpenDilemma && scenarios.map((d) => (
-                <MoreRow key={d.id} label={d.title} hint={s.scenarios} onClick={() => onOpenDilemma(d.id)} />
-              ))}
             </div>
           </>
         ) : null}

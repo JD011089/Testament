@@ -1,7 +1,7 @@
 /**
  * Localized Daily Mission Engine
  * Provides authentic French and Spanish localizations for Daily Missions,
- * Story Quests, Dilemma Steps, Action Buttons, and Hero Tracks.
+ * Story Quests, Action Buttons, and Hero Tracks.
  */
 
 import type { SupportedLanguage } from '../context/LanguageContext';
@@ -117,7 +117,6 @@ export function getLocalizedVirtue(theme: string, lang: SupportedLanguage): stri
 export const LOCALIZED_STEP_BADGES: Record<SupportedLanguage, Record<string, string>> = {
   en: {
     'Story Quest': 'Story Quest',
-    'Real-Life Dilemma': 'Real-Life Dilemma',
     'Scripture Memory': 'Scripture Memory',
     'FSRS Review': 'FSRS Review',
     'Proverbs': 'Proverbs',
@@ -126,7 +125,6 @@ export const LOCALIZED_STEP_BADGES: Record<SupportedLanguage, Record<string, str
   },
   es: {
     'Story Quest': 'Misión Narrativa',
-    'Real-Life Dilemma': 'Dilema de la Vida Real',
     'Scripture Memory': 'Memorizar Escritura',
     'FSRS Review': 'Repaso FSRS',
     'Proverbs': 'Proverbios',
@@ -135,7 +133,6 @@ export const LOCALIZED_STEP_BADGES: Record<SupportedLanguage, Record<string, str
   },
   fr: {
     'Story Quest': 'Quête Narrative',
-    'Real-Life Dilemma': 'Dilemme du Monde Réel',
     'Scripture Memory': 'Mémorisation d’Écriture',
     'FSRS Review': 'Révision FSRS',
     'Proverbs': 'Proverbes',
@@ -155,9 +152,6 @@ export const LOCALIZED_ACTIONS: Record<SupportedLanguage, Record<string, string>
   en: {
     'make the call': 'Make the call',
     'enter story': 'Enter Story',
-    'try a scenario': 'Try a scenario',
-    'run the sim': 'Try a scenario',
-    'solve dilemma': 'What would you do?',
     'memorize this verse': 'Memorize this verse',
     'forge the verse': 'Memorize this verse',
     'forge truth': 'Memorize verse',
@@ -172,9 +166,6 @@ export const LOCALIZED_ACTIONS: Record<SupportedLanguage, Record<string, string>
   es: {
     'make the call': 'Tomar la decisión',
     'enter story': 'Entrar a la historia',
-    'try a scenario': 'Probar un escenario',
-    'run the sim': 'Probar un escenario',
-    'solve dilemma': '¿Qué harías tú?',
     'memorize this verse': 'Memorizar este versículo',
     'forge the verse': 'Memorizar este versículo',
     'forge truth': 'Memorizar versículo',
@@ -189,9 +180,6 @@ export const LOCALIZED_ACTIONS: Record<SupportedLanguage, Record<string, string>
   fr: {
     'make the call': 'Prendre la décision',
     'enter story': 'Entrer dans le récit',
-    'try a scenario': 'Essayer un scénario',
-    'run the sim': 'Essayer un scénario',
-    'solve dilemma': 'Que feriez-vous ?',
     'memorize this verse': 'Mémoriser ce verset',
     'forge the verse': 'Mémoriser ce verset',
     'forge truth': 'Mémoriser le verset',
@@ -315,94 +303,6 @@ export const LOCALIZED_QUEST_ACTS: Record<SupportedLanguage, Record<string, Loca
 };
 
 // ============================================================================
-// 6. REAL-LIFE DILEMMAS (TITLES & SITUATION INTROS)
-// ============================================================================
-export interface LocalizedDilemmaSummary {
-  title: string;
-  situationSetup: string;
-}
-
-export const LOCALIZED_DILEMMA_SUMMARIES: Record<SupportedLanguage, Record<string, LocalizedDilemmaSummary>> = {
-  en: {},
-  es: {
-    'dilemma-burnout-home': {
-      title: 'Agotamiento de 80 Horas y Estallido en Casa',
-      situationSetup: 'Has trabajado turnos brutales de 12 horas toda la semana. Te duele la espalda y la cabeza te estalla. Entras por la puerta y la fatiga amenaza con hacerte estallar frente a tu familia.',
-    },
-    'dilemma-burnout': {
-      title: 'Agotamiento de 80 Horas y Estallido en Casa',
-      situationSetup: 'Has trabajado turnos brutales de 12 horas toda la semana. Te duele la espalda y la cabeza te estalla. Entras por la puerta y la fatiga amenaza con hacerte estallar frente a tu familia.',
-    },
-    'dilemma-credit-thief': {
-      title: 'El Ladrón de Crédito en el Trabajo',
-      situationSetup: 'Dedicaste tres semanas a armar una presentación crucial. En la reunión ejecutiva, un colega presenta tus conclusiones como propias ante el aplauso de la directiva.',
-    },
-    'dilemma-boss-scapegoat': {
-      title: 'El Chivo Expiatorio del Jefe',
-      situationSetup: 'Tu superior cometió un error financiero grave y discretamente insinúa en el informe que tú fuiste el responsable.',
-    },
-    'dilemma-unethical-boss': {
-      title: 'El Chivo Expiatorio del Jefe',
-      situationSetup: 'Tu superior cometió un error financiero grave y discretamente insinúa en el informe que tú fuiste el responsable.',
-    },
-    'dilemma-dirty-money': {
-      title: 'El Atajo del Dinero Sucio',
-      situationSetup: 'Se presenta una oportunidad de negocio rápida con una comisión jugosa, pero requiere falsear un registro contable.',
-    },
-    'dilemma-sudden-layoff': {
-      title: 'El Despido Corporativo Inesperado',
-      situationSetup: 'Sin previo aviso, Recursos Humanos te convoca un viernes a las 4 PM para entregarte tu carta de despido.',
-    },
-    'dilemma-toxic-family': {
-      title: 'La Ruptura Familiar Tóxica',
-      situationSetup: 'Un conflicto familiar enconado durante años vuelve a estallar en una reunión íntima, forzándote a elegir bando.',
-    },
-    'dilemma-friend-betrayal': {
-      title: 'La Traición de un Socio o Amigo',
-      situationSetup: 'Descubres que la persona en quien depositaste toda tu confianza profesional ha estado negociando a tus espaldas.',
-    },
-  },
-  fr: {
-    'dilemma-burnout-home': {
-      title: 'L’Épuisement des 80h & L’Explosion au Foyer',
-      situationSetup: 'Vous avez accumulé des journées brutales de 12h toute la semaine. Votre dos est en miettes, votre crâne explose. Vous passez la porte et la fatigue menace de vous faire craquer face aux vôtres.',
-    },
-    'dilemma-burnout': {
-      title: 'L’Épuisement des 80h & L’Explosion au Foyer',
-      situationSetup: 'Vous avez accumulé des journées brutales de 12h toute la semaine. Votre dos est en miettes, votre crâne explose. Vous passez la porte et la fatigue menace de vous faire craquer face aux vôtres.',
-    },
-    'dilemma-credit-thief': {
-      title: 'Le Voleur de Mérite en Entreprise',
-      situationSetup: 'Vous avez passé trois semaines à monter un modèle stratégique. En réunion de direction, un collègue s’approprie vos résultats sous les éloges du vice-président.',
-    },
-    'dilemma-boss-scapegoat': {
-      title: 'Le Bouc Émissaire du Supérieur',
-      situationSetup: 'Votre supérieur a commis une faute financière lourde et suggère discrètement dans son rapport que vous en portez la responsabilité.',
-    },
-    'dilemma-unethical-boss': {
-      title: 'Le Bouc Émissaire du Supérieur',
-      situationSetup: 'Votre supérieur a commis une faute financière lourde et suggère discrètement dans son rapport que vous en portez la responsabilité.',
-    },
-    'dilemma-dirty-money': {
-      title: 'Le Raccourci de l’Argent Douteux',
-      situationSetup: 'Une opportunité commerciale rapide promet un bonus exceptionnel, mais exige de falsifier discrètement une écriture comptable.',
-    },
-    'dilemma-sudden-layoff': {
-      title: 'Le Licenciement Brutal',
-      situationSetup: 'Sans avertissement, les RH vous convoquent un vendredi à 16h pour vous signifier la fin immédiate de votre contrat.',
-    },
-    'dilemma-toxic-family': {
-      title: 'La Fissure Familiale Toxique',
-      situationSetup: 'Une rancœur familiale enracinée depuis des années explose lors d’un repas, vous sommant de choisir publiquement un camp.',
-    },
-    'dilemma-friend-betrayal': {
-      title: 'La Trahison d’un Associé ou Ami',
-      situationSetup: 'Vous découvrez que l’associé à qui vous avez confié vos dossiers stratégiques négocie en secret avec vos concurrents.',
-    },
-  },
-};
-
-// ============================================================================
 // 7. SCRIPTURE INTEL LOCALIZATIONS
 // ============================================================================
 export const LOCALIZED_FORGE_STRINGS: Record<SupportedLanguage, { cement: string; due: string }> = {
@@ -504,19 +404,6 @@ export function getLocalizedStep(
       return {
         subtitle: `${actPrefix}${actData.actTitle}`,
         intel: actData.atmosphere,
-        badge,
-        actionLabel,
-      };
-    }
-  }
-
-  // 2. Dilemma Step
-  if (step.type === 'dilemma') {
-    const dilemmaData = LOCALIZED_DILEMMA_SUMMARIES[lang]?.[step.targetId];
-    if (dilemmaData) {
-      return {
-        subtitle: dilemmaData.title,
-        intel: dilemmaData.situationSetup,
         badge,
         actionLabel,
       };

@@ -1,46 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Flame, UserRound } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
 import { useLanguage } from '../context/LanguageContext';
 import { TodayIcon, JourneyIcon, BibleIcon, CollectionIcon } from './NavIcons';
 
-export type NavTab = 'today' | 'dashboard' | 'map' | 'library' | 'game' | 'practice' | 'arsenal' | 'wordforge' | 'dilemmas' | 'deck';
-
-/**
- * Phone nav: slides away while you scroll down to read, and comes back as
- * soon as you scroll up or get near the top of the page.
- */
-function useHideOnScrollDown(): [boolean, (hidden: boolean) => void] {
-  const [hidden, setHidden] = useState(false);
-
-  useEffect(() => {
-    const TOP_ZONE = 80;
-    const THRESHOLD = 8;
-    let lastY = window.scrollY;
-
-    // setState bails out when the value is unchanged, so running this on
-    // every scroll event is cheap.
-    const onScroll = () => {
-      const y = window.scrollY;
-      const delta = y - lastY;
-      if (y < TOP_ZONE) {
-        setHidden(false);
-        lastY = y;
-      } else if (delta > THRESHOLD) {
-        setHidden(true);
-        lastY = y;
-      } else if (delta < -THRESHOLD) {
-        setHidden(false);
-        lastY = y;
-      }
-    };
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  return [hidden, setHidden];
-}
+export type NavTab = 'today' | 'dashboard' | 'map' | 'library' | 'game' | 'practice' | 'arsenal' | 'wordforge' | 'deck';
 
 interface NavigationProps {
   currentTab: NavTab | 'not-found';
@@ -64,11 +28,10 @@ export const Navigation: React.FC<NavigationProps> = ({
   onOpenSettings,
 }) => {
   const { t } = useLanguage();
-  const [navHidden, setNavHidden] = useHideOnScrollDown();
 
   const isTabActive = (itemTab: NavTab) => {
     if (itemTab === 'practice') {
-      return currentTab === 'practice' || currentTab === 'wordforge' || currentTab === 'dilemmas';
+      return currentTab === 'practice' || currentTab === 'wordforge';
     }
     if (itemTab === 'deck') {
       return currentTab === 'deck' || currentTab === 'arsenal';
@@ -165,16 +128,12 @@ export const Navigation: React.FC<NavigationProps> = ({
       </header>
 
       {/* ============================================================ */}
-      {/* 2. FLOATING BOTTOM NAV (below xl) */}
+      {/* 2. BOTTOM NAV (below xl): always docked, never hides on scroll */}
       {/* ============================================================ */}
       <nav
         role="navigation"
         aria-label={t('nav.mobileAria')}
-        data-hidden={navHidden ? 'true' : undefined}
-        onFocusCapture={() => setNavHidden(false)}
-        className={`xl:hidden fixed z-40 left-1/2 -translate-x-1/2 bottom-[max(0.75rem,env(safe-area-inset-bottom))] w-[calc(100%-1.5rem)] max-w-sm rounded-full bg-surface-raised/90 dark:bg-stone-900/90 backdrop-blur-xl border border-line p-1.5 shadow-[0_12px_34px_-10px_rgba(10,15,30,0.25),0_2px_6px_rgba(10,15,30,0.06)] transition-transform duration-300 ease-out ${
-          navHidden ? 'translate-y-[calc(100%+2.5rem)]' : 'translate-y-0'
-        }`}
+        className={`xl:hidden fixed z-40 left-1/2 -translate-x-1/2 bottom-[max(0.75rem,env(safe-area-inset-bottom))] w-[calc(100%-1.5rem)] max-w-sm rounded-full bg-surface-raised/90 dark:bg-stone-900/90 backdrop-blur-xl border border-line p-1.5 shadow-[0_12px_34px_-10px_rgba(10,15,30,0.25),0_2px_6px_rgba(10,15,30,0.06)]`}
       >
         <div className="grid grid-cols-4 items-stretch w-full gap-0.5">
           {navItems.map(({ tab, label, Icon }) => {

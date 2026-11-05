@@ -361,10 +361,7 @@ export function TodayScreen({
             story={story}
             onExit={() => setPlaying(false)}
             onReadChapter={onReadChapter}
-            onCompleted={() => {
-              setPlaying(false);
-              persist(4);
-            }}
+            onCompleted={() => persist(4)}
           />,
           document.body
         )

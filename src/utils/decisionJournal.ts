@@ -9,7 +9,7 @@ export interface DecisionJournalEntry {
   userCustomText?: string;
   actionLine?: string;
   storyTakeaway?: string;
-  entryType?: 'mission_decision' | 'free_reflection';
+  entryType?: 'mission_decision' | 'free_reflection' | 'story_reflection';
 }
 
 const STORAGE_KEY = 'testament_decision_journal';

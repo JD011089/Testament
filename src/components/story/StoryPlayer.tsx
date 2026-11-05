@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import type { InteractionCard, Story, StoryArc, StoryCard, TapRevealConfig } from '../../types/story';
+import type { InteractionCard, PayoffCard, Story, StoryArc, StoryCard, TapRevealConfig } from '../../types/story';
 import { getStoryCardIndex, isStoryCompleted, markStoryComplete, saveStoryCursor } from '../../utils/storyProgress';
 import { addVerseCard } from '../../utils/deck';
 import { recordDailyActivityStreak } from '../../utils/dailyEngine';
@@ -13,6 +13,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import { useModalLock } from '../../utils/useModalLock';
 import { VerseLine } from './VerseLine';
 import { ChoiceMoment } from './ChoiceMoment';
+import { StoryFinish } from './StoryFinish';
 import { DragToTarget } from './interactions/DragToTarget';
 import { HoldToContinue } from './interactions/HoldToContinue';
 import { TapReveal } from './interactions/TapReveal';
@@ -72,6 +73,8 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
   const payoffRecorded = useRef(false);
 
   const card: StoryCard = story.cards[index];
+  const payoffCard = story.cards.find((c): c is PayoffCard => c.type === 'payoff');
+  const keptVerse = payoffCard?.verse ?? story.verse;
 
   useLayoutEffect(() => {
     const main = mainRef.current;
@@ -250,9 +253,11 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
         </div>
       </header>
 
-      <main ref={mainRef} className={`relative z-10 min-h-0 flex-1 overflow-hidden overscroll-contain px-4 ${density > 1 ? 'py-1' : density ? 'py-2' : 'pb-4 pt-5'}`}>
+      <main ref={mainRef} className={`relative z-10 min-h-0 flex-1 ${completed ? 'overflow-y-auto' : 'overflow-hidden'} overscroll-contain px-4 ${density > 1 ? 'py-1' : density ? 'py-2' : 'pb-4 pt-5'}`}>
         <div ref={stageRef} className={`mx-auto flex min-h-full w-full max-w-xl flex-col justify-end ${illustrated ? density > 1 ? 'gap-1' : density ? 'gap-2' : 'gap-4' : ''}`}>
-          {card.type === 'narration' && (
+          {completed && <StoryFinish story={story} verse={keptVerse} />}
+
+          {!completed && card.type === 'narration' && (
             <article className={`rounded-[1.75rem] border border-white/20 bg-black/55 shadow-[0_16px_48px_rgba(0,0,0,0.25)] backdrop-blur-xl ${density > 1 ? 'p-2.5' : density ? 'p-3' : 'p-5 sm:p-7'}`}>
               <span className="inline-flex rounded-full border border-amber-200/30 bg-amber-200/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-100">
                 {t('story.narrationLabel')}
@@ -262,7 +267,7 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
             </article>
           )}
 
-          {card.type === 'interaction' && (
+          {!completed && card.type === 'interaction' && (
             <article className={`rounded-[1.75rem] border border-white/20 bg-black/55 shadow-[0_16px_48px_rgba(0,0,0,0.25)] backdrop-blur-xl ${density > 1 ? 'space-y-1.5 p-2' : density ? 'space-y-2 p-3' : `space-y-4 p-4 sm:p-6 ${illustrated ? '' : 'space-y-5'}`}`}>
               <div>
                 <span className="inline-flex rounded-full border border-amber-200/30 bg-amber-200/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-100">{t('story.stageYourTurn')}</span>
@@ -278,13 +283,13 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
             </article>
           )}
 
-          {card.type === 'choice' && (
+          {!completed && card.type === 'choice' && (
             <article className={`rounded-[1.75rem] border border-white/20 bg-black/55 shadow-[0_16px_48px_rgba(0,0,0,0.25)] backdrop-blur-xl ${density > 1 ? 'p-2' : density ? 'p-3' : 'p-5 sm:p-7'}`}>
               <ChoiceMoment card={card} compact={density > 0} veryCompact={density > 1} onComplete={() => { setCardDone(true); advance(); }} />
             </article>
           )}
 
-          {card.type === 'payoff' && (
+          {!completed && card.type === 'payoff' && (
             <article className={`rounded-[1.75rem] border border-amber-200/30 bg-black/60 text-center shadow-[0_16px_48px_rgba(0,0,0,0.3)] backdrop-blur-xl ${density > 1 ? 'p-2' : density ? 'p-3' : 'p-5 sm:p-7'}`}>
               <span className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-200">
                 <Sparkles className="h-3.5 w-3.5" /> {t('today.verseCollected')}
@@ -320,6 +325,11 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
           {card.type === 'payoff' && !completed && (
             <button type="button" onClick={finish} className="btn-primary min-h-12 flex-1 inline-flex items-center justify-center gap-2">
               <Check className="h-4 w-4" /> {t('story.doneForNow')}
+            </button>
+          )}
+          {completed && (
+            <button type="button" onClick={requestExit} className="btn-primary min-h-12 flex-1 inline-flex items-center justify-center gap-2">
+              <Check className="h-4 w-4" /> {t('finish.done')}
             </button>
           )}
         </div>

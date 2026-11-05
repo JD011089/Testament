@@ -6,7 +6,6 @@
  */
 
 import type { MemoryVerse } from '../types';
-import type { RealLifeDilemma } from '../data/dilemmas';
 import type { ProverbScenario } from '../data/proverbs';
 import type { PsalmPrescription } from '../data/psalms';
 import type { CanonBook } from '../data/canon';
@@ -19,12 +18,6 @@ export interface LocalizedVerseData {
   plainEnglishSummary: string;
   category?: MemoryVerse['category'];
   keyTakeaway: string;
-}
-
-export interface LocalizedDilemmaData {
-  reference: string;
-  text: string;
-  streetMeaning: string;
 }
 
 // ============================================================================
@@ -623,116 +616,6 @@ export const LOCALIZED_PSALM_VERSES: Record<'es' | 'fr', Record<string, Localize
       plainEnglishSummary: 'La tristesse profonde ne signifie nullement l’éloignement de Dieu. Cette vallée d’ombre n’est pas votre demeure définitive.',
       category: 'Pressure & Anxiety',
       keyTakeaway: 'Exhortez votre propre cœur dans les jours sombres. L’espérance en Dieu ranimera bientôt vos chants de délivrance.'
-    }
-  }
-};
-
-// ============================================================================
-// REAL LIFE DILEMMAS (10 DILEMMAS)
-// ============================================================================
-export const LOCALIZED_DILEMMAS: Record<'es' | 'fr', Record<string, LocalizedDilemmaData>> = {
-  es: {
-    'dilemma-credit-thief': {
-      reference: 'Génesis 41:38-39 y Proverbios 22:29',
-      text: '¿Has visto hombre solícito en su trabajo? Delante de los reyes estará; no estará delante de los de baja condición.',
-      streetMeaning: 'La excelencia, la maestría y la constancia hablan con más contundencia que los reclamos airados en el pasillo. Deja que los resultados revelen quién construyó realmente el motor.'
-    },
-    'dilemma-burnout': {
-      reference: '1 Reyes 19:5-8 y Mateo 11:28',
-      text: 'Venid a mí todos los que estáis trabajados y cargados, y yo os haré descansar.',
-      streetMeaning: 'El descanso no es pereza ni deserción; es mantenimiento táctico indispensable de la armadura. Dios envió pan y sueño reparador a Elías antes de confiarle cualquier nueva misión.'
-    },
-    'dilemma-family-conflict': {
-      reference: 'Génesis 45:4-8 y Colosenses 3:13',
-      text: 'Soportándoos con paciencia los unos a los otros, y perdonándoos unos a otros si alguno tuviere queja contra otro.',
-      streetMeaning: 'El perdón no anula los límites sanos ni finge amnesia, pero corta de raíz la cadena tóxica del resentimiento generacional.'
-    },
-    'dilemma-unethical-boss': {
-      reference: 'Daniel 3:16-18 y Hechos 5:29',
-      text: 'Es menester obedecer a Dios antes que a los hombres.',
-      streetMeaning: 'La integridad no está en venta. Jamás comprometas tu conciencia moral por complacer órdenes fraudulentas de un superior.'
-    },
-    'dilemma-whistleblower': {
-      reference: 'Proverbios 28:1 y Efesios 5:11',
-      text: 'Y no participéis en las obras infructuosas de las tinieblas, sino más bien reprendedlas.',
-      streetMeaning: 'El silencio cómplice también corrompe. La verdadera valentía exige exponer las irregularidades con pruebas sobrias y sin histeria.'
-    },
-    'dilemma-friend-betrayal': {
-      reference: 'Salmos 41:9 y Romanos 12:19-21',
-      text: 'No os venguéis vosotros mismos, amados míos... No seas vencido de lo malo, sino vence con el bien el mal.',
-      streetMeaning: 'La venganza te encadena a quien te lastimó. Deja el veredicto en manos de Dios y continúa tu camino con la conciencia limpia.'
-    },
-    'dilemma-job-loss': {
-      reference: 'Habacuc 3:17-19 y Romanos 8:28',
-      text: 'Aunque la higuera no florezca... con todo, yo me alegraré en Jehová, y me gozaré en el Dios de mi salvación.',
-      streetMeaning: 'Tu dignidad no depende de un puesto ni de una nómina corporativa. La fuente de tu sustento es el Dios vivo.'
-    },
-    'dilemma-envy-promotion': {
-      reference: '1 Samuel 18:8-9 y Santiago 3:16',
-      text: 'Porque donde hay celos y contención, allí hay perturbación y toda obra perversa.',
-      streetMeaning: 'La envidia es un veneno que tomas tú esperando que muera el otro. Concéntrate en tu propia misión y celebra el avance ajeno.'
-    },
-    'dilemma-parental-pressure': {
-      reference: 'Mateo 10:37 y Proverbios 3:5-6',
-      text: 'Fíate de Jehová de todo tu corazón, y no te apoyes en tu propia prudencia.',
-      streetMeaning: 'Honrar a tus padres no significa abdicar del llamado único que Dios plantó en tu alma por satisfacer expectativas ajenas.'
-    },
-    'dilemma-moral-compromise': {
-      reference: 'Génesis 39:9 y 1 Corintios 10:13',
-      text: '¿Cómo, pues, haría yo este grande mal, y pecaría contra Dios?',
-      streetMeaning: 'Corre como José. Frente a la trampa moral armada ante ti, no te detengas a dialogar ni a negociar: sal de ahí de inmediato.'
-    }
-  },
-  fr: {
-    'dilemma-credit-thief': {
-      reference: 'Genèse 41:38-39 & Proverbes 22:29',
-      text: 'Si tu vois un homme habile dans son ouvrage, il se tient auprès des rois; il ne se tient pas auprès de gens obscurs.',
-      streetMeaning: 'La compétence incontestable et les faits ont bien plus de poids que les récriminations de couloir. Laissez le temps prouver qui maîtrise les dossiers.'
-    },
-    'dilemma-burnout': {
-      reference: '1 Rois 19:5-8 & Matthieu 11:28',
-      text: 'Venez à moi, vous tous qui êtes fatigués et chargés, et je vous donnerai du repos.',
-      streetMeaning: 'Le repos n’est ni de la paresse ni une faiblesse; c’est un entretien tactique vital de votre armure. Dieu a d’abord accordé du sommeil et un repas fortifiant à Élie.'
-    },
-    'dilemma-family-conflict': {
-      reference: 'Genèse 45:4-8 & Colossiens 3:13',
-      text: 'Supportez-vous les uns les autres, et, si l’un a sujet de se plaindre de l’autre, pardonnez-vous réciproquement.',
-      streetMeaning: 'Pardonner n’abolit pas la prudence ni les limites salutaires, mais cela brise net la chaîne toxique de la rancune familiale.'
-    },
-    'dilemma-unethical-boss': {
-      reference: 'Daniel 3:16-18 & Actes 5:29',
-      text: 'Il faut obéir à Dieu plutôt qu’aux hommes.',
-      streetMeaning: 'L’intégrité morale ne se marchande jamais. Ne transigez pas avec votre conscience pour complaire aux injonctions douteuses d’un dirigeant.'
-    },
-    'dilemma-whistleblower': {
-      reference: 'Proverbes 28:1 & Éphésiens 5:11',
-      text: 'Et ne prenez point part aux œuvres infructueuses des ténèbres, mais plutôt condamnez-les.',
-      streetMeaning: 'Le silence complice nourrit la dérive. Le courage exige de dénoncer les malversations avec des preuves solides et un calme rigoureux.'
-    },
-    'dilemma-friend-betrayal': {
-      reference: 'Psaume 41:9 & Romains 12:19-21',
-      text: 'Ne vous vengez point vous-mêmes, bien-aimés... Ne te laisse pas surmonter par le mal, mais surmonte le mal par le bien.',
-      streetMeaning: 'La vengeance vous attache à votre agresseur. Laissez le verdict entre les mains de Dieu et avancez le cœur libre.'
-    },
-    'dilemma-job-loss': {
-      reference: 'Habacuc 3:17-19 & Romains 8:28',
-      text: 'Car le figuier ne fleurira pas... Toutefois, je veux me réjouir en l’Éternel, je veux me réjouir dans le Dieu de mon salut.',
-      streetMeaning: 'Votre dignité ne réside pas dans un intitulé de poste ou une fiche de paie. Votre véritable sécurité repose en Dieu.'
-    },
-    'dilemma-envy-promotion': {
-      reference: '1 Samuel 18:8-9 & Jacques 3:16',
-      text: 'Car là où il y a un zèle amer et un esprit de dispute, il y a du désordre et toutes sortes de mauvaises actions.',
-      streetMeaning: 'La jalousie est un poison destructeur. Consacrez votre énergie à votre propre appel et réjouissez-vous du succès de vos pairs.'
-    },
-    'dilemma-parental-pressure': {
-      reference: 'Matthieu 10:37 & Proverbes 3:5-6',
-      text: 'Confie-toi en l’Éternel de tout ton cœur, et ne t’appuie pas sur ta sagesse.',
-      streetMeaning: 'Honorer ses parents n’exige pas de sacrifier la vocation que Dieu a déposée en vous au profit de conformismes extérieurs.'
-    },
-    'dilemma-moral-compromise': {
-      reference: 'Genèse 39:9 & 1 Corinthiens 10:13',
-      text: 'Comment ferais-je un aussi grand mal et pécherais-je contre Dieu?',
-      streetMeaning: 'Fuyez sans hésiter comme Joseph. Face au piège tendu, ne discutez pas, ne tergiversez pas: partez sur-le-champ.'
     }
   }
 };
@@ -1341,25 +1224,6 @@ export function getLocalizedVerse(verse: MemoryVerse, lang: SupportedLanguage): 
 }
 
 /**
- * Resolves a RealLifeDilemma anchor scripture and plays into the active language.
- */
-export function getLocalizedDilemma(dilemma: RealLifeDilemma, lang: SupportedLanguage): RealLifeDilemma {
-  if (lang === 'en') return dilemma;
-
-  const match = LOCALIZED_DILEMMAS[lang]?.[dilemma.id];
-  if (!match) return dilemma;
-
-  return {
-    ...dilemma,
-    anchorScripture: {
-      reference: match.reference,
-      text: match.text,
-      streetMeaning: match.streetMeaning
-    }
-  };
-}
-
-/**
  * Resolves a ProverbScenario into the active language.
  */
 export function getLocalizedProverb(proverb: ProverbScenario, lang: SupportedLanguage): ProverbScenario {
@@ -1446,4 +1310,4 @@ export const CANON_LIFE_THEME_I18N_KEYS: Record<string, string> = {
   'Integrity in Toxic Cultures': 'lifeTheme.integrity',
   'Family & Conflict Resolution': 'lifeTheme.family',
   'Courage Under Fire': 'lifeTheme.courage',
-};
+};

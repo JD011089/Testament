@@ -67,7 +67,7 @@ function ViewFallback() {
 
 /** Legacy tabs that now live inside Practice/Deck. Never render them directly. */
 function normalizeTab(tab: AppTab): AppTab {
-  if (tab === 'wordforge' || tab === 'dilemmas') return 'practice';
+  if (tab === 'wordforge') return 'practice';
   if (tab === 'arsenal') return 'deck';
   return tab;
 }
@@ -194,9 +194,6 @@ export function App() {
     const params = new URLSearchParams(window.location.search);
     return params.get('verseId') || null;
   });
-  const [practiceEntry, setPracticeEntry] = useState<'memorize' | 'dilemmas'>('memorize');
-
-  const [targetDilemmaId, setTargetDilemmaId] = useState<string | null>(null);
   const [targetPsalmId, setTargetPsalmId] = useState<string | null>(null);
   const [targetProverbId, setTargetProverbId] = useState<string | null>(null);
   const [targetDossierId, setTargetDossierId] = useState<string | null>(null);
@@ -409,7 +406,6 @@ export function App() {
     const handleSwMessage = (event: MessageEvent) => {
       if (event.data?.type === 'TESTAMENT_NAVIGATE_VERSE' && event.data.verseId) {
         setTargetWordForgeVerseId(event.data.verseId);
-        setPracticeEntry('memorize');
         setCurrentTab('wordforge');
         setActiveDailyMission(null);
         setActiveQuest(null);
@@ -491,25 +487,6 @@ export function App() {
     };
   }, []);
 
-  // Listen for dilemma completions from DilemmaSimulator to advance Daily Campaign
-  useEffect(() => {
-    const handleDilemmaCompleted = (e: Event) => {
-      const customEvent = e as CustomEvent<{ dilemmaId: string }>;
-      const todayCampaign = getComposedDailyMission();
-      const dilemmaStep = todayCampaign.steps.find(step => step.type === 'dilemma');
-      if (dilemmaStep && dilemmaStep.targetId === customEvent.detail?.dilemmaId) {
-        recordActivityStreak();
-        markCampaignStepCompleted(todayCampaign.id, dilemmaStep.stepNumber, undefined, todayCampaign.steps.length);
-        window.dispatchEvent(new CustomEvent('testament-campaign-updated'));
-        const nextStep = todayCampaign.steps.find(step => step.stepNumber === dilemmaStep.stepNumber + 1);
-        if (nextStep) setCampaignPrompt({ completedStep: dilemmaStep.stepNumber, nextStep });
-      }
-    };
-
-    window.addEventListener('testament-dilemma-completed', handleDilemmaCompleted);
-    return () => window.removeEventListener('testament-dilemma-completed', handleDilemmaCompleted);
-  }, []);
-
   useEffect(() => {
     const markStep = (type: DailyCampaignStep['type']) => {
       const todayCampaign = getComposedDailyMission();
@@ -539,13 +516,6 @@ export function App() {
         setActiveQuest(targetQuest);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
-    } else if (step.type === 'dilemma') {
-      soundEngine.stopSpeaking();
-      setActiveQuest(null);
-      setTargetDilemmaId(step.targetId);
-      setPracticeEntry('dilemmas');
-      setCurrentTab('dilemmas');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (step.type === 'wordforge') {
       soundEngine.stopSpeaking();
       setActiveQuest(null);
@@ -568,15 +538,6 @@ export function App() {
     soundEngine.playClick();
     if (type === 'quest') {
       handleSelectQuestById(id);
-      return;
-    }
-    if (type === 'dilemma') {
-      soundEngine.stopSpeaking();
-      setActiveQuest(null);
-      setTargetDilemmaId(id);
-      setPracticeEntry('dilemmas');
-      setCurrentTab('dilemmas');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
     if (type === 'psalm') {
@@ -819,13 +780,7 @@ export function App() {
       localStorage.setItem('testament_onboarding_xp_awarded', 'true');
     }
 
-    if (profile.learningStyle === 'tactical') {
-      // Tactical learners jump into a dilemma after calibration
-      soundEngine.stopSpeaking();
-      setActiveQuest(null);
-      setCurrentTab('dilemmas');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else if (startRecommendedQuest && profile.recommendedQuestId) {
+    if (startRecommendedQuest && profile.recommendedQuestId) {
       handleSelectQuestById(profile.recommendedQuestId);
     }
   };
@@ -833,7 +788,6 @@ export function App() {
   const handlePracticeVerseFromArsenal = (verseId: string) => {
     soundEngine.stopSpeaking();
     setTargetWordForgeVerseId(verseId);
-    setPracticeEntry('memorize');
     setCurrentTab('wordforge');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -975,7 +929,6 @@ export function App() {
                 onPlayStory={handlePlayStory}
                 onOpenWordForge={(verseId?: string) => {
                   soundEngine.stopSpeaking();
-                  setPracticeEntry('memorize');
                   if (verseId) setTargetWordForgeVerseId(verseId);
                   setCurrentTab('wordforge');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -983,12 +936,6 @@ export function App() {
                 onOpenArsenal={() => {
                   soundEngine.stopSpeaking();
                   setCurrentTab('arsenal');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                onOpenDilemmas={() => {
-                  soundEngine.stopSpeaking();
-                  setPracticeEntry('dilemmas');
-                  setCurrentTab('dilemmas');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 onOpenProverbs={() => setIsProverbsOpen(true)}
@@ -1034,7 +981,6 @@ export function App() {
               <CanonLibraryPage 
                 onOpenWordForge={(verseId) => {
                   soundEngine.stopSpeaking();
-                  setPracticeEntry('memorize');
                   setTargetWordForgeVerseId(verseId);
                   setCurrentTab('wordforge');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1043,12 +989,6 @@ export function App() {
                   handleSelectQuestById(questId);
                 }}
                 onPlayStory={handlePlayStory}
-                onOpenDilemma={(dilemmaId) => {
-                  soundEngine.stopSpeaking();
-                  setTargetDilemmaId(dilemmaId);
-                  setCurrentTab('dilemmas');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
                 passageTarget={libraryPassage}
                 onPassageOpened={() => setLibraryPassage(null)}
               />
@@ -1064,15 +1004,10 @@ export function App() {
             {currentTab === 'practice' && (
               <Suspense fallback={<ViewFallback />}>
                 <PracticeView
-                  initialSubTab={practiceEntry}
                   memorizedVerses={memorizedVerses}
                   onVerseMastered={handleVerseMastered}
                   targetVerseId={targetWordForgeVerseId}
                   onClearTargetVerse={() => setTargetWordForgeVerseId(null)}
-                  onRewardXP={handleRewardXP}
-                  targetDilemmaId={targetDilemmaId}
-                  onClearTargetDilemma={() => setTargetDilemmaId(null)}
-                  onOpenNexus={handleOpenNexus}
                 />
               </Suspense>
             )}
@@ -1166,7 +1101,6 @@ export function App() {
           setIsProverbsOpen(false);
           setTargetProverbId(null);
           setTargetWordForgeVerseId(verseId);
-          setPracticeEntry('memorize');
           setCurrentTab('wordforge');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
@@ -1190,7 +1124,6 @@ export function App() {
           setIsPsalmsOpen(false);
           setTargetPsalmId(null);
           setTargetWordForgeVerseId(verseId);
-          setPracticeEntry('memorize');
           setCurrentTab('wordforge');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}

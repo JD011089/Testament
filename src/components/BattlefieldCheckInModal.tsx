@@ -21,7 +21,6 @@ export interface BattlefieldOption {
   subtitle: string;
   icon: 'briefcase' | 'heart' | 'flame' | 'compass' | 'swords';
   suggestedQuestId: string;
-  suggestedDilemmaId: string;
   psalmReference: string;
   colorBorder: string;
   colorBg: string;
@@ -34,7 +33,6 @@ export const BATTLEFIELD_OPTIONS: BattlefieldOption[] = [
     subtitle: 'Dealing with unfair credit, high expectations, or difficult people.',
     icon: 'briefcase',
     suggestedQuestId: 'david-journey',
-    suggestedDilemmaId: 'dilemma-credit-thief',
     psalmReference: 'Psalm 59 (When Saul sent men to watch David)',
     colorBorder: 'border-amber-500/60',
     colorBg: 'from-amber-950/40'
@@ -45,7 +43,6 @@ export const BATTLEFIELD_OPTIONS: BattlefieldOption[] = [
     subtitle: 'Racing mind, heavy worry about tomorrow, or feeling completely depleted.',
     icon: 'flame',
     suggestedQuestId: 'elijah-journey',
-    suggestedDilemmaId: 'dilemma-burnout-home',
     psalmReference: 'Psalm 46 (God is our refuge and strength)',
     colorBorder: 'border-blue-500/60',
     colorBg: 'from-blue-950/40'
@@ -56,7 +53,6 @@ export const BATTLEFIELD_OPTIONS: BattlefieldOption[] = [
     subtitle: 'Stung by friends, family tension, or someone talking behind your back.',
     icon: 'heart',
     suggestedQuestId: 'joseph-journey',
-    suggestedDilemmaId: 'dilemma-friend-betrayal',
     psalmReference: 'Psalm 55 (When a companion betrays trust)',
     colorBorder: 'border-red-500/60',
     colorBg: 'from-red-950/40'
@@ -67,7 +63,6 @@ export const BATTLEFIELD_OPTIONS: BattlefieldOption[] = [
     subtitle: 'Standing at a critical crossroad; trying to do what is right when it is hard.',
     icon: 'compass',
     suggestedQuestId: 'peter-journey',
-    suggestedDilemmaId: 'dilemma-group-chat-pressure',
     psalmReference: 'Proverbs 3:5-6 & Psalm 27 (Whom shall I fear?)',
     colorBorder: 'border-purple-500/60',
     colorBg: 'from-purple-950/40'
@@ -78,7 +73,6 @@ export const BATTLEFIELD_OPTIONS: BattlefieldOption[] = [
     subtitle: 'Going through the motions, feeling disconnected, wanting a fresh start.',
     icon: 'swords',
     suggestedQuestId: 'jesus-journey',
-    suggestedDilemmaId: 'dilemma-envy-spiral',
     psalmReference: 'Psalm 63 (My soul thirsts for You in a parched land)',
     colorBorder: 'border-emerald-500/60',
     colorBg: 'from-emerald-950/40'

@@ -1,13 +1,13 @@
 /**
  * Biblical Knowledge Graph ("The Tactical Nexus")
- * Interconnects Story Quests, Field Medic Psalms, Proverbs, Character Dossiers,
- * and Modern Dilemmas into a rich relational matrix.
+ * Interconnects Story Quests, Field Medic Psalms, Proverbs and Character Dossiers
+ * into a rich relational matrix.
  */
 
 export interface NexusNode {
   id: string;
   title: string;
-  type: 'quest' | 'psalm' | 'proverb' | 'dilemma' | 'dossier';
+  type: 'quest' | 'psalm' | 'proverb' | 'dossier';
   label: string;
   description: string;
   scriptureRef?: string;
@@ -112,22 +112,6 @@ export const NEXUS_NODES: Record<string, NexusNode> = {
     description: 'The rich rule over the poor, and the borrower is slave to the lender.'
   },
 
-  // Dilemmas
-  'dilemma-credit-thief': {
-    id: 'dilemma-credit-thief',
-    title: 'The Workplace Credit Thief',
-    type: 'dilemma',
-    label: 'Real-Life Scenario',
-    description: 'A peer takes credit for your 60-hour presentation in the executive meeting.'
-  },
-  'dilemma-burnout': {
-    id: 'dilemma-burnout',
-    title: 'Executive Burnout & The Desert',
-    type: 'dilemma',
-    label: 'Real-Life Scenario',
-    description: 'Exhausted from prolonged crisis and feeling completely depleted.'
-  },
-
   // Character Dossiers
   'david': {
     id: 'david',
@@ -182,13 +166,6 @@ export const NEXUS_CONNECTIONS: NexusConnection[] = [
     badgeLabel: 'Tactical Doctrine',
     contextNote: 'De-escalating Saul’s psychotic rage required unmatched poise and restrained speech.'
   },
-  {
-    sourceId: 'david-journey',
-    targetId: 'dilemma-credit-thief',
-    relationship: 'modern_parallel',
-    badgeLabel: 'Modern Workplace Precedent',
-    contextNote: 'How to handle superiors or colleagues who feel threatened by your competence.'
-  },
 
   // Joseph Quest Connections
   {
@@ -197,13 +174,6 @@ export const NEXUS_CONNECTIONS: NexusConnection[] = [
     relationship: 'theological_precedent',
     badgeLabel: 'Protagonist Dossier',
     contextNote: 'Study Joseph’s administrative genius, emotional resilience, and integrity under pressure.'
-  },
-  {
-    sourceId: 'joseph-journey',
-    targetId: 'dilemma-credit-thief',
-    relationship: 'modern_parallel',
-    badgeLabel: 'Direct Modern Parallel',
-    contextNote: 'Joseph was forgotten by the Chief Cupbearer yet never became toxic or cynical.'
   },
   {
     sourceId: 'joseph-journey',
@@ -220,13 +190,6 @@ export const NEXUS_CONNECTIONS: NexusConnection[] = [
     relationship: 'theological_precedent',
     badgeLabel: 'Protagonist Dossier',
     contextNote: 'Inspect Elijah’s supernatural boldness on Carmel contrasted with his vulnerability under the broom tree.'
-  },
-  {
-    sourceId: 'elijah-journey',
-    targetId: 'dilemma-burnout',
-    relationship: 'modern_parallel',
-    badgeLabel: 'Burnout Recovery Play',
-    contextNote: 'God prescribes physical rest, nutrition, and quiet before giving the next mission.'
   },
   {
     sourceId: 'elijah-journey',
@@ -251,29 +214,6 @@ export const NEXUS_CONNECTIONS: NexusConnection[] = [
     badgeLabel: 'Warning Doctrine',
     contextNote: '"Even if all fall away, I never will"—how spiritual overconfidence precedes a fall.'
   },
-
-  // Dilemma reverse links
-  {
-    sourceId: 'dilemma-credit-thief',
-    targetId: 'david-journey',
-    relationship: 'theological_precedent',
-    badgeLabel: 'Historical Precedent',
-    contextNote: 'David served Saul with distinction even while Saul hurled spears at his head.'
-  },
-  {
-    sourceId: 'dilemma-credit-thief',
-    targetId: 'psalm-27-light',
-    relationship: 'written_during',
-    badgeLabel: 'Battlefield Psalm',
-    contextNote: 'Pray Psalm 27 when facing office politics, toxic bosses, and deceitful peers.'
-  },
-  {
-    sourceId: 'dilemma-burnout',
-    targetId: 'elijah-journey',
-    relationship: 'theological_precedent',
-    badgeLabel: 'Historical Recovery',
-    contextNote: 'How Elijah recovered after running into the desert and wanting to die.'
-  }
 ];
 
 export interface ConnectedNexusItem {

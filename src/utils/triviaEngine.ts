@@ -1,10 +1,8 @@
 import type { MemoryVerse, StoryQuest } from '../types';
-import type { RealLifeDilemma } from '../data/dilemmas';
 import type { CanonBook } from '../data/canon';
 import { getAllVerses } from './verseRegistry';
 import { cleanWord, normalizeWord, VERSE_STOP_WORDS } from './verseText';
 import { STORY_QUESTS } from '../data/stories';
-import { REAL_LIFE_DILEMMAS } from '../data/dilemmas';
 import { CANON_BOOKS } from '../data/canon';
 import type { SupportedLanguage } from '../context/LanguageContext';
 
@@ -29,7 +27,6 @@ export interface TriviaQuestion {
 interface TriviaSources {
   verses: MemoryVerse[];
   quests: StoryQuest[];
-  dilemmas: RealLifeDilemma[];
   books: CanonBook[];
 }
 
@@ -212,11 +209,10 @@ export function buildTriviaBank(lang?: SupportedLanguage): TriviaQuestion[] {
   const sources: TriviaSources = {
     verses: getAllVerses(lang),
     quests: STORY_QUESTS,
-    dilemmas: REAL_LIFE_DILEMMAS,
     books: CANON_BOOKS,
   };
 
-  const { verses, quests, dilemmas, books } = sources;
+  const { verses, quests, books } = sources;
   const bank: TriviaQuestion[] = [];
   const seen = new Set<string>();
 
@@ -232,13 +228,11 @@ export function buildTriviaBank(lang?: SupportedLanguage): TriviaQuestion[] {
   const heroPool = uniqueStrings(
     verses.map((v) => cleanHeroName(v.heroName || '')).concat(quests.map((q) => cleanHeroName(q.heroName)))
   );
-  const dilemmaHeroPool = uniqueStrings(dilemmas.map((d) => cleanHeroName(d.biblicalParallel.hero)));
 
   const referenceCandidates = uniqueStrings([
     ...referencePool,
     ...quests.map((q) => q.acts[0]?.unlockedScripture.reference || ''),
     ...books.map((b) => b.anchorScripture.reference),
-    ...dilemmas.map((d) => d.anchorScripture.reference),
   ]);
 
   // Distractors for reference questions come from the same division (book family),
@@ -377,36 +371,6 @@ export function buildTriviaBank(lang?: SupportedLanguage): TriviaQuestion[] {
       correct: book.name,
       pool: bookOptionsFor(book),
       explain: `“${truncate(book.anchorScripture.canonicalText, 120)}” — ${book.anchorScripture.reference}`,
-      scripture,
-    }));
-  }
-
-  // ---- Dilemma ancient-parallel questions (Bible history) ----
-  for (const dilemma of dilemmas) {
-    const scripture: TriviaScripture = {
-      reference: dilemma.anchorScripture.reference,
-      text: dilemma.anchorScripture.text,
-    };
-
-    push(buildChoice({
-      id: `d-figure:${dilemma.id}`,
-      kind: 'dilemma-figure',
-      tag: 'Ancient parallel',
-      prompt: `Which biblical figure parallels “${dilemma.title}”?`,
-      correct: cleanHeroName(dilemma.biblicalParallel.hero),
-      pool: dilemmaHeroPool,
-      explain: truncate(dilemma.biblicalParallel.event, 160),
-      scripture,
-    }));
-
-    push(buildChoice({
-      id: `d-ref:${dilemma.id}`,
-      kind: 'dilemma-reference',
-      tag: 'Counsel Scripture',
-      prompt: `Which Scripture anchors the counsel for “${dilemma.title}”?`,
-      correct: dilemma.anchorScripture.reference,
-      pool: familyPoolFor(dilemma.anchorScripture.reference, true),
-      explain: truncate(dilemma.anchorScripture.streetMeaning, 150),
       scripture,
     }));
   }

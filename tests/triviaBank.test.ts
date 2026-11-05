@@ -84,10 +84,9 @@ test.describe('Trivia Gauntlet — generated question bank integrity', () => {
     expect(new Set(references).size).toBe(references.length);
   });
 
-  test('non-dilemma scripture references resolve back to a verse', () => {
+  test('scripture references resolve back to a verse', () => {
     for (const q of bank) {
       if (!q.scripture) continue;
-      if (q.kind.startsWith('dilemma')) continue; // dilemma anchors may be compound refs
       expect(
         getVerseById(q.scripture.reference, 'en'),
         `unresolvable reference ${q.scripture.reference} in ${q.id}`,
