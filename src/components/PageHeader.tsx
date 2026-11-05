@@ -41,7 +41,8 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
               <span>{eyebrow}</span>
             </div>
           )}
-          <h1 className="text-title-1 text-fg">{title}</h1>
+          {/* Shrinks a little on narrow phones with large text so it never runs into the buttons. */}
+          <h1 className="text-title-1 text-fg" style={{ fontSize: 'min(1.75rem, 8.6vw)' }}>{title}</h1>
           {subtitle && (
             <p className="mt-1.5 max-w-2xl text-small sm:text-body text-fg-secondary">
               {subtitle}

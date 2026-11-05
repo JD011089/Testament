@@ -19,6 +19,8 @@ interface TodayScreenProps {
   streakCount?: number;
   onOpenMap?: () => void;
   onOpenDeck?: () => void;
+  /** Opens the Practice home (review plus trivia, psalms and more). */
+  onOpenPractice?: () => void;
   onReadChapter: (passage: string) => void;
   onPracticeVerse?: (ref: string) => void;
   onContinueReading?: () => void;
@@ -100,6 +102,7 @@ export function TodayScreen({
   streakCount = 0,
   onOpenMap,
   onOpenDeck,
+  onOpenPractice,
   onReadChapter,
   onPracticeVerse,
   onContinueReading,
@@ -150,6 +153,11 @@ export function TodayScreen({
 
   const practiceTarget = reviewQueue[0]?.card.ref ?? deckVerses[0]?.ref ?? null;
   const startReview = () => {
+    if (onOpenPractice) {
+      celebrate('tap');
+      onOpenPractice();
+      return;
+    }
     if (!practiceTarget || !onPracticeVerse) {
       onOpenDeck?.();
       return;

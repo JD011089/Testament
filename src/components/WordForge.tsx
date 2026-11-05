@@ -5,7 +5,6 @@ import { getAllVerses, getVerseById, normalizeVerseSlug } from '../utils/verseRe
 import { cleanWord, normalizeWord, VERSE_STOP_WORDS } from '../utils/verseText';
 import { soundEngine } from '../utils/audio';
 import { getDailyVerse } from '../utils/dailyEngine';
-import { CalendarRemindersModal } from './CalendarRemindersModal';
 import confetti from 'canvas-confetti';
 import { recordFSRSReview, getFSRSCard, previewFSRSDays, getDueFSRSCards, isVerseMastered, loadFSRSCards, saveFSRSCards, type FSRSCard } from '../utils/fsrsEngine';
 import { 
@@ -15,12 +14,11 @@ import {
   VolumeX, 
   CheckCircle, 
   ShieldCheck, 
-  Flame, 
+  
   ArrowRight, 
   Sparkles, 
   Brain,
   Clock,
-  Calendar,
   BookOpen
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
@@ -455,15 +453,10 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
             </div>
           </div>
 
-          <div className="p-3 bg-stone-200/50 dark:bg-stone-950/70 rounded-xl text-xs md:text-sm text-stone-700 dark:text-stone-300 italic">
-            <span className="not-italic inline-flex items-center gap-1 text-[10px] font-sans tabular-nums font-bold uppercase tracking-widest text-amber-800 dark:text-amber-300 bg-amber-500/15 px-2 py-0.5 rounded-full mb-1.5" role="note" aria-label="Plain English, Not Scripture">
-              Plain English • Not Scripture
-            </span>
-            <span className="block">"{verse.plainEnglishSummary}"</span>
-          </div>
-          <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-3">
-            {useFirstLetters ? t('forge.tilesFirstLetter') : t('forge.tilesMeaning')}
-          </p>
+          {/* Scripture only: no paraphrase next to the verse. */}
+          {useFirstLetters && (
+            <p className="text-[12px] text-fg-muted mt-1">{t('forge.tilesFirstLetter')}</p>
+          )}
         </div>
       </div>
 
@@ -480,7 +473,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                 : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
             }`}
           >
-            ⚡ Quick Recall (1 Round)
+            Fill gaps
           </button>
           <button
             type="button"
@@ -491,7 +484,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                 : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
             }`}
           >
-            By Phrase
+            Phrases
           </button>
           <button
             type="button"
@@ -502,7 +495,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                 : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
             }`}
           >
-            Progressive Reveal
+            Read & reveal
           </button>
           <button
             type="button"
@@ -513,7 +506,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
                 : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
             }`}
           >
-            Full Verse
+            Whole verse
           </button>
         </div>
 
@@ -523,7 +516,7 @@ const PuzzleWorkbench: React.FC<PuzzleWorkbenchProps> = ({
             <div className="p-5 md:p-6 rounded-2xl bg-stone-100/70 dark:bg-stone-900/60 space-y-5">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-sans tabular-nums uppercase font-bold text-amber-800 dark:text-amber-400">
-                  Quick Recall Drill • 1 Round
+                  Fill the gaps
                 </span>
                 <span className="text-[11px] font-sans tabular-nums text-stone-500 dark:text-stone-400">
                   {isCompleted ? '✓ Complete' : `Blank ${activeBlankStep + 1} of ${blankIndices.length}`}
@@ -905,7 +898,6 @@ export const WordForge: React.FC<WordForgeProps> = ({
   const { t, language } = useLanguage();
   const allVerses = getAllVerses(language);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState<boolean>(false);
 
   const findVerseIndex = (targetId: string | null | undefined, list: MemoryVerse[]): number => {
     if (!targetId) return -1;
@@ -1047,42 +1039,10 @@ export const WordForge: React.FC<WordForgeProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-8 pb-2 md:pb-6 text-left">
-      {/* Header */}
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-sans tabular-nums font-semibold uppercase tracking-widest text-amber-800 dark:text-amber-500 mb-1">
-            <Flame className="w-4 h-4" />
-            <span>{t('forge.badge')}</span>
-          </div>
-          <h1 className="text-2xl md:text-4xl font-serif font-black text-stone-900 dark:text-parchment-50">
-            {t('forge.title')}
-          </h1>
-          <p className="text-xs md:text-sm text-stone-600 dark:text-stone-400 mt-1">
-            {t('forge.subtitle')}
-          </p>
-          {verseNotice && (
-            <p className="text-xs text-amber-800 dark:text-amber-300 mt-2">{verseNotice}</p>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2">
-
-          <button
-            onClick={() => {
-              soundEngine.playClick();
-              setIsCalendarModalOpen(true);
-            }}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-500/15 text-amber-800 dark:text-amber-300 text-xs font-semibold hover:bg-amber-500 hover:text-stone-950 transition-all cursor-pointer"
-            title="Daily reminders"
-          >
-            <Calendar className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
-            <span>Daily Reminders</span>
-          </button>
-        </div>
-      </div>
+      {verseNotice && <p className="text-xs text-accent-text mb-3">{verseNotice}</p>}
 
       {/* Category Pills */}
-      <div className="flex flex-wrap gap-2 pb-3 mb-6" role="tablist" aria-label={t('dilemma.category')}>
+      <div className="flex gap-2 overflow-x-auto pb-2 mb-4 -mx-4 px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="tablist" aria-label={t('dilemma.category')}>
         {categories.map(cat => {
           const catLabel = cat === 'All' ? t('forge.all')
             : cat === 'Courage & Facing Giants' ? t('forge.courage')
@@ -1144,13 +1104,6 @@ export const WordForge: React.FC<WordForgeProps> = ({
         </button>
       </div>
 
-      {/* Calendar Reminders Modal */}
-      <CalendarRemindersModal
-        isOpen={isCalendarModalOpen}
-        onClose={() => setIsCalendarModalOpen(false)}
-        initialType="recall"
-        targetVerse={currentVerse}
-      />
     </div>
   );
 };

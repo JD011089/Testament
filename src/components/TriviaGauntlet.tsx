@@ -6,7 +6,7 @@ import { buildTriviaBank, pickRunFromBank, type TriviaQuestion } from '../utils/
 import { getVerseById } from '../utils/verseRegistry';
 import { getDailyVerse } from '../utils/dailyEngine';
 import { getDueFSRSCards, recordFSRSReview } from '../utils/fsrsEngine';
-import { PageHeader } from './PageHeader';
+import { usePracticeStrings } from './practice/strings';
 import {
   Gamepad2,
   Heart,
@@ -20,8 +20,8 @@ import {
   RotateCcw,
   Crown,
   Sparkles,
-  Swords,
-  Target,
+  ChevronLeft,
+  Play,
   BookOpen
 } from 'lucide-react';
 
@@ -83,6 +83,8 @@ interface SavedRun {
 interface TriviaGauntletProps {
   onRewardXP?: (amount: number) => void;
   onStudyVerse?: (reference: string) => void;
+  /** Leave the game (back to Practice). */
+  onExit?: () => void;
 }
 
 function timeForIndex(index: number, mode: GameMode): number {
@@ -147,8 +149,9 @@ function readMissed(): string[] {
   }
 }
 
-export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onStudyVerse }) => {
+export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onStudyVerse, onExit }) => {
   const { language } = useLanguage();
+  const s = usePracticeStrings();
 
   const bank = useMemo(() => buildTriviaBank(language), [language]);
 
@@ -490,18 +493,7 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
   const accuracy = attempted > 0 ? Math.round((correctCount / attempted) * 100) : 0;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-8 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] text-left">
-      {/* The intro owns the header; during play it would only push options off screen. */}
-      {phase === 'intro' && (
-        <PageHeader
-          className="mb-6"
-          eyebrow="Scripture Arcade"
-          eyebrowIcon={<Gamepad2 className="w-4 h-4" />}
-          title="Bible Trivia"
-          subtitle="Ten questions drawn straight from the verses, stories, and books inside your Bible. Miss one and you'll be pointed to the exact passage to study it — then it comes back later until you get it."
-        />
-      )}
-
+    <div className="max-w-xl mx-auto px-4 sm:px-6 pt-3 md:pt-8 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] text-left">
       <AnimatePresence mode="wait">
         {phase === 'intro' && (
           <motion.div
@@ -509,102 +501,88 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="space-y-4"
+            className="space-y-3"
           >
+            {onExit && (
+              <button
+                type="button"
+                onClick={() => { soundEngine.playClick(); onExit(); }}
+                className="inline-flex items-center gap-1 min-h-[44px] -ml-1 pl-1 pr-3 rounded-full text-[15px] font-semibold text-fg-secondary hover:bg-stone-100 dark:hover:bg-stone-850"
+              >
+                <ChevronLeft className="w-5 h-5" aria-hidden="true" />
+                {s.practice}
+              </button>
+            )}
+
+            <section className="rounded-3xl p-5 text-center text-white bg-[linear-gradient(150deg,#23408E,#16295C)] dark:bg-[linear-gradient(150deg,#1D2A4A,#121A2E)] dark:text-fg shadow-[0_16px_34px_-16px_rgba(10,15,30,0.6)]">
+              <span className="mx-auto mb-2.5 w-16 h-16 rounded-[20px] bg-white/15 flex items-center justify-center">
+                <Gamepad2 className="w-8 h-8" aria-hidden="true" />
+              </span>
+              <h1 className="font-serif text-[1.7rem] font-semibold">{s.trivia}</h1>
+              <p className="text-[13.5px] leading-snug opacity-90 mt-1">{s.triviaIntro}</p>
+            </section>
+
             {savedRun && (
-              <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/30">
-                <span className="text-xs text-indigo-800 dark:text-indigo-300">
+              <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-amber-100 dark:bg-amber-500/15 border border-line">
+                <span className="text-xs text-fg-secondary">
                   Paused run — question {savedRun.index + 1} of {savedRun.questions.length}, {savedRun.score} points.
                 </span>
-                <button
-                  type="button"
-                  onClick={resumeRun}
-                  className="btn-gold px-4 py-2 rounded-xl text-xs cursor-pointer"
-                >
+                <button type="button" onClick={resumeRun} className="btn-primary !min-h-10 px-4 text-xs">
                   Resume run
                 </button>
               </div>
             )}
 
-            <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-stone-100/70 dark:bg-stone-900/50">
+            <div className="grid grid-cols-2 gap-2" role="radiogroup">
               {(['relaxed', 'arcade'] as GameMode[]).map((option) => (
                 <button
                   key={option}
                   type="button"
+                  role="radio"
+                  aria-checked={mode === option}
                   onClick={() => {
                     setMode(option);
                     writeMode(option);
                   }}
-                  className={`flex-1 px-4 py-2.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
-                    mode === option
-                      ? 'bg-amber-500 text-accent-on'
-                      : 'text-stone-600 dark:text-stone-300 hover:bg-stone-200/60 dark:hover:bg-stone-800'
+                  className={`rounded-2xl border-[1.5px] px-3 py-2.5 text-left transition-colors ${
+                    mode === option ? 'border-accent bg-amber-100 dark:bg-amber-500/15' : 'border-line bg-surface-raised'
                   }`}
                 >
-                  {option === 'relaxed' ? 'Relaxed · 20s each' : 'Arcade · accelerating clock'}
+                  <span className="block text-[14px] font-bold text-fg">{option === 'relaxed' ? s.relaxed : s.quickFire}</span>
+                  <span className="block text-[12px] text-fg-muted">{option === 'relaxed' ? s.relaxedHint : s.quickFireHint}</span>
                 </button>
               ))}
             </div>
 
-            <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-stone-100/60 dark:to-stone-900/60 border border-amber-500/20">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-                <div className="p-3 rounded-2xl bg-white/70 dark:bg-stone-900/60">
-                  <Target className="w-5 h-5 mx-auto text-amber-600 dark:text-amber-400 mb-1" />
-                  <div className="text-sm font-serif font-black text-stone-900 dark:text-parchment-50">{QUESTIONS_PER_RUN} Qs</div>
-                  <div className="text-[10px] font-sans tabular-nums uppercase tracking-wider text-stone-500 dark:text-stone-400">{bank.length} in bank</div>
+            <div className="grid grid-cols-3 gap-2 text-center">
+              {[
+                [String(QUESTIONS_PER_RUN), s.questions],
+                [String(STARTING_LIVES), s.lives],
+                ['2×', s.comboBonus],
+              ].map(([value, label]) => (
+                <div key={label} className="rounded-2xl border border-line bg-surface-raised px-2 py-2.5">
+                  <b className="block font-serif text-lg text-fg">{value}</b>
+                  <span className="text-[11px] font-semibold text-fg-muted">{label}</span>
                 </div>
-                <div className="p-3 rounded-2xl bg-white/70 dark:bg-stone-900/60">
-                  <Heart className="w-5 h-5 mx-auto text-red-500 mb-1" />
-                  <div className="text-sm font-serif font-black text-stone-900 dark:text-parchment-50">{STARTING_LIVES} Lives</div>
-                  <div className="text-[10px] font-sans tabular-nums uppercase tracking-wider text-stone-500 dark:text-stone-400">Miss = 1 life</div>
-                </div>
-                <div className="p-3 rounded-2xl bg-white/70 dark:bg-stone-900/60">
-                  <Flame className="w-5 h-5 mx-auto text-orange-500 mb-1" />
-                  <div className="text-sm font-serif font-black text-stone-900 dark:text-parchment-50">Combos</div>
-                  <div className="text-[10px] font-sans tabular-nums uppercase tracking-wider text-stone-500 dark:text-stone-400">Up to 2× points</div>
-                </div>
-                <div className="p-3 rounded-2xl bg-white/70 dark:bg-stone-900/60">
-                  <Crown className="w-5 h-5 mx-auto text-amber-500 mb-1" />
-                  <div className="text-sm font-serif font-black text-stone-900 dark:text-parchment-50">Boss</div>
-                  <div className="text-[10px] font-sans tabular-nums uppercase tracking-wider text-stone-500 dark:text-stone-400">2× final Q</div>
-                </div>
-              </div>
+              ))}
+            </div>
 
-              {missedIds.length > 0 && (
-                <div className="mt-4 flex items-center gap-2.5 p-3 rounded-2xl bg-indigo-500/10 text-xs text-indigo-800 dark:text-indigo-300">
-                  <BookOpen className="w-4 h-4 shrink-0" />
-                  <span>
-                    {missedIds.length} missed question{missedIds.length === 1 ? '' : 's'} queued — they will come back
-                    until you get them right.
-                  </span>
-                </div>
-              )}
-
-              <p className="text-xs text-stone-600 dark:text-stone-400 mt-4">
-                {mode === 'relaxed'
-                  ? 'Relaxed gives you 20 seconds on every question — the clock never shrinks. Change the mode above anytime.'
-                  : 'Arcade starts at 13 seconds and shortens each question; the final boss question is worth double. Miss one and you lose a life.'}
-                {' '}Keyboard: press <kbd className="px-1.5 py-0.5 rounded bg-stone-200 dark:bg-stone-800 font-sans tabular-nums text-[10px]">1–4</kbd> to
-                answer, <kbd className="px-1.5 py-0.5 rounded bg-stone-200 dark:bg-stone-800 font-sans tabular-nums text-[10px]">Enter</kbd> to continue.
+            {missedIds.length > 0 && (
+              <p className="flex items-center gap-2 rounded-2xl bg-stone-100 dark:bg-stone-900 px-3.5 py-2.5 text-xs text-fg-secondary">
+                <BookOpen className="w-4 h-4 shrink-0 text-accent-text" aria-hidden="true" />
+                {s.missedQueued(missedIds.length)}
               </p>
-            </div>
+            )}
 
-            <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl bg-stone-100/70 dark:bg-stone-900/50">
-              <div className="flex items-center gap-2 text-xs font-sans tabular-nums text-stone-600 dark:text-stone-400">
-                <Trophy className="w-4 h-4 text-amber-500" />
-                <span>High score: <strong className="text-stone-900 dark:text-parchment-50">{highScore}</strong></span>
-                <span className="text-stone-400">•</span>
-                <span>Best combo: <strong className="text-stone-900 dark:text-parchment-50">{bestComboEver}</strong></span>
-              </div>
-              <button
-                type="button"
-                onClick={startGame}
-                className="btn-gold w-full sm:w-auto px-7 py-3.5 rounded-2xl text-sm flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Swords className="w-4 h-4" />
-                <span>Start the quiz</span>
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={startGame}
+              className="btn-primary w-full !max-w-none flex items-center justify-center gap-2"
+            >
+              <Play className="w-4 h-4 fill-current" aria-hidden="true" />
+              <span>{s.startQuiz}</span>
+            </button>
+            <p className="text-center text-xs font-semibold text-fg-muted">{s.best(highScore, bestComboEver)}</p>
           </motion.div>
         )}
 
@@ -623,7 +601,7 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
                 onClick={quitToIntro}
                 className="text-xs font-semibold text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 py-1.5 px-2.5 rounded-xl hover:bg-stone-200/50 dark:hover:bg-stone-800 transition-colors cursor-pointer"
               >
-                Quit
+                {s.quit}
               </button>
 
               <div className="flex items-center gap-2">
@@ -672,11 +650,11 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
                 {isBoss && (
                   <span className="flex items-center gap-1 text-[10px] font-sans tabular-nums font-bold uppercase tracking-widest text-accent-on bg-amber-500 px-2 py-0.5 rounded-full">
                     <Crown className="w-3 h-3" />
-                    Final Boss • 2× points
+                    {s.finalQuestion}
                   </span>
                 )}
                 {isReviewQuestion && (
-                  <span className="flex items-center gap-1 text-[10px] font-sans tabular-nums font-bold uppercase tracking-widest text-indigo-700 dark:text-indigo-300 bg-indigo-500/15 px-2 py-0.5 rounded-full">
+                  <span className="flex items-center gap-1 text-[10px] font-sans tabular-nums font-bold uppercase tracking-widest text-accent-text bg-amber-100 dark:bg-amber-500/15 px-2 py-0.5 rounded-full">
                     <RotateCcw className="w-3 h-3" />
                     Review round
                   </span>
@@ -817,7 +795,7 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
                   <button
                     type="button"
                     onClick={handleNext}
-                    className="btn-gold w-full flex items-center justify-center gap-2 py-3 px-5 rounded-2xl text-sm cursor-pointer"
+                    className="btn-primary w-full !max-w-none flex items-center justify-center gap-2"
                   >
                     <span>{lives <= 0 ? 'See results' : index + 1 >= questions.length ? 'Finish run' : 'Next question'}</span>
                     <ArrowRight className="w-4 h-4" />
@@ -886,7 +864,7 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
 
               {missedThisRun.length > 0 && (
                 <div className="mt-5 text-left">
-                  <div className="flex items-center gap-2 text-[11px] font-sans tabular-nums uppercase tracking-wider text-indigo-800 dark:text-indigo-300 mb-2">
+                  <div className="flex items-center gap-2 text-[11px] font-sans tabular-nums uppercase tracking-wider text-accent-text mb-2">
                     <BookOpen className="w-3.5 h-3.5" />
                     {missedThisRun.length} missed this run — added to your review
                   </div>
@@ -903,7 +881,7 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
                               soundEngine.playSnap();
                               onStudyVerse(reference);
                             }}
-                            className="px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-800 dark:text-indigo-300 text-xs font-sans tabular-nums cursor-pointer"
+                            className="px-3 py-1.5 rounded-xl bg-amber-100 dark:bg-amber-500/15 text-accent-text text-xs font-sans tabular-nums cursor-pointer"
                           >
                             {reference}
                           </button>
@@ -932,17 +910,17 @@ export const TriviaGauntlet: React.FC<TriviaGauntletProps> = ({ onRewardXP, onSt
               <button
                 type="button"
                 onClick={startGame}
-                className="btn-gold flex-1 flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl text-sm cursor-pointer"
+                className="btn-primary flex-1 !max-w-none flex items-center justify-center gap-2"
               >
                 <RotateCcw className="w-4 h-4" />
-                <span>Play Again</span>
+                <span>{s.playAgain}</span>
               </button>
               <button
                 type="button"
-                onClick={quitToIntro}
-                className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl text-sm font-bold bg-stone-200/70 dark:bg-stone-800 text-stone-800 dark:text-stone-200 hover:bg-stone-300/70 dark:hover:bg-stone-750 transition-colors cursor-pointer"
+                onClick={() => { if (onExit) { clearSavedRun(); onExit(); } else { quitToIntro(); } }}
+                className="flex-1 flex items-center justify-center gap-2 min-h-[48px] px-6 rounded-full text-sm font-bold border border-line bg-surface-raised text-fg-secondary transition-colors cursor-pointer"
               >
-                <span>Back to briefing</span>
+                <span>{s.done}</span>
               </button>
             </div>
           </motion.div>

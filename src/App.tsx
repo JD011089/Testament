@@ -2,7 +2,6 @@ import { lazy, Suspense, useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import type { StoryQuest } from './types';
 import { STORY_QUESTS } from './data/stories';
-import { Dashboard } from './components/Dashboard';
 import { StoryViewer } from './components/StoryViewer';
 import { Navigation } from './components/Navigation';
 import type { NavTab } from './components/Navigation';
@@ -93,7 +92,7 @@ function persistNumber(key: string, value: number) {
 
 export function App() {
   const [currentTab, setCurrentTabState] = useState<AppTab>(() => {
-    if (typeof window === 'undefined') return 'dashboard';
+    if (typeof window === 'undefined') return 'today';
     if (isAppPagePath(window.location.pathname)) {
       const saved = (window.history.state as { tab?: string } | null)?.tab;
       if (saved && saved in TAB_PATHS) return normalizeTab(saved as AppTab);
@@ -881,6 +880,7 @@ export function App() {
                   streakCount={streakCount}
                   onOpenMap={() => setCurrentTab('map')}
                   onOpenDeck={() => setCurrentTab('deck')}
+                  onOpenPractice={() => { setCurrentTab('practice'); window.scrollTo({ top: 0 }); }}
                   onReadChapter={handleReadChapterFromStory}
                   onPracticeVerse={handlePracticeVerseFromArsenal}
                   onContinueReading={() => {
@@ -917,63 +917,10 @@ export function App() {
               <Suspense fallback={<ViewFallback />}>
                 <DeckScreen
                   onPractice={handlePracticeVerseFromArsenal}
+                  onPlayStory={handlePlayStory}
                   onReadChapter={handleReadChapterFromStory}
                 />
               </Suspense>
-            )}
-
-            {currentTab === 'dashboard' && (
-              <Dashboard 
-                onSelectQuest={handleSelectQuest}
-                onStartDailyMission={handleStartDailyMission}
-                onPlayStory={handlePlayStory}
-                onOpenWordForge={(verseId?: string) => {
-                  soundEngine.stopSpeaking();
-                  if (verseId) setTargetWordForgeVerseId(verseId);
-                  setCurrentTab('wordforge');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                onOpenArsenal={() => {
-                  soundEngine.stopSpeaking();
-                  setCurrentTab('arsenal');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                onOpenProverbs={() => setIsProverbsOpen(true)}
-                onOpenPsalms={() => setIsPsalmsOpen(true)}
-                onOpenLibrary={() => {
-                  soundEngine.stopSpeaking();
-                  setCurrentTab('library');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                onContinueReading={() => {
-                  const place = loadReadingPlace();
-                  soundEngine.stopSpeaking();
-                  if (place) {
-                    setLibraryPassage({
-                      book: place.bookName,
-                      chapter: place.chapter,
-                      verseStart: 0,
-                      verseEnd: 0,
-                    });
-                  }
-                  setCurrentTab('library');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                completedActs={completedActs}
-                memorizedVerses={memorizedVerses}
-                unlockedRelics={unlockedRelics}
-                streakCount={streakCount}
-                xp={xp}
-                currentAmbience={currentAmbience}
-                onToggleAmbience={handleToggleAmbience}
-                userProfile={userProfile}
-                onOpenOnboarding={() => openPage('plan')}
-                onOpenWhatsNew={() => openModalWithHistory('whatsnew', () => setIsWhatsNewOpen(true))}
-                onOpenHowItWorks={() => openPage('how-it-works')}
-                onOpenSettings={openSettingsPage}
-                onRewardXP={handleRewardXP}
-                onLaunchCampaignStep={handleLaunchCampaignStep}
-              />
             )}
 
             {currentTab === 'library' && (
@@ -997,7 +944,7 @@ export function App() {
 
             {currentTab === 'game' && (
               <Suspense fallback={<ViewFallback />}>
-                <TriviaGauntlet onRewardXP={handleRewardXP} onStudyVerse={handlePracticeVerseFromArsenal} />
+                <TriviaGauntlet onRewardXP={handleRewardXP} onStudyVerse={handlePracticeVerseFromArsenal} onExit={() => { setCurrentTab('practice'); window.scrollTo({ top: 0 }); }} />
               </Suspense>
             )}
 
@@ -1008,6 +955,8 @@ export function App() {
                   onVerseMastered={handleVerseMastered}
                   targetVerseId={targetWordForgeVerseId}
                   onClearTargetVerse={() => setTargetWordForgeVerseId(null)}
+                  onOpenTrivia={() => { setCurrentTab('game'); window.scrollTo({ top: 0 }); }}
+                  onOpenDriveMode={() => openModalWithHistory('drivemode', () => setIsDriveModeOpen(true))}
                 />
               </Suspense>
             )}
@@ -1029,7 +978,7 @@ export function App() {
                   type="button"
                   onClick={() => {
                     soundEngine.playClick();
-                    setCurrentTab('dashboard');
+                    setCurrentTab('today');
                   }}
                   className="btn-primary text-xs shadow-md transition-all cursor-pointer"
                 >
