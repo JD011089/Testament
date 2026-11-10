@@ -4,11 +4,12 @@ import { VerseLine } from './VerseLine';
 import { celebrate } from '../../utils/feedback';
 
 /**
- * A choice moment: the learner picks, then sees what really happened with the
- * actual verse. This replaces the old Dilemmas.
+ * A choice moment: the learner picks, sees the scene that pick leads to (when
+ * the option has one), then what really happened with the actual verse.
  */
 export function ChoiceMoment({ card, onComplete, compact = false, veryCompact = false }: { card: ChoiceCard; onComplete: () => void; compact?: boolean; veryCompact?: boolean }) {
   const [picked, setPicked] = useState<number | null>(null);
+  const [sceneSeen, setSceneSeen] = useState(false);
 
   if (picked === null) {
     return (
@@ -31,6 +32,17 @@ export function ChoiceMoment({ card, onComplete, compact = false, veryCompact = 
   }
 
   const option = card.options[picked];
+  if (option.scene && !sceneSeen) {
+    return (
+      <div className={compact ? 'space-y-2' : 'space-y-4'}>
+        <span className="text-label uppercase text-amber-100">{option.label}</span>
+        <p className={`font-serif leading-snug text-white ${veryCompact ? 'text-base' : compact ? 'text-lg' : 'text-xl sm:text-2xl'}`}>{option.scene}</p>
+        <button type="button" onClick={() => { celebrate('snap'); setSceneSeen(true); }} className="btn-primary w-full">
+          Continue
+        </button>
+      </div>
+    );
+  }
   return (
     <div className={compact ? 'space-y-2' : 'space-y-4'}>
       <p className="text-small text-white/75">{option.response}</p>

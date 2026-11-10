@@ -3,6 +3,7 @@ import type { InteractionCard, PayoffCard, Story, StoryArc, StoryCard, TapReveal
 import { getStoryCardIndex, isStoryCompleted, markStoryComplete, saveStoryCursor } from '../../utils/storyProgress';
 import { addVerseCard } from '../../utils/deck';
 import { recordDailyActivityStreak } from '../../utils/dailyEngine';
+import { nextUnplayedStoryId } from '../../utils/dailyStory';
 import { celebrate, isSoundEnabled } from '../../utils/feedback';
 import { soundEngine } from '../../utils/audio';
 import { findNarrationClip, spokenTextForCard, type NarrationManifest } from '../../utils/narrationScript';
@@ -35,6 +36,8 @@ interface StoryPlayerProps {
   onExit: () => void;
   onReadChapter: (passage: string) => void;
   onCompleted?: (story: Story) => void;
+  /** Opens another story straight from the finish screen. */
+  onPlayNext?: (storyId: string) => void;
 }
 
 function narrationAudioEnabled(): boolean {
@@ -60,7 +63,7 @@ function InteractionCardView({ card, onComplete, density }: { card: InteractionC
   }
 }
 
-export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: StoryPlayerProps) {
+export function StoryPlayer({ story, onExit, onReadChapter, onCompleted, onPlayNext }: StoryPlayerProps) {
   const { t } = useLanguage();
   const lastIndex = story.cards.length - 1;
   const [index, setIndex] = useState(() => isStoryCompleted(story.id) ? 0 : Math.min(getStoryCardIndex(story.id), lastIndex));
@@ -85,7 +88,8 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
     const fitToViewport = () => {
       window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(() => {
-        if (stage.scrollHeight > main.clientHeight + 2) {
+        // Measure main, not the stage: main's padding counts toward what has to fit.
+        if (main.scrollHeight > main.clientHeight + 2) {
           setDensity((current) => Math.min(current + 1, 2));
         }
       });
@@ -196,8 +200,14 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
     onExit();
   };
 
-  const canTapAdvance = card.type === 'narration' || card.type === 'payoff';
+  const nextStoryId = completed && onPlayNext ? nextUnplayedStoryId(story.id) : null;
+  const canTapAdvance =card.type === 'narration' || card.type === 'payoff';
   const sceneId = isStorySceneId(story.id) && getStoryScene(story.id) ? story.id : undefined;
+  // Some stories keep the finished picture back until the reveal card, so it does not spoil the ending.
+  const revealIndex = story.cards.findIndex((c) => c.type === 'interaction' && c.kind === 'tap-reveal');
+  const beforeArt = story.hideArtUntilReveal && sceneId && !completed && index < revealIndex
+    ? getStoryScene(sceneId)?.anchor.src
+    : undefined;
   const tapScene =
     card.type === 'interaction' &&
     card.kind === 'tap-reveal' &&
@@ -217,7 +227,7 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
       className="story-reader fixed inset-0 z-[100] isolate flex flex-col overflow-hidden bg-stone-950 text-white overscroll-none"
     >
       <img
-        src={getStoryIllustrationUrl(story.id)}
+        src={beforeArt ?? getStoryIllustrationUrl(story.id)}
         alt=""
         aria-hidden="true"
         className="absolute inset-0 h-full w-full object-cover object-center opacity-70"
@@ -273,7 +283,7 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
                 <span className="inline-flex rounded-full border border-amber-200/30 bg-amber-200/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-100">{t('story.stageYourTurn')}</span>
                 <p className={`font-serif leading-snug text-white ${density > 1 ? 'mt-1 text-base' : density ? 'mt-2 text-lg' : 'mt-3 text-xl sm:text-2xl'}`}>{card.prompt}</p>
               </div>
-              {sceneBehind && sceneId && <StoryWorld scene={sceneId} stepIndex={99} compact={density > 0} veryCompact={density > 1} />}
+              {sceneBehind && sceneId && <StoryWorld scene={sceneId} stepIndex={99} imageSrc={beforeArt} compact={density > 0} veryCompact={density > 1} />}
               <InteractionCardView card={card} density={density} onComplete={() => setCardDone(true)} />
               {cardDone ? (
                 <p className={`rounded-2xl bg-amber-200/10 text-sm font-medium text-amber-100 ${density > 1 ? 'px-2 py-1' : density ? 'px-3 py-1.5' : 'px-4 py-3'}`} aria-live="polite">
@@ -327,13 +337,22 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted }: Story
               <Check className="h-4 w-4" /> {t('story.doneForNow')}
             </button>
           )}
-          {completed && (
+          {completed && nextStoryId && (
+            <button type="button" onClick={() => onPlayNext?.(nextStoryId)} className="btn-primary min-h-12 flex-1 inline-flex items-center justify-center gap-2">
+              {t('story.nextStory')} <ArrowRight className="h-4 w-4" />
+            </button>
+          )}
+          {completed && !nextStoryId && (
             <button type="button" onClick={requestExit} className="btn-primary min-h-12 flex-1 inline-flex items-center justify-center gap-2">
               <Check className="h-4 w-4" /> {t('finish.done')}
             </button>
           )}
         </div>
-        {completed && <p className="mx-auto mt-2 max-w-xl text-center text-xs text-white/60">{t('story.doneFooter')}</p>}
+        {completed && nextStoryId && (
+          <button type="button" onClick={requestExit} className="btn-quiet mx-auto mt-1 !min-h-10 text-xs !text-white/70">
+            {t('story.enoughToday')}
+          </button>
+        )}
       </footer>
     </div>
   );

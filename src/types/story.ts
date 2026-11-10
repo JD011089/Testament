@@ -46,6 +46,8 @@ export interface DragItem {
   label: string;
   /** Whether dropping this item into the target counts toward the goal. */
   accept?: boolean;
+  /** Narration shown when a wrong item is dropped on the target. */
+  rejectText?: string;
 }
 
 export interface DragConfig {
@@ -92,6 +94,8 @@ export interface InteractionCard {
 export interface ChoiceOption {
   label: string;
   response: string;
+  /** A scene only this option leads to, shown on its own before what really happened. */
+  scene?: string;
 }
 
 export interface WhatHappened {
@@ -139,6 +143,8 @@ export interface Story {
   verse: StoryVerse;
   /** One personal question asked on the finish screen. */
   reflection?: string;
+  /** Show the scene's "before" picture until the tap-reveal card, so the art does not give away the ending. */
+  hideArtUntilReveal?: boolean;
   quiz: QuizItem[];
 }
 

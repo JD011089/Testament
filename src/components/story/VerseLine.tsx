@@ -1,6 +1,14 @@
 import type { ScriptureLine } from '../../types/story';
 
 /**
+ * A verse that opens mid-speech starts with a quote mark that never closes.
+ * Drop it where the text is already wrapped in quote marks.
+ */
+export function stripOpenQuote(text: string): string {
+  return text.startsWith('“') && !text.includes('”') ? text.slice(1) : text;
+}
+
+/**
  * A real Scripture line: gold highlight with its reference and translation.
  * Never used for AI-written narration.
  */
@@ -9,7 +17,7 @@ export function VerseLine({ line, className = '', compact = false, veryCompact =
     <figure className={`rounded-2xl border border-accent/40 bg-accent/10 ${compact ? 'p-2' : 'p-3 sm:p-4'} ${className}`}>
       <blockquote className={`font-reading text-fg italic ${veryCompact ? 'text-[clamp(0.72rem,1.5dvh,0.86rem)]' : compact ? 'text-[clamp(0.78rem,1.7dvh,0.95rem)]' : 'text-body'}`}>
         <span className="text-accent text-title-4 not-italic">“</span>
-        {line.text}
+        {stripOpenQuote(line.text)}
         <span className="text-accent text-title-4 not-italic">”</span>
       </blockquote>
       <figcaption className={`mt-2 flex items-center gap-2 text-fg-muted ${compact ? 'text-[10px]' : 'text-ref'}`}>

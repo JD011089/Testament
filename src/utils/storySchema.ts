@@ -86,6 +86,8 @@ function validateChoice(card: Record<string, unknown>, where: string, errors: st
     card.options.forEach((option, i) => {
       if (!isObject(option) || typeof option.label !== 'string' || typeof option.response !== 'string') {
         errors.push(`${where}: option ${i} needs label and response`);
+      } else if (option.scene !== undefined && (typeof option.scene !== 'string' || !option.scene.trim())) {
+        errors.push(`${where}: option ${i} scene must be text`);
       }
     });
   }
@@ -187,6 +189,7 @@ export function validateStory(raw: unknown): ValidationResult {
     cards,
     verse: raw.verse as Story['verse'],
     reflection: raw.reflection as string | undefined,
+    hideArtUntilReveal: raw.hideArtUntilReveal === true,
     quiz
   };
   return { ok: true, story };

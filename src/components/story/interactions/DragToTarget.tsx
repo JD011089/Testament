@@ -27,6 +27,7 @@ export function DragToTarget({ config, disabled, onComplete }: InteractionProps<
   const [placed, setPlaced] = useState<string[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [wrongId, setWrongId] = useState<string | null>(null);
+  const [rejectNote, setRejectNote] = useState<string | null>(null);
   const [drag, setDrag] = useState<DragState | null>(null);
   const [overTarget, setOverTarget] = useState(false);
   const targetRef = useRef<HTMLDivElement | null>(null);
@@ -43,17 +44,20 @@ export function DragToTarget({ config, disabled, onComplete }: InteractionProps<
     if (!isCorrect) {
       nudge();
       setWrongId(itemId);
+      setRejectNote(config.items.find((item) => item.id === itemId)?.rejectText ?? null);
+      setSelected(null);
       window.setTimeout(() => setWrongId(null), 450);
       return;
     }
     const next = [...placed, itemId];
     setPlaced(next);
+    setRejectNote(null);
     setSelected(null);
     celebrate('settle');
     if (next.length >= config.requiredCount) {
       window.setTimeout(() => { celebrate('victory'); onComplete(); }, 250);
     }
-  }, [config.requiredCount, disabled, onComplete, placed, targetIds]);
+  }, [config.items, config.requiredCount, disabled, onComplete, placed, targetIds]);
 
   const clearDrag = () => {
     dragRef.current = null;
@@ -221,6 +225,10 @@ export function DragToTarget({ config, disabled, onComplete }: InteractionProps<
           {selected ? t('story.tapBag') : t('story.dragHint')}
         </span>
       </div>
+
+      {rejectNote && (
+        <p className="rounded-2xl bg-white/10 px-3 py-2 text-center text-small text-white/85" aria-live="polite">{rejectNote}</p>
+      )}
 
       {remaining.length === 0 && (
         <p className="text-center text-small text-success font-semibold">{t('story.allStones')}</p>

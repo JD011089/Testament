@@ -38,17 +38,19 @@ export function getQuizIssues(story: Story): string[] {
   return issues;
 }
 
-/** Deterministic option shuffle so a rerun is stable but not answer-first. */
-function rotateOptions(item: QuizItem): QuizItem {
+/** Random option order each run, so the answer's position gives nothing away. */
+function shuffleOptions(item: QuizItem, random: () => number): QuizItem {
   const answer = item.options[item.answerIndex];
-  const others = item.options.filter((_, i) => i !== item.answerIndex);
-  const ordered = [...others.slice(1), others[0] ?? '', answer].filter(Boolean);
-  const options = ordered.slice(0, item.options.length);
+  const options = [...item.options];
+  for (let i = options.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [options[i], options[j]] = [options[j], options[i]];
+  }
   return { ...item, options, answerIndex: options.indexOf(answer) };
 }
 
 /** Pick one who / what / where question (in that order) from the story. */
-export function buildQuizRun(story: Story): QuizItem[] {
+export function buildQuizRun(story: Story, random: () => number = Math.random): QuizItem[] {
   const picked: QuizItem[] = [];
   for (const category of CATEGORY_ORDER) {
     const match = story.quiz.find((item) => item.category === category && !picked.includes(item));
@@ -58,5 +60,5 @@ export function buildQuizRun(story: Story): QuizItem[] {
     if (picked.length >= 3) break;
     if (!picked.includes(item)) picked.push(item);
   }
-  return picked.slice(0, 3).map(rotateOptions);
+  return picked.slice(0, 3).map((item) => shuffleOptions(item, random));
 }

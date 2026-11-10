@@ -6,7 +6,8 @@ import { useModalLock } from '../../utils/useModalLock';
 import { Play, Layers, Bell, Sparkles } from 'lucide-react';
 
 interface FirstRunProps {
-  onDone: () => void;
+  /** `startStory` is true when the person tapped the "Start with…" button. */
+  onDone: (startStory?: boolean) => void;
 }
 
 export function FirstRun({ onDone }: FirstRunProps) {
@@ -29,7 +30,7 @@ export function FirstRun({ onDone }: FirstRunProps) {
     celebrate('tap');
     if (isLast) {
       markFirstRunDone();
-      onDone();
+      onDone(true);
       return;
     }
     setIndex((i) => i + 1);

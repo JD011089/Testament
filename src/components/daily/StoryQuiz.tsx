@@ -53,10 +53,7 @@ export function StoryQuiz({ story, onDone }: StoryQuizProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between text-small text-fg-muted">
-        <span>Question {index + 1} of {run.length}</span>
-        <span className="uppercase text-label">{item.category}</span>
-      </div>
+      <p className="text-small text-fg-muted">Question {index + 1} of {run.length}</p>
       <p className="text-title-3 text-fg">{item.question}</p>
       <div className="grid gap-2">
         {item.options.map((option, i) => {

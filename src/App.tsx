@@ -25,6 +25,7 @@ import { pathForTab, tabFromPath, storyIdFromPath, pathForStory, pageFromPath, P
 import { loadReadingPlace } from './utils/readingPlace';
 import { addBookmark } from './utils/bookmarks';
 import { hasCompletedFirstRun } from './utils/firstRun';
+import { LEGACY_FEATURED_STORY_ID } from './utils/dailyStory';
 import { loadLearnerModesState, setLearnerMode } from './utils/learnerModes';
 import { getDailyMission, getDailyMissionSync, type GeneratedDailyMission } from './utils/dailyMissionPipeline';
 import { isVerseMastered } from './utils/fsrsEngine';
@@ -637,6 +638,18 @@ export function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handlePlayNextStory = (storyId: string) => {
+    soundEngine.playClick();
+    if (window.history.state?.modal === 'story') {
+      try {
+        window.history.replaceState({ modal: 'story', storyId, tab: currentTabRef.current }, '', pathForStory(storyId));
+      } catch {
+        // ignore
+      }
+    }
+    setActiveStoryId(storyId);
+  };
+
   const handleExitStory = () => {
     soundEngine.playClick();
     setActiveStoryId(null);
@@ -818,10 +831,11 @@ export function App() {
       {showFirstRun && (
         <Suspense fallback={null}>
           <FirstRun
-            onDone={() => {
+            onDone={(startStory) => {
               setShowFirstRun(false);
               setCurrentTab('today');
               try { window.history.replaceState({ tab: 'today' }, '', '/'); } catch { /* ignore */ }
+              if (startStory) handlePlayStory(LEGACY_FEATURED_STORY_ID);
             }}
           />
         </Suspense>
@@ -997,6 +1011,7 @@ export function App() {
               key={activeStory.id}
               story={activeStory}
               onExit={handleExitStory}
+              onPlayNext={handlePlayNextStory}
               onReadChapter={handleReadChapterFromStory}
             />
           </Suspense>,

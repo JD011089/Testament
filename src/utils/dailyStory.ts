@@ -6,9 +6,9 @@
  */
 
 import { STORY_STOPS, getStoryById } from '../content/stories';
-import type { Story } from '../types/story';
+import { isFullStory, type Story } from '../types/story';
 import { todayKey } from './spacedRepetition';
-import { listStoryProgress, type StorageLike } from './storyProgress';
+import { isStoryCompleted, listStoryProgress, type StorageLike } from './storyProgress';
 
 export const DAILY_STORY_ASSIGNMENTS_KEY = 'testament_daily_story_assignments';
 export const LEGACY_FEATURED_STORY_ID = 'david-and-goliath';
@@ -154,6 +154,17 @@ export function getDailyStoryId(date = new Date(), storage: StorageLike | null =
 
 export function getDailyStory(date = new Date(), storage: StorageLike | null = defaultStorage()): Story | null {
   return getStoryById(getDailyStoryId(date, storage));
+}
+
+/** The first unfinished playable story after `storyId` in map order (wrapping), or null when all are done. */
+export function nextUnplayedStoryId(storyId: string, storage: StorageLike | null = defaultStorage()): string | null {
+  const ids = STORY_STOPS.filter(isFullStory).map((stop) => stop.id);
+  const start = ids.indexOf(storyId);
+  for (let step = 1; step <= ids.length; step++) {
+    const id = ids[(start + step) % ids.length];
+    if (id !== storyId && !isStoryCompleted(id, storage)) return id;
+  }
+  return null;
 }
 
 export function getTomorrowStoryId(date = new Date(), storage: StorageLike | null = defaultStorage()): string {

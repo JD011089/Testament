@@ -29,6 +29,8 @@ interface StoryWorldProps {
   focusIndex?: number;
   compact?: boolean;
   veryCompact?: boolean;
+  /** Picture to show instead of the finished illustration. */
+  imageSrc?: string;
 }
 
 /**
@@ -36,7 +38,7 @@ interface StoryWorldProps {
  * picture toward its spot, dims the rest, drops a numbered marker there, and
  * names what was revealed in a caption on the picture.
  */
-export function StoryWorld({ scene, reveals, revealedCount = 0, focusIndex = -1, compact = false, veryCompact = false }: StoryWorldProps) {
+export function StoryWorld({ scene, reveals, revealedCount = 0, focusIndex = -1, compact = false, veryCompact = false, imageSrc }: StoryWorldProps) {
   const config = getStoryScene(scene);
   if (!config) return null;
 
@@ -59,7 +61,7 @@ export function StoryWorld({ scene, reveals, revealedCount = 0, focusIndex = -1,
   return (
     <div className={`relative w-full overflow-hidden rounded-3xl border border-line bg-stone-950 aspect-video ${sizeClass}`}>
       <img
-        src={getStoryIllustrationUrl(config.id)}
+        src={imageSrc ?? getStoryIllustrationUrl(config.id)}
         alt={`${config.title} story illustration`}
         className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out motion-reduce:transition-none"
         style={{ transformOrigin: origin, transform: `scale(${zoom})` }}

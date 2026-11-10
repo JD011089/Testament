@@ -82,4 +82,18 @@ test.describe('quiz engine', () => {
       expect(item.options[item.answerIndex]).toBeTruthy();
     }
   });
+
+  test('buildQuizRun does not park the answer in one slot', () => {
+    const story = getStoryById('david-and-goliath')!;
+    const positions = new Set<number>();
+    for (let i = 0; i < 40; i++) {
+      for (const item of buildQuizRun(story)) {
+        const source = story.quiz.find((q) => q.id === item.id)!;
+        expect(item.options[item.answerIndex]).toBe(source.options[source.answerIndex]);
+        expect([...item.options].sort()).toEqual([...source.options].sort());
+        positions.add(item.answerIndex);
+      }
+    }
+    expect(positions.size).toBe(4);
+  });
 });

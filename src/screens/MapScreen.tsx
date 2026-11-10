@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { STORY_ARCS, isFullStory, type StoryArc } from '../types/story';
 import { STORY_STOPS } from '../content/stories';
-import { getDailyStoryId } from '../utils/dailyStory';
+import { getDailyStoryId, nextUnplayedStoryId } from '../utils/dailyStory';
 import { isStoryCompleted } from '../utils/storyProgress';
 import { celebrate } from '../utils/feedback';
 import { useLanguage } from '../context/LanguageContext';
@@ -21,10 +21,11 @@ export function MapScreen({ onPlayStory, onQuickPlay }: MapScreenProps) {
   const [activeArc, setActiveArc] = useState<StoryArc | null>(null);
   const completedIds = STORY_STOPS.filter((stop) => isStoryCompleted(stop.id)).map((stop) => stop.id);
   const todayStop = STORY_STOPS.find((stop) => stop.id === todayId) ?? null;
-  const nextPlayable =
-    (todayStop && isFullStory(todayStop) ? todayStop : null) ??
-    STORY_STOPS.find((stop) => isFullStory(stop) && !completedIds.includes(stop.id)) ??
-    null;
+  const todayPlayable = todayStop && isFullStory(todayStop) ? todayStop : null;
+  const todayPending = todayPlayable !== null && !completedIds.includes(todayPlayable.id);
+  // Continue opens today's story until it is finished, then the next unplayed one.
+  const nextId = todayPending ? todayId : nextUnplayedStoryId(todayId);
+  const nextPlayable = STORY_STOPS.find((stop) => stop.id === nextId) ?? todayPlayable;
   const activeStops = activeArc ? STORY_STOPS.filter((stop) => stop.arc === activeArc) : [];
   const totalPlayable = STORY_STOPS.filter(isFullStory).length;
   const currentArc = nextPlayable?.arc ?? null;
@@ -44,7 +45,8 @@ export function MapScreen({ onPlayStory, onQuickPlay }: MapScreenProps) {
       status,
       label:
         status === 'complete' ? t('map.storyComplete')
-        : status === 'current' ? (stops.some((stop) => stop.id === todayId) ? t('map.today') : t('map.upNext'))
+        : status === 'current' && todayPending && stops.some((stop) => stop.id === todayId) ? t('map.today')
+        : status === 'current' && done === 0 ? t('map.upNext')
         : status === 'locked' ? t('map.comingSoon')
         : t('map.progressCount', { done, total: playable.length }),
     }];

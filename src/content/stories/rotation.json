@@ -2028,27 +2028,129 @@
     "arc": "Jesus",
     "order": 18,
     "passage": "Luke 15",
-    "estMinutes": 3,
+    "estMinutes": 5,
     "verse": {
       "ref": "Luke 15:20",
       "translation": "WEB",
       "text": "“He arose, and came to his father. But while he was still far off, his father saw him, and was moved with compassion, and ran, and fell on his neck, and kissed him."
     },
     "reflection": "Is there something you need to come home to the Father about?",
+    "hideArtUntilReveal": true,
     "cards": [
       {
         "type": "narration",
-        "text": "A son left home, wasted everything, and turned back.",
+        "text": "Jesus tells a story about a father and his two sons. One day the younger son asks for something no son should ask.",
         "scriptureLine": {
-          "ref": "Luke 15:20",
+          "ref": "Luke 15:11",
           "translation": "WEB",
-          "text": "“He arose, and came to his father. But while he was still far off, his father saw him, and was moved with compassion, and ran, and fell on his neck, and kissed him."
+          "text": "He said, “A certain man had two sons."
+        }
+      },
+      {
+        "type": "choice",
+        "prompt": "What does the younger son ask his father for?",
+        "options": [
+          {
+            "label": "A blessing for a long journey",
+            "response": "A fair guess, but he asked for far more."
+          },
+          {
+            "label": "His share of the inheritance, now",
+            "response": "Yes. He wanted it while his father was still alive."
+          },
+          {
+            "label": "Charge of the family farm",
+            "response": "A fair guess, but he did not want to stay at all."
+          }
+        ],
+        "whatHappened": {
+          "text": "He asked for his inheritance early, and his father gave it to him.",
+          "ref": "Luke 15:12",
+          "translation": "WEB",
+          "scriptureText": "The younger of them said to his father, ‘Father, give me my share of your property.’ He divided his livelihood between them."
+        }
+      },
+      {
+        "type": "narration",
+        "text": "A few days later he packs up everything he owns and leaves for a far country, a long way from his father.",
+        "scriptureLine": {
+          "ref": "Luke 15:13",
+          "translation": "WEB",
+          "text": "Not many days after, the younger son gathered all of this together and traveled into a far country. There he wasted his property with riotous living."
+        }
+      },
+      {
+        "type": "narration",
+        "text": "The money runs out. Then a severe famine hits the land, and he has nothing left.",
+        "scriptureLine": {
+          "ref": "Luke 15:14",
+          "translation": "WEB",
+          "text": "When he had spent all of it, there arose a severe famine in that country, and he began to be in need."
+        }
+      },
+      {
+        "type": "narration",
+        "text": "He takes the only work he can find: feeding pigs. He is so hungry that their food looks good to him.",
+        "scriptureLine": {
+          "ref": "Luke 15:16",
+          "translation": "WEB",
+          "text": "He wanted to fill his belly with the husks that the pigs ate, but no one gave him any."
         }
       },
       {
         "type": "interaction",
+        "kind": "tap-sequence",
+        "prompt": "Trace how far he fell. Tap the steps in order.",
+        "config": {
+          "kind": "tap-sequence",
+          "steps": [
+            "He leaves home with his share",
+            "He spends it all",
+            "A famine hits",
+            "He feeds pigs and envies their food"
+          ]
+        },
+        "successText": "From a son with an inheritance to a hungry hired hand."
+      },
+      {
+        "type": "narration",
+        "text": "Then he comes to himself. Even his father's hired servants have more bread than they can eat.",
+        "scriptureLine": {
+          "ref": "Luke 15:17",
+          "translation": "WEB",
+          "text": "But when he came to himself he said, ‘How many hired servants of my father’s have bread enough to spare, and I’m dying with hunger!"
+        }
+      },
+      {
+        "type": "choice",
+        "prompt": "You are starving, far from home, and you wasted it all. What do you do?",
+        "options": [
+          {
+            "label": "Go home and face my father",
+            "response": "You chose the road he chose.",
+            "scene": "You turn toward home. The whole long road you practice asking for a servant's job. You do not expect to be called a son again."
+          },
+          {
+            "label": "Stay away. He will never take me back",
+            "response": "You stayed. He did not.",
+            "scene": "You stay with the pigs one more day. The hunger does not leave, and neither does the thought of your father's house."
+          }
+        ],
+        "whatHappened": {
+          "text": "He decided to get up, go to his father, and confess.",
+          "ref": "Luke 15:18",
+          "translation": "WEB",
+          "scriptureText": "I will get up and go to my father, and will tell him, “Father, I have sinned against heaven, and in your sight."
+        }
+      },
+      {
+        "type": "narration",
+        "text": "It is a long road home. He walks it rehearsing his speech and expecting the worst."
+      },
+      {
+        "type": "interaction",
         "kind": "tap-reveal",
-        "prompt": "Tap how the father welcomed him.",
+        "prompt": "His father sees him first. Uncover what the father does.",
         "config": {
           "kind": "tap-reveal",
           "scene": "prodigal-son",
@@ -2081,23 +2183,55 @@
         "successText": "He is home."
       },
       {
+        "type": "interaction",
+        "kind": "tap-sequence",
+        "prompt": "The father calls his servants. Dress the son in the order he says.",
+        "config": {
+          "kind": "tap-sequence",
+          "steps": [
+            "The best robe",
+            "A ring for his hand",
+            "Shoes for his feet"
+          ]
+        },
+        "successText": "He came to ask for a servant's place. His father dressed him as a son."
+      },
+      {
+        "type": "narration",
+        "text": "He never gets to ask for the servant's job. His father is already calling for a feast.",
+        "scriptureLine": {
+          "ref": "Luke 15:24",
+          "translation": "WEB",
+          "text": "for this, my son, was dead, and is alive again. He was lost, and is found.’ They began to celebrate."
+        }
+      },
+      {
+        "type": "narration",
+        "text": "But the older brother comes in from the field and hears the music. He is angry, and he will not go in.",
+        "scriptureLine": {
+          "ref": "Luke 15:28",
+          "translation": "WEB",
+          "text": "But he was angry, and would not go in. Therefore his father came out, and begged him."
+        }
+      },
+      {
         "type": "choice",
-        "prompt": "You have failed, and the road home is open. Do you take it?",
+        "prompt": "You stayed and worked for years. Your brother wasted everything and gets a feast. Do you go in?",
         "options": [
           {
-            "label": "Go home",
-            "response": "You turn around."
+            "label": "Go in and celebrate",
+            "response": "You walk toward the music."
           },
           {
-            "label": "Stay away",
-            "response": "You hide in the far country."
+            "label": "Stay outside",
+            "response": "You stand in the dark, listening."
           }
         ],
         "whatHappened": {
-          "text": "The lost son was alive again, and they celebrated.",
-          "ref": "Luke 15:24",
+          "text": "The father came out to this son too. Jesus ends the story there, without saying whether the brother went in.",
+          "ref": "Luke 15:31",
           "translation": "WEB",
-          "scriptureText": "for this, my son, was dead, and is alive again. He was lost, and is found.’ They began to celebrate."
+          "scriptureText": "“He said to him, ‘Son, you are always with me, and all that is mine is yours."
         }
       },
       {
@@ -2129,7 +2263,7 @@
           "A silence"
         ],
         "answerIndex": 0,
-        "verseRef": "Luke 15:20"
+        "verseRef": "Luke 15:24"
       },
       {
         "id": "prodigal-son-where",

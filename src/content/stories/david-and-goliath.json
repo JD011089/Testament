@@ -25,7 +25,7 @@
     {
       "type": "interaction",
       "kind": "tap-reveal",
-      "prompt": "Tap each piece of Goliath's armor.",
+      "prompt": "Uncover Goliath's armor, one piece at a time.",
       "config": {
         "kind": "tap-reveal",
         "scene": "david-and-goliath",
@@ -105,12 +105,14 @@
           {
             "id": "sword",
             "label": "Heavy sword",
-            "accept": false
+            "accept": false,
+            "rejectText": "Not the sword. David strapped on Saul's sword, tried to walk, and took it off. He had never tested it (1 Samuel 17:39)."
           },
           {
             "id": "helmet",
             "label": "Heavy helmet",
-            "accept": false
+            "accept": false,
+            "rejectText": "Not the helmet. Saul put his own bronze helmet on David, but David took the armor off (1 Samuel 17:38-39)."
           }
         ]
       },
