@@ -15,7 +15,7 @@
     "cards": [
       {
         "type": "narration",
-        "text": "Before anything else, God made the heavens and the earth.",
+        "text": "Before anything else, there was only God. What does he make first?",
         "scriptureLine": {
           "ref": "Genesis 1:1",
           "translation": "WEB",
@@ -67,11 +67,13 @@
         "options": [
           {
             "label": "Give thanks",
-            "response": "You start by noticing the gift."
+            "response": "You start by noticing the gift.",
+            "scene": "You look at the light, the sea, the land, and every living thing, and you say thank you before you touch any of it."
           },
           {
             "label": "Hold back",
-            "response": "You wait and watch."
+            "response": "You wait and watch.",
+            "scene": "You stand at the edge of it all and say nothing yet. The world is still very good, and it is waiting for you."
           }
         ],
         "whatHappened": {
@@ -143,7 +145,7 @@
     "cards": [
       {
         "type": "narration",
-        "text": "The world turned violent, but Noah still had favor with God.",
+        "text": "The world turned violent, but one man still had favor with God. What will God ask of him?",
         "scriptureLine": {
           "ref": "Genesis 6:8",
           "translation": "WEB",
@@ -213,11 +215,13 @@
         "options": [
           {
             "label": "Start building",
-            "response": "You begin the work early."
+            "response": "You begin the work early.",
+            "scene": "You cut the first plank under a clear sky. The neighbors watch, and there is not a cloud in sight."
           },
           {
             "label": "Ignore it",
-            "response": "You hope the warning is wrong."
+            "response": "You hope the warning is wrong.",
+            "scene": "You go on with your days. The sky stays clear for a long time, and then it does not."
           }
         ],
         "whatHappened": {
@@ -289,11 +293,33 @@
     "cards": [
       {
         "type": "narration",
-        "text": "God told Abram to leave home for a land not yet seen.",
+        "text": "God tells Abram to leave home for a land he has never seen. Will he go?",
         "scriptureLine": {
           "ref": "Genesis 12:1",
           "translation": "WEB",
           "text": "Now Yahweh said to Abram, “Leave your country, and your relatives, and your father’s house, and go to the land that I will show you."
+        }
+      },
+      {
+        "type": "choice",
+        "prompt": "You are asked to leave what you know. Do you go?",
+        "options": [
+          {
+            "label": "Go",
+            "response": "You step onto the road.",
+            "scene": "You pack what you can carry and walk out past the last house you know, with no map, only a promise."
+          },
+          {
+            "label": "Stay",
+            "response": "You keep the life you already have.",
+            "scene": "You stay where every road is familiar. The promise of a land you have never seen stays with you too."
+          }
+        ],
+        "whatHappened": {
+          "text": "Abram went, just as God had told him.",
+          "ref": "Genesis 12:4",
+          "translation": "WEB",
+          "scriptureText": "So Abram went, as Yahweh had told him. Lot went with him. Abram was seventy-five years old when he departed from Haran."
         }
       },
       {
@@ -330,26 +356,6 @@
           "holdLabel": "Hold to step"
         },
         "successText": "You leave with him."
-      },
-      {
-        "type": "choice",
-        "prompt": "You are asked to leave what you know. Do you go?",
-        "options": [
-          {
-            "label": "Go",
-            "response": "You step onto the road."
-          },
-          {
-            "label": "Stay",
-            "response": "You keep the life you already have."
-          }
-        ],
-        "whatHappened": {
-          "text": "Abram went, just as God had told him.",
-          "ref": "Genesis 12:4",
-          "translation": "WEB",
-          "scriptureText": "So Abram went, as Yahweh had told him. Lot went with him. Abram was seventy-five years old when he departed from Haran."
-        }
       },
       {
         "type": "payoff"
@@ -413,7 +419,7 @@
     "cards": [
       {
         "type": "narration",
-        "text": "Joseph's brothers sold him, and merchants took him away.",
+        "text": "Joseph's own brothers sold him, and merchants carried him off to Egypt. Was that the end of him?",
         "scriptureLine": {
           "ref": "Genesis 37:28",
           "translation": "WEB",
@@ -464,11 +470,13 @@
         "options": [
           {
             "label": "Show mercy",
-            "response": "You choose mercy over payback."
+            "response": "You choose mercy over payback.",
+            "scene": "Your brothers stand in front of you, afraid. You could ruin them with a word. You feed them instead."
           },
           {
             "label": "Get even",
-            "response": "You make them feel what you felt."
+            "response": "You make them feel what you felt.",
+            "scene": "You let them feel the pit, the chains, and the years. It is fair. It does not give you those years back."
           }
         ],
         "whatHappened": {
@@ -540,7 +548,7 @@
     "cards": [
       {
         "type": "narration",
-        "text": "A bush burned on the mountain, and the fire did not consume it.",
+        "text": "A bush burned on the mountain, and the fire did not consume it. Who was in the fire, and what did he want?",
         "scriptureLine": {
           "ref": "Exodus 3:2",
           "translation": "WEB",
@@ -588,11 +596,13 @@
         "options": [
           {
             "label": "Take the next step",
-            "response": "You go, even unsure."
+            "response": "You go, even unsure.",
+            "scene": "You pick up your staff and start back toward Egypt, still sure you are the wrong person for this."
           },
           {
             "label": "Refuse",
-            "response": "You stay where it feels safe."
+            "response": "You stay where it feels safe.",
+            "scene": "You list every reason you cannot go. The bush keeps burning, and the voice does not take back the call."
           }
         ],
         "whatHappened": {
@@ -664,7 +674,7 @@
     "cards": [
       {
         "type": "narration",
-        "text": "The sea was in front of them, and an army was behind.",
+        "text": "The sea was in front of them and an army was behind. Where could they go?",
         "scriptureLine": {
           "ref": "Exodus 14:13",
           "translation": "WEB",
@@ -712,11 +722,13 @@
         "options": [
           {
             "label": "Stand still",
-            "response": "You wait and watch."
+            "response": "You wait and watch.",
+            "scene": "You plant your feet in the sand with the chariots closing in, and you watch the water."
           },
           {
             "label": "Panic",
-            "response": "You look for a way to run."
+            "response": "You look for a way to run.",
+            "scene": "You run along the shore looking for a way out. There is only the sea ahead and dust behind you."
           }
         ],
         "whatHappened": {
@@ -788,11 +800,11 @@
     "cards": [
       {
         "type": "narration",
-        "text": "Ruth would not turn back. She stayed with Naomi.",
+        "text": "Naomi had lost her husband and both her sons. She told her daughters-in-law to go back home. Would Ruth leave her?",
         "scriptureLine": {
-          "ref": "Ruth 1:16",
+          "ref": "Ruth 1:8",
           "translation": "WEB",
-          "text": "Ruth said, “Don’t urge me to leave you, and to return from following you, for where you go, I will go; and where you stay, I will stay. Your people will be my people, and your God my God."
+          "text": "Naomi said to her two daughters-in-law, “Go, return each of you to her mother’s house. May Yahweh deal kindly with you, as you have dealt with the dead, and with me."
         }
       },
       {
@@ -836,11 +848,13 @@
         "options": [
           {
             "label": "Stay",
-            "response": "You bind your road to theirs."
+            "response": "You bind your road to theirs.",
+            "scene": "You take Naomi's road as your own: her town, her people, her God, with no promise of anything waiting there."
           },
           {
             "label": "Turn back",
-            "response": "You return to the old life."
+            "response": "You return to the old life.",
+            "scene": "You kiss Naomi goodbye and walk back toward home, as her other daughter-in-law did."
           }
         ],
         "whatHappened": {
@@ -912,11 +926,35 @@
     "cards": [
       {
         "type": "narration",
-        "text": "Elijah stood before the crowd and told them to choose.",
+        "text": "Elijah stood before the crowd and told them to choose. How would they know who the true God was?",
         "scriptureLine": {
           "ref": "1 Kings 18:21",
           "translation": "WEB",
           "text": "Elijah came near to all the people, and said, “How long will you waver between the two sides? If Yahweh is God, follow him; but if Baal, then follow him.” The people didn’t say a word."
+        }
+      },
+      {
+        "type": "choice",
+        "prompt": "The prophets of Baal have shouted all day, and no fire has come. Now it is Elijah's turn. What does he do to his altar?",
+        "options": [
+          {
+            "label": "Keeps it dry so it will catch",
+            "response": "A sensible guess. He did the opposite."
+          },
+          {
+            "label": "Soaks it with water",
+            "response": "Yes. He made it as hard to burn as he could."
+          },
+          {
+            "label": "Lights it himself",
+            "response": "No. No one was to put fire under it."
+          }
+        ],
+        "whatHappened": {
+          "text": "He had water poured over the offering three times, until it filled the trench.",
+          "ref": "1 Kings 18:35",
+          "translation": "WEB",
+          "scriptureText": "The water ran around the altar; and he also filled the trench with water."
         }
       },
       {
@@ -1013,7 +1051,7 @@
     "cards": [
       {
         "type": "narration",
-        "text": "Wind, earthquake, and fire passed by. God was not in them.",
+        "text": "Elijah hid in a cave on the mountain, and God passed by. How would God speak to him?",
         "scriptureLine": {
           "ref": "1 Kings 19:11",
           "translation": "WEB",
@@ -1065,11 +1103,13 @@
         "options": [
           {
             "label": "In the quiet",
-            "response": "You step out and wait."
+            "response": "You step out and wait.",
+            "scene": "You step to the mouth of the cave and wait. Nothing shakes. Nothing burns. You keep listening."
           },
           {
             "label": "In the noise",
-            "response": "You stay inside the storm."
+            "response": "You stay inside the storm.",
+            "scene": "You look for God in the wind, then the earthquake, then the fire. Each one passes, and you have heard nothing."
           }
         ],
         "whatHappened": {
@@ -1141,7 +1181,7 @@
     "cards": [
       {
         "type": "narration",
-        "text": "A law said not to pray. Daniel prayed anyway.",
+        "text": "A new law banned prayer to anyone but the king. Daniel prayed anyway, with his windows open. What would it cost him?",
         "scriptureLine": {
           "ref": "Daniel 6:10",
           "translation": "WEB",
@@ -1189,11 +1229,13 @@
         "options": [
           {
             "label": "Pray anyway",
-            "response": "You keep the habit, even at a cost."
+            "response": "You keep the habit, even at a cost.",
+            "scene": "You kneel at the open window, three times that day, where anyone watching can see you."
           },
           {
             "label": "Stay silent",
-            "response": "You close the windows and wait."
+            "response": "You close the windows and wait.",
+            "scene": "You shut the windows for thirty days. No one can accuse you. The room is very quiet."
           }
         ],
         "whatHappened": {
@@ -1265,7 +1307,7 @@
     "cards": [
       {
         "type": "narration",
-        "text": "Jonah paid the fare the other way and ran from God.",
+        "text": "God sent Jonah to Nineveh. Jonah paid for a ship going the other way. How far can a man run from God?",
         "scriptureLine": {
           "ref": "Jonah 1:3",
           "translation": "WEB",
@@ -1316,11 +1358,13 @@
         "options": [
           {
             "label": "Turn around",
-            "response": "You head back toward the call."
+            "response": "You head back toward the call.",
+            "scene": "You walk away from the docks and face the road to Nineveh, the last place you want to go."
           },
           {
             "label": "Keep running",
-            "response": "You pay the fare and leave."
+            "response": "You pay the fare and leave.",
+            "scene": "You pay the fare, go below deck, and fall asleep while the wind begins to rise."
           }
         ],
         "whatHappened": {
@@ -1392,11 +1436,33 @@
     "cards": [
       {
         "type": "narration",
-        "text": "Esther's people were in danger, and silence would not save them.",
+        "text": "An order went out to destroy Esther's people. She was queen, and no one at court knew she was one of them. Would she speak?",
         "scriptureLine": {
           "ref": "Esther 4:14",
           "translation": "WEB",
           "text": "For if you remain silent now, then relief and deliverance will come to the Jews from another place, but you and your father’s house will perish. Who knows if you haven’t come to the kingdom for such a time as this?”"
+        }
+      },
+      {
+        "type": "choice",
+        "prompt": "Speaking up could cost you. Do you stay quiet?",
+        "options": [
+          {
+            "label": "Speak",
+            "response": "You step in at the right time.",
+            "scene": "You put on your royal robes and walk toward the inner court, where coming uninvited can mean death."
+          },
+          {
+            "label": "Stay silent",
+            "response": "You hope someone else will act.",
+            "scene": "You stay in your rooms, safe for now. The order against your people still stands."
+          }
+        ],
+        "whatHappened": {
+          "text": "Esther decided to go to the king, even if she perished.",
+          "ref": "Esther 4:16",
+          "translation": "WEB",
+          "scriptureText": "“Go, gather together all the Jews who are present in Shushan, and fast for me, and neither eat nor drink three days, night or day. I and my maidens will also fast the same way. Then I will go in to the king, which is against the law; and if I perish, I perish.”"
         }
       },
       {
@@ -1433,26 +1499,6 @@
           "holdLabel": "Hold your courage"
         },
         "successText": "You are ready to enter."
-      },
-      {
-        "type": "choice",
-        "prompt": "Speaking up could cost you. Do you stay quiet?",
-        "options": [
-          {
-            "label": "Speak",
-            "response": "You step in at the right time."
-          },
-          {
-            "label": "Stay silent",
-            "response": "You hope someone else will act."
-          }
-        ],
-        "whatHappened": {
-          "text": "Esther decided to go to the king, even if she perished.",
-          "ref": "Esther 4:16",
-          "translation": "WEB",
-          "scriptureText": "“Go, gather together all the Jews who are present in Shushan, and fast for me, and neither eat nor drink three days, night or day. I and my maidens will also fast the same way. Then I will go in to the king, which is against the law; and if I perish, I perish.”"
-        }
       },
       {
         "type": "payoff"
@@ -1516,7 +1562,7 @@
     "cards": [
       {
         "type": "narration",
-        "text": "Mary laid her baby in a feeding trough. The inn was full.",
+        "text": "The inn was full, so Mary laid her baby in a feeding trough. Who would be the first to hear he had come?",
         "scriptureLine": {
           "ref": "Luke 2:7",
           "translation": "WEB",
@@ -1568,11 +1614,13 @@
         "options": [
           {
             "label": "Go and see",
-            "response": "You move toward the news."
+            "response": "You move toward the news.",
+            "scene": "You leave the flock and hurry into town in the dark, looking for a baby lying in a feeding trough."
           },
           {
             "label": "Stay away",
-            "response": "You keep your distance."
+            "response": "You keep your distance.",
+            "scene": "You stay in the field with the sheep. The sky goes dark again, and you keep wondering what you missed."
           }
         ],
         "whatHappened": {
@@ -1644,11 +1692,11 @@
     "cards": [
       {
         "type": "narration",
-        "text": "Waves beat the boat while Jesus slept.",
+        "text": "A storm hit the lake, and waves were filling the boat. Jesus was asleep in the stern. What happens next?",
         "scriptureLine": {
-          "ref": "Mark 4:39",
+          "ref": "Mark 4:37",
           "translation": "WEB",
-          "text": "He awoke, and rebuked the wind, and said to the sea, “Peace! Be still!” The wind ceased, and there was a great calm."
+          "text": "A big wind storm arose, and the waves beat into the boat, so much that the boat was already filled."
         }
       },
       {
@@ -1688,11 +1736,13 @@
         "options": [
           {
             "label": "Ask for help",
-            "response": "You wake him."
+            "response": "You wake him.",
+            "scene": "You shake him awake and shout over the wind that you are all about to die."
           },
           {
             "label": "Bail alone",
-            "response": "You fight the waves by yourself."
+            "response": "You fight the waves by yourself.",
+            "scene": "You bail as fast as you can. The water comes in faster. He is still asleep in the stern."
           }
         ],
         "whatHappened": {
@@ -1764,11 +1814,11 @@
     "cards": [
       {
         "type": "narration",
-        "text": "A huge crowd was hungry, and the food on hand was small.",
+        "text": "Thousands of people were hungry. All the disciples could find was one boy with five loaves and two fish. What could that do?",
         "scriptureLine": {
-          "ref": "John 6:11",
+          "ref": "John 6:9",
           "translation": "WEB",
-          "text": "Jesus took the loaves; and having given thanks, he distributed to the disciples, and the disciples to those who were sitting down; likewise also of the fish as much as they desired."
+          "text": "“There is a boy here who has five barley loaves and two fish, but what are these among so many?”"
         }
       },
       {
@@ -1838,11 +1888,13 @@
         "options": [
           {
             "label": "Offer what you have",
-            "response": "You hand over the little."
+            "response": "You hand over the little.",
+            "scene": "You hand over five loaves and two fish, knowing it is not nearly enough for this crowd."
           },
           {
             "label": "Send them away",
-            "response": "You decide it cannot be done."
+            "response": "You decide it cannot be done.",
+            "scene": "You count the crowd, count the money, and tell them to go and find food for themselves."
           }
         ],
         "whatHappened": {
@@ -1914,7 +1966,7 @@
     "cards": [
       {
         "type": "narration",
-        "text": "Peter stepped out of the boat and walked on the water.",
+        "text": "In the night, Peter stepped out of the boat and walked on the water toward Jesus. How long could he keep it up?",
         "scriptureLine": {
           "ref": "Matthew 14:29",
           "translation": "WEB",
@@ -1962,11 +2014,13 @@
         "options": [
           {
             "label": "Call for help",
-            "response": "You reach out instead of pretending."
+            "response": "You reach out instead of pretending.",
+            "scene": "You are going under. You shout for him to save you, because there is no time for anything else."
           },
           {
             "label": "Give up",
-            "response": "You let the fear finish it."
+            "response": "You let the fear finish it.",
+            "scene": "You stop looking for him. The wind is all you can see, and the water closes over your feet."
           }
         ],
         "whatHappened": {
@@ -2296,11 +2350,11 @@
     "cards": [
       {
         "type": "narration",
-        "text": "A man lay hurt on the road. Most people passed by.",
+        "text": "A man lay beaten on the road. A priest saw him and passed by. So did a Levite. Who would stop?",
         "scriptureLine": {
-          "ref": "Luke 10:33",
+          "ref": "Luke 10:31",
           "translation": "WEB",
-          "text": "But a certain Samaritan, as he traveled, came where he was. When he saw him, he was moved with compassion,"
+          "text": "By chance a certain priest was going down that way. When he saw him, he passed by on the other side."
         }
       },
       {
@@ -2356,11 +2410,13 @@
         "options": [
           {
             "label": "Stop and help",
-            "response": "You cross toward them."
+            "response": "You cross toward them.",
+            "scene": "You kneel in the dust beside a stranger, clean his wounds, and lift him onto your own animal."
           },
           {
             "label": "Pass by",
-            "response": "You keep your plans."
+            "response": "You keep your plans.",
+            "scene": "You cross to the other side of the road and keep walking. You are not the first to do it."
           }
         ],
         "whatHappened": {
@@ -2432,11 +2488,33 @@
     "cards": [
       {
         "type": "narration",
-        "text": "Zacchaeus was short, so he climbed to see over the crowd.",
+        "text": "Zacchaeus was a rich tax collector, too short to see over the crowd, so he climbed a tree. Would Jesus even notice him?",
         "scriptureLine": {
-          "ref": "Luke 19:5",
+          "ref": "Luke 19:4",
           "translation": "WEB",
-          "text": "When Jesus came to the place, he looked up and saw him, and said to him, “Zacchaeus, hurry and come down, for today I must stay at your house.”"
+          "text": "He ran on ahead, and climbed up into a sycamore tree to see him, for he was going to pass that way."
+        }
+      },
+      {
+        "type": "choice",
+        "prompt": "You are seen, and your record is not proud. What do you do?",
+        "options": [
+          {
+            "label": "Make it right",
+            "response": "You pay back what you took.",
+            "scene": "You stand up in front of everyone and start naming what you owe, and to whom."
+          },
+          {
+            "label": "Slip away",
+            "response": "You climb down and hide.",
+            "scene": "You stay in the branches until the crowd moves on, with your money and your name just as they were."
+          }
+        ],
+        "whatHappened": {
+          "text": "Zacchaeus promised to give and to repay.",
+          "ref": "Luke 19:8",
+          "translation": "WEB",
+          "scriptureText": "Zacchaeus stood and said to the Lord, “Behold, Lord, half of my goods I give to the poor. If I have wrongfully exacted anything of anyone, I restore four times as much.”"
         }
       },
       {
@@ -2491,26 +2569,6 @@
           ]
         },
         "successText": "The coins go back."
-      },
-      {
-        "type": "choice",
-        "prompt": "You are seen, and your record is not proud. What do you do?",
-        "options": [
-          {
-            "label": "Make it right",
-            "response": "You pay back what you took."
-          },
-          {
-            "label": "Slip away",
-            "response": "You climb down and hide."
-          }
-        ],
-        "whatHappened": {
-          "text": "Zacchaeus promised to give and to repay.",
-          "ref": "Luke 19:8",
-          "translation": "WEB",
-          "scriptureText": "Zacchaeus stood and said to the Lord, “Behold, Lord, half of my goods I give to the poor. If I have wrongfully exacted anything of anyone, I restore four times as much.”"
-        }
       },
       {
         "type": "payoff"
@@ -2574,7 +2632,7 @@
     "cards": [
       {
         "type": "narration",
-        "text": "They crucified Jesus between two others.",
+        "text": "They crucified Jesus between two others. What would his last words be?",
         "scriptureLine": {
           "ref": "John 19:18",
           "translation": "WEB",
@@ -2622,11 +2680,13 @@
         "options": [
           {
             "label": "Stay near",
-            "response": "You do not look away."
+            "response": "You do not look away.",
+            "scene": "You stand near the cross with the few who are left, and you do not look away."
           },
           {
             "label": "Walk off",
-            "response": "You leave before the end."
+            "response": "You leave before the end.",
+            "scene": "You walk back down toward the city. Behind you, it goes on without you."
           }
         ],
         "whatHappened": {
@@ -2698,7 +2758,7 @@
     "cards": [
       {
         "type": "narration",
-        "text": "Mary came to the tomb while it was still dark.",
+        "text": "Mary came to the tomb while it was still dark. What would she find?",
         "scriptureLine": {
           "ref": "John 20:1",
           "translation": "WEB",
@@ -2749,11 +2809,13 @@
         "options": [
           {
             "label": "Go and look",
-            "response": "You show up even in the dark."
+            "response": "You show up even in the dark.",
+            "scene": "You walk to the tomb in the dark, carrying your grief, expecting a sealed stone."
           },
           {
             "label": "Stay home",
-            "response": "You let the night decide."
+            "response": "You let the night decide.",
+            "scene": "You stay behind a closed door. As far as you know, the stone is still in place."
           }
         ],
         "whatHappened": {
@@ -2825,7 +2887,7 @@
     "cards": [
       {
         "type": "narration",
-        "text": "A sound like a mighty wind filled the house.",
+        "text": "The disciples were together in one house, waiting. Then a sound like a rushing wind filled it. What was happening?",
         "scriptureLine": {
           "ref": "Acts 2:2",
           "translation": "WEB",
@@ -2873,11 +2935,13 @@
         "options": [
           {
             "label": "Open your mouth",
-            "response": "You trust the help you are given."
+            "response": "You trust the help you are given.",
+            "scene": "You open your mouth with nothing prepared, and words come that you never learned."
           },
           {
             "label": "Stay quiet",
-            "response": "You keep the words inside."
+            "response": "You keep the words inside.",
+            "scene": "You keep still while the others begin to speak. Outside, a crowd is gathering to listen."
           }
         ],
         "whatHappened": {
@@ -2949,7 +3013,7 @@
     "cards": [
       {
         "type": "narration",
-        "text": "A light stopped Saul on the road, and he fell.",
+        "text": "Saul was on his way to arrest followers of Jesus when a light from the sky stopped him. Who was speaking to him?",
         "scriptureLine": {
           "ref": "Acts 9:4",
           "translation": "WEB",
@@ -3001,11 +3065,13 @@
         "options": [
           {
             "label": "Listen",
-            "response": "You let the question land."
+            "response": "You let the question land.",
+            "scene": "You lie in the dust, blind, and ask who is speaking to you."
           },
           {
             "label": "Fight it",
-            "response": "You keep going the old way."
+            "response": "You keep going the old way.",
+            "scene": "You get up and push on toward Damascus, as sure as ever that you are right. You still cannot see."
           }
         ],
         "whatHappened": {

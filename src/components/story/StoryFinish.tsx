@@ -9,7 +9,7 @@ import { saveDecisionJournalEntry } from '../../utils/decisionJournal';
 import { shareVerseCard } from '../../utils/shareCard';
 import { celebrate } from '../../utils/feedback';
 import { StoryQuiz } from '../daily/StoryQuiz';
-import { stripOpenQuote } from './VerseLine';
+import { stripOuterQuotes } from './VerseLine';
 
 interface StoryFinishProps {
   story: Story;
@@ -175,7 +175,7 @@ export function StoryFinish({ story, verse }: StoryFinishProps) {
           <p className="font-display text-[11px] font-bold uppercase tracking-[0.18em] text-amber-200">
             {t('finish.yourCard')} · {t(`deck.tier.${strength}`)}
           </p>
-          <p className="mt-2 line-clamp-4 font-serif text-base italic leading-relaxed text-white">“{stripOpenQuote(verse.text)}”</p>
+          <p className="mt-2 line-clamp-4 font-serif text-base italic leading-relaxed text-white">“{stripOuterQuotes(verse.text)}”</p>
           <p className="mt-1 text-xs text-white/60">{verse.ref}</p>
           {upgraded && <p className="mt-2 text-sm font-semibold text-amber-100" aria-live="polite">{t('finish.upgraded')}</p>}
           <button

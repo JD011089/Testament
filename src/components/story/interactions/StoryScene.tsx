@@ -111,8 +111,12 @@ export function StoryWorld({ scene, reveals, revealedCount = 0, focusIndex = -1,
       {reveals?.slice(0, revealedCount).map((reveal, index) => {
         const point = getRevealFocus(scene, reveal.id);
         if (!point) return null;
-        const pos = project(point);
-        if (pos.left < 2 || pos.left > 98 || pos.top < 2 || pos.top > 98) return null;
+        // A spot zoomed out of frame keeps its pin at the nearest edge instead of vanishing.
+        const projected = project(point);
+        const pos = {
+          left: Math.min(96, Math.max(4, projected.left)),
+          top: Math.min(92, Math.max(8, projected.top)),
+        };
         const active = index === focusIndex;
         return (
           <span

@@ -31,6 +31,8 @@ function ambienceForArc(arc: StoryArc): 'wind' | 'campfire' | 'sanctuary' {
   return 'wind';
 }
 
+const BACKDROP_CROPS = ['50% 50%', '18% 35%', '82% 40%', '35% 75%', '70% 68%'];
+
 interface StoryPlayerProps {
   story: Story;
   onExit: () => void;
@@ -203,6 +205,8 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted, onPlayN
   const nextStoryId = completed && onPlayNext ? nextUnplayedStoryId(story.id) : null;
   const canTapAdvance =card.type === 'narration' || card.type === 'payoff';
   const sceneId = isStorySceneId(story.id) && getStoryScene(story.id) ? story.id : undefined;
+  // Each card frames a different part of the backdrop, so the picture is not identical all the way through.
+  const crop = BACKDROP_CROPS[index % BACKDROP_CROPS.length];
   // Some stories keep the finished picture back until the reveal card, so it does not spoil the ending.
   const revealIndex = story.cards.findIndex((c) => c.type === 'interaction' && c.kind === 'tap-reveal');
   const beforeArt = story.hideArtUntilReveal && sceneId && !completed && index < revealIndex
@@ -230,7 +234,8 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted, onPlayN
         src={beforeArt ?? getStoryIllustrationUrl(story.id)}
         alt=""
         aria-hidden="true"
-        className="absolute inset-0 h-full w-full object-cover object-center opacity-70"
+        className="absolute inset-0 h-full w-full object-cover opacity-70 transition-[object-position,transform] duration-700 ease-out motion-reduce:transition-none"
+        style={{ objectPosition: crop, transformOrigin: crop, transform: index === 0 ? undefined : 'scale(1.15)' }}
         loading="eager"
       />
       <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/25 to-black/90" aria-hidden="true" />

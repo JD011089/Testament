@@ -14,7 +14,7 @@
   "cards": [
     {
       "type": "narration",
-      "text": "Two armies face each other across a valley. A giant named Goliath shouts across at Israel every morning.",
+      "text": "Two armies face each other across a valley. Every morning a giant named Goliath dares Israel to send one man. Who will go?",
       "scriptureLine": {
         "ref": "1 Samuel 17:11",
         "translation": "WEB",
@@ -60,12 +60,25 @@
       "successText": "He was covered in bronze from head to spear. And still he was afraid of nothing."
     },
     {
-      "type": "narration",
-      "text": "David is only a shepherd boy, but he hears the giant and steps forward.",
-      "scriptureLine": {
+      "type": "choice",
+      "prompt": "For forty days the giant has called for a fighter, and no soldier will go. Do you?",
+      "options": [
+        {
+          "label": "Yes, I will go",
+          "response": "You chose what he chose.",
+          "scene": "You are a shepherd, not a soldier. You tell the king you will fight, and the king looks you up and down."
+        },
+        {
+          "label": "No, wait for someone else",
+          "response": "You waited. He did not.",
+          "scene": "You wait with the army. Morning and evening the giant shouts again, and still no one moves."
+        }
+      ],
+      "whatHappened": {
+        "text": "David, a young shepherd, told King Saul that he would go.",
         "ref": "1 Samuel 17:32",
         "translation": "WEB",
-        "text": "David said to Saul, \"Let no man's heart fail because of him. Your servant will go and fight with this Philistine.\""
+        "scriptureText": "David said to Saul, \"Let no man's heart fail because of him. Your servant will go and fight with this Philistine.\""
       }
     },
     {
@@ -119,23 +132,12 @@
       "successText": "He took his staff, his sling, and five smooth stones from the brook."
     },
     {
-      "type": "choice",
-      "prompt": "The giant calls for a fighter. Do you go out to face Goliath?",
-      "options": [
-        {
-          "label": "Yes — go out now",
-          "response": "You step into the valley with a sling and five stones."
-        },
-        {
-          "label": "No — wait for someone else",
-          "response": "No one else will go. The army is frozen in fear."
-        }
-      ],
-      "whatHappened": {
-        "text": "David went out in the name of Yahweh of Armies, not with a sword or a spear.",
+      "type": "narration",
+      "text": "David walks into the valley with a sling and five stones. The giant mocks him, and David answers.",
+      "scriptureLine": {
         "ref": "1 Samuel 17:45",
         "translation": "WEB",
-        "scriptureText": "Then David said to the Philistine, \"You come to me with a sword, with a spear, and with a javelin; but I come to you in the name of Yahweh of Armies, the God of the armies of Israel, whom you have defied.\""
+        "text": "Then David said to the Philistine, \"You come to me with a sword, with a spear, and with a javelin; but I come to you in the name of Yahweh of Armies, the God of the armies of Israel, whom you have defied.\""
       }
     },
     {

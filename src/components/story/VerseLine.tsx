@@ -1,11 +1,16 @@
 import type { ScriptureLine } from '../../types/story';
 
 /**
- * A verse that opens mid-speech starts with a quote mark that never closes.
- * Drop it where the text is already wrapped in quote marks.
+ * For text that is shown inside quote marks already. A verse that opens
+ * mid-speech starts with a quote mark that never closes, and a verse that is
+ * one whole quotation carries its own pair: drop those so the marks do not double.
  */
-export function stripOpenQuote(text: string): string {
-  return text.startsWith('“') && !text.includes('”') ? text.slice(1) : text;
+export function stripOuterQuotes(text: string): string {
+  if (!text.startsWith('“')) return text;
+  const rest = text.slice(1);
+  if (!rest.includes('”')) return rest;
+  const wholeQuote = rest.indexOf('”') === rest.length - 1 && !rest.includes('“');
+  return wholeQuote ? rest.slice(0, -1) : text;
 }
 
 /**
@@ -17,7 +22,7 @@ export function VerseLine({ line, className = '', compact = false, veryCompact =
     <figure className={`rounded-2xl border border-accent/40 bg-accent/10 ${compact ? 'p-2' : 'p-3 sm:p-4'} ${className}`}>
       <blockquote className={`font-reading text-fg italic ${veryCompact ? 'text-[clamp(0.72rem,1.5dvh,0.86rem)]' : compact ? 'text-[clamp(0.78rem,1.7dvh,0.95rem)]' : 'text-body'}`}>
         <span className="text-accent text-title-4 not-italic">“</span>
-        {stripOpenQuote(line.text)}
+        {stripOuterQuotes(line.text)}
         <span className="text-accent text-title-4 not-italic">”</span>
       </blockquote>
       <figcaption className={`mt-2 flex items-center gap-2 text-fg-muted ${compact ? 'text-[10px]' : 'text-ref'}`}>
