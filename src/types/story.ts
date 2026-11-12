@@ -33,6 +33,8 @@ export interface StoryVerse extends ScriptureLine {}
 
 export interface NarrationCard {
   type: 'narration';
+  /** Stable key for the recorded clip. Required on cards inside a branch or a callback-driven story. */
+  id?: string;
   text: string;
   scriptureLine?: ScriptureLine;
   image?: string;
@@ -92,10 +94,14 @@ export interface InteractionCard {
 }
 
 export interface ChoiceOption {
+  /** Stable key stored in the choice ledger. Defaults to the option's index when absent. */
+  id?: string;
   label: string;
   response: string;
-  /** A scene only this option leads to, shown on its own before what really happened. */
+  /** Single-screen scene shown on its own before what really happened (legacy). */
   scene?: string;
+  /** 0-2 narration or interaction cards that play after the pick, before what really happened. */
+  branch?: StoryCard[];
 }
 
 export interface WhatHappened {
@@ -107,9 +113,22 @@ export interface WhatHappened {
 
 export interface ChoiceCard {
   type: 'choice';
+  /** Stable id; required when another story calls this choice back. */
+  id?: string;
   prompt: string;
   options: ChoiceOption[];
   whatHappened: WhatHappened;
+}
+
+/** Narrates a remembered pick from an earlier story. Resolves to a variant or the fallback. */
+export interface CallbackCard {
+  type: 'callback';
+  id: string;
+  /** "<storyId>:<choiceId>" of a choice in an earlier story. */
+  choiceRef: string;
+  /** Option id -> narration text. */
+  variants: Record<string, string>;
+  fallback: string;
 }
 
 export interface PayoffCard {
@@ -118,7 +137,16 @@ export interface PayoffCard {
   verse?: StoryVerse;
 }
 
-export type StoryCard = NarrationCard | InteractionCard | ChoiceCard | PayoffCard;
+export type StoryCard = NarrationCard | InteractionCard | ChoiceCard | PayoffCard | CallbackCard;
+
+/** A card in the playable sequence: authored cards plus the reveal that follows a branch. */
+export interface RevealCard {
+  type: 'reveal';
+  choice: ChoiceCard;
+  optionIndex: number;
+}
+
+export type PlayCard = Exclude<StoryCard, CallbackCard> | RevealCard;
 
 export type QuizCategory = 'who' | 'what' | 'where';
 
@@ -146,6 +174,8 @@ export interface Story {
   /** Show the scene's "before" picture until the tap-reveal card, so the art does not give away the ending. */
   hideArtUntilReveal?: boolean;
   quiz: QuizItem[];
+  /** Teaser on the Today screen after finishing, keyed by the option picked in this story's choice. */
+  hook?: Record<string, string>;
 }
 
 /** Stub stops are title/passage/arc/order only until the story is built. */

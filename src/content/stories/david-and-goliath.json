@@ -20,7 +20,8 @@
         "translation": "WEB",
         "text": "When Saul and all Israel heard those words of the Philistine, they were dismayed, and greatly afraid."
       },
-      "image": "valley_battlefield"
+      "image": "valley_battlefield",
+      "id": "dg-valley"
     },
     {
       "type": "interaction",
@@ -64,14 +65,28 @@
       "prompt": "For forty days the giant has called for a fighter, and no soldier will go. Do you?",
       "options": [
         {
+          "id": "go",
           "label": "Yes, I will go",
           "response": "You chose what he chose.",
-          "scene": "You are a shepherd, not a soldier. You tell the king you will fight, and the king looks you up and down."
+          "branch": [
+            {
+              "type": "narration",
+              "id": "dg-go-scene",
+              "text": "You are a shepherd, not a soldier. You tell the king you will fight, and the king looks you up and down."
+            }
+          ]
         },
         {
+          "id": "wait",
           "label": "No, wait for someone else",
           "response": "You waited. He did not.",
-          "scene": "You wait with the army. Morning and evening the giant shouts again, and still no one moves."
+          "branch": [
+            {
+              "type": "narration",
+              "id": "dg-wait-scene",
+              "text": "You wait with the army. Morning and evening the giant shouts again, and still no one moves."
+            }
+          ]
         }
       ],
       "whatHappened": {
@@ -79,7 +94,8 @@
         "ref": "1 Samuel 17:32",
         "translation": "WEB",
         "scriptureText": "David said to Saul, \"Let no man's heart fail because of him. Your servant will go and fight with this Philistine.\""
-      }
+      },
+      "id": "david-choice"
     },
     {
       "type": "interaction",
@@ -138,7 +154,8 @@
         "ref": "1 Samuel 17:45",
         "translation": "WEB",
         "text": "Then David said to the Philistine, \"You come to me with a sword, with a spear, and with a javelin; but I come to you in the name of Yahweh of Armies, the God of the armies of Israel, whom you have defied.\""
-      }
+      },
+      "id": "dg-walk"
     },
     {
       "type": "interaction",
@@ -158,7 +175,8 @@
         "ref": "1 Samuel 17:49",
         "translation": "WEB",
         "text": "David put his hand in his bag, took a stone, and slung it, and struck the Philistine in his forehead. The stone sank into his forehead, and he fell on his face to the earth."
-      }
+      },
+      "id": "dg-stone"
     },
     {
       "type": "payoff"
@@ -204,5 +222,9 @@
       "answerIndex": 0,
       "verseRef": "1 Samuel 17:40"
     }
-  ]
+  ],
+  "hook": {
+    "go": "Tomorrow, Elijah stands alone on Carmel. He will remember that you stepped forward.",
+    "wait": "Tomorrow, Elijah stands alone on Carmel. He will remember that you waited."
+  }
 }

@@ -925,29 +925,64 @@
     "reflection": "Where are you trying to stand with one foot on each side?",
     "cards": [
       {
+        "type": "callback",
+        "id": "ec-callback",
+        "choiceRef": "david-and-goliath:david-choice",
+        "variants": {
+          "go": "You stepped forward once, when the whole army waited. Now Elijah stands alone against four hundred fifty prophets.",
+          "wait": "You waited once, when the whole army waited. Now Elijah stands alone against four hundred fifty prophets."
+        },
+        "fallback": "Elijah stands alone against four hundred fifty prophets of Baal, with the whole nation watching."
+      },
+      {
         "type": "narration",
         "text": "Elijah stood before the crowd and told them to choose. How would they know who the true God was?",
         "scriptureLine": {
           "ref": "1 Kings 18:21",
           "translation": "WEB",
           "text": "Elijah came near to all the people, and said, “How long will you waver between the two sides? If Yahweh is God, follow him; but if Baal, then follow him.” The people didn’t say a word."
-        }
+        },
+        "id": "ec-opening"
       },
       {
         "type": "choice",
         "prompt": "The prophets of Baal have shouted all day, and no fire has come. Now it is Elijah's turn. What does he do to his altar?",
         "options": [
           {
+            "id": "dry",
             "label": "Keeps it dry so it will catch",
-            "response": "A sensible guess. He did the opposite."
+            "response": "A sensible guess. He did the opposite.",
+            "branch": [
+              {
+                "type": "narration",
+                "id": "ec-dry-scene",
+                "text": "You keep the wood dry and set it on the stones. Nothing about the offering is ready to burn, and the crowd can see it."
+              }
+            ]
           },
           {
+            "id": "water",
             "label": "Soaks it with water",
-            "response": "Yes. He made it as hard to burn as he could."
+            "response": "Yes. He made it as hard to burn as he could.",
+            "branch": [
+              {
+                "type": "narration",
+                "id": "ec-water-scene",
+                "text": "The water runs down the altar and fills the trench. Everyone can see that nothing here will catch fire easily."
+              }
+            ]
           },
           {
+            "id": "fire",
             "label": "Lights it himself",
-            "response": "No. No one was to put fire under it."
+            "response": "No. No one was to put fire under it.",
+            "branch": [
+              {
+                "type": "narration",
+                "id": "ec-fire-scene",
+                "text": "You reach for a torch to light the altar yourself. The crowd goes silent, and you remember who really holds the fire."
+              }
+            ]
           }
         ],
         "whatHappened": {
@@ -955,11 +990,13 @@
           "ref": "1 Kings 18:35",
           "translation": "WEB",
           "scriptureText": "The water ran around the altar; and he also filled the trench with water."
-        }
+        },
+        "id": "elijah-altar"
       },
       {
         "type": "narration",
-        "text": "Elijah rebuilt the altar, laid out the offering and wood, then had water poured over everything. The people watched as the trench filled."
+        "text": "Elijah rebuilt the altar, laid out the offering and wood, then had water poured over everything. The people watched as the trench filled.",
+        "id": "ec-altar"
       },
       {
         "type": "interaction",
@@ -1033,7 +1070,12 @@
         "answerIndex": 0,
         "verseRef": "1 Kings 18:39"
       }
-    ]
+    ],
+    "hook": {
+      "dry": "Tomorrow, Jonah runs from the call he has been given. Dry wood was never the question.",
+      "water": "Tomorrow, Jonah runs from the call he has been given. Water did not stop Elijah.",
+      "fire": "Tomorrow, Jonah runs from the call he has been given. Fire was never yours to light."
+    }
   },
   {
     "id": "elijah-still-small-voice",
@@ -1306,13 +1348,24 @@
     "reflection": "Is there a place or a person God is sending you toward that you've been avoiding?",
     "cards": [
       {
+        "type": "callback",
+        "id": "jonah-callback",
+        "choiceRef": "david-and-goliath:david-choice",
+        "variants": {
+          "go": "You stepped forward once, when the army would not move. Jonah is about to run from a call like that.",
+          "wait": "You held back once, when the army would not move. Jonah is about to run from a call like that."
+        },
+        "fallback": "Jonah ran from a call he did not want. Every call asks the same question."
+      },
+      {
         "type": "narration",
         "text": "God sent Jonah to Nineveh. Jonah paid for a ship going the other way. How far can a man run from God?",
         "scriptureLine": {
           "ref": "Jonah 1:3",
           "translation": "WEB",
           "text": "But Jonah rose up to flee to Tarshish from the presence of Yahweh. He went down to Joppa, and found a ship going to Tarshish; so he paid its fare, and went down into it, to go with them to Tarshish from the presence of Yahweh."
-        }
+        },
+        "id": "jonah-open"
       },
       {
         "type": "interaction",
@@ -1357,14 +1410,28 @@
         "prompt": "You know the right direction and you do not want it. What do you do?",
         "options": [
           {
+            "id": "turn",
             "label": "Turn around",
             "response": "You head back toward the call.",
-            "scene": "You walk away from the docks and face the road to Nineveh, the last place you want to go."
+            "branch": [
+              {
+                "type": "narration",
+                "id": "jonah-turn-scene",
+                "text": "You walk away from the docks and face the road to Nineveh, the last place you want to go."
+              }
+            ]
           },
           {
+            "id": "run",
             "label": "Keep running",
             "response": "You pay the fare and leave.",
-            "scene": "You pay the fare, go below deck, and fall asleep while the wind begins to rise."
+            "branch": [
+              {
+                "type": "narration",
+                "id": "jonah-run-scene",
+                "text": "You pay the fare, go below deck, and fall asleep while the wind begins to rise."
+              }
+            ]
           }
         ],
         "whatHappened": {
@@ -1372,7 +1439,8 @@
           "ref": "Jonah 1:17",
           "translation": "WEB",
           "scriptureText": "Yahweh prepared a great fish to swallow up Jonah, and Jonah was in the belly of the fish three days and three nights."
-        }
+        },
+        "id": "jonah-choice"
       },
       {
         "type": "payoff"

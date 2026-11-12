@@ -100,16 +100,16 @@ export interface NarrationClip {
   hash: string;
 }
 
-/** story id -> card index -> narrator -> clip */
+/** story id -> clip key (card id, or card index for legacy cards) -> narrator -> clip */
 export type NarrationManifest = Record<string, Record<string, Partial<Record<NarratorProfile, NarrationClip>>>>;
 
 export function findNarrationClip(
   manifest: NarrationManifest,
   storyId: string,
-  cardIndex: number,
+  clipKey: string | number,
   profile: NarratorProfile
 ): NarrationClip | null {
-  return manifest[storyId]?.[String(cardIndex)]?.[profile] ?? null;
+  return manifest[storyId]?.[String(clipKey)]?.[profile] ?? null;
 }
 
 /** Narrators that have at least one recorded clip. */

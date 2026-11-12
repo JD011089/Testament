@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import type { InteractionCard, PayoffCard, Story, StoryArc, StoryCard, TapRevealConfig } from '../../types/story';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type { ChoiceCard, InteractionCard, PayoffCard, PlayCard, Story, StoryArc, TapRevealConfig } from '../../types/story';
 import { getStoryCardIndex, isStoryCompleted, markStoryComplete, saveStoryCursor } from '../../utils/storyProgress';
+import { choiceLedgerKey, readChoiceLedger, recordChoicePick, type ChoiceLedger } from '../../utils/storyChoices';
+import { choiceKeyOf, optionKeyOf, resolveSequence } from '../../utils/storySequence';
 import { addVerseCard } from '../../utils/deck';
 import { recordDailyActivityStreak } from '../../utils/dailyEngine';
 import { nextUnplayedStoryId } from '../../utils/dailyStory';
@@ -13,7 +15,7 @@ const NARRATION_MANIFEST = narrationManifestRaw as NarrationManifest;
 import { useLanguage } from '../../context/LanguageContext';
 import { useModalLock } from '../../utils/useModalLock';
 import { VerseLine } from './VerseLine';
-import { ChoiceMoment } from './ChoiceMoment';
+import { ChoiceMoment, WhatHappenedBlock } from './ChoiceMoment';
 import { StoryFinish } from './StoryFinish';
 import { DragToTarget } from './interactions/DragToTarget';
 import { HoldToContinue } from './interactions/HoldToContinue';
@@ -67,8 +69,12 @@ function InteractionCardView({ card, onComplete, density }: { card: InteractionC
 
 export function StoryPlayer({ story, onExit, onReadChapter, onCompleted, onPlayNext }: StoryPlayerProps) {
   const { t } = useLanguage();
-  const lastIndex = story.cards.length - 1;
+  const [picks, setPicks] = useState<ChoiceLedger>(() => readChoiceLedger());
+  const cards = useMemo(() => resolveSequence(story, picks), [story, picks]);
+  const lastIndex = cards.length - 1;
   const [index, setIndex] = useState(() => isStoryCompleted(story.id) ? 0 : Math.min(getStoryCardIndex(story.id), lastIndex));
+  const [resumeIndex] = useState(index);
+  const [wasCompletedAtMount] = useState(() => isStoryCompleted(story.id));
   const [completed, setCompleted] = useState(false);
   const [cardDone, setCardDone] = useState(false);
   const [density, setDensity] = useState(0);
@@ -77,8 +83,8 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted, onPlayN
   const stageRef = useRef<HTMLDivElement | null>(null);
   const payoffRecorded = useRef(false);
 
-  const card: StoryCard = story.cards[index];
-  const payoffCard = story.cards.find((c): c is PayoffCard => c.type === 'payoff');
+  const card: PlayCard = cards[index];
+  const payoffCard = cards.find((c): c is PayoffCard => c.type === 'payoff');
   const keptVerse = payoffCard?.verse ?? story.verse;
 
   useLayoutEffect(() => {
@@ -152,16 +158,17 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted, onPlayN
     const line = spokenTextForCard(card);
     if (!line) return;
     const profile = soundEngine.getNarratorProfile();
-    const clip = findNarrationClip(NARRATION_MANIFEST, story.id, index, profile);
+    const clip = findNarrationClip(NARRATION_MANIFEST, story.id, card.id ?? index, profile);
     soundEngine.speakVerse(line, undefined, clip?.url);
 
     // Warm the next recorded clip so the following card starts without a gap.
-    const nextIndex = story.cards.findIndex((c, i) => i > index && c.type === 'narration');
-    const next = nextIndex >= 0 ? findNarrationClip(NARRATION_MANIFEST, story.id, nextIndex, profile) : null;
+    const nextIndex = cards.findIndex((c, i) => i > index && c.type === 'narration');
+    const nextCard = nextIndex >= 0 ? cards[nextIndex] : null;
+    const next = nextCard && nextCard.type === 'narration' ? findNarrationClip(NARRATION_MANIFEST, story.id, nextCard.id ?? nextIndex, profile) : null;
     if (next) fetch(next.url).catch(() => { /* offline: the device voice covers it */ });
 
     return () => { soundEngine.stopSpeaking(); };
-  }, [card, index, story.id, story.cards]);
+  }, [card, index, story.id, cards]);
 
   // Pause audio on tab hidden.
   useEffect(() => {
@@ -202,13 +209,29 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted, onPlayN
     onExit();
   };
 
+  const pickOption = (optionIndex: number) => {
+    if (card.type !== 'choice') return;
+    const option = card.options[optionIndex];
+    const choiceId = choiceKeyOf(card, story.cards.indexOf(card));
+    setPicks(recordChoicePick(story.id, choiceId, optionKeyOf(option, optionIndex)));
+  };
+
+  // Restore an unanswered-to-continue pick only when resuming this story, never on a replay.
+  const resumedPick = (choice: ChoiceCard): number | null => {
+    if (wasCompletedAtMount || index !== resumeIndex) return null;
+    const pick = picks[choiceLedgerKey(story.id, choiceKeyOf(choice, story.cards.indexOf(choice)))];
+    if (!pick) return null;
+    const optionIndex = choice.options.findIndex((o, i) => optionKeyOf(o, i) === pick.optionId);
+    return optionIndex >= 0 ? optionIndex : null;
+  };
+
   const nextStoryId = completed && onPlayNext ? nextUnplayedStoryId(story.id) : null;
-  const canTapAdvance =card.type === 'narration' || card.type === 'payoff';
+  const canTapAdvance = card.type === 'narration' || card.type === 'payoff' || card.type === 'reveal';
   const sceneId = isStorySceneId(story.id) && getStoryScene(story.id) ? story.id : undefined;
   // Each card frames a different part of the backdrop, so the picture is not identical all the way through.
   const crop = BACKDROP_CROPS[index % BACKDROP_CROPS.length];
   // Some stories keep the finished picture back until the reveal card, so it does not spoil the ending.
-  const revealIndex = story.cards.findIndex((c) => c.type === 'interaction' && c.kind === 'tap-reveal');
+  const revealIndex = cards.findIndex((c) => c.type === 'interaction' && c.kind === 'tap-reveal');
   const beforeArt = story.hideArtUntilReveal && sceneId && !completed && index < revealIndex
     ? getStoryScene(sceneId)?.anchor.src
     : undefined;
@@ -252,14 +275,14 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted, onPlayN
           </button>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-white">{story.title}</p>
-            <p className="mt-0.5 text-xs text-white/65">{story.passage} <span className="px-1 text-amber-200">·</span> {index + 1} of {story.cards.length}</p>
+            <p className="mt-0.5 text-xs text-white/65">{story.passage} <span className="px-1 text-amber-200">·</span> {index + 1} of {cards.length}</p>
           </div>
           <span className="rounded-full border border-white/20 bg-black/25 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/75 backdrop-blur-md">
             {card.type === 'interaction' ? t('story.stageYourTurn') : card.type === 'payoff' ? t('story.stageTakeaway') : t('story.stageStory')}
           </span>
         </div>
-        <div className="mx-auto mt-4 flex w-full max-w-3xl gap-1.5" role="progressbar" aria-valuemin={0} aria-valuemax={story.cards.length} aria-valuenow={index + 1}>
-          {story.cards.map((_, i) => (
+        <div className="mx-auto mt-4 flex w-full max-w-3xl gap-1.5" role="progressbar" aria-valuemin={0} aria-valuemax={cards.length} aria-valuenow={index + 1}>
+          {cards.map((_, i) => (
             <span
               key={i}
               className={`h-1 flex-1 rounded-full transition-colors ${i < index || completed ? 'bg-amber-300' : i === index ? 'bg-white' : 'bg-white/25'}`}
@@ -300,7 +323,20 @@ export function StoryPlayer({ story, onExit, onReadChapter, onCompleted, onPlayN
 
           {!completed && card.type === 'choice' && (
             <article className={`rounded-[1.75rem] border border-white/20 bg-black/55 shadow-[0_16px_48px_rgba(0,0,0,0.25)] backdrop-blur-xl ${density > 1 ? 'p-2' : density ? 'p-3' : 'p-5 sm:p-7'}`}>
-              <ChoiceMoment card={card} compact={density > 0} veryCompact={density > 1} onComplete={() => { setCardDone(true); advance(); }} />
+              <ChoiceMoment
+                card={card}
+                initialPick={resumedPick(card)}
+                onPick={pickOption}
+                compact={density > 0}
+                veryCompact={density > 1}
+                onComplete={() => { setCardDone(true); advance(); }}
+              />
+            </article>
+          )}
+
+          {!completed && card.type === 'reveal' && (
+            <article className={`rounded-[1.75rem] border border-white/20 bg-black/55 shadow-[0_16px_48px_rgba(0,0,0,0.25)] backdrop-blur-xl ${density > 1 ? 'p-2' : density ? 'p-3' : 'p-5 sm:p-7'}`}>
+              <WhatHappenedBlock what={card.choice.whatHappened} compact={density > 0} veryCompact={density > 1} />
             </article>
           )}
 

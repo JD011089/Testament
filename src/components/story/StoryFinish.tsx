@@ -1,15 +1,19 @@
 import { useMemo, useState } from 'react';
-import { Check, ChevronLeft, ChevronRight, Flame, ListChecks, PenLine, Share2 } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, Flame, ListChecks, Mic, PenLine, Share2, Sparkles } from 'lucide-react';
 import type { Story, StoryVerse } from '../../types/story';
 import { useLanguage } from '../../context/LanguageContext';
 import { getDeckVerseCards, setVerseStrength, type CardStrength } from '../../utils/deck';
 import { getDailyStreakCount } from '../../utils/dailyEngine';
 import { getCampaignDateKey } from '../../data/dailyCampaigns';
 import { saveDecisionJournalEntry } from '../../utils/decisionJournal';
+import { loadLearnerModesState, saveStorytellerEntry } from '../../utils/learnerModes';
+import type { LearnerMode } from '../../types/learnerModes';
+import { readChoiceLedger } from '../../utils/storyChoices';
+import { choiceKeyOf, optionKeyOf } from '../../utils/storySequence';
 import { shareVerseCard } from '../../utils/shareCard';
 import { celebrate } from '../../utils/feedback';
 import { StoryQuiz } from '../daily/StoryQuiz';
-import { stripOuterQuotes } from './VerseLine';
+import { stripOuterQuotes, VerseLine } from './VerseLine';
 
 interface StoryFinishProps {
   story: Story;
@@ -17,15 +21,16 @@ interface StoryFinishProps {
   verse: StoryVerse;
 }
 
-type View = 'hub' | 'reflect' | 'quiz';
+type View = 'hub' | 'reflect' | 'quiz' | 'say';
 
 function deckStrength(ref: string): CardStrength {
   return getDeckVerseCards().find((card) => card.ref === ref)?.strength ?? 'bronze';
 }
 
-/** Shown after the last card: reflect, quiz, and the verse card just earned. */
+/** Shown after the last card: reflect, quiz, and the verse card just earned. Rows depend on learner mode. */
 export function StoryFinish({ story, verse }: StoryFinishProps) {
   const { t } = useLanguage();
+  const [mode] = useState<LearnerMode>(() => loadLearnerModesState().activeMode);
   const [view, setView] = useState<View>('hub');
   const [reflection, setReflection] = useState('');
   const [reflected, setReflected] = useState(false);
@@ -33,22 +38,47 @@ export function StoryFinish({ story, verse }: StoryFinishProps) {
   const [upgraded, setUpgraded] = useState(false);
   const [strength, setStrength] = useState<CardStrength>(() => deckStrength(verse.ref));
   const [sharing, setSharing] = useState(false);
+  const [said, setSaid] = useState(false);
+  const [revealed, setRevealed] = useState(false);
   const streak = useMemo(() => getDailyStreakCount(), []);
+  const ledger = useMemo(() => readChoiceLedger(), []);
   const prompt = story.reflection ?? t('finish.reflectFallback');
+  const narrationText = story.cards
+    .flatMap((card) => (card.type === 'narration' ? [card.text] : []))
+    .join(' ');
+
+  const picks = story.cards.flatMap((card, index) => {
+    if (card.type !== 'choice') return [];
+    const pick = ledger[`${story.id}:${choiceKeyOf(card, index)}`];
+    const option = pick ? card.options.find((o, i) => optionKeyOf(o, i) === pick.optionId) : undefined;
+    return option ? [{ prompt: card.prompt, label: option.label }] : [];
+  });
 
   const saveReflection = () => {
     const text = reflection.trim();
     if (!text) return;
-    saveDecisionJournalEntry({
-      dateKey: getCampaignDateKey(),
-      passageReference: story.passage,
-      heroName: story.title,
-      scenarioQuestion: prompt,
-      chosenText: text,
-      userCustomText: text,
-      storyTakeaway: `${verse.text} (${verse.ref})`,
-      entryType: 'story_reflection',
-    });
+    if (mode === 'storyteller') {
+      saveStorytellerEntry({
+        dateKey: getCampaignDateKey(),
+        passageReference: story.passage,
+        heroName: story.title,
+        userRetelling: text,
+        faithfulRetelling: narrationText,
+        capturedPoints: [],
+        missedPoints: [],
+      });
+    } else {
+      saveDecisionJournalEntry({
+        dateKey: getCampaignDateKey(),
+        passageReference: story.passage,
+        heroName: story.title,
+        scenarioQuestion: prompt,
+        chosenText: text,
+        userCustomText: text,
+        storyTakeaway: `${verse.text} (${verse.ref})`,
+        entryType: 'story_reflection',
+      });
+    }
     celebrate('snap');
     setReflected(true);
     setView('hub');
@@ -61,6 +91,20 @@ export function StoryFinish({ story, verse }: StoryFinishProps) {
       setStrength('silver');
       setUpgraded(true);
       celebrate('payoff');
+    }
+    setView('hub');
+  };
+
+  const markSaid = () => {
+    setSaid(true);
+    setRevealed(false);
+    if (strength === 'bronze') {
+      setVerseStrength(verse.ref, 'silver');
+      setStrength('silver');
+      setUpgraded(true);
+      celebrate('payoff');
+    } else {
+      celebrate('snap');
     }
     setView('hub');
   };
@@ -78,17 +122,20 @@ export function StoryFinish({ story, verse }: StoryFinishProps) {
   };
 
   const backButton = (
-    <button type="button" onClick={() => setView('hub')} className="btn-quiet !min-h-10 -ml-2 text-sm">
+    <button type="button" onClick={() => { setView('hub'); setRevealed(false); }} className="btn-quiet !min-h-10 -ml-2 text-sm">
       <ChevronLeft className="h-4 w-4" /> {t('story.back')}
     </button>
   );
 
   if (view === 'reflect') {
+    const storyteller = mode === 'storyteller';
     return (
       <article className="rounded-[1.75rem] border border-line bg-surface-raised p-5 text-fg shadow-[0_16px_48px_rgba(0,0,0,0.3)] sm:p-7">
         {backButton}
-        <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.14em] text-fg-muted">{t('finish.reflect')}</p>
-        <h2 className="mt-2 font-serif text-xl leading-snug sm:text-2xl">{prompt}</h2>
+        <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.14em] text-fg-muted">{storyteller ? 'Retell it' : t('finish.reflect')}</p>
+        <h2 className="mt-2 font-serif text-xl leading-snug sm:text-2xl">
+          {storyteller ? `Tell the story of ${story.title} back in your own words.` : prompt}
+        </h2>
         <textarea
           value={reflection}
           onChange={(e) => setReflection(e.target.value)}
@@ -98,8 +145,29 @@ export function StoryFinish({ story, verse }: StoryFinishProps) {
           className="mt-4 w-full resize-none rounded-2xl border border-line bg-surface p-3 font-serif text-base leading-relaxed text-fg placeholder:text-fg-muted focus:outline-none focus:ring-2 focus:ring-accent"
         />
         <button type="button" onClick={saveReflection} disabled={!reflection.trim()} className="btn-primary mt-3 w-full disabled:opacity-50">
-          {t('finish.saveToJournal')}
+          {storyteller ? 'Save my retelling' : t('finish.saveToJournal')}
         </button>
+      </article>
+    );
+  }
+
+  if (view === 'say') {
+    return (
+      <article className="rounded-[1.75rem] border border-line bg-surface-raised p-5 text-fg shadow-[0_16px_48px_rgba(0,0,0,0.3)] sm:p-7">
+        {backButton}
+        <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.14em] text-fg-muted">Say it from memory</p>
+        <p className="mt-2 font-serif text-lg leading-snug">Say {verse.ref} out loud before you look.</p>
+        {revealed ? (
+          <div className="mt-4 space-y-3">
+            <VerseLine line={verse} />
+            <div className="grid grid-cols-2 gap-2">
+              <button type="button" onClick={() => { setRevealed(false); setView('hub'); }} className="btn-secondary">Missed it</button>
+              <button type="button" onClick={markSaid} className="btn-primary">Got it</button>
+            </div>
+          </div>
+        ) : (
+          <button type="button" onClick={() => setRevealed(true)} className="btn-primary mt-4 w-full">Show the verse</button>
+        )}
       </article>
     );
   }
@@ -115,25 +183,34 @@ export function StoryFinish({ story, verse }: StoryFinishProps) {
     );
   }
 
+  const reflectRow = {
+    key: 'reflect',
+    Icon: mode === 'storyteller' ? Mic : PenLine,
+    title: mode === 'storyteller' ? 'Retell it in your words' : t('finish.reflect'),
+    detail: reflected ? t('finish.savedToJournal') : t('finish.reflectDetail'),
+    done: reflected,
+    open: () => setView('reflect'),
+  };
+  const sayRow = {
+    key: 'say',
+    Icon: Mic,
+    title: 'Say the verse from memory',
+    detail: said ? 'Said from memory' : 'Say it, then check it',
+    done: said,
+    open: () => setView('say'),
+  };
+  const quizRow = {
+    key: 'quiz',
+    Icon: ListChecks,
+    title: t('finish.quiz'),
+    detail: score ? t('finish.quizScore', { correct: score.correct, total: score.total }) : t('finish.quizDetail'),
+    done: score !== null,
+    open: () => setView('quiz'),
+  };
   const rows = [
-    {
-      key: 'reflect',
-      Icon: PenLine,
-      title: t('finish.reflect'),
-      detail: reflected ? t('finish.savedToJournal') : t('finish.reflectDetail'),
-      done: reflected,
-      open: () => setView('reflect'),
-    },
-    ...(story.quiz.length > 0
-      ? [{
-          key: 'quiz',
-          Icon: ListChecks,
-          title: t('finish.quiz'),
-          detail: score ? t('finish.quizScore', { correct: score.correct, total: score.total }) : t('finish.quizDetail'),
-          done: score !== null,
-          open: () => setView('quiz'),
-        }]
-      : []),
+    ...(mode === 'reciter' ? [sayRow] : []),
+    reflectRow,
+    ...(story.quiz.length > 0 ? [quizRow] : []),
   ];
 
   return (
@@ -152,6 +229,22 @@ export function StoryFinish({ story, verse }: StoryFinishProps) {
         </p>
         <h2 className="mt-1 font-serif text-2xl text-white sm:text-3xl">{story.title}</h2>
       </header>
+
+      {picks.length > 0 && (
+        <section className="rounded-[1.5rem] border border-line bg-surface-raised p-4 text-fg" aria-label="Your picks">
+          <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-fg-muted">
+            <Sparkles className="h-3.5 w-3.5" /> Your picks
+          </p>
+          <ul className="mt-2 space-y-2">
+            {picks.map((pick) => (
+              <li key={pick.prompt} className="text-sm">
+                <span className="text-fg-muted">{pick.prompt}</span>
+                <span className="block font-semibold">{pick.label}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <ul className="divide-y divide-line overflow-hidden rounded-[1.5rem] border border-line bg-surface-raised text-fg">
         {rows.map(({ key, Icon, title, detail, done, open }) => (

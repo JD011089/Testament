@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import { getStoryById } from '../content/stories';
 import { getDailyStoryId, nextStoryIdAfter } from '../utils/dailyStory';
 import { getStoryProgress, isStoryCompleted } from '../utils/storyProgress';
+import { readChoiceLedger } from '../utils/storyChoices';
+import { storyHookFor } from '../utils/storySequence';
 import { todayKey } from '../utils/spacedRepetition';
 import { getDeckReviewQueue } from '../utils/deckReview';
 import { getDeckVerseCards } from '../utils/deck';
@@ -130,6 +132,7 @@ export function TodayScreen({
   };
 
   const done = step >= 4;
+  const hookLine = done ? storyHookFor(story, readChoiceLedger()) : null;
   const scene = getStoryIllustrationUrl(story.id);
   const teaser = getStoryTeaser(story.id);
   const opening = story.cards.find((card) => card.type === 'narration');
@@ -300,7 +303,7 @@ export function TodayScreen({
         <div className="mt-3 rounded-[1.25rem] border border-line bg-surface-raised px-4 py-3.5 shadow-sm">
           <h2 className="font-serif text-xl font-semibold text-fg">{t('today.done')}</h2>
           <p className="mt-0.5 text-small text-fg-secondary">
-            {tomorrow ? t('today.tomorrow', { title: tomorrow.title, passage: tomorrow.passage }) : t('today.mapFinished')}
+            {hookLine ?? (tomorrow ? t('today.tomorrow', { title: tomorrow.title, passage: tomorrow.passage }) : t('today.mapFinished'))}
           </p>
           <div className="mt-2.5 flex flex-wrap gap-2">
             <button type="button" className="btn-secondary !min-h-10 !rounded-full px-4 text-sm" onClick={() => startStory()}>

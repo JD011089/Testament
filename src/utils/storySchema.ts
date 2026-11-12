@@ -4,6 +4,7 @@
  */
 
 import type {
+  CallbackCard,
   ChoiceCard,
   InteractionCard,
   NarrationCard,
@@ -79,15 +80,39 @@ function validateInteraction(card: Record<string, unknown>, where: string, error
 }
 
 function validateChoice(card: Record<string, unknown>, where: string, errors: string[]): void {
+  if (card.id !== undefined && (typeof card.id !== 'string' || !card.id.trim())) errors.push(`${where}: choice id must be text`);
   if (typeof card.prompt !== 'string' || !card.prompt.trim()) errors.push(`${where}: choice needs a prompt`);
   if (!Array.isArray(card.options) || card.options.length < 2) {
     errors.push(`${where}: choice needs at least 2 options`);
   } else {
     card.options.forEach((option, i) => {
+      const at = `${where}.options[${i}]`;
       if (!isObject(option) || typeof option.label !== 'string' || typeof option.response !== 'string') {
-        errors.push(`${where}: option ${i} needs label and response`);
-      } else if (option.scene !== undefined && (typeof option.scene !== 'string' || !option.scene.trim())) {
-        errors.push(`${where}: option ${i} scene must be text`);
+        errors.push(`${at}: needs label and response`);
+        return;
+      }
+      if (option.id !== undefined && (typeof option.id !== 'string' || !option.id.trim())) errors.push(`${at}: id must be text`);
+      if (option.scene !== undefined && (typeof option.scene !== 'string' || !option.scene.trim())) {
+        errors.push(`${at}: scene must be text`);
+      }
+      if (option.branch !== undefined) {
+        if (!Array.isArray(option.branch) || option.branch.length > 2) {
+          errors.push(`${at}: branch must be an array of at most 2 cards`);
+          return;
+        }
+        option.branch.forEach((b, j) => {
+          const bAt = `${at}.branch[${j}]`;
+          if (!isObject(b)) {
+            errors.push(`${bAt}: must be an object`);
+          } else if (b.type === 'narration') {
+            validateNarration(b, bAt, errors);
+            if (typeof b.id !== 'string' || !b.id.trim()) errors.push(`${bAt}: branch narration needs an id`);
+          } else if (b.type === 'interaction') {
+            validateInteraction(b, bAt, errors);
+          } else {
+            errors.push(`${bAt}: branch cards must be narration or interaction`);
+          }
+        });
       }
     });
   }
@@ -97,6 +122,18 @@ function validateChoice(card: Record<string, unknown>, where: string, errors: st
     errors.push(`${where}: choice needs whatHappened {text, ref, translation, scriptureText}`);
   }
 }
+
+function validateCallback(card: Record<string, unknown>, where: string, errors: string[]): void {
+  if (typeof card.id !== 'string' || !card.id.trim()) errors.push(`${where}: callback needs an id`);
+  if (typeof card.choiceRef !== 'string' || !/^[a-z0-9-]+:[a-z0-9-]+$/i.test(card.choiceRef)) {
+    errors.push(`${where}: callback choiceRef must be "storyId:choiceId"`);
+  }
+  if (typeof card.fallback !== 'string' || !card.fallback.trim()) errors.push(`${where}: callback needs fallback text`);
+  if (!isObject(card.variants) || Object.values(card.variants).some((v) => typeof v !== 'string' || !v.trim())) {
+    errors.push(`${where}: callback variants must map option ids to text`);
+  }
+}
+
 
 function validateQuizItems(raw: unknown, where: string, errors: string[]): QuizItem[] {
   if (!Array.isArray(raw)) {
@@ -162,6 +199,10 @@ export function validateStory(raw: unknown): ValidationResult {
           validateChoice(card, where, errors);
           cards.push(card as unknown as ChoiceCard);
           break;
+        case 'callback':
+          validateCallback(card, where, errors);
+          cards.push(card as unknown as CallbackCard);
+          break;
         case 'payoff':
           cards.push(card as unknown as PayoffCard);
           break;
@@ -175,6 +216,9 @@ export function validateStory(raw: unknown): ValidationResult {
 
   if (raw.reflection !== undefined && typeof raw.reflection !== 'string') {
     errors.push('story: reflection must be a string');
+  }
+  if (raw.hook !== undefined && (!isObject(raw.hook) || Object.values(raw.hook).some((v) => typeof v !== 'string' || !v.trim()))) {
+    errors.push('story: hook must map option ids to text');
   }
 
   if (errors.length > 0) return { ok: false, errors };
@@ -190,7 +234,8 @@ export function validateStory(raw: unknown): ValidationResult {
     verse: raw.verse as Story['verse'],
     reflection: raw.reflection as string | undefined,
     hideArtUntilReveal: raw.hideArtUntilReveal === true,
-    quiz
+    quiz,
+    hook: raw.hook as Record<string, string> | undefined
   };
   return { ok: true, story };
 }

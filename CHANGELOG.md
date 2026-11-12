@@ -5,6 +5,16 @@ All notable changes to the **Testament** project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added (Dynamic stories: choices change what follows)
+- **Choices carry forward**: a pick inserts that option's branch right after the choice, then a reveal with what really happened. Light branches rejoin the same path, and the verse and ending stay fixed.
+- **Choice ledger** (`src/utils/storyChoices.ts`): the latest pick per story and choice, stored on this device. Replays overwrite the pick.
+- **Callbacks across stories** (`callback` card): a later story narrates a pick from an earlier one, with fallback text when no pick was made. Pilot: David and Goliath, Elijah on Carmel, Jonah.
+- **Today teaser after a pick**: the Done card shows the hook for the option picked in that story.
+- **Finish step by learner mode**: Builder keeps the quiz and reflection, Reciter adds a say-the-verse check, Storyteller saves a retelling. Every mode lists "Your picks".
+- **Narration keys by card id**: clips may be keyed by stable id, so inserting a card no longer shifts recordings. New pilot cards and callback variants have no recorded clips yet and use the device voice until `npm run narration` runs with Azure credentials.
+
 ## [2.0.0-beta] - 2026-10-15
 
 ### Added (Phase 1 — Critical fixes)

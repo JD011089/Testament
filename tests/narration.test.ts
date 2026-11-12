@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   buildNarrationSsml,
@@ -10,15 +10,13 @@ import {
   STUDIO_VOICES,
   type NarrationManifest,
 } from '../src/utils/narrationScript';
+import { narrationUnitsForStory } from '../src/utils/storySequence';
+import { STORIES } from '../src/content/stories';
+import manifestRaw from '../src/content/stories/narration-manifest.json' with { type: 'json' };
 import type { NarratorProfile } from '../src/utils/audio';
 
 const ROOT = process.cwd();
-const read = (p: string) => JSON.parse(readFileSync(join(ROOT, p), 'utf8'));
-const stories: { id: string; cards: { type: string; text?: string; scriptureLine?: { text: string } }[] }[] = [
-  read('src/content/stories/david-and-goliath.json'),
-  ...read('src/content/stories/rotation.json'),
-];
-const manifest: NarrationManifest = read('src/content/stories/narration-manifest.json');
+const manifest = manifestRaw as NarrationManifest;
 const hash = (ssml: string) => createHash('sha1').update(ssml).digest('hex').slice(0, 10);
 
 test.describe('Studio narration', () => {
@@ -44,28 +42,28 @@ test.describe('Studio narration', () => {
       .toBe('He stood. Read First Kings eighteen, verse twenty-one.');
   });
 
-  test('every recorded clip exists and matches the current story text', () => {
-    for (const story of stories) {
-      const cards = manifest[story.id] ?? {};
-      for (const [idx, byProfile] of Object.entries(cards)) {
+  test('every recorded clip exists, is a known unit, and matches the current text', () => {
+    for (const story of STORIES) {
+      const units = new Map(narrationUnitsForStory(story).map((u) => [u.key, u.card]));
+      for (const [key, byProfile] of Object.entries(manifest[story.id] ?? {})) {
+        const card = units.get(key);
+        expect(card, `${story.id} clip "${key}" no longer matches a narrated card; run npm run narration`).toBeDefined();
         for (const [profile, clip] of Object.entries(byProfile)) {
-          const card = story.cards[Number(idx)];
-          const ssml = card ? buildNarrationSsml(card, profile as NarratorProfile) : null;
-          expect(ssml, `${story.id} card ${idx} is no longer narrated; run npm run narration`).not.toBeNull();
-          expect(clip!.hash, `${story.id} card ${idx} (${profile}) text changed; run npm run narration`).toBe(hash(ssml!));
+          const ssml = buildNarrationSsml(card!, profile as NarratorProfile);
+          expect(ssml, `${story.id} "${key}" is no longer narrated for ${profile}`).not.toBeNull();
+          expect(clip!.hash, `${story.id} "${key}" (${profile}) text changed; run npm run narration`).toBe(hash(ssml!));
           expect(existsSync(join(ROOT, 'public', clip!.url)), `missing file ${clip!.url}`).toBe(true);
         }
       }
     }
   });
 
-  test('a narrator with any recordings has every narrated card recorded', () => {
+  test('a narrator with any recordings has every narrated unit recorded', () => {
     for (const profile of studioProfiles(manifest)) {
-      for (const story of stories) {
-        story.cards.forEach((card, idx) => {
-          if (card.type !== 'narration') return;
-          expect(findNarrationClip(manifest, story.id, idx, profile), `${profile}: ${story.id} card ${idx} not recorded`).not.toBeNull();
-        });
+      for (const story of STORIES) {
+        for (const { key } of narrationUnitsForStory(story)) {
+          expect(findNarrationClip(manifest, story.id, key, profile), `${profile}: ${story.id} "${key}" not recorded`).not.toBeNull();
+        }
       }
     }
   });
